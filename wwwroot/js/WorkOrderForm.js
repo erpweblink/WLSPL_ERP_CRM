@@ -537,7 +537,7 @@
                         }
                         else {
                             showToast(
-                                "Unable to load  details.", error
+                                "Unable to load  details.", "error"
                             );
 
                         }

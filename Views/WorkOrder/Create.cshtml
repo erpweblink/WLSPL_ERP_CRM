@@ -140,7 +140,7 @@
     </div>
 
     <div class="card">
-        <div class="card-header text-uppercase" >
+        <div class="card-header text-uppercase">
             <h3 style="color:black">Add Services</h3>
         </div>
         <div class="container-fluid">
@@ -333,13 +333,22 @@
 
 
 </form>
+<script>
+    $(document).ready(function () {
 
+          $('.ddlselect').select2({
+              selectOnClose: true,
+              width: '100%'
+          });
+
+      });
+</script>
 @section Scripts {
 
     <script src="~/js/WorkOrderForm.js"></script>
-    <script type="text/javascript">
-
+    <script type="text/javascript">   
         $(document).ready(function ($) {
+
             GetWorkOrderForm.init();
         });
     </script>
