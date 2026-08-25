@@ -17,26 +17,12 @@ namespace WEBLINK_CRM.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-
-            return View();
+            string pageSize = "10";
+            var list = await objWorkOrder.GetWorkOrderList(pageSize);
+            return View(list);
 
         }
-        [HttpPost]
-        public async Task<IActionResult> GetAllWorkOrder()
-        {
-            try
-            {
-                string pageSize = "10"; 
-                var list = await objWorkOrder.GetWorkOrderList(pageSize);
-
-                return Json(new { Success = true, Data = list });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = ex.Message });
-            }
-        }
-
+      
         [HttpPost]
         public async Task<IActionResult> GetWorkOrderDEtailsByID(string ID)
         {
@@ -49,6 +35,47 @@ namespace WEBLINK_CRM.Controllers
             catch (Exception ex)
             {
                 return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteWorkOrder(int ID)
+        {
+            try
+            {
+                if (ID <= 0)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Invalid Work Order ID."
+                    });
+                }
+
+                var result = await objWorkOrder.DeleteWorkOrder(ID);
+
+                if (result)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Work Order deleted successfully."
+                    });
+                }
+
+                return Json(new
+                {
+                    success = false,
+                    message = "Work Order could not be deleted."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
             }
         }
 

@@ -335,7 +335,7 @@ namespace WEBLINK_CRM.repository
             }
         }
 
-        public async Task<List<WorkOrderDetailVM>> GetWorkOrderDEtailsByID(string wono)
+        public async Task<List<WorkOrderDetailVM>> GetWorkOrderDEtailsByID(string ID)
         {
          
             using (var connection = new SqlConnection(
@@ -346,7 +346,7 @@ namespace WEBLINK_CRM.repository
                 var parameters = new DynamicParameters();
 
                 parameters.Add("@Action", "GetWorkOrderDEtailsByID");
-                parameters.Add("@wono", wono);
+                parameters.Add("@ID", ID);
 
                 var result = await connection.QueryAsync<WorkOrderDetailVM>(
      "SP_WorkOrder",
@@ -419,6 +419,26 @@ namespace WEBLINK_CRM.repository
                 );
 
                 return result.Cast<BankDetailVM>().ToList();
+            }
+        }
+
+        public async Task<bool> DeleteWorkOrder(int id)
+        {
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
+            {
+                using (SqlCommand cmd = new SqlCommand("SP_WorkOrder", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Action", "DeleteWorkOrder");
+                    cmd.Parameters.AddWithValue("@ID", id);
+
+                    await con.OpenAsync();
+
+                    int result = await cmd.ExecuteNonQueryAsync();
+
+                    return result > 0;
+                }
             }
         }
     }

@@ -1,36 +1,16 @@
 ﻿var GetWorkOrderForm = function () {
-    function getUrlParameters(parameter, staticURL, decode) {
-
-        var currLocation = (staticURL.length) ? staticURL : window.location.search,
-            parArr = currLocation.split("?")[1].split("&"),
-            returnBool = true;
-        var parr2 = null;
-        for (var i = 0; i < parArr.length; i++) {
-            parr = parArr[i].substring(0, parameter.length);
-            parr2 = parArr[i].substring(parameter.length + 1);
-            if (parr == parameter) {
-                return (decode) ? decodeURIComponent(parr2) : parr2;
-                returnBool = true;
-            } else {
-                returnBool = false;
-            }
-        }
-
-        if (!returnBool) return false;
-    }
-
-    var WorkOrderId = null;
-    var url = window.location.href;
-    if (url.indexOf("?") > -1) {
-        WorkOrderId = getUrlParameters("ID", url, true)
-    }
+    var WorkOrderId = window.location.pathname.split('/').pop();
 
     var IsCreate = $("#hdnCreate").val();
-    if (WorkOrderId == null) {
+
+    if (!WorkOrderId) {
+
         if (IsCreate == "F") {
+
             window.location.href = "/Login/LogIn";
         }
     }
+
 
     var BindDepartmentList = function () {
         var Status = $('#ddlServicenname option:selected').text();
@@ -43,8 +23,7 @@
                 if (response.Success == true) {
 
                     var html = "<option value='' selected='selected'>-- Select Department --</option>";
-                    var users = response.Data;
-                    console.log(users);
+                    var users = response.Data;                 
                     if (users.length > 0) {
                         $.each(users, function (key, data) {
                             $("#txtDepartment").val(data.Name);
@@ -54,16 +33,7 @@
 
 
                 }
-                else {
-                    new PNotify({
-                        title: response.TitleMsg,
-                        text: response.Message,
-                        type: response.MsgType,
-                        delay: response.TimeOutMsg,
-                        styling: 'bootstrap3'
-                    });
-                    console.log(response.Error);
-
+                else {                  
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -89,7 +59,6 @@
             cache: false,
             success: function (response) {
 
-                console.log("Response:", response);
 
                 if (response.success === true) {
 
@@ -120,13 +89,9 @@
                     }
                 }
                 else {
-                    new PNotify({
-                        title: "Error",
-                        text: response.message || "Data Not Found",
-                        type: "error",
-                        delay: 3000,
-                        styling: "bootstrap3"
-                    });
+                    showToast(
+                        "Data not found", error
+                    );
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -138,8 +103,10 @@
     var AddDeleteRow = function () {
 
         $(".add-row").click(function () {
-            if ($('#ddlPaymentMode option:selected').text() == '--Select Payment Mode--') {
-                pnotifymsg('Please select payment mode first');
+            if ($('#ddlPaymentMode option:selected').text() == '--Select Payment Mode--') {     
+                showToast(
+                    "Please select payment mode first", error
+                );
             }
             else {
 
@@ -157,14 +124,10 @@
 
 
                 }
-                else {
-                    new PNotify({
-                        title: 'error',
-                        text: 'Please Fill Required Fields',
-                        type: 'error',
-                        delay: 3000,
-                        styling: 'bootstrap3'
-                    });
+                else {                
+                    showToast(
+                        "Please Fill Required Fields", error
+                    );
                 }
 
                 $("#txtBankName").val("");
@@ -183,14 +146,10 @@
                     }
                 });
             }
-            else {
-                new PNotify({
-                    title: 'error',
-                    text: 'Please Select Record',
-                    type: 'error',
-                    delay: 3000,
-                    styling: 'bootstrap3'
-                });
+            else {              
+                showToast(
+                    "Please Select Record", error
+                );
             }
 
         });
@@ -208,7 +167,11 @@
                 if (response.success == true) {
                     var result = response.data[0];
                     if (result != null && result != undefined && result != "") {
-                        $('#ddlType').val(result.RegisterType).trigger('change');
+
+                        if (!WorkOrderId) {
+                            $('#ddlType').val(result.RegisterType).trigger('change');
+                        }
+                       
                         $('#txtOwnerName').val(result.oname);
                         $('#txtAddress').val(result.address);
                         $('#txtGSTNo').val(result.gstno == null ? "NA" : result.gstno);
@@ -216,14 +179,9 @@
                     }
                 }
                 else {
-                    new PNotify({
-                        title: response.TitleMsg,
-                        text: response.Message,
-                        type: response.MsgType,
-                        delay: response.TimeOutMsg,
-                        styling: 'bootstrap3'
-                    });
-                    console.log(response.Error);
+                    showToast(
+                        "Unable to load  details.", "error"
+                    );
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -234,7 +192,123 @@
 
 
     var formValidator = function () {
-        $("#btnSubmit").click(function () {
+        $("#loader").show();
+        // ---- Validation ----
+        function validateForm() {
+            var errors = [];
+        
+            // Company Name
+            if (!$('#ddlCompanyname').val()) {
+                errors.push("Please select Company Name.");
+                $('#ddlCompanyname').addClass('is-invalid');
+            } else {
+                $('#ddlCompanyname').removeClass('is-invalid');
+            }
+
+            // Type
+            if (!$('#ddlType').val()) {
+                errors.push("Please select Type.");
+                $('#ddlType').addClass('is-invalid');
+            } else {
+                $('#ddlType').removeClass('is-invalid');
+            }
+
+            // W.O. Status
+            if (!$('#ddlWOStatus').val()) {
+                errors.push("Please select W.O. Status.");
+                $('#ddlWOStatus').addClass('is-invalid');
+            } else {
+                $('#ddlWOStatus').removeClass('is-invalid');
+            }
+
+            // Owner Name
+            if (!$('#txtOwnerName').val().trim()) {
+                errors.push("Owner Name is required.");
+                $('#txtOwnerName').addClass('is-invalid');
+            } else {
+                $('#txtOwnerName').removeClass('is-invalid');
+            }
+
+            // Address
+            if (!$('#txtAddress').val().trim()) {
+                errors.push("Address is required.");
+                $('#txtAddress').addClass('is-invalid');
+            } else {
+                $('#txtAddress').removeClass('is-invalid');
+            }
+
+            if (!$('#txtGSTNo').val().trim()) {
+                errors.push("GST No. is required.");
+                $('#txtGSTNo').addClass('is-invalid');
+            } else {
+                $('#txtGSTNo').removeClass('is-invalid');
+            }
+
+            var email = $('#txtEmailID').val().trim();
+            var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email) {
+                errors.push("Email ID is required.");
+                $('#txtEmailID').addClass('is-invalid');
+            } else if (!emailPattern.test(email)) {
+                errors.push("Please enter a valid Email ID.");
+                $('#txtEmailID').addClass('is-invalid');
+            } else {
+                $('#txtEmailID').removeClass('is-invalid');
+            }
+
+            if (!$('#txtRenewalDate').val().trim()) {
+                errors.push("Renewal Date is required.");
+                $('#txtRenewalDate').addClass('is-invalid');
+            } else {
+                $('#txtRenewalDate').removeClass('is-invalid');
+            }
+
+            if (!$('#txtTodayDate').val().trim()) {
+                errors.push("Today Date is required.");
+                $('#txtTodayDate').addClass('is-invalid');
+            } else {
+                $('#txtTodayDate').removeClass('is-invalid');
+            }
+
+            if (!$('#ddlPaymentMode').val()) {
+                errors.push("Please select Payment Mode.");
+                $('#ddlPaymentMode').addClass('is-invalid');
+            } else {
+                $('#ddlPaymentMode').removeClass('is-invalid');
+            }
+
+            if ($("#tblService >tbody >tr").length === 0) {
+                errors.push("Please add at least one Service.");
+                $("#tblService").addClass('table-invalid');
+            } else {
+                $("#tblService").removeClass('table-invalid');
+            }
+
+            //if ($("#tblBankDetail >tbody >tr").length === 0) {
+            //    errors.push("Please add at least one Bank Detail.");
+            //}
+
+            return errors;
+        }
+
+        function toIsoDate(ddmmyyyy) {
+            var parts = ddmmyyyy.split('/');
+            return parts[2] + '-' + parts[1] + '-' + parts[0];
+        }
+
+        $("#btnSubmit").click(function (e) {
+            e.preventDefault();
+
+            // ---- Run validation first ----
+            var errors = validateForm();
+            if (errors.length > 0) {
+                // show each missing/invalid field as its own toast
+                errors.forEach(function (msg) {
+                    showToast(msg, "error");
+                });
+                return; // stop here — do not proceed to build DataList or call AJAX
+            }
+
             var submitted = false;
 
             var WorkOrderID = $("#WorkOrderID").val();
@@ -248,11 +322,8 @@
             var GSTNo = $('#txtGSTNo').val();
             var EmailID = $("#txtEmailID").val();
 
-            var Rdate = new Date($("#txtRenewalDate").val().split('/').reverse().join('-')).toISOString().slice(0, 10);
-            var RenewalDate = Rdate;
-
-            var Todate = new Date($("#txtTodayDate").val().split('/').reverse().join('-')).toISOString().slice(0, 10);
-            var TodayDate = Todate;
+            var RenewalDate = toIsoDate($("#txtRenewalDate").val().trim());
+            var TodayDate = toIsoDate($("#txtTodayDate").val().trim());
 
             var PaymentMode = $('#ddlPaymentMode option:selected').val();
 
@@ -282,29 +353,31 @@
                     ServiceDescriptiondata.Amount = row.find("TD").eq(7).html();
                     ServiceDescriptionList.push(ServiceDescriptiondata);
                 });
-            }
-            else {
+            } else {
                 ServiceDescriptionList = null;
             }
 
             var BankDetailList = new Array();
-            var rowCount = $('#tblBankDetail >tbody >tr').length;
-            if (rowCount > 0) {
+            var bankRowCount = $('#tblBankDetail >tbody >tr').length;
+            if (bankRowCount > 0) {
                 $("#tblBankDetail TBODY TR").each(function () {
                     var row = $(this);
                     var BankDetaildata = {};
                     BankDetaildata.BankName = row.find("TD").eq(1).html();
                     BankDetaildata.ChequeNo = row.find("TD").eq(2).html();
 
-                    var date = new Date(row.find("TD").eq(3).html().split('/').reverse().join('-')).toISOString().slice(0, 10);
-                    var CheqDate = date;
+                    var cheqDateCell = row.find("TD").eq(3).text().trim();
+                    if (cheqDateCell) {
+                        BankDetaildata.ChequeDate = toIsoDate(cheqDateCell);
+                    } else {
+                        console.warn("Skipping row — missing cheque date cell:", row.html());
+                        return true; // skip this row, continue .each()
+                    }
 
-                    BankDetaildata.ChequeDate = CheqDate;
                     BankDetaildata.Amount = row.find("TD").eq(4).html();
                     BankDetailList.push(BankDetaildata);
                 });
-            }
-            else {
+            } else {
                 BankDetailList = null;
             }
 
@@ -341,44 +414,36 @@
             };
 
             if (count == 0) {
+                $("#loader").show();
                 $.ajax({
                     url: "/WorkOrder/CreateOrEdit",
                     data: JSON.stringify(DataList),
-                    contentType: "application/json; charset=utf-8",
                     type: "post",
-                    dataType: "json",                
+                    contentType: "application/json; charset=utf-8",
                     cache: false,
                     success: function (response) {
                         if (response.success == true) {
-                            showToast(
-                                response.Message,
-                                response.MsgType
-                            );
-
+                            showToast(response.message, "success");
                             setTimeout(function () {
                                 window.location.href = "/WorkOrder/Index";
                             }, 2000);
-                        }
-                        else {
-                            showToast(
-                                response.Message,
-                                response.MsgType
-                            );
+                        } else {
+                            showToast(response.Message, response.MsgType);
                         }
                     },
                     complete: function (data) {
                         $("#loader").hide();
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
-                        //$('#lblCommentsNotification').text("Error encountered while saving the comments.");
+                        console.error(xhr.responseText);
+                        showToast("Error saving Work Order. Please try again.", "error");
                     }
                 });
+            } else {
+                showToast("Please Enter Remarks", "error");
             }
-            else {
-                pnotifymsg("Please Enter Remarks");
-            }
-
         });
+        $("#loader").hide();
     };
 
     var loadWorkOrderData = function () {
@@ -393,7 +458,8 @@
                         if (response.success == true) {
                             var result = response.data || [];
                             if (result != null && result != undefined && result != "") {
-
+                                $("#btnSubmit").html("Update");
+                                $("#lblHeader").html("UPDATE WorkOrder");
                                 var WorkOrderDtls = result.workOrderDtls;
                                 var WorkOrderBankList = result.workOrderBankList;
 
@@ -466,22 +532,18 @@
 
                                 bindBankData(WorkOrderBankList);
 
-                                $("#btnSubmit").html("Update");
-                                $("#lblHeader").html("UPDATE WorkOrder");
+                          
                             }
                         }
                         else {
-                            pnotifymsg(
-                                response.Message,
-                                response.MsgType,
-                                response.TitleMsg
+                            showToast(
+                                "Unable to load  details.", error
                             );
-                            console.log(response.Error);
 
                         }
                     },
                     complete: function (data) {
-                        $("#loader").hide();
+                   
                     },
                     error: function (xhr, ajaxOptions, thrownError) {
                         //$('#lblCommentsNotification').text("Error encountered while saving the comments.");
@@ -657,6 +719,7 @@
         return day + "/" + month + "/" + year;
     }
 
+  
     //------------------------------------------------------------------------------------
 
     var Servicetext = "";
@@ -667,8 +730,7 @@
             data: { "Dept": Dept },
             type: "post",
             cache: false,
-            success: function (response) {
-                console.log("Response:", response);
+            success: function (response) {          
                 if (response.success === true) {           // lowercase wrapper
                     var users = response.data || [];        // lowercase wrapper
                     var html = "<option value=''>-- Select Service Name --</option>";
