@@ -1,0 +1,1762 @@
+﻿@model WEBLINK_CRM.Models.Services
+
+@{
+    ViewData["Title"] = "Edit Service";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .card-header h3 {
+        margin: 0 0 5px 0;
+    }
+
+    .card-header small {
+        display: block;
+        color: #777;
+        font-size: 13px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #344054;
+    }
+
+    .req {
+        color: #dc3545;
+    }
+
+    .form-control,
+    .form-select {
+        min-height: 45px;
+        border-radius: 10px;
+        border: 1px solid #d8dee9;
+    }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 .15rem rgba(13,110,253,.12);
+        }
+
+    textarea.form-control {
+        min-height: 100px;
+    }
+
+    .config-box {
+        background: #f8faff;
+        border: 1px solid #dce6f5;
+        border-radius: 14px;
+        padding: 20px;
+        margin-top: 15px;
+    }
+
+    .config-header {
+        background: #eaf2ff;
+        color: #0d6efd;
+        border-radius: 10px;
+        padding: 12px 15px;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+
+    .department-info {
+        background: #eff7ff;
+        border-left: 4px solid #0d6efd;
+        padding: 12px 15px;
+        border-radius: 8px;
+        display: none;
+        margin-bottom: 20px;
+    }
+
+    .service-config {
+        display: none;
+    }
+
+    .seo-sub-config {
+        display: none;
+        background: #fff;
+        border: 1px solid #e1e7ef;
+        border-radius: 12px;
+        padding: 18px;
+        margin-top: 15px;
+    }
+
+    .seo-sub-title {
+        color: #344054;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .keyword-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+
+        .keyword-row .form-control {
+            flex: 1;
+        }
+
+    .remove-keyword {
+        width: 45px;
+    }
+
+    .btn {
+        border-radius: 8px;
+        height: 43px;
+        font-weight: 600;
+        transition: .3s;
+    }
+
+    .btn-success {
+        background: #198754;
+        border: none;
+    }
+
+        .btn-success:hover {
+            background: #157347;
+            transform: translateY(-2px);
+        }
+
+    .btn-danger {
+        background: #dc3545;
+        border: none;
+    }
+
+        .btn-danger:hover {
+            background: #bb2d3b;
+            transform: translateY(-2px);
+        }
+
+
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+
+    .text-danger {
+        font-size: 13px;
+    }
+
+    .badge-config {
+        background: #e8f1ff;
+        color: #0d6efd;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+
+    .department-select {
+        width: 100%;
+        min-height: 45px;
+        border: 1px solid #d0d7e2;
+        border-radius: 10px;
+        padding: 10px 14px;
+        background: #fff;
+        color: #344054;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+        .department-select:focus {
+            border-color: #0d6efd;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(13,110,253,.12);
+        }
+
+    .responsive-swal {
+        border-radius: 14px !important;
+        box-shadow: 0 8px 30px rgba(0,0,0,.15) !important;
+    }
+
+    @@media (max-width:576px) {
+        .service-header {
+            padding: 18px;
+        }
+
+        .card-body {
+            padding: 15px !important;
+        }
+
+        .keyword-row {
+            flex-direction: column;
+        }
+
+        .remove-keyword {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h3>
+                <i class="fa fa-cogs"></i>
+                Edit New Service
+            </h3>
+
+            <small>
+                Configure service according to department and service type
+            </small>
+        </div>
+    </div>
+
+
+    <div class="card-body">
+        <form asp-action="Update"
+              method="post"
+              id="serviceForm"
+              onsubmit="return validateServiceForm();">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" asp-for="ID" />
+            <!-- ================================================= -->
+            <!-- BASIC INFORMATION -->
+            <!-- ================================================= -->
+
+            <h5 class="section-title">
+                <i class="fa fa-info-circle"></i>
+                Basic Service Information
+            </h5>
+
+            <div class="row">
+
+                <!-- DEPARTMENT ID -->
+                <div class="col-md-4 mb-3">
+
+                    <label for="DepartmentName" class="form-label">
+                        Department <span class="req">*</span>
+                    </label>
+
+                    <select asp-for="DepartmentName"
+                            id="DepartmentName"
+                            name="DepartmentName"
+                            class="form-select"
+                            onchange="loadDepartmentConfiguration()">
+
+                        <option value="">
+                            -- Select Department --
+                        </option>
+
+                        @if (ViewBag.Departments != null)
+                        {
+                            foreach (var department in ViewBag.Departments)
+                            {
+                                <option value="@department.DepartmentName"
+                                        data-code="@department.DepartmentName">
+
+                                    @department.DepartmentName
+
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                    <span asp-validation-for="DepartmentName"
+                          class="text-danger"></span>
+
+                </div>
+
+
+                <!-- SERVICE NAME -->
+                <div class="col-md-4 mb-3">
+
+                    <label asp-for="ServiceName" class="form-label">
+                        Service Name <span class="req">*</span>
+                    </label>
+
+                    <input asp-for="ServiceName"
+                           id="ServiceName"
+                           class="form-control"
+                           placeholder="Enter Service Name" />
+
+                    <span asp-validation-for="ServiceName"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- SERVICE CODE -->
+                <div class="col-md-4 mb-3">
+
+                    <label asp-for="ServiceCode" class="form-label">
+                        Service Code <span class="req">*</span>
+                    </label>
+
+                    <input asp-for="ServiceCode"
+                           id="ServiceCode"
+                           class="form-control"
+                           placeholder="Example: SEO-LOCAL-001" />
+
+                    <span asp-validation-for="ServiceCode"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- DESCRIPTION -->
+                <div class="col-md-12 mb-3">
+
+                    <label asp-for="ServicesDesc" class="form-label">
+                        Service Description
+                    </label>
+
+                    <textarea asp-for="ServicesDesc"
+                              id="ServicesDesc"
+                              class="form-control"
+                              rows="3"
+                              placeholder="Enter service description"></textarea>
+
+                    <span asp-validation-for="ServicesDesc"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- SELECTED DEPARTMENT -->
+
+            <div id="departmentInfo"
+                 class="department-info">
+
+                <strong>
+                    Selected Department:
+                </strong>
+
+                <span id="selectedDepartment"></span>
+
+                <span class="badge-config ms-2"
+                      id="selectedDepartmentCode">
+                </span>
+
+            </div>
+
+
+            <hr />
+
+
+            <!-- ================================================= -->
+            <!-- PRICING -->
+            <!-- ================================================= -->
+
+            <h5 class="section-title">
+                <i class="fa fa-money"></i>
+                Service Pricing
+            </h5>
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+
+                    <label asp-for="Price" class="form-label">
+                        Price <span class="req">*</span>
+                    </label>
+
+                    <input asp-for="Price"
+                           id="Price"
+                           type="number"
+                           step="0.01"
+                           min="0"
+                           class="form-control"
+                           placeholder="Enter Price" />
+
+                    <span asp-validation-for="Price"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <div class="col-md-4 mb-3">
+
+                    <label asp-for="Currency" class="form-label">
+                        Currency <span class="req">*</span>
+                    </label>
+
+                    <select asp-for="Currency"
+                            id="Currency"
+                            class="form-select">
+
+                        <option value="">-- Select Currency --</option>
+                        <option value="INR">INR - Indian Rupee</option>
+                        <option value="USD">USD - US Dollar</option>
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="GBP">GBP - British Pound</option>
+                        <option value="AUD">AUD - Australian Dollar</option>
+                        <option value="CAD">CAD - Australian Dollar</option>
+
+                    </select>
+
+                    <span asp-validation-for="Currency"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <div class="col-md-4 mb-3">
+
+                    <label asp-for="Years" class="form-label">
+                        Duration / Years <span class="req">*</span>
+                    </label>
+
+                    <input asp-for="Years"
+                           id="Years"
+                           type="number"
+                           min="1"
+                           max="50"
+                           step="1"
+                           class="form-control"
+                           placeholder="Example: 1" />
+
+                    <span asp-validation-for="Years"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <hr />
+
+
+            <!-- ================================================= -->
+            <!-- SEO -->
+            <!-- ================================================= -->
+
+            <div id="seoConfiguration"
+                 class="service-config config-box">
+
+                <div class="config-header">
+                    <i class="fa fa-search"></i>
+                    SEO Service Configuration
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            SEO Type <span class="req">*</span>
+                        </label>
+
+                        <select id="SEOType"
+                                name="SEOType"
+                                class="form-select"
+                                onchange="loadSEOConfiguration()">
+
+                            <option value="">
+                                -- Select SEO Type --
+                            </option>
+
+                            <option value="Local SEO">
+                                Local SEO
+                            </option>
+
+                            <option value="National SEO">
+                                National SEO
+                            </option>
+
+                            <option value="E-Commerce SEO">
+                                E-Commerce SEO
+                            </option>
+
+                        </select>
+
+                        <span id="SEOTypeError"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Industry
+                        </label>
+
+                        <select name="SEOIndustry"
+                                class="form-select">
+
+                            <option value="">
+                                -- Select Industry --
+                            </option>
+
+                            <option value="IT">IT</option>
+                            <option value="Healthcare">Healthcare</option>
+                            <option value="Education">Education</option>
+                            <option value="Finance">Finance</option>
+                            <option value="Real Estate">Real Estate</option>
+                            <option value="E-Commerce">E-Commerce</option>
+                            <option value="Manufacturing">Manufacturing</option>
+                            <option value="Retail">Retail</option>
+                            <option value="Travel">Travel</option>
+                            <option value="Hospitality">Hospitality</option>
+                            <option value="Other">Other</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Number Of Pages
+                        </label>
+
+                        <input name="PageSize"
+                               type="number"
+                               min="1"
+                               class="form-control"
+                               placeholder="Example: 10" />
+
+                    </div>
+
+                </div>
+
+
+                <!-- LOCAL SEO -->
+
+                <div id="localSEO"
+                     class="seo-sub-config">
+
+                    <div class="seo-sub-title">
+
+                        <i class="fa fa-map-marker text-primary"></i>
+                        Local SEO
+
+                        <span class="badge-config float-end">
+                            City / Location Based
+                        </span>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Country
+                            </label>
+
+                            <select name="Country"
+                                    class="form-select">
+
+                                <option value="">
+                                    -- Select Country --
+                                </option>
+
+                                <option value="India">India</option>
+                                <option value="USA">USA</option>
+                                <option value="UK">UK</option>
+                                <option value="Australia">Australia</option>
+                                <option value="Canada">Canada</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                State
+                            </label>
+
+                            <input name="State"
+                                   class="form-control"
+                                   placeholder="Example: Maharashtra" />
+
+                        </div>
+
+
+                        <div class="col-md-4 mb-3">
+
+                            <label asp-for="City"
+                                   class="form-label">
+                                City
+                            </label>
+
+                            <input asp-for="City"
+                                   id="City"
+                                   class="form-control"
+                                   placeholder="Example: Mumbai" />
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+                                Area / Location
+                            </label>
+
+                            <input name="Area"
+                                   class="form-control"
+                                   placeholder="Example: Andheri, Powai, Baner" />
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+                                Location Targeting
+                            </label>
+
+                            <select name="LocationType"
+                                    class="form-select">
+
+                                <option value="">
+                                    -- Select Location Target --
+                                </option>
+
+                                <option value="City Wise">
+                                    City Wise
+                                </option>
+
+                                <option value="Area Wise">
+                                    Area / Locality Wise
+                                </option>
+
+                                <option value="Multiple Cities">
+                                    Multiple Cities
+                                </option>
+
+                                <option value="Multiple Locations">
+                                    Multiple Locations
+                                </option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="col-md-12 mb-3">
+
+                            <label class="form-label">
+                                SEO Keywords
+                            </label>
+
+                            <div id="keywordContainer">
+
+                                <div class="keyword-row">
+
+                                    <input type="text"
+                                           name="Keywords"
+                                           class="form-control"
+                                           placeholder="Example: SEO company in Mumbai" />
+
+                                    <button type="button"
+                                            class="btn btn-danger remove-keyword"
+                                            onclick="removeKeyword(this)">
+
+                                        <i class="fa fa-trash"></i>
+
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                            <button type="button"
+                                    class="btn btn-primary mt-2"
+                                    onclick="addKeyword()">
+
+                                <i class="fa fa-plus"></i>
+                                Add Keyword
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- NATIONAL SEO -->
+
+                <div id="nationalSEO"
+                     class="seo-sub-config">
+
+                    <div class="seo-sub-title">
+
+                        <i class="fa fa-globe text-primary"></i>
+                        National SEO
+
+                        <span class="badge-config float-end">
+                            Country Wide
+                        </span>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Target Country
+                            </label>
+
+                            <select name="NationalCountry"
+                                    class="form-select">
+
+                                <option value="">
+                                    -- Select Country --
+                                </option>
+
+                                <option value="India">India</option>
+                                <option value="USA">USA</option>
+                                <option value="UK">UK</option>
+                                <option value="Australia">Australia</option>
+                                <option value="Canada">Canada</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Number Of Pages
+                            </label>
+
+                            <input name="NationalPages"
+                                   type="number"
+                                   min="1"
+                                   class="form-control"
+                                   placeholder="Number of Pages" />
+
+                        </div>
+
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Target Years
+                            </label>
+
+                            <input name="NationalYears"
+                                   type="number"
+                                   min="1"
+                                   max="50"
+                                   class="form-control"
+                                   placeholder="Years" />
+
+                        </div>
+
+
+                        <div class="col-md-12 mb-3">
+
+                            <label class="form-label">
+                                National Keywords
+                            </label>
+
+                            <textarea name="NationalKeywords"
+                                      class="form-control"
+                                      rows="3"
+                                      placeholder="seo company, digital marketing company, seo services"></textarea>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ECOMMERCE SEO -->
+
+                <div id="ecommerceSEO"
+                     class="seo-sub-config">
+
+                    <div class="seo-sub-title">
+
+                        <i class="fa fa-shopping-cart text-primary"></i>
+                        E-Commerce SEO
+
+                        <span class="badge-config float-end">
+                            Product Based
+                        </span>
+
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Number Of Products
+                            </label>
+
+                            <input name="ProductSize"
+                                   type="number"
+                                   min="1"
+                                   class="form-control"
+                                   placeholder="Example: 100" />
+
+                        </div>
+
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Number Of Pages
+                            </label>
+
+                            <input name="EcommercePages"
+                                   type="number"
+                                   min="1"
+                                   class="form-control"
+                                   placeholder="Example: 20" />
+
+                        </div>
+
+
+                        <div class="col-md-4 mb-3">
+
+                            <label class="form-label">
+                                Duration / Years
+                            </label>
+
+                            <input name="EcommerceYears"
+                                   type="number"
+                                   min="1"
+                                   max="50"
+                                   class="form-control"
+                                   placeholder="Example: 1" />
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+                                Product Category
+                            </label>
+
+                            <input name="ProductCategory"
+                                   class="form-control"
+                                   placeholder="Example: Clothing, Electronics" />
+
+                        </div>
+
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+                                E-Commerce Platform
+                            </label>
+
+                            <select name="EcommercePlatform"
+                                    class="form-select">
+
+                                <option value="">
+                                    -- Select Platform --
+                                </option>
+
+                                <option value="Shopify">Shopify</option>
+                                <option value="WooCommerce">WooCommerce</option>
+                                <option value="Magento">Magento</option>
+                                <option value="Custom">Custom</option>
+                                <option value="Other">Other</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="col-md-12 mb-3">
+
+                            <label class="form-label">
+                                Product Keywords
+                            </label>
+
+                            <textarea name="EcommerceKeywords"
+                                      class="form-control"
+                                      rows="3"
+                                      placeholder="Example: buy shoes online, men's shoes online"></textarea>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- WEB DEVELOPMENT -->
+            <!-- ================================================= -->
+
+            <div id="webDevelopmentConfiguration"
+                 class="service-config config-box">
+
+                <div class="config-header">
+                    <i class="fa fa-globe"></i>
+                    Web Development Configuration
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Website Type
+                        </label>
+
+                        <select name="WebsiteType"
+                                class="form-select">
+
+                            <option value="">
+                                -- Select Website Type --
+                            </option>
+
+                            <option value="Corporate">Corporate</option>
+                            <option value="E-Commerce">E-Commerce</option>
+                            <option value="Portfolio">Portfolio</option>
+                            <option value="Blog">Blog</option>
+                            <option value="Landing Page">Landing Page</option>
+                            <option value="Web Application">Web Application</option>
+                            <option value="News Portal">News Portal</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Technology
+                        </label>
+
+                        <select name="WebTechnology"
+                                class="form-select">
+
+                            <option value="">
+                                -- Select Technology --
+                            </option>
+
+                            <option value="ASP.NET Core">ASP.NET Core</option>
+                            <option value="PHP">PHP</option>
+                            <option value="Laravel">Laravel</option>
+                            <option value="WordPress">WordPress</option>
+                            <option value="React">React</option>
+                            <option value="Angular">Angular</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Number Of Pages
+                        </label>
+
+                        <input name="WebPages"
+                               type="number"
+                               min="1"
+                               class="form-control"
+                               placeholder="Pages" />
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Responsive
+                        </label>
+
+                        <select name="Responsive"
+                                class="form-select">
+
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            CMS
+                        </label>
+
+                        <select name="CMS"
+                                class="form-select">
+
+                            <option value="">
+                                -- Select CMS --
+                            </option>
+
+                            <option value="None">None</option>
+                            <option value="WordPress">WordPress</option>
+                            <option value="Custom CMS">Custom CMS</option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- GRAPHICS -->
+            <!-- ================================================= -->
+
+            <div id="graphicsConfiguration"
+                 class="service-config config-box">
+
+                <div class="config-header">
+                    <i class="fa fa-paint-brush"></i>
+                    Graphics & SMO Configuration
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Service Type
+                        </label>
+
+                        <select name="GraphicsServiceType"
+                                class="form-select">
+
+                            <option value="">
+                                -- Select Type --
+                            </option>
+
+                            <option value="Logo Design">Logo Design</option>
+                            <option value="Social Media Design">Social Media Design</option>
+                            <option value="Banner Design">Banner Design</option>
+                            <option value="Brochure Design">Brochure Design</option>
+                            <option value="Social Media Management">Social Media Management</option>
+                            <option value="Social Media Promotion">Social Media Promotion</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Platform
+                        </label>
+
+                        <select name="SocialPlatform"
+                                class="form-select">
+
+                            <option value="">
+                                -- Select Platform --
+                            </option>
+
+                            <option value="Facebook">Facebook</option>
+                            <option value="Instagram">Instagram</option>
+                            <option value="LinkedIn">LinkedIn</option>
+                            <option value="YouTube">YouTube</option>
+                            <option value="Twitter">Twitter / X</option>
+                            <option value="All">All Platforms</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Quantity
+                        </label>
+
+                        <input name="DesignQuantity"
+                               type="number"
+                               min="1"
+                               class="form-control"
+                               placeholder="Quantity" />
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- SOFTWARE DEVELOPMENT -->
+            <!-- ================================================= -->
+
+            <div id="softwareDevelopmentConfiguration"
+                 class="service-config config-box">
+
+                <div class="config-header">
+                    <i class="fa fa-code"></i>
+                    Software Development Configuration
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Application Type
+                        </label>
+
+                        <select name="ApplicationType"
+                                class="form-select">
+
+                            <option value="">
+                                -- Select Application --
+                            </option>
+
+                            <option value="Web Application">Web Application</option>
+                            <option value="Mobile Application">Mobile Application</option>
+                            <option value="Desktop Application">Desktop Application</option>
+                            <option value="ERP">ERP</option>
+                            <option value="CRM">CRM</option>
+                            <option value="API">API Development</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Technology
+                        </label>
+
+                        <select name="SoftwareTechnology"
+                                class="form-select">
+
+                            <option value="">
+                                -- Select Technology --
+                            </option>
+
+                            <option value=".NET">.NET</option>
+                            <option value="Java">Java</option>
+                            <option value="PHP">PHP</option>
+                            <option value="Python">Python</option>
+                            <option value="Node JS">Node JS</option>
+                            <option value="React">React</option>
+                            <option value="Angular">Angular</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Platform
+                        </label>
+
+                        <select name="SoftwarePlatform"
+                                class="form-select">
+
+                            <option value="">
+                                -- Select Platform --
+                            </option>
+
+                            <option value="Web">Web</option>
+                            <option value="Android">Android</option>
+                            <option value="iOS">iOS</option>
+                            <option value="Windows">Windows</option>
+                            <option value="Cross Platform">Cross Platform</option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- SOFTWARE TESTING -->
+            <!-- ================================================= -->
+
+            <div id="testingConfiguration"
+                 class="service-config config-box">
+
+                <div class="config-header">
+                    <i class="fa fa-bug"></i>
+                    Software Testing Configuration
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Testing Type
+                        </label>
+
+                        <select name="TestingType"
+                                class="form-select">
+
+                            <option value="">
+                                -- Select Testing Type --
+                            </option>
+
+                            <option value="Manual Testing">Manual Testing</option>
+                            <option value="Automation Testing">Automation Testing</option>
+                            <option value="API Testing">API Testing</option>
+                            <option value="Performance Testing">Performance Testing</option>
+                            <option value="Security Testing">Security Testing</option>
+                            <option value="Regression Testing">Regression Testing</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Testing Tool
+                        </label>
+
+                        <select name="TestingTool"
+                                class="form-select">
+
+                            <option value="">
+                                -- Select Tool --
+                            </option>
+
+                            <option value="Selenium">Selenium</option>
+                            <option value="JMeter">JMeter</option>
+                            <option value="Postman">Postman</option>
+                            <option value="Playwright">Playwright</option>
+                            <option value="Cypress">Cypress</option>
+                            <option value="Other">Other</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Application Type
+                        </label>
+
+                        <select name="TestingApplicationType"
+                                class="form-select">
+
+                            <option value="">
+                                -- Select Application --
+                            </option>
+
+                            <option value="Web">Web</option>
+                            <option value="Mobile">Mobile</option>
+                            <option value="API">API</option>
+                            <option value="Desktop">Desktop</option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- SALES -->
+            <!-- ================================================= -->
+
+            <div id="salesConfiguration"
+                 class="service-config config-box">
+
+                <div class="config-header">
+                    <i class="fa fa-line-chart"></i>
+                    Sales Configuration
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Sales Type
+                        </label>
+
+                        <select name="SalesType"
+                                class="form-select">
+
+                            <option value="">
+                                -- Select Sales Type --
+                            </option>
+
+                            <option value="Lead Generation">Lead Generation</option>
+                            <option value="Telecalling">Telecalling</option>
+                            <option value="Business Development">Business Development</option>
+                            <option value="Sales Consultation">Sales Consultation</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Lead Type
+                        </label>
+
+                        <select name="LeadType"
+                                class="form-select">
+
+                            <option value="">
+                                -- Select Lead Type --
+                            </option>
+
+                            <option value="B2B">B2B</option>
+                            <option value="B2C">B2C</option>
+                            <option value="Both">Both</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Target Industry
+                        </label>
+
+                        <input name="SalesIndustry"
+                               class="form-control"
+                               placeholder="Target Industry" />
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- HR -->
+            <!-- ================================================= -->
+
+            <div id="hrConfiguration"
+                 class="service-config config-box">
+
+                <div class="config-header">
+                    <i class="fa fa-users"></i>
+                    HR Configuration
+                </div>
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            HR Service Type
+                        </label>
+
+                        <select name="HRServiceType"
+                                class="form-select">
+
+                            <option value="">
+                                -- Select HR Service --
+                            </option>
+
+                            <option value="Recruitment">Recruitment</option>
+                            <option value="Employee Onboarding">Employee Onboarding</option>
+                            <option value="Payroll">Payroll</option>
+                            <option value="Employee Management">Employee Management</option>
+                            <option value="Training">Training</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Employee Type
+                        </label>
+
+                        <select name="EmployeeType"
+                                class="form-select">
+
+                            <option value="">
+                                -- Select Employee Type --
+                            </option>
+
+                            <option value="Full Time">Full Time</option>
+                            <option value="Part Time">Part Time</option>
+                            <option value="Contract">Contract</option>
+                            <option value="Intern">Intern</option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- STATUS -->
+            <!-- ================================================= -->
+
+            <hr />
+
+            <h5 class="section-title">
+                <i class="fa fa-toggle-on"></i>
+                Status
+            </h5>
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+
+                    <label asp-for="IsActive"
+                           class="form-label">
+                        Status
+                    </label>
+
+                    <select asp-for="IsActive"
+                            id="IsActive"
+                            class="form-select">
+
+                        <option value="true">
+                            Active
+                        </option>
+
+                        <option value="false">
+                            Inactive
+                        </option>
+
+                    </select>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================================= -->
+            <!-- BUTTONS -->
+            <!-- ================================================= -->
+
+            <div class="row justify-content-center mt-3">
+
+                <div class="col-md-3 text-end">
+
+                    <button type="submit"
+                            class="btn btn-success">
+
+                        <i class="fa fa-save"></i>
+                        Update Service
+
+                    </button>
+                </div>
+
+                <div class="col-md-3 text-start">
+                    <a asp-action="Index"
+                       class="btn btn-danger">
+
+                        <i class="fa fa-arrow-left"></i>
+                        Back
+
+                    </a>
+
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script>
+    function loadSEOConfiguration() {
+
+        var seoType = $("#SEOType").val();
+
+
+        $("#localSEO").hide();
+        $("#nationalSEO").hide();
+        $("#ecommerceSEO").hide();
+
+
+        if (seoType === "Local SEO") {
+
+            $("#localSEO").slideDown();
+
+        }
+        else if (seoType === "National SEO") {
+
+            $("#nationalSEO").slideDown();
+
+        }
+        else if (seoType === "E-Commerce SEO") {
+
+            $("#ecommerceSEO").slideDown();
+
+        }
+
+    }
+
+
+    // =========================================================
+    // KEYWORDS
+    // =========================================================
+
+    function addKeyword() {
+
+        var html = `
+            <div class="keyword-row">
+
+                <input type="text"
+                       name="Keywords"
+                       class="form-control"
+                       placeholder="Example: SEO company in Delhi" />
+
+                <button type="button"
+                        class="btn btn-danger remove-keyword"
+                        onclick="removeKeyword(this)">
+
+                    <i class="fa fa-trash"></i>
+
+                </button>
+
+            </div>
+        `;
+
+        $("#keywordContainer").append(html);
+    }
+
+
+    function removeKeyword(button) {
+
+        var rows = $("#keywordContainer .keyword-row");
+
+        if (rows.length > 1) {
+
+            $(button)
+                .closest(".keyword-row")
+                .remove();
+
+        }
+
+    }
+
+
+    // =========================================================
+    // SERVICE CODE
+    // =========================================================
+
+    $(document).on("input", "#ServiceCode", function () {
+
+        this.value = this.value
+            .toUpperCase()
+            .replace(/[^A-Z0-9-_]/g, "");
+
+    });
+
+
+    // =========================================================
+    // PRICE
+    // =========================================================
+
+    $(document).on("input", "#Price", function () {
+
+        if (parseFloat(this.value) < 0) {
+
+            this.value = 0;
+
+        }
+
+    });
+
+
+    // =========================================================
+    // YEARS
+    // =========================================================
+
+    $(document).on("input", "#Years", function () {
+
+        let value = Number(this.value);
+
+        if (value < 1 && this.value !== "") {
+
+            this.value = 1;
+
+        }
+
+        if (value > 50) {
+
+            this.value = 50;
+
+        }
+
+    });
+
+
+    // =========================================================
+    // VALIDATION
+    // =========================================================
+
+        function validateServiceForm() {
+
+        let isValid = true;
+
+        // Remove old validation
+        $(".form-control, .form-select")
+            .removeClass("is-invalid");
+
+        $(".text-danger")
+            .not("#SEOTypeError")
+            .text("");
+
+        $("#SEOTypeError").text("");
+
+
+        // =====================================================
+        // DEPARTMENT
+        // =====================================================
+
+
+
+        // =====================================================
+        // SERVICE NAME
+        // =====================================================
+
+        var serviceName = $("#ServiceName").val();
+
+        if (!serviceName ||
+            serviceName.trim() === "") {
+
+            $("#ServiceName")
+                .addClass("is-invalid");
+
+            isValid = false;
+        }
+
+
+        // =====================================================
+        // SERVICE CODE
+        // =====================================================
+
+        var serviceCode = $("#ServiceCode").val();
+
+        if (!serviceCode ||
+            serviceCode.trim() === "") {
+
+            $("#ServiceCode")
+                .addClass("is-invalid");
+
+            isValid = false;
+
+        }
+        else if (serviceCode.trim().length < 2) {
+
+            $("#ServiceCode")
+                .addClass("is-invalid");
+
+            isValid = false;
+        }
+
+
+        // =====================================================
+        // PRICE
+        // =====================================================
+
+        var price = $("#Price").val();
+
+        if (price === "" ||
+            price === null ||
+            isNaN(Number(price)) ||
+            Number(price) < 0) {
+
+            $("#Price")
+                .addClass("is-invalid");
+
+            isValid = false;
+        }
+
+
+        // =====================================================
+        // CURRENCY
+        // =====================================================
+
+        var currency = $("#Currency").val();
+
+        if (!currency ||
+            currency.trim() === "") {
+
+            $("#Currency")
+                .addClass("is-invalid");
+
+            isValid = false;
+        }
+
+
+        // =====================================================
+        // YEARS
+        // =====================================================
+
+        var years = $("#Years").val();
+
+        if (years === "" ||
+            years === null) {
+
+            $("#Years")
+                .addClass("is-invalid");
+
+            isValid = false;
+
+        }
+        else {
+
+            var duration = Number(years);
+
+            if (!Number.isInteger(duration) ||
+                duration < 1 ||
+                duration > 50) {
+
+                $("#Years")
+                    .addClass("is-invalid");
+
+                isValid = false;
+            }
+        }
+
+
+
+
+
+
+</script>
+

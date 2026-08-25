@@ -18,9 +18,7 @@
         </div>
     </div>
     <div class="card">
-        <div class="card-header  text-uppercase text-black"
-             style="display:flex; align-items:center; justify-content:space-between;">
-
+        <div class="card-header d-flex align-items-center justify-content-between">
             <h3 style="color:black; margin:0;" id="lblHeader">
                 Create Work Order
             </h3>
@@ -146,10 +144,8 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
-
                     <div class="panel panel-default">
                         <div class="panel-body">
-
                             <div class="table-responsive">
                                 <input type="hidden" id="rowID" />
                                 <table style="width:100%!important" id="tblsparedetails" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0">
@@ -178,9 +174,9 @@
                                 </table>
                                 <div class="col-md-12" style="text-align:center">
                                     <input type="button" class="btn btn-primary btn-sm add-row1" value="Add Service" id="btnaddrow">
-                                    <input type="button" class="btn btn-primary btn-sm update-row" style="display:none" value="Update Row" id="btnupdaterow">
-
+                                    <input type="button" class="btn btn-primary btn-sm update-row" style="display:none" value="Update Row" id="btnupdaterow">     
                                 </div>
+                                <br/>
                             </div>
                             <div class="table-responsive" style="display:none;" id="divtableservice">
                                 <center>
@@ -205,16 +201,13 @@
                             </div>
                         </div>
                     </div>
-
-
-
                 </div>
             </div>
         </div>
     </div>
 
     <div class="card">
-        <div class="card-header text-uppercase">            <h3 style="color:black">Payment</h3></div>
+        <div class="card-header text-uppercase"><h3 style="color:black">Payment</h3></div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-8">
@@ -316,21 +309,19 @@
                     </div>
                 </div>
             </div>
+            <div class="row justify-content-center mt-3">
+                <div class="col-md-3 text-end">
+                    <button type="submit" id="btnSubmit" class="btn btn-primary">Save</button>
+                </div>
+
+                <div class="col-md-3 text-start">
+                    <a href="~/WorkOrder/Index">
+                        <input type="button" id="btnCancel" value="Cancel" class="btn btn-warning" />
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
-
-    <div class="col-md-12">
-        <center>
-            <button type="submit" id="btnSubmit" class="btn btn-primary">Save</button>
-            <a href="~/WorkOrder/Index">
-                <input type="button" id="btnCancel" value="Cancel" class="btn btn-warning" />
-            </a>
-        </center>
-    </div>
-    <br />
-    <br />
-
-
 
 </form>
 <script>
@@ -346,7 +337,8 @@
 @section Scripts {
 
     <script src="~/js/WorkOrderForm.js"></script>
-    <script type="text/javascript">   
+    <script type="text/javascript">
+
         $(document).ready(function ($) {
 
             GetWorkOrderForm.init();

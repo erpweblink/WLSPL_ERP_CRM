@@ -71,11 +71,8 @@ namespace WEBLINK_CRM.Controllers
 
                 if (result == -1)
                 {
-                    TempData["Save_Record"] = "Company already exists.";
-                    TempData["icon"] = "warning";
-                    TempData["Time"] = "2000";
-
-                    //return RedirectToAction("IndexLogin", "Alert");
+                    TempData["ToastMessage"] = "Company already exists.";
+                    TempData["ToastType"] = "warning";
 
                     return RedirectToAction("Index", "Companymaster");
                 }
@@ -83,19 +80,19 @@ namespace WEBLINK_CRM.Controllers
 
                 if (result > 0)
                 {
-                    TempData["Save_Record"] = "Company Created successfully.";
-                    TempData["icon"] = "success";
-                    TempData["Time"] = "2000";
+                    TempData["ToastMessage"] = "Company Created successfully.";
+                    TempData["ToastType"] = "success";
 
-                    //return RedirectToAction("IndexLogin", "Alert");
                     return RedirectToAction("Index", "Companymaster");
                 }
 
 
                 return View(model);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
+                TempData["ToastMessage"] = "Something went wrong.";
+                TempData["ToastType"] = "error";
                 throw;
             }
         }
@@ -132,44 +129,6 @@ namespace WEBLINK_CRM.Controllers
             }
         }
 
-
-        //[HttpGet]
-        //public async Task<IActionResult> Delete(int id)
-        //{
-        //    try
-        //    {
-        //        string userName = HttpContext.Session.GetString("userName");
-
-        //        var result = await _companymaster.DeleteReord(
-        //            id.ToString(),
-        //            userName
-        //        );
-
-        //        if (result > 0)
-        //        {
-        //            TempData["Save_Record"] = "Company deleted successfully.";
-        //            TempData["icon"] = "success";
-        //            TempData["Time"] = "2000";
-        //        }
-        //        else
-        //        {
-        //            TempData["Save_Record"] = "Unable to delete company.";
-        //            TempData["icon"] = "error";
-        //            TempData["Time"] = "2000";
-        //        }
-
-        //        return RedirectToAction("Index");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        TempData["Save_Record"] = ex.Message;
-        //        TempData["icon"] = "error";
-        //        TempData["Time"] = "2000";
-
-        //        return RedirectToAction("Index");
-        //    }
-        //}
-
         [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
@@ -184,26 +143,23 @@ namespace WEBLINK_CRM.Controllers
 
                 if (result > 0)
                 {
-                    TempData["Save_Record"] = "Company deleted successfully.";
-                    TempData["icon"] = "success";
-                    TempData["Time"] = "2000";
+                    TempData["ToastMessage"] = "Company deleted successfully.";
+                    TempData["ToastType"] = "success";
                 }
                 else
                 {
-                    TempData["Save_Record"] = "Unable to delete company.";
-                    TempData["icon"] = "error";
-                    TempData["Time"] = "2000";
+
+                    TempData["ToastMessage"] = "Unable to delete company.";
+                    TempData["ToastType"] = "error";
                 }
 
                 return RedirectToAction("Index");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                TempData["Save_Record"] = ex.Message;
-                TempData["icon"] = "error";
-                TempData["Time"] = "2000";
-
-                return RedirectToAction("Index");
+                TempData["ToastMessage"] = "Something went wrong..";
+                TempData["ToastType"] = "error";
+                throw;
             }
         }
 

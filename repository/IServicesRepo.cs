@@ -1,4 +1,4 @@
-﻿using WEBLINK_CRM.Models;
+﻿
 using System.Collections.Generic;
 using WEBLINK_CRM.Models;
 
@@ -6,9 +6,13 @@ namespace WEBLINK_CRM.repository
 {
     public interface IServicesRepo
     {
-        Task<List<Services>> GetDepartment(string Action);
-        Task<int?> Submitservices(Services Model, string Action);
-        Task<int> Delete(string ID, string CreatedBy);
-       
+
+        Task<int> SubmitServices(Services Model, string Action);
+
+        Task<List<Services>> GetServices(Services Model, string Action);
+        Task<List<Department>> Getdepartments(Department Model, string Action);
+        Task<Services> GetServicesById(string ID);
+
+        Task<int> DeleteServices(string ID, string UpdatedBy);
     }
 }

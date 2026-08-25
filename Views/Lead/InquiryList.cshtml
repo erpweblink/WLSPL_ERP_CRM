@@ -1,917 +1,607 @@
-﻿@{
+﻿@model List<WEBLINK_CRM.Models.Inquiry>
+
+
+@{
     ViewData["Title"] = "Inquiry List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<!DOCTYPE html>
-<html lang="en">
+<style>
+    .table tbody td {
+        font-size: 13px;
+        vertical-align: middle;
+    }
 
-<head>
+    .table tbody tr:hover {
+        background: #f4f8ff;
+    }
 
-    <meta charset="utf-8" />
+    #statusMessage {
+        font-size: 13px;
+        color: #fff;
+    }
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1" />
+    .feedback-scroll {
+        max-height: 120px;
+        overflow-y: auto;
+        overflow-y: auto;
+        word-break: break-word;
+        padding: 4px 8px;
+        background: #ffffff;
+        font-size: 12px;
+    }
 
-    <title>Inquiry List</title>
-
-
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet" />
-
-
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-          rel="stylesheet" />
-
-
-    <!-- SweetAlert -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-
-    <style>
-
-        body {
-            background: #f4f6f9;
-            font-family: Arial, Helvetica, sans-serif;
-        }
-
-
-        /* Main Card */
-
-        .main-card {
-            border: none;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0,0,0,.08);
-            background: #ffffff;
-        }
-
-
-        /* Header */
-
-        .card-header-custom {
-            background: #ffffff;
-            border-bottom: 1px solid #e5e7eb;
-            padding: 18px 20px;
-        }
-
-
-        .page-title {
-            margin: 0;
-            font-size: 22px;
-            font-weight: 700;
-            color: #2c3e50;
-        }
-
-
-        .page-title i {
-            color: #0d6efd;
-            margin-right: 8px;
-        }
-
-
-        /* Fetch Button */
-
-        .btn-fetch {
-            background: #0d6efd;
-            border: none;
-            color: white;
-            padding: 9px 18px;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-        }
-
-
-        .btn-fetch:hover {
-            background: #0b5ed7;
-            color: white;
-        }
-
-
-        .btn-fetch:disabled {
-            opacity: .7;
-            cursor: not-allowed;
-        }
-
-
-        .btn-fetch i {
-            margin-right: 6px;
-        }
-
-
-        /* Refresh Animation */
-
-        .btn-fetch.loading i {
-            animation: spin 1s linear infinite;
-        }
-
-
-        @@keyframes spin {
-
-            from {
-                transform: rotate(0deg);
-            }
-
-            to {
-                transform: rotate(360deg);
-            }
-
-        }
-
-
-        /* Status */
-
-        #statusMessage {
-            font-size: 14px;
-            margin-left: 10px;
-        }
-
-
-        #statusMessage.loading {
-            color: #0d6efd;
-        }
-
-
-        #statusMessage.success {
-            color: #198754;
-        }
-
-
-        #statusMessage.error {
-            color: #dc3545;
-        }
-
-
-        /* Search */
-
-        .search-box {
-            max-width: 350px;
-        }
-
-
-        .search-box i {
-            color: #6c757d;
-        }
-
-
-        /* Record Count */
-
-        .record-info {
-            font-size: 14px;
-            color: #6c757d;
-        }
-
+    .status-icon {
+        margin-right: 5px;
+    }
+     
+    .record-info {
+        font-size: 14px;
+        color: #6c757d;
+    }
 
         .record-info strong {
             color: #0d6efd;
+            font-size: 15px;
         }
 
+    .name-text {
+        color: #344054;
+        font-weight: 600;
+    }
 
-        /* Table */
+    /* =========================================================
+                                               MOBILE
+                                            ========================================================= */
 
-        .table-responsive {
-            overflow-x: auto;
-        }
+    .mobile-text {
+        color: #344054;
+    }
 
+    /* =========================================================
+                                               EMAIL
+                                            ========================================================= */
 
-        #dataTable {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-
-        #dataTable th,
-        #dataTable td {
-
-            padding: 12px;
-
-            text-align: left;
-
-            border-bottom: 1px solid #dee2e6;
-
-            font-size: 13px;
-
-            vertical-align: middle;
-
-            white-space: nowrap;
-
-        }
+    .email-text {
+        color: #0d6efd;
+    }
 
 
-        #dataTable thead th {
+    /* =========================================================
+                                               DATE
+                                            ========================================================= */
 
-            background: #2c3e50;
+    .date-text {
+        color: #667085;
+        font-size: 12px;
+    }
 
-            color: white;
+    /* =========================================================
+                                               LOCATION
+                                            ========================================================= */
 
-            font-weight: 600;
+    .location-badge {
+        display: inline-block;
+        background: #f0fdf4;
+        color: #198754;
+        border: 1px solid #d1e7dd;
+        padding: 5px 9px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
 
-            border: none;
+    .pagination {
+        margin-bottom: 0;
+    }
 
-        }
-
-
-        #dataTable tbody tr:hover {
-
-            background-color: #f8f9fa;
-
-        }
-
-
-        /* ID */
-
-        .id-badge {
-
-            background: #e9f2ff;
-
-            color: #0d6efd;
-
-            padding: 5px 9px;
-
-            border-radius: 5px;
-
-            font-weight: 600;
-
-        }
-
-
-        /* Action */
-
-        .btn-add-lead {
-
-            background: #198754;
-
-            color: white;
-
-            border: none;
-
-            padding: 6px 11px;
-
-            border-radius: 5px;
-
+        .pagination .page-link {
             font-size: 12px;
-
+            padding: 6px 11px;
+            color: #0d6efd;
         }
 
-
-        .btn-add-lead:hover {
-
-            background: #157347;
-
-            color: white;
-
+        .pagination .active .page-link {
+            background-color: #142c45;
+            border-color: #142d47;
+            color: #ffffff;
         }
 
-
-        /* Pagination */
-
-        .pagination {
-
-            margin-bottom: 0;
-
+        .pagination .page-link:hover {
+            background-color: #e9f2ff;
         }
 
-
-        .page-link {
-
-            font-size: 13px;
-
-        }
-
-
-        /* Empty */
-
-        .empty-row {
-
-            text-align: center !important;
-
-            padding: 35px !important;
-
-            color: #6c757d;
-
-        }
-
-
-        .empty-row i {
-
-            font-size: 30px;
-
-            margin-bottom: 10px;
-
-            display: block;
-
-        }
-
-
-        /* Mobile */
-
-        @@media (max-width: 768px) {
-
-            .page-title {
-
-                font-size: 18px;
-
-            }
-
-            .btn-fetch {
-
-                margin-top: 10px;
-
-            }
-
-            #statusMessage {
-
-                display: block;
-
-                margin: 8px 0 0 0;
-
-            }
-
-        }
-
-    </style>
-
-</head>
-
-
-<body>
-
-
-<div class="container-fluid py-4">
-
-
-    <div class="card main-card">
-
-
-        <!-- HEADER -->
-
-        <div class="card-header-custom">
-
-            <div class="row align-items-center">
-
-
-                <div class="col-md-6">
-
-                    <h2 class="page-title">
-
-                        <i class="fa fa-envelope-open-text"></i>
-
-                        Inquiry Management
-
-                    </h2>
-
-                </div>
-
-
-                <div class="col-md-6 text-md-end mt-3 mt-md-0">
-
-
-                    <button type="button"
-                            id="fetchButton"
-                            class="btn-fetch"
-                            onclick="fetchData()">
-
-                        <i class="fa fa-refresh"></i>
-
-                        Fetch Inquiries
-
-                    </button>
-
-
-                    <span id="statusMessage">
-
-                        Click the button to load data.
-
-                    </span>
-
-
-                </div>
-
-
+</style>
+
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h3><i class="fa fa-envelope-open-text"></i> Inquiry Management</h3>
+            <span class="page-subtitle">
+                Manage customer inquiries and convert them into leads
+            </span>
+        </div>
+    </div>
+    <div class="card-body">
+        <span id="statusMessage">
+            <i class="fa fa-circle-check status-icon"></i>
+            Records loaded
+        </span>
+
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <input type="text"
+                       id="searchInput"
+                       class="form-control search-box"
+                       placeholder="Search salesperson, name, mobile, email, city..." />
             </div>
-
+            <div class="col-md-8 d-flex justify-content-end align-items-center">
+                <span class="record-info">
+                    Total Records :
+                    <strong id="totalRecords">@Model.Count()</strong>
+                </span>
+            </div>
         </div>
 
+        <div class="table-responsive">
+            <table id="dataTable"
+                   class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+
+                        <th>Name</th>
+
+                        <th>Mobile</th>
+
+                        <th>Email</th>
+
+                        <th>Inquiry</th>
+
+                        <th>Date</th>
+
+                        <th>Location</th>
+
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+                <tbody id="tableBody">
+                    @{
+                        var count = 1;
+                    }
+                    @if (Model != null && Model.Any())
+                    {
+
+                        foreach (var inquiry in Model)
+                        {
+
+                            <tr class="inquiry-row">
+                                <td>
+                                    @count
+                                </td>
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(inquiry.Name))
+                                    {
+
+                                        <span class="name-text">
+
+                                            @inquiry.Name
+
+                                        </span>
+
+                                    }
+                                    else
+                                    {
+
+                                        <span class="text-muted">
+                                            -
+                                        </span>
+
+                                    }
+
+                                </td>
 
 
-        <!-- BODY -->
+                                <!-- =================================
+                                     MOBILE
+                                ================================== -->
 
-        <div class="card-body">
+                                <td>
 
+                                    @if (!string.IsNullOrWhiteSpace(inquiry.MobileNumber))
+                                    {
 
-            <!-- SEARCH / RECORD COUNT -->
+                                        <span class="mobile-text">
 
-            <div class="row mb-3 align-items-center">
+                                            @inquiry.MobileNumber
 
+                                        </span>
 
-                <div class="col-md-5">
+                                    }
+                                    else
+                                    {
 
+                                        <span class="text-muted">
+                                            -
+                                        </span>
 
-                    <div class="input-group search-box">
+                                    }
 
-
-                        <span class="input-group-text">
-
-                            <i class="fa fa-search"></i>
-
-                        </span>
-
-
-                        <input type="text"
-                               id="searchInput"
-                               class="form-control"
-                               placeholder="Search inquiry..." />
-
-                    </div>
+                                </td>
 
 
-                </div>
+                                <!-- =================================
+                                     EMAIL
+                                ================================== -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(inquiry.Email))
+                                    {
+
+                                        <span class="email-text">
+
+                                            @inquiry.Email
+
+                                        </span>
+
+                                    }
+                                    else
+                                    {
+
+                                        <span class="text-muted">
+                                            -
+                                        </span>
+
+                                    }
+
+                                </td>
 
 
-                <div class="col-md-7 text-md-end mt-3 mt-md-0">
+                                <!-- =================================
+                                     INQUIRY
+                                ================================== -->
+
+                                <td>
+                                    <div class="feedback-scroll">
+
+                                        @if (!string.IsNullOrWhiteSpace(inquiry.ServiceRequested))
+                                        {
+                                            @Html.Raw(
+                                            inquiry.ServiceRequested
+                                            .Replace("<br>", " ")
+                                            .Replace("<br/>", " ")
+                                            .Replace("<br />", " "))
+                                                                }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                No inquiry details
+                                            </span>
+                                        }
+                                    </div>
+                                </td>
 
 
-                    <span class="record-info">
+                                <!-- =================================
+                                     DATE
+                                ================================== -->
 
-                        Total Records :
+                                <td>
 
-                        <strong id="totalRecords">
+                                    @if (inquiry.CreatedAt != null)
+                                    {
 
-                            0
+                                        <span class="date-text">
 
-                        </strong>
+                                            @inquiry.CreatedAt
 
-                    </span>
+                                        </span>
 
+                                    }
+                                    else
+                                    {
 
-                </div>
+                                        <span class="text-muted">
+                                            -
+                                        </span>
 
+                                    }
 
-            </div>
-
-
-
-            <!-- TABLE -->
-
-            <div class="table-responsive">
-
-
-                <table id="dataTable"
-                       class="table table-hover">
+                                </td>
 
 
-                    <thead>
+                                <!-- =================================
+                                     LOCATION
+                                ================================== -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(inquiry.City))
+                                    {
+
+                                        <span class="location-badge">
+
+                                            <i class="fa fa-location-dot me-1"></i>
+
+                                            @inquiry.City
+
+                                        </span>
+
+                                    }
+                                    else
+                                    {
+
+                                        <span class="text-muted">
+                                            -
+                                        </span>
+
+                                    }
+
+                                </td>
+
+
+
+                                <td>
+                                    <select class="form-select form-select-sm sales-person-select"
+                                            data-inquiry-id="@inquiry.Id"
+                                            onchange="updateSalesPerson(this)">
+
+                                        <option value="">Select Sales Person</option>
+
+                                        @if (inquiry.SalesPersons != null && inquiry.SalesPersons.Any())
+                                        {
+                                            foreach (var employee in inquiry.SalesPersons)
+                                            {
+                                                if (employee.empcode == inquiry.SalesEmpCode)
+                                                {
+                                                    <option value="@employee.empcode" selected>
+                                                        @employee.name
+                                                        @if (!string.IsNullOrWhiteSpace(employee.empcode))
+                                                        {
+                                                            @: (@employee.empcode)
+                                                        }
+                                                    </option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@employee.empcode">
+                                                        @employee.name
+                                                        @if (!string.IsNullOrWhiteSpace(employee.empcode))
+                                                        {
+                                                            @: (@employee.empcode)
+                                                        }
+                                                    </option>
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <option value="" disabled>
+                                                No Sales Person Found
+                                            </option>
+                                        }
+
+                                    </select>
+                                </td>
+                            </tr>
+
+                            count++;
+                        }
+                    }
+                    else
+                    {
 
                         <tr>
 
-                            <th>ID</th>
-
-                            <th>Name</th>
-
-                            <th>Mobile</th>
-
-                            <th>Email</th>
-
-                            <th>Inquiry</th>
-
-                            <th>Date</th>
-
-                            <th>Remarks</th>
-
-                            <th>Location</th>
-
-                            <th>Created At</th>
-
-                            <th>IP Address</th>
-
-                            <th>Page URL</th>
-
-                            <th>Action</th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody id="tableBody">
-
-
-                        <tr>
-
-                            <td colspan="12"
+                            <td colspan="10"
                                 class="empty-row">
 
-                                <i class="fa fa-database"></i>
+                                <i class="fa fa-envelope-open"></i>
 
-                                No data loaded yet.
-
-                                <br />
-
-                                Click
-                                <strong>Fetch Inquiries</strong>
-                                to load records.
+                                No inquiry records found.
 
                             </td>
 
                         </tr>
 
+                    }
 
-                    </tbody>
+                </tbody>
 
+            </table>
+            <nav>
 
-                </table>
+                <ul class="pagination justify-content-center"
+                    id="pagination">
+                </ul>
 
-
-            </div>
-
-
-
-            <!-- PAGINATION -->
-
-            <div class="row mt-3">
-
-
-                <div class="col-md-12">
-
-                    <nav>
-
-                        <ul class="pagination justify-content-center"
-                            id="pagination">
-
-                        </ul>
-
-                    </nav>
-
-                </div>
-
-            </div>
-
-
+            </nav>
         </div>
 
     </div>
 
 </div>
 
-
-
 <script>
+        const rowsPerPage = 20;
 
+        let currentPage = 1;
 
-    // =====================================================
-    // API CONFIGURATION
-    // =====================================================
+        let allRows = [];
 
-    const API_URL =
-        'https://www.weblinkservices.net/career/inquiry/wlspl-api/api.php';
+        let filteredRows = [];
 
 
-    // IMPORTANT:
-    // Replace this with your actual PHP API token.
 
-    const API_TOKEN =
-        'your_super_secret_token_12345';
+        document.addEventListener(
+            "DOMContentLoaded",
+            function () {
 
+                allRows =
+                    Array.from(
+                        document.querySelectorAll(
+                            "#tableBody .inquiry-row"
+                        )
+                    );
 
 
-    // =====================================================
-    // VARIABLES
-    // =====================================================
-
-    let allRecords = [];
-
-    let filteredRecords = [];
-
-    let currentPage = 1;
-
-    const rowsPerPage = 10;
-
-
-
-    // =====================================================
-    // FETCH DATA
-    // =====================================================
-
-    async function fetchData() {
-
-
-        const tableBody =
-            document.getElementById('tableBody');
-
-
-        const statusMessage =
-            document.getElementById('statusMessage');
-
-
-        const fetchButton =
-            document.getElementById('fetchButton');
-
-
-        try {
-
-
-            // Loading
-
-            fetchButton.disabled = true;
-
-            fetchButton.classList.add('loading');
-
-
-            statusMessage.textContent =
-                'Loading data...';
-
-            statusMessage.className =
-                'loading';
-
-
-            tableBody.innerHTML = `
-
-                <tr>
-
-                    <td colspan="12"
-                        class="empty-row">
-
-                        <i class="fa fa-refresh fa-spin"></i>
-
-                        Fetching inquiries...
-
-                    </td>
-
-                </tr>
-
-            `;
-
-
-
-            console.log(
-                'Calling API:',
-                API_URL
-            );
-
-
-
-            // =====================================================
-            // API REQUEST
-            // =====================================================
-
-            const response = await fetch(
-
-                API_URL,
-
-                {
-
-                    method: 'GET',
-
-                    headers: {
-
-                        'API-Token':
-                            API_TOKEN,
-
-                        'Accept':
-                            'application/json'
-
-                    }
-
-                }
-
-            );
-
-
-
-            console.log(
-                'HTTP Status:',
-                response.status
-            );
-
-
-
-            // =====================================================
-            // READ RESPONSE
-            // =====================================================
-
-            const result =
-                await response.json();
-
-
-
-            console.log(
-                'API Response:',
-                result
-            );
-
-
-
-            // =====================================================
-            // CHECK ERROR
-            // =====================================================
-
-            if (
-                !response.ok ||
-                result.status === 'error'
-            ) {
-
-                throw new Error(
-
-                    result.message ||
-
-                    `HTTP Error: ${response.status}`
-
-                );
-
-            }
-
-
-
-            // =====================================================
-            // SUCCESS
-            // =====================================================
-
-            if (
-
-                result.status === 'success' &&
-
-                result.count > 0 &&
-
-                Array.isArray(result.data)
-
-            ) {
-
-
-                allRecords =
-                    result.data;
-
-
-                filteredRecords =
-                    [...allRecords];
-
-
-                currentPage = 1;
-
-
-                statusMessage.textContent =
-                    `Success! Loaded ${result.count} records.`;
-
-
-                statusMessage.className =
-                    'success';
+                filteredRows =
+                    [...allRows];
 
 
                 document.getElementById(
-                    'totalRecords'
+                    "totalRecords"
                 ).textContent =
-                    allRecords.length;
-
-
-                renderTable();
-
-
-            }
-
-
-            else {
-
-
-                allRecords = [];
-
-                filteredRecords = [];
+                    allRows.length;
 
 
                 document.getElementById(
-                    'totalRecords'
-                ).textContent = '0';
+                    "statusMessage"
+                ).innerHTML = `
 
+                    <i class="fa fa-circle-check status-icon"></i>
 
-                statusMessage.textContent =
-                    'Success, but no records found.';
-
-
-                statusMessage.className =
-                    'success';
-
-
-                tableBody.innerHTML = `
-
-                    <tr>
-
-                        <td colspan="12"
-                            class="empty-row">
-
-                            <i class="fa fa-inbox"></i>
-
-                            No inquiries found.
-
-                        </td>
-
-                    </tr>
+                    Loaded ${allRows.length} database records.
 
                 `;
 
 
+                renderTable();
+
+            }
+        );
+
+
+        document
+            .getElementById("searchInput")
+            .addEventListener(
+                "input",
+                function () {
+
+                    const searchValue =
+                        this.value
+                            .toLowerCase()
+                            .trim();
+
+
+                    filteredRows =
+                        allRows.filter(
+                            function (row) {
+
+                                return row.innerText
+                                    .toLowerCase()
+                                    .includes(
+                                        searchValue
+                                    );
+
+                            }
+                        );
+
+
+                    currentPage = 1;
+
+
+                    document.getElementById(
+                        "totalRecords"
+                    ).textContent =
+                        filteredRows.length;
+
+
+                    renderTable();
+
+                }
+            );
+
+
+        function renderTable() {
+
+            allRows.forEach(
+                function (row) {
+
+                    row.style.display =
+                        "none";
+
+                }
+            );
+
+
+            if (filteredRows.length === 0) {
+
+                showEmptyResult();
+
                 createPagination();
+
+                return;
 
             }
 
 
-        }
+            const startIndex =
+                (currentPage - 1) *
+                rowsPerPage;
 
 
-        catch (error) {
+            const endIndex =
+                startIndex +
+                rowsPerPage;
 
 
-            console.error(
-                'Error fetching data:',
-                error
+            const pageRows =
+                filteredRows.slice(
+                    startIndex,
+                    endIndex
+                );
+
+
+            pageRows.forEach(
+                function (row) {
+
+                    row.style.display =
+                        "";
+
+                }
             );
 
 
-            statusMessage.textContent =
-                `Error: ${error.message}`;
-
-
-            statusMessage.className =
-                'error';
-
-
-            tableBody.innerHTML = `
-
-                <tr>
-
-                    <td colspan="12"
-                        class="empty-row"
-                        style="color:#dc3545;">
-
-                        <i class="fa fa-triangle-exclamation"></i>
-
-                        Failed to load data.
-
-                        <br />
-
-                        Check browser Console (F12)
-                        for details.
-
-                    </td>
-
-                </tr>
-
-            `;
-
-
-            Swal.fire({
-
-                title: 'Error',
-
-                text: error.message,
-
-                icon: 'error',
-
-                confirmButtonColor: '#dc3545'
-
-            });
+            createPagination();
 
         }
 
+        function showEmptyResult() {
 
-        finally {
+            allRows.forEach(
+                function (row) {
 
+                    row.style.display =
+                        "none";
 
-            fetchButton.disabled = false;
-
-            fetchButton.classList.remove(
-                'loading'
+                }
             );
 
-        }
 
-    }
-
-
-
-    // =====================================================
-    // RENDER TABLE
-    // =====================================================
-
-    function renderTable() {
+            let emptyRow =
+                document.getElementById(
+                    "dynamicEmptyRow"
+                );
 
 
-        const tableBody =
-            document.getElementById('tableBody');
+            if (!emptyRow) {
+
+                emptyRow =
+                    document.createElement(
+                        "tr"
+                    );
+
+                emptyRow.id =
+                    "dynamicEmptyRow";
 
 
-        tableBody.innerHTML = '';
+                emptyRow.innerHTML = `
 
-
-        if (
-            filteredRecords.length === 0
-        ) {
-
-            tableBody.innerHTML = `
-
-                <tr>
-
-                    <td colspan="12"
+                    <td colspan="10"
                         class="empty-row">
 
                         <i class="fa fa-search"></i>
@@ -920,483 +610,307 @@
 
                     </td>
 
-                </tr>
-
-            `;
-
-
-            createPagination();
-
-            return;
-
-        }
-
-
-
-        const startIndex =
-            (currentPage - 1) *
-            rowsPerPage;
-
-
-        const endIndex =
-            startIndex +
-            rowsPerPage;
-
-
-        const pageRecords =
-            filteredRecords.slice(
-                startIndex,
-                endIndex
-            );
-
-
-
-        pageRecords.forEach(
-            function (row) {
-
-
-                const tr =
-                    document.createElement('tr');
-
-
-                tr.innerHTML = `
-
-                    <td>
-
-                        <span class="id-badge">
-
-                            ${escapeHTML(row.id)}
-
-                        </span>
-
-                    </td>
-
-
-                    <td>
-
-                        <strong>
-
-                            ${escapeHTML(row.i_name)}
-
-                        </strong>
-
-                    </td>
-
-
-                    <td>
-
-                        ${escapeHTML(row.mobile_no)}
-
-                    </td>
-
-
-                    <td>
-
-                        ${escapeHTML(row.mail)}
-
-                    </td>
-
-
-                    <td>
-
-                        ${escapeHTML(row.inq)}
-
-                    </td>
-
-
-                    <td>
-
-                        ${escapeHTML(row.date)}
-
-                    </td>
-
-
-                    <td>
-
-                        ${escapeHTML(row.remarks)}
-
-                    </td>
-
-
-                    <td>
-
-                        ${escapeHTML(row.location)}
-
-                    </td>
-
-
-                    <td>
-
-                        ${escapeHTML(row.created_at)}
-
-                    </td>
-
-
-                    <td>
-
-                        ${escapeHTML(row.ip_address)}
-
-                    </td>
-
-
-                    <td>
-
-                        ${escapeHTML(row.page_url)}
-
-                    </td>
-
-
-                    <td>
-
-                        <button type="button"
-                                class="btn-add-lead"
-                                onclick="addLead(${escapeHTML(row.id)})">
-
-                            <i class="fa fa-plus"></i>
-
-                            Add Lead
-
-                        </button>
-
-                    </td>
-
                 `;
 
 
-                tableBody.appendChild(tr);
+                document
+                    .getElementById("tableBody")
+                    .appendChild(emptyRow);
 
             }
-        );
 
+            emptyRow.style.display = "";
 
-        createPagination();
-
-    }
-
-
-
-    // =====================================================
-    // SEARCH
-    // =====================================================
-
-    document
-        .getElementById('searchInput')
-        .addEventListener(
-            'input',
-            function () {
-
-
-                const searchValue =
-                    this.value
-                        .toLowerCase()
-                        .trim();
-
-
-                filteredRecords =
-                    allRecords.filter(
-
-                        function (row) {
-
-                            return JSON
-                                .stringify(row)
-                                .toLowerCase()
-                                .includes(searchValue);
-
-                        }
-
-                    );
-
-
-                currentPage = 1;
-
-
-                document.getElementById(
-                    'totalRecords'
-                ).textContent =
-                    filteredRecords.length;
-
-
-                renderTable();
-
-            }
-        );
-
-
-
-    // =====================================================
-    // PAGINATION
-    // =====================================================
-
-    function createPagination() {
-
-
-        const pagination =
-            document.getElementById(
-                'pagination'
-            );
-
-
-        pagination.innerHTML = '';
-
-
-        const totalPages =
-            Math.ceil(
-                filteredRecords.length /
-                rowsPerPage
-            );
-
-
-        if (totalPages <= 1) {
-            return;
         }
 
 
+        // =====================================================
+        // PAGINATION
+        // =====================================================
 
-        // Previous
+        function createPagination() {
 
-        const previous =
-            document.createElement('li');
-
-
-        previous.className =
-            'page-item ' +
-            (currentPage === 1
-                ? 'disabled'
-                : '');
-
-
-        previous.innerHTML = `
-
-            <a class="page-link"
-               href="javascript:void(0);">
-
-                Previous
-
-            </a>
-
-        `;
-
-
-        previous.onclick =
-            function () {
-
-                if (currentPage > 1) {
-
-                    currentPage--;
-
-                    renderTable();
-
-                }
-
-            };
-
-
-        pagination.appendChild(
-            previous
-        );
-
-
-
-        // Page numbers
-
-        for (
-            let i = 1;
-            i <= totalPages;
-            i++
-        ) {
-
-
-            const li =
-                document.createElement('li');
-
-
-            li.className =
-                'page-item ' +
-                (
-                    i === currentPage
-                        ? 'active'
-                        : ''
+            const pagination =
+                document.getElementById(
+                    "pagination"
                 );
 
 
-            li.innerHTML = `
+            pagination.innerHTML = "";
+
+
+            const totalPages =
+                Math.ceil(
+                    filteredRows.length /
+                    rowsPerPage
+                );
+
+
+            if (totalPages <= 1) {
+
+                return;
+
+            }
+
+
+            // =================================================
+            // PREVIOUS
+            // =================================================
+
+            const previous =
+                document.createElement(
+                    "li"
+                );
+
+
+            previous.className =
+                "page-item " +
+                (
+                    currentPage === 1
+                        ? "disabled"
+                        : ""
+                );
+
+
+            previous.innerHTML = `
 
                 <a class="page-link"
                    href="javascript:void(0);">
 
-                    ${i}
+                    Previous
 
                 </a>
 
             `;
 
 
-            li.onclick =
+            previous.onclick =
                 function () {
 
-                    currentPage = i;
+                    if (
+                        currentPage > 1
+                    ) {
 
-                    renderTable();
+                        currentPage--;
+
+                        removeEmptyRow();
+
+                        renderTable();
+
+                    }
 
                 };
 
 
-            pagination.appendChild(li);
+            pagination.appendChild(
+                previous
+            );
+
+
+            // =================================================
+            // PAGE NUMBERS
+            // =================================================
+
+            for (
+                let i = 1;
+                i <= totalPages;
+                i++
+            ) {
+
+                const li =
+                    document.createElement(
+                        "li"
+                    );
+
+
+                li.className =
+                    "page-item " +
+                    (
+                        i === currentPage
+                            ? "active"
+                            : ""
+                    );
+
+
+                li.innerHTML = `
+
+                    <a class="page-link"
+                       href="javascript:void(0);">
+
+                        ${i}
+
+                    </a>
+
+                `;
+
+
+                li.onclick =
+                    function () {
+
+                        currentPage = i;
+
+                        removeEmptyRow();
+
+                        renderTable();
+
+                    };
+
+
+                pagination.appendChild(
+                    li
+                );
+
+            }
+
+
+            // =================================================
+            // NEXT
+            // =================================================
+
+            const next =
+                document.createElement(
+                    "li"
+                );
+
+
+            next.className =
+                "page-item " +
+                (
+                    currentPage === totalPages
+                        ? "disabled"
+                        : ""
+                );
+
+
+            next.innerHTML = `
+
+                <a class="page-link"
+                   href="javascript:void(0);">
+
+                    Next
+
+                </a>
+
+            `;
+
+
+            next.onclick =
+                function () {
+
+                    if (
+                        currentPage <
+                        totalPages
+                    ) {
+
+                        currentPage++;
+
+                        removeEmptyRow();
+
+                        renderTable();
+
+                    }
+
+                };
+
+
+            pagination.appendChild(
+                next
+            );
+
+        }
+
+
+        function removeEmptyRow() {
+
+            const emptyRow =
+                document.getElementById(
+                    "dynamicEmptyRow"
+                );
+
+
+            if (emptyRow) {
+
+                emptyRow.remove();
+
+            }
 
         }
 
 
 
-        // Next
+        function addLead(id) {
 
-        const next =
-            document.createElement('li');
+            if (!id) {
 
-
-        next.className =
-            'page-item ' +
-
-            (
-                currentPage === totalPages
-                    ? 'disabled'
-                    : ''
-            );
+                      showToast( "Inquiry ID not found.","error");
+                return;
+            }
+            window.location.href =
+                `/Lead/CreateOrEdit?inquiryId=${encodeURIComponent(id)}`;
+        }
 
 
-        next.innerHTML = `
+      $(document).ready(function () {
 
-            <a class="page-link"
-               href="javascript:void(0);">
+        $('.sales-person-select').select2({
+            placeholder: "Select Sales Person",
+            allowClear: true,
+            width: '220px'
+        });
 
-                Next
-
-            </a>
-
-        `;
-
-
-        next.onclick =
-            function () {
-
-                if (
-                    currentPage <
-                    totalPages
-                ) {
-
-                    currentPage++;
-
-                    renderTable();
-
-                }
-
-            };
+    });
 
 
-        pagination.appendChild(
-            next
-        );
+    function updateSalesPerson(select) {
 
-    }
+        const inquiryId = select.getAttribute("data-inquiry-id");
+        const salesEmpCode = select.value;
 
+        if (!inquiryId) {
 
-
-    // =====================================================
-    // ADD LEAD
-    // =====================================================
-
-    function addLead(id) {
-
-
-        const record =
-            allRecords.find(
-
-                function (item) {
-
-                    return String(item.id) ===
-                        String(id);
-
-                }
-
-            );
-
-
-        if (!record) {
-
-            Swal.fire({
-
-                title: 'Error',
-
-                text: 'Inquiry record not found.',
-
-                icon: 'error'
-
-            });
-
+           showToast(
+                    "Inquiry ID not found.",
+                    "error"
+                );
             return;
-
         }
 
-
-
-        // You can change this URL
-        // according to your LeadController.
-
-        window.location.href =
-            `/Lead/CreateOrEdit?inquiryId=${encodeURIComponent(id)}`;
-
-    }
-
-
-
-    // =====================================================
-    // ESCAPE HTML
-    // =====================================================
-
-    function escapeHTML(str) {
-
-
-        if (
-            str === null ||
-            str === undefined
-        ) {
-
-            return '';
-
+        if (!salesEmpCode) {
+            return;
         }
 
+        $.ajax({
+            url: '@Url.Action("AssignSalesPerson", "Lead")',
+            type: 'POST',
+            data: {
+                inquiryId: inquiryId,
+                salesEmpCode: salesEmpCode,
+                Action: "AssignToWebsite"
+            },
 
-        return String(str)
+            success: function (response) {
+                if (response.success) {
+                      showToast(
+                        "Sales person assigned successfully.",
+                        "success"
+                    );
 
-            .replace(
-                /&/g,
-                '&amp;'
-            )
+                } else {
+                      showToast(
+                        response.message || "Unable to assign sales person.",
+                        "error"
+                    );
 
-            .replace(
-                /</g,
-                '&lt;'
-            )
+                }
+            },
 
-            .replace(
-                />/g,
-                '&gt;'
-            )
+            error: function (xhr) {
 
-            .replace(
-                /"/g,
-                '&quot;'
-            )
-
-            .replace(
-                /'/g,
-                '&#039;'
-            );
-
+                  showToast(
+                       "Something went wrong while assigning the sales person.",
+                        "error"
+                    );
+            }
+        });
     }
-
 </script>
-
-
-</body>
-
-</html>

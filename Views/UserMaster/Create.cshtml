@@ -23,26 +23,38 @@
         }
 
     .btn {
-        border-radius: 10px;
-        padding: 10px 25px;
-        font-weight: 500;
+        border-radius: 8px;
+        height: 43px;
+        font-weight: 600;
+        transition: .3s;
     }
 
     .btn-success {
         background: #198754;
+        border: none;
     }
 
-    .btn {
-        width: 100%;
-        margin-bottom: 10px;
+        .btn-success:hover {
+            background: #157347;
+            transform: translateY(-2px);
+        }
+
+    .btn-danger {
+        background: #dc3545;
+        border: none;
     }
+
+        .btn-danger:hover {
+            background: #bb2d3b;
+            transform: translateY(-2px);
+        }
+
 </style>
 
 <div class="card">
     <div class="card-header">
         <h3>
-            <i class="fa fa-user-plus"></i>
-            Create New User
+            <i class="fa fa-user-plus"></i> Create New User
         </h3>
     </div>
     <div class="card-body">
@@ -327,16 +339,16 @@
             <div class="row justify-content-center mt-3">
 
                 <div class="col-md-3 text-end">
-                    <button type="submit" class="btn btn-success btn-sm px-3">
-                        <i class="fa fa-save me-1"></i>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fa fa-save"></i>
                         Save User
                     </button>
                 </div>
 
                 <div class="col-md-3 text-start">
                     <a asp-action="Index"
-                       class="btn btn-secondary btn-sm px-3">
-                        <i class="fa fa-arrow-left me-1"></i>
+                       class="btn btn-danger">
+                        <i class="fa fa-arrow-left"></i>
                         Back
                     </a>
                 </div>

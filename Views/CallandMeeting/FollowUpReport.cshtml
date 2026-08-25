@@ -4,136 +4,70 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
 <style type="text/css">
-    .page-title {
-        margin: 0;
-        color: #0d6efd;
-        font-size: 22px;
-        font-weight: 700;
+    /* Filter Toggle Button */
+    .btn-filter-toggle {
+        background: #fff;
+        border: 1px solid #ddd;
+        color: #333;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s ease;
     }
 
-        .page-title i {
-            margin-right: 8px;
+        .btn-filter-toggle:hover {
+            background: #f5f5f5;
+            border-color: #bbb;
+        }
+
+    /* Filter Card */
+    #filterCard {
+        overflow: hidden;
+        max-height: 1000px;
+        opacity: 1;
+        transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.35s ease;
+    }
+
+        /* Collapsed */
+        #filterCard.filter-collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin: 0;
+            padding-top: 0;
+            padding-bottom: 0;
         }
 
 
-    .search-box {
-        max-width: 350px;
+    .table tbody td {
+        font-size: 15px;
+        vertical-align: middle;
     }
 
-    .record-info {
-        font-size: 14px;
-        color: #6c757d;
+    .table tbody tr:hover {
+        background: #f4f8ff;
     }
 
-    .table {
+    .pagination {
         margin-bottom: 0;
     }
 
-        .table thead th {
-            background: #0d6efd;
-            color: white;
-            font-size: 15px;
-            font-weight: 700;
-            white-space: nowrap;
-            vertical-align: middle;
+        .pagination .page-link {
+            font-size: 12px;
+            padding: 6px 11px;
+            color: #0d6efd;
         }
 
-        .table tbody td {
-            font-size: 15px;
-            vertical-align: middle;
-            white-space: nowrap;
+        .pagination .active .page-link {
+            background-color: #142c45;
+            border-color: #142d47;
+            color: #ffffff;
         }
 
-        .table tbody tr:hover {
-            background: #f4f8ff;
+        .pagination .page-link:hover {
+            background-color: #e9f2ff;
         }
-
-
-    /* ===== Enhanced Table Styling (borders & structure only, no color changes) ===== */
-    #companyTable {
-        border-collapse: separate;
-        border-spacing: 0;
-        border-radius: 10px;
-        overflow: hidden;
-        border: 1px solid #dee2e6;
-    }
-
-        #companyTable thead th {
-            border: none;
-            border-right: 1px solid rgba(255, 255, 255, 0.25);
-            padding: 12px 14px;
-            letter-spacing: 0.3px;
-        }
-
-            #companyTable thead th:last-child {
-                border-right: none;
-            }
-
-        #companyTable tbody td {
-            border: none;
-            border-right: 1px solid #edf0f3;
-            border-bottom: 1px solid #edf0f3;
-            padding: 12px 14px;
-        }
-
-            #companyTable tbody td:last-child {
-                border-right: none;
-            }
-
-        #companyTable tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        #companyTable tbody tr {
-            transition: background-color 0.15s ease-in-out;
-        }
-
-            /* Zebra striping using existing bg tone, no new colors */
-            #companyTable tbody tr:nth-child(even) {
-                background-color: #fafbfc;
-            }
-
-    .table-responsive {
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,.05);
-    }
-
-    /* Slight emphasis on the toggle icon column */
-    #companyTable tbody td:first-child {
-        text-align: center;
-        width: 40px;
-    }
-
-    #companyTable tbody td:nth-child(2) {
-        text-align: center;
-        width: 60px;
-        font-weight: 600;
-        color: #6c757d;
-    }
-
-    /* Pagination polish */
-    .pagination .page-link {
-        border-radius: 6px !important;
-        margin: 0 3px;
-        border: 1px solid #dee2e6;
-    }
-
-    .pagination .page-item.active .page-link {
-        border-color: #0d6efd;
-    }
-
-    /* Card body breathing room */
-    .card-body {
-        padding: 10px;
-    }
 
     /* Filter section separation */
     .row.mb-3.g-2 {
@@ -152,7 +86,7 @@
     }
 
     .headingcls {
-        background-color: #0d6efd;
+        background: linear-gradient( 314deg, #23262a, #1a4373);
     }
 
     .reqcls {
@@ -189,8 +123,7 @@
         padding: 10px 12px !important;
         border-top: none !important;
     }
-</style>
-<style>
+
     /* ── Trigger ── */
     .select2-container--premium .select2-selection--single {
         height: 50px;
@@ -329,11 +262,6 @@
     .select2-container--premium .select2-results__option--disabled {
         color: #ccc;
     }
-</style>
-<style>
-    /* ================================
-               FILTER CARD
-            ================================ */
 
     .filter-card {
         background: #ffffff;
@@ -341,10 +269,9 @@
         border-radius: 14px;
         box-shadow: 0 4px 18px rgba(30, 41, 59, 0.06);
         overflow: visible;
-        margin-bottom: 20px;
+        margin-bottom: 10px;
+        padding: 5px 5px 5px 5px;
     }
-
-    /* Labels */
 
     .modern-label {
         display: flex;
@@ -360,8 +287,6 @@
             color: #6b7cff;
             font-size: 13px;
         }
-
-    /* Inputs */
 
     .modern-control {
         height: 38px !important;
@@ -389,15 +314,10 @@
             cursor: not-allowed;
         }
 
-    /* Date icon */
 
     input[type="date"] {
         cursor: pointer;
     }
-
-    /* ================================
-               SELECT2
-            ================================ */
 
     .select2-container {
         width: 100% !important;
@@ -449,7 +369,7 @@
     .select2-results__option {
         padding: 9px 12px !important;
         font-size: 13px;
-        color : black;
+        color: black;
     }
 
     .select2-results__option--highlighted {
@@ -463,10 +383,6 @@
         margin-right: 8px;
     }
 
-    /* ================================
-               SEARCH FOOTER
-            ================================ */
-
     .filter-footer {
         display: flex;
         align-items: center;
@@ -475,7 +391,6 @@
         border-top: 1px solid #edf0f4;
     }
 
-    /* Search */
 
     .search-wrapper {
         position: relative;
@@ -514,8 +429,6 @@
             box-shadow: 0 0 0 3px rgba(107, 124, 255, .10);
         }
 
-    /* Buttons */
-
     .filter-actions {
         display: flex;
         gap: 7px;
@@ -549,11 +462,11 @@
         border: 1px solid #2563eb !important;
     }
 
-    .btn-search:hover {
-        background: linear-gradient(135deg, #2563eb, #4f46e5);
-        color: #fff;
-        box-shadow: 0 3px 8px rgba(37, 99, 235, .20);
-    }
+        .btn-search:hover {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            color: #fff;
+            box-shadow: 0 3px 8px rgba(37, 99, 235, .20);
+        }
 
 
     .btn-reset {
@@ -562,12 +475,10 @@
         border: 1px solid #fd001f !important;
     }
 
-        .btn-reset:hover { 
-            background:linear-gradient(135deg, #f90000, #db688a);
+        .btn-reset:hover {
+            background: linear-gradient(135deg, #f90000, #db688a);
             color: whitesmoke;
         }
-
-    /* Record count */
 
     .record-info {
         margin-left: auto;
@@ -592,16 +503,7 @@
             font-size: 12px;
         }
 
-    /* ================================
-               RESPONSIVE
-            ================================ */
-
     @@media (max-width: 768px) {
-
-
-        .filter-body {
-            padding: 14px;
-        }
 
         .filter-footer {
             flex-wrap: wrap;
@@ -618,427 +520,418 @@
     }
 </style>
 
-<div class="container-fluid">
-    <div class="card">
-        <div class="card-header">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h2 class="page-title">
-                        <i class="fa-solid fa-phone-volume"></i>Call & Meeting Report
-                    </h2>
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h3>
+            <i class="fa-solid fa-phone-volume"></i> Call & Meeting Report
+        </h3>
+        <button type="button"
+                id="btnToggleFilter"
+                class="btn btn-filter-toggle">
+            <i class="fa-solid fa-filter"></i>
+            <span>Show Filters</span>
+        </button>
+    </div>
+    <div class="card-body">
+        <div class="filter-card" id="filterCard">
+            <div class="row g-3">
+                <!-- Type -->
+                <div class="col-xl-3 col-lg-3 col-md-6">
+                    <label class="modern-label">
+                        <i class="bi bi-arrow-repeat"></i>
+                        Type of Update
+                    </label>
+
+                    <select id="ddlfollowup" class="form-control modern-control">
+                        <option value="">Select Type of Update</option>
+                        <option value="Call">Call</option>
+                        <option value="Meeting">Meeting</option>
+                    </select>
                 </div>
+
+                <!-- Status -->
+                <div class="col-xl-3 col-lg-3 col-md-6">
+                    <label class="modern-label">
+                        <i class="bi bi-check2-circle"></i>
+                        Status of Update
+                    </label>
+
+                    <select id="ddlfollowupStatus"
+                            class="form-control modern-control"
+                            disabled>
+                        <option value="">Select Status of Update</option>
+                        <option value="Not interested">Not interested</option>
+                        <option value="Ringing">Ringing</option>
+                        <option value="Follow-Up">Follow-Up</option>
+                        <option value="Busy">Busy</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                </div>
+
+                <!-- Sales Manager -->
+                <div class="col-xl-3 col-lg-3 col-md-6">
+                    <label class="modern-label">
+                        <i class="bi bi-person-badge"></i>
+                        Sales Manager
+                    </label>
+
+                    <select id="ddlTeamuser" class="form-control">
+                        <option value="">Select Sales Manager</option>
+
+                        @if (ViewBag.SalesManagers != null)
+                        {
+                            string currentEmpCode = Context.Session.GetString("EmpCode");
+
+                            foreach (var mgr in (IEnumerable<dynamic>)ViewBag.SalesManagers)
+                            {
+                                string userCode = mgr.UserCode;
+
+                                <option value="@userCode"
+                                        selected="@(userCode == currentEmpCode ? "selected" : null)">
+                                    @mgr.FullName
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <!-- Meeting With -->
+                <div class="col-xl-3 col-lg-3 col-md-6">
+                    <label class="modern-label">
+                        <i class="bi bi-people"></i>
+                        Meeting With Manager
+                    </label>
+
+                    <select id="ddlmeetingwith" class="form-control">
+                        <option value="">Select Manager</option>
+                        <option value="1">Individual</option>
+
+                        @if (ViewBag.MeetingWithManagers != null)
+                        {
+                            foreach (var mgr in (IEnumerable<dynamic>)ViewBag.MeetingWithManagers)
+                            {
+                                <option value="@mgr.UserCode">
+                                    @mgr.FullName
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+            </div>
+            <div class="row g-3">
+
+                <!-- From Date -->
+                <div class="col-xl-3 col-lg-3 col-md-6">
+                    <label class="modern-label">
+                        <i class="bi bi-calendar3"></i>
+                        From Date
+                    </label>
+
+                    <input type="date"
+                           id="txtfromdate"
+                           class="form-control modern-control" />
+                </div>
+
+                <!-- To Date -->
+                <div class="col-xl-3 col-lg-3 col-md-6">
+                    <label class="modern-label">
+                        <i class="bi bi-calendar3"></i>
+                        To Date
+                    </label>
+
+                    <input type="date"
+                           id="txttodate"
+                           class="form-control modern-control" />
+                </div>
+
+                <!-- Follow Up -->
+                <div class="col-xl-3 col-lg-3 col-md-6">
+                    <label class="modern-label">
+                        <i class="bi bi-calendar-check"></i>
+                        Follow-Up Date
+                    </label>
+
+                    <input type="date"
+                           id="txtfollowupdate"
+                           class="form-control modern-control" />
+                </div>
+
+                <!-- Area -->
+                <div class="col-xl-3 col-lg-3 col-md-6">
+                    <label class="modern-label">
+                        <i class="bi bi-geo-alt"></i>
+                        Area
+                    </label>
+
+                    <input type="text"
+                           id="txtarea"
+                           class="form-control modern-control"
+                           placeholder="Enter area" />
+                </div>
+
+            </div>
+            <div class="filter-footer">
+
+                <div class="search-wrapper">
+                    <i class="bi bi-search"></i>
+
+                    <input type="text"
+                           id="searchInput"
+                           class="search-input"
+                           placeholder="Search company name..." />
+                </div>
+
+                <div class="filter-actions">
+
+                    <button type="button"
+                            id="btnSearchData"
+                            class="btn btn-search">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+
+                    <button type="button"
+                            id="btnresetfilter"
+                            class="btn btn-reset">
+                        <i class="fa-solid fa-arrow-rotate-left"></i>
+                    </button>
+
+                </div>
+
+                <div class="record-info">
+                    <span>
+                        Total Records
+                    </span>
+
+                    <strong id="totalRecords">
+                        @Model.Count()
+                    </strong>
+                </div>
+
             </div>
         </div>
-        <div class="card-body">
-            <div class="filter-card">
 
-                <div class="filter-body">
-                    <!-- Row 1 -->
-                    <div class="row g-3">
-                        <!-- Type -->
-                        <div class="col-xl-3 col-lg-3 col-md-6">
-                            <label class="modern-label">
-                                <i class="bi bi-arrow-repeat"></i>
-                                Type of Update
-                            </label>
-
-                            <select id="ddlfollowup" class="form-control modern-control">
-                                <option value="">Select Type of Update</option>
-                                <option value="Call">Call</option>
-                                <option value="Meeting">Meeting</option>
-                            </select>
-                        </div>
-
-                        <!-- Status -->
-                        <div class="col-xl-3 col-lg-3 col-md-6">
-                            <label class="modern-label">
-                                <i class="bi bi-check2-circle"></i>
-                                Status of Update
-                            </label>
-
-                            <select id="ddlfollowupStatus"
-                                    class="form-control modern-control"
-                                    disabled>
-                                <option value="">Select Status of Update</option>
-                                <option value="Not interested">Not interested</option>
-                                <option value="Ringing">Ringing</option>
-                                <option value="Follow-Up">Follow-Up</option>
-                                <option value="Busy">Busy</option>
-                                <option value="Closed">Closed</option>
-                            </select>
-                        </div>
-
-                        <!-- Sales Manager -->
-                        <div class="col-xl-3 col-lg-3 col-md-6">
-                            <label class="modern-label">
-                                <i class="bi bi-person-badge"></i>
-                                Sales Manager
-                            </label>
-
-                            <select id="ddlTeamuser" class="form-control">
-                                <option value="">Select Sales Manager</option>
-
-                                @if (ViewBag.SalesManagers != null)
-                                {
-                                    string currentEmpCode = Context.Session.GetString("EmpCode");
-
-                                    foreach (var mgr in (IEnumerable<dynamic>)ViewBag.SalesManagers)
-                                    {
-                                        string userCode = mgr.UserCode;
-
-                                        <option value="@userCode"
-                                                selected="@(userCode == currentEmpCode ? "selected" : null)">
-                                            @mgr.FullName
-                                        </option>
-                                    }
-                                }
-                            </select>
-                        </div>
-
-                        <!-- Meeting With -->
-                        <div class="col-xl-3 col-lg-3 col-md-6">
-                            <label class="modern-label">
-                                <i class="bi bi-people"></i>
-                                Meeting With Manager
-                            </label>
-
-                            <select id="ddlmeetingwith" class="form-control">
-                                <option value="">Select Manager</option>
-                                <option value="1">Individual</option>
-
-                                @if (ViewBag.MeetingWithManagers != null)
-                                {
-                                    foreach (var mgr in (IEnumerable<dynamic>)ViewBag.MeetingWithManagers)
-                                    {
-                                        <option value="@mgr.UserCode">
-                                            @mgr.FullName
-                                        </option>
-                                    }
-                                }
-                            </select>
-                        </div>
-
-                    </div>
-
-                    <!-- Row 2 -->
-                    <div class="row g-3 mt-1">
-
-                        <!-- From Date -->
-                        <div class="col-xl-3 col-lg-3 col-md-6">
-                            <label class="modern-label">
-                                <i class="bi bi-calendar3"></i>
-                                From Date
-                            </label>
-
-                            <input type="date"
-                                   id="txtfromdate"
-                                   class="form-control modern-control" />
-                        </div>
-
-                        <!-- To Date -->
-                        <div class="col-xl-3 col-lg-3 col-md-6">
-                            <label class="modern-label">
-                                <i class="bi bi-calendar3"></i>
-                                To Date
-                            </label>
-
-                            <input type="date"
-                                   id="txttodate"
-                                   class="form-control modern-control" />
-                        </div>
-
-                        <!-- Follow Up -->
-                        <div class="col-xl-3 col-lg-3 col-md-6">
-                            <label class="modern-label">
-                                <i class="bi bi-calendar-check"></i>
-                                Follow-Up Date
-                            </label>
-
-                            <input type="date"
-                                   id="txtfollowupdate"
-                                   class="form-control modern-control" />
-                        </div>
-
-                        <!-- Area -->
-                        <div class="col-xl-3 col-lg-3 col-md-6">
-                            <label class="modern-label">
-                                <i class="bi bi-geo-alt"></i>
-                                Area
-                            </label>
-
-                            <input type="text"
-                                   id="txtarea"
-                                   class="form-control modern-control"
-                                   placeholder="Enter area" />
-                        </div>
-
-                    </div>
-
-                    <!-- Bottom Search -->
-                    <div class="filter-footer mt-2">
-
-                        <div class="search-wrapper">
-                            <i class="bi bi-search"></i>
-
-                            <input type="text"
-                                   id="searchInput"
-                                   class="search-input"
-                                   placeholder="Search company name..." />
-                        </div>
-
-                        <div class="filter-actions">
-
-                            <button type="button"
-                                    id="btnSearchData"
-                                    class="btn btn-search">
-                                <i class="bi bi-search"></i>
-                            </button>
-
-                            <button type="button"
-                                    id="btnresetfilter"
-                                    class="btn btn-reset">
-                                <i class="bi bi-arrow-counterclockwise"></i>
-                            </button>
-
-                        </div>
-
-                        <div class="record-info">
-                            <span>
-                                Total Records
-                            </span>
-
-                            <strong id="totalRecords">
-                                @Model.Count()
-                            </strong>
-                        </div>
-
-                    </div>
-
-                </div>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover" id="companyTable">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>Sr.No.</th>
-                            <th>Company Name</th>
-                            <th>Created Date</th>
-                            <th>Status of Update</th>
-                            <th>Follow-up Date</th>
-                            <th>Close Follow-up</th>
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="companyTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Sr.No.</th>
+                        <th>Company Name</th>
+                        <th>Created Date</th>
+                        <th>Status of Update</th>
+                        <th>Follow-up Date</th>
+                        <th>Close Follow-up</th>
+                    </tr>
+                </thead>
+                <tbody id="companyTableBody">
+                    @{
+                        int Count = 0;
+                    }
+                    @foreach (var callandMeet in Model)
+                    {
+                        Count++;
+                        <tr data-feedback="@callandMeet.FeedBack" data-remarks="@callandMeet.AdminRemark">
+                            <td><i class="fa fa-plus toggle-row" style="font-weight: bolder;cursor:pointer;color: #ff0707;"></i></td>
+                            <td>@Count</td>
+                            <td>@callandMeet.CompanyName</td>
+                            <td>@callandMeet.CommentDateTime?.ToString("dd-MM-yyyy")</td>
+                            <td><strong>@callandMeet.CallUpdateStatus</strong></td>
+                            <td>@(callandMeet?.FollowDate?.ToString("dd-MM-yyyy") ?? "-")</td>
+                            <td>
+                                <a href="javascript:void(0)" style="font-weight: 700!important;text-decoration: none !important;color: #074993;" class="open-company-modal" data-id="@callandMeet.Id">Close Follow-up</a>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody id="companyTableBody">
-                        @{
-                            int Count = 0;
-                        }
-                        @foreach (var callandMeet in Model)
-                        {
-                            Count++;
-                            <tr data-feedback="@callandMeet.FeedBack" data-remarks="@callandMeet.AdminRemark">
-                                <td><i class="fa fa-plus toggle-row" style="font-weight: bolder;cursor:pointer;color: #ff0707;"></i></td>
-                                <td>@Count</td>
-                                <td>@callandMeet.CompanyName</td>
-                                <td>@callandMeet.CommentDateTime?.ToString("dd-MM-yyyy")</td>
-                                <td><strong>@callandMeet.CallUpdateStatus</strong></td>
-                                <td>@(callandMeet?.FollowDate?.ToString("dd-MM-yyyy") ?? "-")</td>
-                                <td>
-                                    <a href="javascript:void(0)" style="color: rgba(var(--bs-link-color-rgb), var(--bs-link-opacity, 1))!important;font-weight: 700!important;text-decoration: none !important;" class="open-company-modal" data-id="@callandMeet.Id">Close Follow-up</a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-                <nav>
-                    <ul class="pagination justify-content-center mt-4" id="pagination"></ul>
-                </nav>
-            </div>
+                    }
+                </tbody>
+            </table>
+            <nav>
+                <ul class="pagination justify-content-center mt-4" id="pagination"></ul>
+            </nav>
+        </div>
 
-            <div class="modal fade" id="companyDetailModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-                <div class="modal-dialog modal-xl modal-dialog-scrollable">
-                    <div class="modal-content modelprofile1">
-                        <div class="modal-header headingcls d-flex align-items-center">
-                            <h4 class="modal-title mb-0">Company Detail</h4>
-                            <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row container p-0 m-0">
-                                <div class="profilemodel2">
-                                    <div class="row ms-2">
-                                        <div class="col-md-7" style="background-color:#f9f7f7">
-                                            <div class="row p-1 bg-light">
-                                                <div class="col-md-4"><b>Company Code :</b></div>
-                                                <div class="col-md-8 lblpopup" id="lblccode" name="Ccode"></div>
-                                                <input type="hidden" id="commenthistoryId" name="Id" />
-                                            </div>
-                                            <div class="row p-1 bg-light">
-                                                <div class="col-md-4"><b>Company Name :</b></div>
-                                                <div class="col-md-8 lblpopup" id="lblcname" name="CompanyName"></div>
-                                            </div>
-                                            <div class="row p-1 bg-light">
-                                                <div class="col-md-4"><b>Owner Name :</b></div>
-                                                <div class="col-md-8 lblpopup" id="lbloname" name="PersonName"></div>
-                                            </div>
-                                            <div class="row p-1 bg-light">
-                                                <div class="col-md-4"><b>Email :</b></div>
-                                                <div class="col-md-8 lblpopup" id="lblemail" name="ClientMail"></div>
-                                            </div>
-                                            <div class="row p-1 bg-light">
-                                                <div class="col-md-4"><b>Mobile :</b></div>
-                                                <div class="col-md-8 lblpopup"><div class="col-md-8 lblpopup" id="lblmobile" name="ContactNo"></div></div>
-                                            </div>
+        <div class="modal fade" id="companyDetailModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content modelprofile1">
+                    <div class="modal-header headingcls d-flex align-items-center">
+                        <h4 class="modal-title mb-0">Company Detail</h4>
+                        <button type="button" class="btn btn-danger ms-auto" data-bs-dismiss="modal"><i class="fa-notdog-duo fa-solid fa-xmark"></i></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row container p-0 m-0">
+                            <div class="profilemodel2">
+                                <div class="row ms-2">
+                                    <div class="col-md-7">
+                                        <div class="row p-1 bg-light">
+                                            <div class="col-md-4"><b>Company Code :</b></div>
+                                            <div class="col-md-8 lblpopup" id="lblccode" name="Ccode"></div>
+                                            <input type="hidden" id="commenthistoryId" name="Id" />
                                         </div>
-                                        <div class="col-md-5">
-                                            <img id="Imgvisitingcard" src="/assets/images/wlspl_main_logo.png" class="img-fluid" style="height:165px;" />
+                                        <div class="row p-1 bg-light">
+                                            <div class="col-md-4"><b>Company Name :</b></div>
+                                            <div class="col-md-8 lblpopup" id="lblcname" name="CompanyName"></div>
+                                        </div>
+                                        <div class="row p-1 bg-light">
+                                            <div class="col-md-4"><b>Owner Name :</b></div>
+                                            <div class="col-md-8 lblpopup" id="lbloname" name="PersonName"></div>
+                                        </div>
+                                        <div class="row p-1 bg-light">
+                                            <div class="col-md-4"><b>Email :</b></div>
+                                            <div class="col-md-8 lblpopup" id="lblemail" name="ClientMail"></div>
+                                        </div>
+                                        <div class="row p-1 bg-light">
+                                            <div class="col-md-4"><b>Mobile :</b></div>
+                                            <div class="col-md-8 lblpopup"><div class="col-md-8 lblpopup" id="lblmobile" name="ContactNo"></div></div>
                                         </div>
                                     </div>
-                                    <br />
-                                    <div class="row ms-2">
-                                        <div class="col-md-2"><b>Sales Manager :</b></div>
-                                        <div class="col-md-4"><select id="ddlregbypopup" class="form-control" name="SessionName"></select></div>
-                                        <div class="col-md-2"><button type="button" id="btnChange" class="btn btn-danger mt-0" onclick="ChangeCompanyUser()">Change</button></div>
+                                    <div class="col-md-5">
+                                        <img id="Imgvisitingcard" src="/assets/images/wlspl_main_logo.png" class="img-fluid" style="height:165px;" />
                                     </div>
-                                    <br />
-                                    <div class="row ms-2">
-                                        <textarea id="txtcomment" name="FeedBack" class="form-control" placeholder="Write Something..." rows="3"></textarea>
+                                </div>
+                                <br />
+                                <div class="row ms-2">
+                                    <div class="col-md-2"><b>Sales Manager :</b></div>
+                                    <div class="col-md-4"><select id="ddlregbypopup" class="form-control" name="SessionName"></select></div>
+                                    <div class="col-md-2"><button type="button" id="btnChange" class="btn btn-danger mt-0" onclick="ChangeCompanyUser()">Change</button></div>
+                                </div>
+                                <br />
+                                <div class="row ms-2">
+                                    <textarea id="txtcomment" name="FeedBack" class="form-control" placeholder="Write Something..." rows="3"></textarea>
+                                </div>
+                                <br />
+                                <div class="row ms-2">
+                                    <input type="text" id="txtaddemail" name="Area" class="form-control" placeholder="Add additional Mail Id's separated with comma (,)" />
+                                </div>
+                                <br />
+                                <div class="row ms-2 p-1">
+                                    <div class="col-md-2">Type of Update <i class="reqcls">*&nbsp;</i></div>
+                                    <div class="col-md-4">
+                                        <select id="ddlupdatefor" name="UpdateFor" class="form-control required-field" onchange="CheckUpdateFor()">
+                                            <option>--Select--</option>
+                                            <option value="Call">Call</option>
+                                            <option value="Meeting">Meeting</option>
+                                        </select>
+                                        <span class="text-danger validation-error"></span>
                                     </div>
-                                    <br />
-                                    <div class="row ms-2">
-                                        <input type="text" id="txtaddemail" name="Area" class="form-control" placeholder="Add additional Mail Id's separated with comma (,)" />
+                                    <div class="col-md-2">Type<i class="reqcls">*&nbsp;</i></div>
+                                    <div class="col-md-4">
+                                        <select id="ddltype" name="Type" class="form-control required-field">
+                                            <option value="">- Select Type -</option>
+                                            <option value="Fresh">Fresh</option>
+                                            <option value="Followup">Followup</option>
+                                            <option value="Services">Services</option>
+                                        </select>
+                                        <span class="text-danger validation-error"></span>
                                     </div>
-                                    <br />
-                                    <div class="row ms-2 p-1">
-                                        <div class="col-md-2">Type of Update <i class="reqcls">*&nbsp;</i></div>
-                                        <div class="col-md-4">
-                                            <select id="ddlupdatefor" name="UpdateFor" class="form-control required-field" onchange="CheckUpdateFor()">
-                                                <option>--Select--</option>
-                                                <option value="Call">Call</option>
-                                                <option value="Meeting">Meeting</option>
-                                            </select>
-                                            <span class="text-danger validation-error"></span>
-                                        </div>
-                                        <div class="col-md-2">Type<i class="reqcls">*&nbsp;</i></div>
-                                        <div class="col-md-4">
-                                            <select id="ddltype" name="Type" class="form-control required-field">
-                                                <option value="">- Select Type -</option>
-                                                <option value="Fresh">Fresh</option>
-                                                <option value="Followup">Followup</option>
-                                                <option value="Services">Services</option>
-                                            </select>
-                                            <span class="text-danger validation-error"></span>
-                                        </div>
+                                </div>
+                                <div class="row ms-2 p-1">
+                                    <div class="col-md-2" id="lblfolldate">Follow-Up Date<i class="reqcls">*&nbsp;</i></div>
+                                    <div class="col-md-4">
+                                        <input type="date" id="txtfollowupdatee" name="FollowDate" class="form-control required-field" />
+                                        <span class="text-danger validation-error"></span>
                                     </div>
-                                    <div class="row ms-2 p-1">
-                                        <div class="col-md-2" id="lblfolldate">Follow-Up Date<i class="reqcls">*&nbsp;</i></div>
-                                        <div class="col-md-4">
-                                            <input type="date" id="txtfollowupdatee" name="FollowDate" class="form-control required-field" />
-                                            <span class="text-danger validation-error"></span>
-                                        </div>
+                                </div>
+                                <div class="row ms-2 p-1" id="DivCallUpdate">
+                                    <div class="col-md-2">Call Status<i class="reqcls">*&nbsp;</i></div>
+                                    <div class="col-md-4">
+                                        <select id="ddlcallstatus" name="CallUpdateStatus" class="form-control required-field" onchange="CheckCallMeetingUpdate()">
+                                            <option value="">--Select--</option>
+                                            <option value="Not Interested">Not Interested</option>
+                                            <option value="Ringing">Ringing</option>
+                                            <option value="Follow-up">Follow-up</option>
+                                            <option value="Busy">Busy</option>
+                                            <option value="Closed">Closed</option>
+                                        </select>
+                                        <span class="text-danger validation-error"></span>
                                     </div>
-                                    <div class="row ms-2 p-1" id="DivCallUpdate">
-                                        <div class="col-md-2">Call Status<i class="reqcls">*&nbsp;</i></div>
-                                        <div class="col-md-4">
-                                            <select id="ddlcallstatus" name="CallUpdateStatus" class="form-control required-field" onchange="CheckCallMeetingUpdate()">
-                                                <option value="">--Select--</option>
-                                                <option value="Not Interested">Not Interested</option>
-                                                <option value="Ringing">Ringing</option>
-                                                <option value="Follow-up">Follow-up</option>
-                                                <option value="Busy">Busy</option>
-                                                <option value="Closed">Closed</option>
-                                            </select>
-                                            <span class="text-danger validation-error"></span>
-                                        </div>
+                                </div>
+                                <br />
+                                <div class="row ms-2 p-1" id="DivMeetingUpdate">
+                                    <div class="col-md-2">Meeting Update<i class="reqcls">*&nbsp;</i></div>
+                                    <div class="col-md-4">
+                                        <select class="form-control required-field" ID="ddlmeetingupdate" name="MeetUpdateStatus" onchange="CheckCallMeetingUpdate()">
+                                            <option value="">--Select--</option>
+                                            <option value="Not Interested">Not Interested</option>
+                                            <option value="Follow-up">Follow-up</option>
+                                            <option value="Closed">Closed</option>
+                                        </select>
+                                        <span class="text-danger validation-error"></span>
                                     </div>
-                                    <br />
-                                    <div class="row ms-2 p-1" id="DivMeetingUpdate">
-                                        <div class="col-md-2">Meeting Update<i class="reqcls">*&nbsp;</i></div>
-                                        <div class="col-md-4">
-                                            <select class="form-control required-field" ID="ddlmeetingupdate" name="MeetUpdateStatus" onchange="CheckCallMeetingUpdate()">
-                                                <option value="">--Select--</option>
-                                                <option value="Not Interested">Not Interested</option>
-                                                <option value="Follow-up">Follow-up</option>
-                                                <option value="Closed">Closed</option>
-                                            </select>
-                                            <span class="text-danger validation-error"></span>
-                                        </div>
-                                        <div class="col-md-2">Meeting With Manager<i class="reqcls">*&nbsp;</i></div>
-                                        <div class="col-md-4">
-                                            <select class="form-control required-field" ID="ddlmeetingwithm" name="MeetingwithManager">
-                                                <option Value="1">Individual</option>
-                                                <option Value="WLSPL/01">Admin</option>
-                                                <option Value="WLSPL/081">Vaibhav Zope</option>
-                                                <option Value="WLSPL/0141">Vikrant</option>
-                                            </select>
-                                            <span class="text-danger validation-error"></span>
-                                        </div>
+                                    <div class="col-md-2">Meeting With Manager<i class="reqcls">*&nbsp;</i></div>
+                                    <div class="col-md-4">
+                                        <select class="form-control required-field" ID="ddlmeetingwithm" name="MeetingwithManager">
+                                            <option Value="1">Individual</option>
+                                            <option Value="WLSPL/01">Admin</option>
+                                            <option Value="WLSPL/081">Vaibhav Zope</option>
+                                            <option Value="WLSPL/0141">Vikrant</option>
+                                        </select>
+                                        <span class="text-danger validation-error"></span>
                                     </div>
-                                    <br />
-                                    <div class="row ms-2 p-1" id="DivTypeofclient">
-                                        <div class="col-md-2">Type of Client<i class="reqcls">*&nbsp;</i></div>
-                                        <div class="col-md-4">
-                                            <select class="form-control required-field" ID="ddltypeofclient" name="TypeofClient">
-                                                <option>--Select--</option>
-                                                <option>New</option>
-                                                <option>Renewal </option>
-                                                <option>Upgrade </option>
-                                                <option>Renewal + Upgrade</option>
-                                            </select>
-                                            <span class="text-danger validation-error"></span>
-                                        </div>
-                                        <div class="col-md-2">Deal Details<i class="reqcls">*&nbsp;</i></div>
-                                        <div class="col-md-4">
-                                            <textarea ID="txtdealdetails" name="DealDetails" class="form-control required-field"></textarea>
-                                            <span class="text-danger validation-error"></span><br />
-                                            <p style="color: red">Enter Deal Details, Collected Amount, Cheque No, Online , UPI, etc. </p>
-                                        </div>
+                                </div>
+                                <br />
+                                <div class="row ms-2 p-1" id="DivTypeofclient">
+                                    <div class="col-md-2">Type of Client<i class="reqcls">*&nbsp;</i></div>
+                                    <div class="col-md-4">
+                                        <select class="form-control required-field" ID="ddltypeofclient" name="TypeofClient">
+                                            <option>--Select--</option>
+                                            <option>New</option>
+                                            <option>Renewal </option>
+                                            <option>Upgrade </option>
+                                            <option>Renewal + Upgrade</option>
+                                        </select>
+                                        <span class="text-danger validation-error"></span>
                                     </div>
-                                    <br />
-                                    <div class="row ms-2 p-1" id="DivMeetingtime">
-                                        <div class="col-md-2">Meeting Time<i class="reqcls">*&nbsp;</i></div>
-                                        <div class="col-md-4">
-                                            <input ID="txtmeetingtime" name="MeetingTimeView" type="time" class="form-control required-field" />
-                                            <span class="text-danger validation-error"></span>
-                                        </div>
+                                    <div class="col-md-2">Deal Details<i class="reqcls">*&nbsp;</i></div>
+                                    <div class="col-md-4">
+                                        <textarea ID="txtdealdetails" name="DealDetails" class="form-control required-field"></textarea>
+                                        <span class="text-danger validation-error"></span><br />
+                                        <p style="color: red">Enter Deal Details, Collected Amount, Cheque No, Online , UPI, etc. </p>
                                     </div>
-                                    <div class="row ms-2 p-2">
-                                        <div class="col-md-2"><button type="button" class="btn btn-success w-100" id="btnSave">Save</button></div>
-                                        <div class="col-md-2 offset-md-8"><button type="button" class="btn btn-secondary w-100" onclick="OpenHistory()">History</button></div>
+                                </div>
+                                <br />
+                                <div class="row ms-2 p-1" id="DivMeetingtime">
+                                    <div class="col-md-2">Meeting Time<i class="reqcls">*&nbsp;</i></div>
+                                    <div class="col-md-4">
+                                        <input ID="txtmeetingtime" name="MeetingTimeView" type="time" class="form-control required-field" />
+                                        <span class="text-danger validation-error"></span>
                                     </div>
+                                </div>
+                                <div class="row ms-2 p-2">
+                                    <div class="col-md-2"><button type="button" class="btn btn-success w-100" id="btnSave">Save</button></div>
+                                    <div class="col-md-2 offset-md-8"><button type="button" class="btn btn-secondary w-100" onclick="OpenHistory()">History</button></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="modal fade" id="companyHistoryModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-                <div class="modal-dialog modal-xl modal-dialog-scrollable">
-                    <div class="modal-content modelprofile1">
-                        <div class="modal-header headingcls d-flex align-items-center">
-                            <h4 class="modal-title mb-0">Company Comment History</h4>
-                            <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="row container p-0 m-0">
-                                <div class="profilemodel2">
-                                    <div class="row ms-2">
-                                        <div class="col-md-12" style="background-color:#f9f7f7">
-                                            <div class="row p-1 bg-light">
-                                                <div class="col-md-4"><b>Company Name :</b></div>
-                                                <div class="col-md-8 lblpopup" id="lblHistorycname"></div>
-                                            </div>
-                                            <div class="row p-1 bg-light">
-                                                <div class="col-md-4"><b>Company Code :</b></div>
-                                                <div class="col-md-8 lblpopup" id="lblHistoryccode"></div>
-                                            </div>
+        <div class="modal fade" id="companyHistoryModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content modelprofile1">
+                    <div class="modal-header headingcls d-flex align-items-center">
+                        <h4 class="modal-title mb-0">Company Comment History</h4>
+                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row container p-0 m-0">
+                            <div class="profilemodel2">
+                                <div class="row ms-2">
+                                    <div class="col-md-12" style="background-color:#f9f7f7">
+                                        <div class="row p-1 bg-light">
+                                            <div class="col-md-4"><b>Company Name :</b></div>
+                                            <div class="col-md-8 lblpopup" id="lblHistorycname"></div>
+                                        </div>
+                                        <div class="row p-1 bg-light">
+                                            <div class="col-md-4"><b>Company Code :</b></div>
+                                            <div class="col-md-8 lblpopup" id="lblHistoryccode"></div>
                                         </div>
                                     </div>
-                                    <hr class="new1" />
-                                    <div class="row ms-2" style="overflow-y:scroll;height:500px;">
-                                        <div class="col-md-12" id="commentHistoryContainer"></div>
-                                    </div>
+                                </div>
+                                <hr class="new1" />
+                                <div class="row ms-2" style="overflow-y:scroll;height:500px;">
+                                    <div class="col-md-12" id="commentHistoryContainer"></div>
                                 </div>
                             </div>
                         </div>
@@ -1057,6 +950,36 @@
     let currentPage = 1;
     let allRows = [];
     $(document).ready(function () {
+
+            // COLLAPSED BY DEFAULT
+        $("#filterCard").addClass("filter-collapsed");
+
+        $("#btnToggleFilter").on("click", function () {
+
+            $("#filterCard").toggleClass("filter-collapsed");
+
+            if ($("#filterCard").hasClass("filter-collapsed")) {
+
+                // Collapsed
+                $(this).find("span").text("Show Filters");
+
+                $(this).find("i")
+                    .removeClass("fa-filter-circle-xmark")
+                    .addClass("fa-filter");
+
+            } else {
+
+                // Expanded
+                $(this).find("span").text("Hide Filters");
+
+                $(this).find("i")
+                    .removeClass("fa-filter")
+                    .addClass("fa-filter-circle-xmark");
+            }
+
+        });
+
+
 
         $("#ddlTeamuser").select2({
             placeholder: "Select Sales Manager",
@@ -1093,9 +1016,6 @@
                 $("#ddlfollowupStatus").val("").prop("disabled", true);
             }
         });
-
-        // Initial load: paginate the server-rendered (Model) rows already in the DOM.
-        // No AJAX call here — GetFilteredReport only fires on Search/Reset.
         currentPage = 1;
         displayFilteredTable(1);
     });
@@ -1223,11 +1143,11 @@
 
             const detailRow = `
                 <tr class="detail-row">
-                    <td colspan="5">
+                    <td colspan="4">
                         <strong style="color:red">Feedback of Client Update :</strong>
                         <div class="feedback-scroll">${feedback}</div>
                     </td>
-                    <td colspan="2">
+                    <td colspan="3">
                         <strong style="color:#0d6efd">Admin Comment :</strong>
                         ${remarksControl}
                     </td>

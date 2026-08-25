@@ -11,12 +11,12 @@ builder.Services.AddScoped(resolver =>
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<ILeadRepository, LeadRepository>();
+builder.Services.AddScoped<ILeadRepository, LeadRepository>().AddScoped<IinquiryRepo, InquiryRepo>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IcomapnymasterRepo, CompanymasterRepo>();
 builder.Services.AddScoped<ICallandMeetingRepo, CallandMeetingRepo>();
 builder.Services.AddScoped<IGoveServices, GovServicesRepo>();
-builder.Services.AddScoped<IMailingRepo, MailingRepo>().AddScoped<IWorkOrder, RepoWorkOrder>();
+builder.Services.AddScoped<IMailingRepo, MailingRepo>().AddScoped<IWorkOrder, RepoWorkOrder>().AddScoped<IServicesRepo, ServicesRepo>();
 
 // Temporary Session configuration
 builder.Services.AddDistributedMemoryCache();

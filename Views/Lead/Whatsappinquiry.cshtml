@@ -1,0 +1,721 @@
+﻿@model List<WEBLINK_CRM.Models.Inquiry>
+
+@{
+    ViewData["Title"] = "WhatsApp Inquiry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .table tbody td {
+        font-size: 13px;
+        vertical-align: middle;
+    }
+
+    .table tbody tr:hover {
+        background: #f4f8ff;
+    }
+
+    #statusMessage {
+        font-size: 13px;
+        color: #fff;
+    }
+
+    .feedback-scroll {
+        max-height: 120px;
+        overflow-y: auto;
+        overflow-y: auto;
+        word-break: break-word;
+        padding: 4px 8px;
+        background: #ffffff;
+        font-size: 12px;
+    }
+
+    /* RECORD */
+
+    .record-info {
+        font-size: 14px;
+        color: #6c757d;
+    }
+
+        .record-info strong {
+            color: #128c7e;
+            font-size: 15px;
+        }
+
+    /* WHATSAPP ID */
+
+    .id-badge {
+        display: inline-block;
+        background: #e7f8f3;
+        color: #128c7e;
+        padding: 5px 9px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 12px;
+    }
+
+    /* NAME */
+
+    .name-text {
+        color: #344054;
+        font-weight: 600;
+    }
+
+    /* MOBILE */
+
+    .mobile-text {
+        color: #344054;
+    }
+
+    /* EMAIL */
+
+    .email-text {
+        color: #0d6efd;
+    }
+
+
+    /* DATE */
+
+    .date-text {
+        color: #667085;
+        font-size: 12px;
+    }
+
+    /* LOCATION */
+
+    .location-badge {
+        display: inline-block;
+        background: #f0fdf4;
+        color: #198754;
+        border: 1px solid #d1e7dd;
+        padding: 5px 9px;
+        border-radius: 20px;
+        font-size: 12px;
+    }
+
+
+    /* SOURCE */
+
+    .url-scroll {
+        max-height: 70px;
+        overflow-y: auto;
+        word-break: break-all;
+        padding: 7px 9px;
+        background: #f8f9fa;
+        border: 1px solid #e5e7eb;
+        border-radius: 7px;
+    }
+
+    .source-link {
+        color: #0d6efd;
+        text-decoration: none;
+        font-size: 12px;
+    }
+
+        .source-link:hover {
+            text-decoration: underline;
+        }
+
+    /* EMPTY */
+
+    .empty-row {
+        text-align: center !important;
+        padding: 50px !important;
+        color: #6c757d;
+    }
+
+        .empty-row i {
+            display: block;
+            font-size: 35px;
+            margin-bottom: 10px;
+            color: #adb5bd;
+        }
+
+    .pagination {
+        margin-bottom: 0;
+    }
+
+        .pagination .page-link {
+            font-size: 12px;
+            padding: 6px 11px;
+            color: #0d6efd;
+        }
+
+        .pagination .active .page-link {
+            background-color: #142c45;
+            border-color: #142d47;
+            color: #ffffff;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #e9f2ff;
+        }
+
+</style>
+
+
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h2>
+                <i class="fab fa-whatsapp"></i>  WhatsApp Inquiry Management
+            </h2>
+
+            <span class="page-subtitle">
+
+                Manage customer inquiries received from WhatsApp
+
+            </span>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <span id="statusMessage">
+
+            <i class="fa fa-circle-check status-icon"></i>
+
+            Records loaded
+
+        </span>
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <input type="text"
+                       id="searchInput"
+                       class="form-control search-box"
+                       placeholder="Search name, mobile, email, city..." />
+            </div>
+            <div class="col-md-8 d-flex justify-content-end align-items-center">
+                <span class="record-info">
+                    Total Records :
+                    <strong id="totalRecords">@Model.Count()</strong>
+                </span>
+            </div>
+        </div>
+        <div class="table-responsive" style="overflow:auto">
+            <table id="dataTable"
+                   class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+
+                        <th>WhatsApp ID</th>
+
+                        <th>Name</th>
+
+                        <th>Mobile</th>
+
+                        <th>Email</th>
+
+                        <th>Inquiry</th>
+
+                        <th>Date</th>
+
+                        <th>Location</th>
+
+                        <th class="d-none">Source</th>
+
+                        <th>Sales Person</th>
+
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    @if (Model != null && Model.Any())
+                    {
+                        var count = 1;
+                        foreach (var inquiry in Model)
+                        {
+                            <tr class="inquiry-row">
+
+                                <!-- ID -->
+
+                                <td>
+                                    @count
+                                </td>
+                                <td>
+
+                                    @if (inquiry.Id.HasValue)
+                                    {
+                                        <span class="id-badge">
+                                            WA-@inquiry.Id
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+
+                                </td>
+
+
+                                <!-- NAME -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(inquiry.Name))
+                                    {
+                                        <span class="name-text">
+                                            @inquiry.Name
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+
+                                </td>
+
+
+                                <!-- MOBILE -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(inquiry.MobileNumber))
+                                    {
+                                        <span class="mobile-text">
+                                            @inquiry.MobileNumber
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+
+                                </td>
+
+
+                                <!-- EMAIL -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(inquiry.Email))
+                                    {
+                                        <span class="email-text">
+                                            @inquiry.Email
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+
+                                </td>
+
+
+                                <!-- INQUIRY -->
+
+                                <td>
+
+                                    <div class="feedback-scroll">
+
+                                        @if (!string.IsNullOrWhiteSpace(inquiry.ServiceRequested))
+                                        {
+                                            @inquiry.ServiceRequested
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">
+                                                No inquiry details
+                                            </span>
+                                        }
+
+                                    </div>
+
+                                </td>
+
+
+                                <!-- DATE -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(inquiry.CreatedAt))
+                                    {
+                                        <span class="date-text">
+                                            @inquiry.CreatedAt
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+
+                                </td>
+
+
+                                <!-- LOCATION -->
+
+                                <td>
+
+                                    @if (!string.IsNullOrWhiteSpace(inquiry.City))
+                                    {
+                                        <span class="location-badge">
+
+                                            <i class="fa fa-location-dot me-1"></i>
+
+                                            @inquiry.City
+
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+
+                                </td>
+
+
+                                <!-- SOURCE -->
+
+                                <td class="d-none">
+
+                                    @if (!string.IsNullOrWhiteSpace(inquiry.SourceUrl))
+                                    {
+                                        <div class="url-scroll">
+
+                                            <a href="@inquiry.SourceUrl"
+                                               target="_blank"
+                                               class="source-link">
+
+                                                @inquiry.SourceUrl
+
+                                            </a>
+
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+
+                                </td>
+
+
+                                <!-- SALES PERSON -->
+
+                                <td>
+
+
+
+                                    <select class="form-select form-select-sm sales-person-select"
+                                            data-inquiry-id="@inquiry.Id"
+                                            onchange="updateSalesPerson(this)">
+
+                                        <option value="">Select Sales Person</option>
+
+                                        @if (inquiry.SalesPersons != null && inquiry.SalesPersons.Any())
+                                        {
+                                            foreach (var employee in inquiry.SalesPersons)
+                                            {
+                                                if (employee.empcode == inquiry.SalesEmpCode)
+                                                {
+                                                    <option value="@employee.empcode" selected>
+                                                        @employee.name
+                                                        @if (!string.IsNullOrWhiteSpace(employee.empcode))
+                                                        {
+                                                            @: (@employee.empcode)
+                                                        }
+                                                    </option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@employee.empcode">
+                                                        @employee.name
+                                                        @if (!string.IsNullOrWhiteSpace(employee.empcode))
+                                                        {
+                                                            @: (@employee.empcode)
+                                                        }
+                                                    </option>
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <option value="" disabled>
+                                                No Sales Person Found
+                                            </option>
+                                        }
+
+                                    </select>
+
+                                </td>
+
+                            </tr>
+                            count++;
+                        }
+                    }
+                    else
+                    {
+
+                        <tr>
+
+                            <td colspan="9"
+                                class="empty-row">
+
+                                <i class="fab fa-whatsapp"></i>
+
+                                No WhatsApp inquiry records found.
+
+                            </td>
+
+                        </tr>
+
+                    }
+
+                </tbody>
+
+            </table>
+            <nav>
+                <ul class="pagination justify-content-center"
+                    id="pagination">
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<script>
+    const rowsPerPage = 20;
+    let currentPage = 1;
+    let allRows = [];
+    let filteredRows = [];
+
+    document.addEventListener("DOMContentLoaded", function () {
+        allRows = Array.from(document.querySelectorAll("#tableBody tr.inquiry-row"));
+        filteredRows = [...allRows];
+
+        updateRecordCount();
+        renderTable();
+    });
+
+    const searchInput = document.getElementById("searchInput");
+
+    if (searchInput) {
+        searchInput.addEventListener("input", function () {
+            const searchValue = this.value.toLowerCase().trim();
+
+            filteredRows = allRows.filter(function (row) {
+                return row.innerText.toLowerCase().includes(searchValue);
+            });
+
+            currentPage = 1;
+            updateRecordCount();
+            removeEmptyRow();
+            renderTable();
+        });
+    }
+
+    function updateRecordCount() {
+        const totalRecords = document.getElementById("totalRecords");
+
+        if (totalRecords) {
+            totalRecords.textContent = filteredRows.length;
+        }
+
+        const statusMessage = document.getElementById("statusMessage");
+
+        if (statusMessage) {
+            statusMessage.innerHTML = `
+                <i class="fab fa-whatsapp status-icon"></i>
+                Loaded ${filteredRows.length} WhatsApp records.
+            `;
+        }
+    }
+
+    function renderTable() {
+        removeEmptyRow();
+
+        allRows.forEach(function (row) {
+            row.style.display = "none";
+        });
+
+        if (filteredRows.length === 0) {
+            showEmptyResult();
+            createPagination();
+            return;
+        }
+
+        const startIndex = (currentPage - 1) * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+        const pageRows = filteredRows.slice(startIndex, endIndex);
+
+        pageRows.forEach(function (row) {
+            row.style.display = "table-row";
+        });
+
+        createPagination();
+    }
+
+    function showEmptyResult() {
+        removeEmptyRow();
+
+        const tableBody = document.getElementById("tableBody");
+        const emptyRow = document.createElement("tr");
+
+        emptyRow.id = "dynamicEmptyRow";
+
+        emptyRow.innerHTML = `
+            <td colspan="10" class="empty-row">
+                <i class="fa fa-search"></i>
+                No matching WhatsApp inquiries found.
+            </td>
+        `;
+
+        tableBody.appendChild(emptyRow);
+    }
+
+    function removeEmptyRow() {
+        const emptyRow = document.getElementById("dynamicEmptyRow");
+
+        if (emptyRow) {
+            emptyRow.remove();
+        }
+    }
+
+    function createPagination() {
+        const pagination = document.getElementById("pagination");
+
+        if (!pagination) {
+            return;
+        }
+
+        pagination.innerHTML = "";
+
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+
+        if (totalPages <= 1) {
+            return;
+        }
+
+        const previous = document.createElement("li");
+
+        previous.className =
+            "page-item " +
+            (currentPage === 1 ? "disabled" : "");
+
+        previous.innerHTML = `
+            <a class="page-link" href="javascript:void(0)">
+                <i class="fa fa-chevron-left"></i>
+                Previous
+            </a>
+        `;
+
+        previous.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            if (currentPage > 1) {
+                currentPage--;
+                renderTable();
+                scrollToTable();
+            }
+        });
+
+        pagination.appendChild(previous);
+
+        for (let i = 1; i <= totalPages; i++) {
+            const pageItem = document.createElement("li");
+
+            pageItem.className =
+                "page-item " +
+                (i === currentPage ? "active" : "");
+
+            pageItem.innerHTML = `
+                <a class="page-link" href="javascript:void(0)">
+                    ${i}
+                </a>
+            `;
+
+            pageItem.addEventListener("click", function (e) {
+                e.preventDefault();
+
+                currentPage = i;
+                renderTable();
+                scrollToTable();
+            });
+
+            pagination.appendChild(pageItem);
+        }
+
+        const next = document.createElement("li");
+
+        next.className =
+            "page-item " +
+            (currentPage === totalPages ? "disabled" : "");
+
+        next.innerHTML = `
+            <a class="page-link" href="javascript:void(0)">
+                Next
+                <i class="fa fa-chevron-right"></i>
+            </a>
+        `;
+
+        next.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderTable();
+                scrollToTable();
+            }
+        });
+
+        pagination.appendChild(next);
+    }
+
+    function scrollToTable() {
+        const table = document.getElementById("dataTable");
+
+        if (!table) {
+            return;
+        }
+
+        const rect = table.getBoundingClientRect();
+
+        if (rect.top < 0) {
+            table.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        $('.sales-person-select').select2({
+            placeholder: "Select Sales Person",
+            allowClear: true,
+            width: '220px'
+        });
+    });
+
+    function updateSalesPerson(select) {
+        const inquiryId = select.getAttribute("data-inquiry-id");
+        const salesEmpCode = select.value;
+
+        if (!inquiryId) {
+            showToast( "WhatsApp inquiry ID not found.","error");
+            return;
+        }
+
+        if (!salesEmpCode) {
+            return;
+        }
+
+        $.ajax({
+            url: '@Url.Action("AssignSalesPerson", "Lead")',
+            type: 'POST',
+            data: {
+                inquiryId: inquiryId,
+                salesEmpCode: salesEmpCode,
+                Action: "AssignToWhatsapp"
+            },
+            success: function (response) {
+                if (response.success) {
+                    showToast( "Sales person assigned successfully.","success");  
+                } else {
+                     showToast( response.message || "Unable to assign sales person.","error");
+                }
+            },
+            error: function (xhr) {
+                 showToast( "Something went wrong while assigning the sales person.","error");
+            }
+        });
+    }
+</script>

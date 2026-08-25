@@ -5,49 +5,10 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-
 <style type="text/css">
-    body {
-        background: #f4f7fb;
-        font-family: "Segoe UI", Arial, sans-serif;
-    }
-
-    .container.mt-4 {
-        max-width: 1400px;
-    }
-
-    .card {
-        border: none;
-        border-radius: 15px;
-        overflow: hidden;
-        margin-bottom: 25px;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, .08);
-    }
-
-    .card-header {
-        background: linear-gradient(135deg, #0d6efd, #003b9b);
-        padding: 18px 25px;
-    }
-
-        .card-header h5 {
-            color: white;
-            margin: 0;
-            font-size: 19px;
-            font-weight: 600;
-        }
-
-    .card-body {
-        padding: 30px;
-    }
-
     .form-label-custom {
         font-weight: 600;
         color: #344054;
@@ -200,8 +161,8 @@
     document.addEventListener("DOMContentLoaded", function () {
         hideAll();
         if (hasDashboardCompany) {
-           var dashboardCompany = @Html.Raw(ViewBag.DashboardCompanyDetails != null? 
-               Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.DashboardCompanyDetails): "null");
+           var dashboardCompany = @Html.Raw(ViewBag.DashboardCompanyDetails != null?
+                                                            Newtonsoft.Json.JsonConvert.SerializeObject(ViewBag.DashboardCompanyDetails) : "null");
 
             if (dashboardCompany != null &&
                 dashboardCompany.Id != null) {
@@ -276,7 +237,7 @@
                         data: {
                             companyCode: ui.item.code
                         },
-                        success: function (data) {                    
+                        success: function (data) {
                             if (!data) {
                                 return;
                             }
@@ -329,774 +290,744 @@
     }
 </script>
 
-<div class="container mt-4">
-    <form asp-action="SaveCallAndMeeting"
-          method="post"
-          onsubmit="return validateForm();">
-        <div class="card">
-            <div class="card-header">
+<form asp-action="SaveCallAndMeeting" method="post"
+      onsubmit="return validateForm();">
+    <div class="card">
+        <div class="card-header">
+            <h3>
+                <i class="fa fa-building"></i> Company Details
+            </h3>
 
-                <h5>
-                    <i class="bi bi-building-fill me-2"></i>
-                    Company Details
-                </h5>
+        </div>
+        <div class="card-body">
 
-            </div>
-            <div class="card-body">
+            <div class="row mb-3">
 
-                <div class="row mb-3">
+                <div class="col-md-2 form-label-custom">
 
-                    <div class="col-md-2 form-label-custom">
+                    <label>
 
-                        <label>
+                        <i class="bi bi-card-checklist me-1"></i>
 
-                            <i class="bi bi-card-checklist me-1"></i>
+                        Registration Category
 
-                            Registration Category
+                        <i class="reqcls">*</i>
 
-                            <i class="reqcls">*</i>
-
-                        </label>
-
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <select asp-for="RegistrationCategory"
-                                id="RegistrationCategory"
-                                class="form-control">
-
-                            <option value="">
-                                -- Select Registration Category --
-                            </option>
-
-                            <option value="Trading/Manufacturing">
-                                Trading/Manufacturing
-                            </option>
-
-                            <option value="Hospital/Clinic">
-                                Hospital/Clinic
-                            </option>
-
-                            <option value="Other Non GTS">
-                                Other Non GTS
-                            </option>
-
-                        </select>
-
-
-                        <span id="RegistrationCategoryError"
-                              class="text-danger"></span>
-
-                    </div>
-
-
-
-
-                    <div class="col-md-2 form-label-custom" id="DivRegistrationFor">
-
-                        <label>
-
-                            <i class="bi bi-building-check me-1"></i>
-
-                            Registration For
-
-                        </label>
-
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <input asp-for="RegistrationFor"
-                               id="RegistrationFor"
-                               class="form-control"
-                               readonly />
-
-                        <span id="RegistrationForError"
-                              class="text-danger"></span>
-
-                    </div>
+                    </label>
 
                 </div>
 
 
-                <div class="row mb-3">
+                <div class="col-md-4">
+
+                    <select asp-for="RegistrationCategory"
+                            id="RegistrationCategory"
+                            class="form-control">
+
+                        <option value="">
+                            -- Select Registration Category --
+                        </option>
+
+                        <option value="Trading/Manufacturing">
+                            Trading/Manufacturing
+                        </option>
+
+                        <option value="Hospital/Clinic">
+                            Hospital/Clinic
+                        </option>
+
+                        <option value="Other Non GTS">
+                            Other Non GTS
+                        </option>
+
+                    </select>
+
+
+                    <span id="RegistrationCategoryError"
+                          class="text-danger"></span>
+
+                </div>
 
 
 
 
-                    <div class="col-md-2 form-label-custom"
-                         id="LblGSTNo">
+                <div class="col-md-2 form-label-custom" id="DivRegistrationFor">
 
-                        <label>
-                            <i class="bi bi-receipt me-1"></i>
-                            GST No.
-                            <i id="GSTRequired" class="reqcls">*</i>
-                        </label>
+                    <label>
 
-                    </div>
+                        <i class="bi bi-building-check me-1"></i>
 
-                    <div class="col-md-4"
-                         id="DivGSTNo">
+                        Registration For
 
-                        <input asp-for="GSTNo"
-                               id="GSTNo"
+                    </label>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <input asp-for="RegistrationFor"
+                           id="RegistrationFor"
+                           class="form-control"
+                           readonly />
+
+                    <span id="RegistrationForError"
+                          class="text-danger"></span>
+
+                </div>
+
+            </div>
+
+
+            <div class="row mb-3">
+
+
+
+
+                <div class="col-md-2 form-label-custom"
+                     id="LblGSTNo">
+
+                    <label>
+                        <i class="bi bi-receipt me-1"></i>
+                        GST No.
+                        <i id="GSTRequired" class="reqcls">*</i>
+                    </label>
+
+                </div>
+
+                <div class="col-md-4"
+                     id="DivGSTNo">
+
+                    <input asp-for="GSTNo"
+                           id="GSTNo"
+                           class="form-control"
+                           maxlength="15"
+                           placeholder="Enter GST number"
+                           autocomplete="off" />
+
+                    <span id="GSTNoError"
+                          class="text-danger"></span>
+
+                </div>
+
+            </div>
+
+
+            <div class="row mb-3">
+
+                <div class="col-md-2 form-label-custom">
+
+                    <label>
+                        <i class="bi bi-buildings me-1"></i>
+                        Company Name
+                        <i class="reqcls">*</i>
+                    </label>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <input asp-for="Ccode"
+                           id="Ccode"
+                           class="d-none" />
+
+
+                    <input asp-for="CompanyName"
+                           id="txtCompanyName"
+                           class="form-control"
+                           autocomplete="off"
+                           placeholder="Search company name..." />
+
+
+                    <input type="hidden"
+                           id="hdCompanyCode"
+                           name="CompanyCode" />
+
+
+                    <span id="CompanyNameError"
+                          class="text-danger"></span>
+
+                </div>
+
+
+                <div class="col-md-2 form-label-custom">
+
+                    <label>
+                        <i class="bi bi-person me-1"></i>
+                        Owner Name
+                        <i class="reqcls">*</i>
+                    </label>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <input asp-for="PersonName"
+                           id="PersonName"
+                           class="form-control"
+                           placeholder="Enter owner name" />
+
+                    <span id="PersonNameError"
+                          class="text-danger"></span>
+
+                </div>
+
+            </div>
+
+
+            <div class="row mb-3">
+
+                <div class="col-md-2 form-label-custom">
+
+                    <label>
+
+                        <i class="bi bi-phone me-1"></i>
+
+                        Contact No
+
+                        <i class="reqcls">*</i>
+
+                    </label>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <input asp-for="ContactNo"
+                           id="ContactNo"
+                           class="form-control"
+                           placeholder="Enter mobile number" />
+
+                    <span id="ContactNoError"
+                          class="text-danger"></span>
+
+                </div>
+
+
+                <div class="col-md-2 form-label-custom">
+
+                    <label>
+
+                        <i class="bi bi-geo-alt me-1"></i>
+
+                        Area
+
+                        <i class="reqcls">*</i>
+
+                    </label>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <input asp-for="Area"
+                           id="Area"
+                           class="form-control"
+                           placeholder="Enter area" />
+
+                    <span id="AreaError"
+                          class="text-danger"></span>
+
+                </div>
+
+            </div>
+
+
+            <div class="row mb-3">
+
+                <div class="col-md-2 form-label-custom">
+
+                    <label>
+
+                        <i class="bi bi-house me-1"></i>
+
+                        Address
+
+                        <i class="reqcls">*</i>
+
+                    </label>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <textarea asp-for="Address"
+                              id="Address"
+                              class="form-control"
+                              placeholder="Enter company address"></textarea>
+
+                    <span id="AddressError"
+                          class="text-danger"></span>
+
+                </div>
+
+
+                <div class="col-md-2 form-label-custom">
+
+                    <label>
+
+                        <i class="bi bi-chat-left-text me-1"></i>
+
+                        Feedback
+
+                        <i class="reqcls">*</i>
+
+                    </label>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <textarea asp-for="FeedBack"
+                              id="FeedBack"
+                              minlength="100"
+                              class="form-control"
+                              placeholder="Enter minimum 100 characters feedback"></textarea>
+
+                    <span id="FeedBackError"
+                          class="text-danger"></span>
+
+                </div>
+
+            </div>
+
+
+
+
+            <div class="row mb-3"
+                 id="DivMailID">
+
+                <div class="col-md-2 form-label-custom">
+
+                    <label>
+
+                        <i class="bi bi-envelope me-1"></i>
+
+                        Mail ID
+
+                        <i class="reqcls">*</i>
+
+                    </label>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <input asp-for="ClientMail"
+                           id="ClientMail"
+                           class="form-control"
+                           placeholder="Enter client email" />
+
+                    <span id="ClientMailError"
+                          class="text-danger"></span>
+
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fa-solid fa-phone"></i> Call and Meeting Update</h3>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+
+                <div class="col-md-2 form-label-custom">
+                    <label>
+                        <i class="bi bi-list-check me-1"></i>
+                       Type of Update
+                        <i class="reqcls">*</i>
+
+                    </label>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <select asp-for="UpdateFor"
+                            id="UpdateFor"
+                            class="form-control"
+                            onchange="CheckUpdateFor()">
+
+                        <option value="">
+                            -- Select --
+                        </option>
+
+                        <option value="Call">
+                            Call
+                        </option>
+
+                        <option value="Meeting">
+                            Meeting
+                        </option>
+
+                    </select>
+
+                    <span id="UpdateForError"
+                          class="text-danger"></span>
+
+                </div>
+
+                <div class="col-md-2 form-label-custom">
+                    <label>
+                        <i class="bi bi-tag me-1"></i>
+                        Type
+                        <i class="reqcls">*</i>
+                    </label>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <select asp-for="Type"
+                            id="Type"
+                            class="form-control">
+
+                        <option value="">
+                            -- Select --
+                        </option>
+
+                        <option value="Fresh">
+                            Fresh
+                        </option>
+
+                        <option value="Follow-up">
+                            Follow-up
+                        </option>
+
+                        <option value="Services">
+                            Services
+                        </option>
+
+                    </select>
+
+                    <span id="TypeError"
+                          class="text-danger"></span>
+
+                </div>
+
+            </div>
+
+            <div class="row mb-3" id="DivFollowDate" style="display: flex;">
+                <div class="col-12 col-md-2 form-label-custom">
+                    <label class="mb-2">
+                        Follow Date
+                    </label>
+                </div>
+
+                <div class="col-12 col-md-4">
+                    <div class="input-group date-box">
+                        <input asp-for="FollowDate"
+                               id="txtfolldate"
+                               type="text"
                                class="form-control"
-                               maxlength="15"
-                               placeholder="Enter GST number"
+                               placeholder="Select follow date"
                                autocomplete="off" />
-
-                        <span id="GSTNoError"
-                              class="text-danger"></span>
-
+                        <span class="input-group-text"
+                              id="followDateCalendar">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </span>
                     </div>
 
+                    <span id="FollowDateError" class="text-danger"></span>
                 </div>
-
-
-                <div class="row mb-3">
-
-                    <div class="col-md-2 form-label-custom">
-
-                        <label>
-                            <i class="bi bi-buildings me-1"></i>
-                            Company Name
-                            <i class="reqcls">*</i>
-                        </label>
-
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <input asp-for="Ccode"
-                               id="Ccode"
-                               class="d-none" />
-
-
-                        <input asp-for="CompanyName"
-                               id="txtCompanyName"
-                               class="form-control"
-                               autocomplete="off"
-                               placeholder="Search company name..." />
-
-
-                        <input type="hidden"
-                               id="hdCompanyCode"
-                               name="CompanyCode" />
-
-
-                        <span id="CompanyNameError"
-                              class="text-danger"></span>
-
-                    </div>
-
-
-                    <div class="col-md-2 form-label-custom">
-
-                        <label>
-                            <i class="bi bi-person me-1"></i>
-                            Owner Name
-                            <i class="reqcls">*</i>
-                        </label>
-
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <input asp-for="PersonName"
-                               id="PersonName"
-                               class="form-control"
-                               placeholder="Enter owner name" />
-
-                        <span id="PersonNameError"
-                              class="text-danger"></span>
-
-                    </div>
-
-                </div>
-
-
-                <div class="row mb-3">
-
-                    <div class="col-md-2 form-label-custom">
-
-                        <label>
-
-                            <i class="bi bi-phone me-1"></i>
-
-                            Contact No
-
-                            <i class="reqcls">*</i>
-
-                        </label>
-
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <input asp-for="ContactNo"
-                               id="ContactNo"
-                               class="form-control"
-                               placeholder="Enter mobile number" />
-
-                        <span id="ContactNoError"
-                              class="text-danger"></span>
-
-                    </div>
-
-
-                    <div class="col-md-2 form-label-custom">
-
-                        <label>
-
-                            <i class="bi bi-geo-alt me-1"></i>
-
-                            Area
-
-                            <i class="reqcls">*</i>
-
-                        </label>
-
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <input asp-for="Area"
-                               id="Area"
-                               class="form-control"
-                               placeholder="Enter area" />
-
-                        <span id="AreaError"
-                              class="text-danger"></span>
-
-                    </div>
-
-                </div>
-
-
-                <div class="row mb-3">
-
-                    <div class="col-md-2 form-label-custom">
-
-                        <label>
-
-                            <i class="bi bi-house me-1"></i>
-
-                            Address
-
-                            <i class="reqcls">*</i>
-
-                        </label>
-
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <textarea asp-for="Address"
-                                  id="Address"
-                                  class="form-control"
-                                  placeholder="Enter company address"></textarea>
-
-                        <span id="AddressError"
-                              class="text-danger"></span>
-
-                    </div>
-
-
-                    <div class="col-md-2 form-label-custom">
-
-                        <label>
-
-                            <i class="bi bi-chat-left-text me-1"></i>
-
-                            Feedback
-
-                            <i class="reqcls">*</i>
-
-                        </label>
-
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <textarea asp-for="FeedBack"
-                                  id="FeedBack"
-                                  minlength="100"
-                                  class="form-control"
-                                  placeholder="Enter minimum 100 characters feedback"></textarea>
-
-                        <span id="FeedBackError"
-                              class="text-danger"></span>
-
-                    </div>
-
-                </div>
-
-
-
-
-                <div class="row mb-3"
-                     id="DivMailID">
-
-                    <div class="col-md-2 form-label-custom">
-
-                        <label>
-
-                            <i class="bi bi-envelope me-1"></i>
-
-                            Mail ID
-
-                            <i class="reqcls">*</i>
-
-                        </label>
-
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <input asp-for="ClientMail"
-                               id="ClientMail"
-                               class="form-control"
-                               placeholder="Enter client email" />
-
-                        <span id="ClientMailError"
-                              class="text-danger"></span>
-
-                    </div>
-
-                </div>
-
 
             </div>
-        </div>
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="bi bi-telephone-forward-fill me-2"></i>Call and Meeting Update</h5>
+
+            <div class="row mb-3"
+                 id="DivCallUpdate">
+
+                <div class="col-md-2 form-label-custom">
+
+                    <label>
+
+                        <i class="bi bi-telephone me-1"></i>
+
+                        Call Status
+
+                    </label>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <select asp-for="CallUpdateStatus"
+                            id="CallUpdateStatus"
+                            class="form-control"
+                            onchange="CheckCallMeetingUpdate()">
+
+                        <option value="">
+                            -- Select --
+                        </option>
+
+                        <option value="Not Interested">
+                            Not Interested
+                        </option>
+
+                        <option value="Ringing">
+                            Ringing
+                        </option>
+
+                        <option value="Follow-up">
+                            Follow-up
+                        </option>
+
+                        <option value="Busy">
+                            Busy
+                        </option>
+
+                        <option value="Call-Closed">
+                            Call Closed
+                        </option>
+
+                    </select>
+
+                    <span id="CallUpdateStatusError"
+                          class="text-danger"></span>
+
+                </div>
+
             </div>
-            <div class="card-body">
-                <div class="row mb-3">
 
-                    <div class="col-md-2 form-label-custom">
+            <div class="row mb-3"
+                 id="DivMeetingUpdate">
 
-                        <label>
+                <div class="col-md-2 form-label-custom">
 
-                            <i class="bi bi-list-check me-1"></i>
+                    <label>
 
-                            Type of Update
+                        <i class="bi bi-calendar-check me-1"></i>
 
-                            <i class="reqcls">*</i>
+                        Meeting Update
 
-                        </label>
+                        <i class="reqcls">*</i>
 
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <select asp-for="UpdateFor"
-                                id="UpdateFor"
-                                class="form-control"
-                                onchange="CheckUpdateFor()">
-
-                            <option value="">
-                                -- Select --
-                            </option>
-
-                            <option value="Call">
-                                Call
-                            </option>
-
-                            <option value="Meeting">
-                                Meeting
-                            </option>
-
-                        </select>
-
-                        <span id="UpdateForError"
-                              class="text-danger"></span>
-
-                    </div>
-
-
-                    <div class="col-md-2 form-label-custom">
-
-                        <label>
-
-                            <i class="bi bi-tag me-1"></i>
-
-                            Type
-
-                            <i class="reqcls">*</i>
-
-                        </label>
-
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <select asp-for="Type"
-                                id="Type"
-                                class="form-control">
-
-                            <option value="">
-                                -- Select --
-                            </option>
-
-                            <option value="Fresh">
-                                Fresh
-                            </option>
-
-                            <option value="Follow-up">
-                                Follow-up
-                            </option>
-
-                            <option value="Services">
-                                Services
-                            </option>
-
-                        </select>
-
-                        <span id="TypeError"
-                              class="text-danger"></span>
-
-                    </div>
-
-                </div>
-                <div class="row mb-3" id="DivFollowDate" style="display: flex;">
-                    <div class="col-12 col-md-2 form-label-custom">
-                        <label class="mb-2">
-                            <i class="bi bi-calendar-event me-1"></i>
-
-                            Follow Date
-                        </label>
-                    </div>
-
-                    <div class="col-12 col-md-4">
-                        <div class="input-group date-box">
-                            <input asp-for="FollowDate"
-                                   id="txtfolldate"
-                                   type="text"
-                                   class="form-control"
-                                   placeholder="Select follow date"
-                                   autocomplete="off" />
-                            <span class="input-group-text"
-                                  id="followDateCalendar">
-                                <i class="bi bi-calendar3"></i>
-                            </span>
-                        </div>
-
-                        <span id="FollowDateError" class="text-danger"></span>
-                    </div>
+                    </label>
 
                 </div>
 
-                <div class="row mb-3"
-                     id="DivCallUpdate">
 
-                    <div class="col-md-2 form-label-custom">
+                <div class="col-md-4">
 
-                        <label>
+                    <select asp-for="MeetUpdateStatus"
+                            id="MeetUpdateStatus"
+                            class="form-control"
+                            onchange="CheckCallMeetingUpdate()">
 
-                            <i class="bi bi-telephone me-1"></i>
+                        <option value="">
+                            -- Select --
+                        </option>
 
-                            Call Status
+                        <option value="Not Interested">
+                            Not Interested
+                        </option>
 
-                        </label>
+                        <option value="Follow-up">
+                            Follow-up
+                        </option>
 
-                    </div>
+                        <option value="Closed">
+                            Closed
+                        </option>
 
+                    </select>
 
-                    <div class="col-md-4">
-
-                        <select asp-for="CallUpdateStatus"
-                                id="CallUpdateStatus"
-                                class="form-control"
-                                onchange="CheckCallMeetingUpdate()">
-
-                            <option value="">
-                                -- Select --
-                            </option>
-
-                            <option value="Not Interested">
-                                Not Interested
-                            </option>
-
-                            <option value="Ringing">
-                                Ringing
-                            </option>
-
-                            <option value="Follow-up">
-                                Follow-up
-                            </option>
-
-                            <option value="Busy">
-                                Busy
-                            </option>
-
-                            <option value="Call-Closed">
-                                Call Closed
-                            </option>
-
-                        </select>
-
-                        <span id="CallUpdateStatusError"
-                              class="text-danger"></span>
-
-                    </div>
+                    <span id="MeetUpdateStatusError"
+                          class="text-danger"></span>
 
                 </div>
 
-                <div class="row mb-3"
-                     id="DivMeetingUpdate">
 
-                    <div class="col-md-2 form-label-custom">
+                <div class="col-md-2 form-label-custom">
 
-                        <label>
+                    <label>
 
-                            <i class="bi bi-calendar-check me-1"></i>
+                        <i class="bi bi-person-badge me-1"></i>
 
-                            Meeting Update
+                        Meeting With Manager
 
-                            <i class="reqcls">*</i>
-
-                        </label>
-
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <select asp-for="MeetUpdateStatus"
-                                id="MeetUpdateStatus"
-                                class="form-control"
-                                onchange="CheckCallMeetingUpdate()">
-
-                            <option value="">
-                                -- Select --
-                            </option>
-
-                            <option value="Not Interested">
-                                Not Interested
-                            </option>
-
-                            <option value="Follow-up">
-                                Follow-up
-                            </option>
-
-                            <option value="Closed">
-                                Closed
-                            </option>
-
-                        </select>
-
-                        <span id="MeetUpdateStatusError"
-                              class="text-danger"></span>
-
-                    </div>
-
-
-                    <div class="col-md-2 form-label-custom">
-
-                        <label>
-
-                            <i class="bi bi-person-badge me-1"></i>
-
-                            Meeting With Manager
-
-                        </label>
-
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <select asp-for="MeetingwithManager"
-                                id="MeetingwithManager"
-                                class="form-control">
-
-                            <option value="1">
-                                Individual
-                            </option>
-
-                            <option value="WLSPL/01">
-                                Admin
-                            </option>
-
-                            <option value="WLSPL/081">
-                                Vaibhav Zope
-                            </option>
-
-                            <option value="WLSPL/0141">
-                                Vikrant
-                            </option>
-
-                        </select>
-
-                        <span id="MeetingwithManagerError"
-                              class="text-danger"></span>
-
-                    </div>
+                    </label>
 
                 </div>
 
-                <div class="row mb-3"
-                     id="DivTypeofclient">
 
-                    <div class="col-md-2 form-label-custom">
+                <div class="col-md-4">
 
-                        <label>
+                    <select asp-for="MeetingwithManager"
+                            id="MeetingwithManager"
+                            class="form-control">
 
-                            <i class="bi bi-people me-1"></i>
+                        <option value="1">
+                            Individual
+                        </option>
 
-                            Type of Client
+                        <option value="WLSPL/01">
+                            Admin
+                        </option>
 
-                            <i class="reqcls">*</i>
+                        <option value="WLSPL/081">
+                            Vaibhav Zope
+                        </option>
 
-                        </label>
+                        <option value="WLSPL/0141">
+                            Vikrant
+                        </option>
 
-                    </div>
+                    </select>
 
-
-                    <div class="col-md-4">
-
-                        <select asp-for="TypeofClient"
-                                id="TypeofClient"
-                                class="form-control">
-
-                            <option value="">
-                                -- Select --
-                            </option>
-
-                            <option value="New">
-                                New
-                            </option>
-
-                            <option value="Renewal">
-                                Renewal
-                            </option>
-
-                            <option value="Upgrade">
-                                Upgrade
-                            </option>
-
-                            <option value="Renewal + Upgrade">
-                                Renewal + Upgrade
-                            </option>
-
-                        </select>
-
-                        <span id="TypeofClientError"
-                              class="text-danger"></span>
-
-                    </div>
-
-
-                    <div class="col-md-2 form-label-custom">
-
-                        <label>
-
-                            <i class="bi bi-cash-stack me-1"></i>
-
-                            Deal Details
-
-                            <i class="reqcls">*</i>
-
-                        </label>
-
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <textarea asp-for="DealDetails"
-                                  id="DealDetails"
-                                  class="form-control"
-                                  placeholder="Enter amount, payment details, cheque, UPI etc."></textarea>
-
-                        <span id="DealDetailsError"
-                              class="text-danger"></span>
-
-                    </div>
+                    <span id="MeetingwithManagerError"
+                          class="text-danger"></span>
 
                 </div>
 
-                <div class="row mb-3"
-                     id="DivMeetingtime">
+            </div>
 
-                    <div class="col-md-2 form-label-custom">
+            <div class="row mb-3"
+                 id="DivTypeofclient">
 
-                        <label>
+                <div class="col-md-2 form-label-custom">
 
-                            <i class="bi bi-clock me-1"></i>
+                    <label>
 
-                            Meeting Time
+                        <i class="bi bi-people me-1"></i>
 
-                            <i class="reqcls">*</i>
+                        Type of Client
 
-                        </label>
+                        <i class="reqcls">*</i>
 
-                    </div>
-
-
-                    <div class="col-md-4">
-
-                        <input asp-for="MeetingTime"
-                               id="MeetingTime"
-                               type="time"
-                               class="form-control" />
-
-                        <span id="MeetingTimeError"
-                              class="text-danger"></span>
-
-                    </div>
+                    </label>
 
                 </div>
 
-                <div class="row mt-4">
-                    <div class="col-md-4"></div>
 
-                    <div class="col-md-2">
+                <div class="col-md-4">
 
-                        <button type="submit"
-                                class="btn btn-success w-100">
+                    <select asp-for="TypeofClient"
+                            id="TypeofClient"
+                            class="form-control">
 
-                            <i class="bi bi-check-circle-fill me-2"></i>
+                        <option value="">
+                            -- Select --
+                        </option>
 
-                            Save
+                        <option value="New">
+                            New
+                        </option>
 
-                        </button>
+                        <option value="Renewal">
+                            Renewal
+                        </option>
 
-                    </div>
+                        <option value="Upgrade">
+                            Upgrade
+                        </option>
 
-                    <div class="col-md-2">
+                        <option value="Renewal + Upgrade">
+                            Renewal + Upgrade
+                        </option>
 
-                        <a asp-action="Create"
-                           class="btn btn-danger w-100">
+                    </select>
 
-                            <i class="bi bi-arrow-clockwise me-2"></i>
+                    <span id="TypeofClientError"
+                          class="text-danger"></span>
 
-                            Reset
+                </div>
 
-                        </a>
 
-                    </div>
+                <div class="col-md-2 form-label-custom">
 
-                    <div class="col-md-4"></div>
+                    <label>
+
+                        <i class="bi bi-cash-stack me-1"></i>
+
+                        Deal Details
+
+                        <i class="reqcls">*</i>
+
+                    </label>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <textarea asp-for="DealDetails"
+                              id="DealDetails"
+                              class="form-control"
+                              placeholder="Enter amount, payment details, cheque, UPI etc."></textarea>
+
+                    <span id="DealDetailsError"
+                          class="text-danger"></span>
+
+                </div>
+
+            </div>
+
+            <div class="row mb-3"
+                 id="DivMeetingtime">
+
+                <div class="col-md-2 form-label-custom">
+
+                    <label>
+
+                        <i class="bi bi-clock me-1"></i>
+
+                        Meeting Time
+
+                        <i class="reqcls">*</i>
+
+                    </label>
+
+                </div>
+
+
+                <div class="col-md-4">
+
+                    <input asp-for="MeetingTime"
+                           id="MeetingTime"
+                           type="time"
+                           class="form-control" />
+
+                    <span id="MeetingTimeError"
+                          class="text-danger"></span>
+
+                </div>
+
+            </div>
+
+            <div class="row justify-content-center mt-3">
+                <div class="col-md-3 text-end">
+
+                    <button type="submit" class="btn btn-success">
+                        <i class="fa fa-save"></i>
+                        Save
+                   </button>
+                </div>
+
+                <div class="col-md-3 text-start">
+                    <a asp-action="Create"
+                       class="btn btn-danger">
+                        <i class="fa fa-arrow-left"></i>
+                        Reset
+                   </a>
                 </div>
             </div>
         </div>
-    </form>
-</div>
+    </div>
+</form>
 
 <script type="text/javascript">
 

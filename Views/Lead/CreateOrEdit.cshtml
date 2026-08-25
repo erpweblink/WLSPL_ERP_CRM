@@ -1,567 +1,495 @@
 ﻿@model WEBLINK_CRM.Models.LeadGenration
 
 @{
-	ViewData["Title"] = Model.ID == 0 ? "Create New Lead" : "Edit Lead";
-	Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.ID == 0 ? "Create New Lead" : "Edit Lead";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <style>
-	body {
-		background-color: #f4f7fb;
-	}
 
-	.lead-card {
-		background: #fff;
-		border-radius: 20px;
-		box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-		overflow: hidden;
-		margin: 20px 0;
-	}
+    .form-label {
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 8px;
+    }
 
-	.lead-header {
-		background: #1673f9;
-		color: white;
-		padding: 18px 22px;
-		font-size: 20px;
-		font-weight: 600;
-	}
+    .required {
+        color: #dc3545;
+    }
 
-	.lead-body {
-		padding: 28px 24px 25px 24px;
-	}
+    .form-control,
+    .form-select {
+        height: 45px;
+        border: 1px solid #d7dde5;
+        border-radius: 10px;
+        padding: 10px 13px;
+        font-size: 15px;
+        color: #344054;
+        box-shadow: none;
+        transition: all 0.2s ease;
+    }
 
-	.form-label {
-		font-weight: 600;
-		color: #212529;
-		margin-bottom: 8px;
-	}
+    textarea.form-control {
+        height: 100px;
+        resize: vertical;
+    }
 
-	.required {
-		color: #dc3545;
-	}
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #1673f9;
+        box-shadow: 0 0 0 3px rgba(22, 115, 249, 0.10);
+    }
 
-	.form-control,
-	.form-select {
-		height: 45px;
-		border: 1px solid #d7dde5;
-		border-radius: 10px;
-		padding: 10px 13px;
-		font-size: 15px;
-		color: #344054;
-		box-shadow: none;
-		transition: all 0.2s ease;
-	}
+    .form-control::placeholder {
+        color: #98a2b3;
+    }
 
-	textarea.form-control {
-		height: 100px;
-		resize: vertical;
-	}
+    .section-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1673f9;
+        margin: 8px 0 18px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #e9edf2;
+    }
 
-	.form-control:focus,
-	.form-select:focus {
-		border-color: #1673f9;
-		box-shadow: 0 0 0 3px rgba(22, 115, 249, 0.10);
-	}
+    .field-validation-error {
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 4px;
+        display: block;
+    }
 
-	.form-control::placeholder {
-		color: #98a2b3;
-	}
+    .validation-summary-errors {
+        background: #fff1f2;
+        border: 1px solid #fecdd3;
+        color: #b42318;
+        border-radius: 10px;
+        padding: 12px 15px;
+        margin-bottom: 20px;
+    }
 
-	.section-title {
-		font-size: 16px;
-		font-weight: 600;
-		color: #1673f9;
-		margin: 8px 0 18px;
-		padding-bottom: 8px;
-		border-bottom: 1px solid #e9edf2;
-	}
 
-	.field-validation-error {
-		color: #dc3545;
-		font-size: 13px;
-		margin-top: 4px;
-		display: block;
-	}
 
-	.validation-summary-errors {
-		background: #fff1f2;
-		border: 1px solid #fecdd3;
-		color: #b42318;
-		border-radius: 10px;
-		padding: 12px 15px;
-		margin-bottom: 20px;
-	}
+    .readonly-field {
+        background-color: #f8f9fa;
+    }
 
-	.btn-save {
-		width: 100%;
-		height: 47px;
-		border: none;
-		border-radius: 10px;
-		background: #198754;
-		color: white;
-		font-size: 15px;
-		font-weight: 600;
-		transition: all 0.2s ease;
-	}
+    .button-area {
+        margin-top: 25px;
+    }
 
-		.btn-save:hover {
-			background: #157347;
-			color: white;
-			transform: translateY(-1px);
-		}
+    .btn {
+        border-radius: 8px;
+        height: 43px;
+        font-weight: 600;
+        transition: .3s;
+    }
 
-	.btn-back {
-		width: 100%;
-		height: 47px;
-		border: none;
-		border-radius: 10px;
-		background: #6c757d;
-		color: white;
-		font-size: 15px;
-		font-weight: 600;
-		transition: all 0.2s ease;
-	}
+    .btn-success {
+        background: #198754;
+        border: none;
+    }
 
-		.btn-back:hover {
-			background: #5c636a;
-			color: white;
-		}
+        .btn-success:hover {
+            background: #157347;
+            transform: translateY(-2px);
+        }
 
-	.readonly-field {
-		background-color: #f8f9fa;
-	}
+    .btn-danger {
+        background: #dc3545;
+        border: none;
+    }
 
-	.button-area {
-		margin-top: 25px;
-	}
+        .btn-danger:hover {
+            background: #bb2d3b;
+            transform: translateY(-2px);
+        }
 
-	@@media (max-width: 768px) {
-		.lead-body {
-			padding: 20px 15px;
-		}
-
-		.lead-header {
-			font-size: 18px;
-		}
-	}
 </style>
 
+<div class="card">
+    <div class="card-header">
+        <h3>
+            <i class="fa @(Model.ID == 0 ? "fa-user-plus" : "fa-edit")"></i>
+            @(Model.ID == 0 ? " Create New Lead" : " Edit Lead")
+        </h3>
+    </div>
+    <div class="card-body">
+        @if (ViewBag.ValidationErrors != null)
+        {
+            <div class="alert alert-danger">
+                <strong>Please fix the following:</strong>
+
+                <ul class="mb-0">
+                    @foreach (var error in ViewBag.ValidationErrors)
+                    {
+                        <li>@error</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <form asp-controller="Lead"
+              asp-action="CreateOrEdit"
+              method="post">
+
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" asp-for="ID" />
+
+            <!-- VALIDATION -->
+            <div asp-validation-summary="ModelOnly"
+                 class="validation-summary-errors">
+            </div>
+
+
+            <!-- ================= LEAD INFORMATION ================= -->
+
+            <div class="section-title">
+                <i class="fa fa-info-circle"></i>
+                Lead Information
+            </div>
+
+            <div class="row">
+
+                <!-- Lead Code -->
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Leadcode" class="form-label">
+                        Lead Code
+                    </label>
+
+                    <input asp-for="Leadcode"
+                           class="form-control readonly-field"
+                           placeholder="Enter lead code" />
+
+                    <span asp-validation-for="Leadcode"></span>
+                </div>
+
+
+                <!-- Status -->
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Status" class="form-label">
+                        Status
+                    </label>
+
+                    <select asp-for="Status" class="form-select">
+                        <option value="">Select Status</option>
+                        <option value="New">New</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Follow Up">Follow Up</option>
+                        <option value="Converted">Converted</option>
+                        <option value="Closed">Closed</option>
+                        <option value="Lost">Lost</option>
+                    </select>
+
+                    <span asp-validation-for="Status"></span>
+                </div>
+
+
+                <!-- Source -->
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Source" class="form-label">
+                        Source <span class="required">*</span>
+                    </label>
+
+                    <select asp-for="Source" class="form-select">
+                        <option value="">Select Source</option>
+                        <option value="Website">Website</option>
+                        <option value="Email">Email</option>
+                        <option value="Facebook">Facebook</option>
+                        <option value="Meta">Meta</option>
+                        <option value="Phone">Phone</option>
+                        <option value="Reference">Reference</option>
+                        <option value="Other">Other</option>
+                    </select>
+
+                    <span asp-validation-for="Source"></span>
+                </div>
 
+            </div>
 
 
-<div class="container-fluid">
+            <!-- ================= COMPANY INFORMATION ================= -->
 
-	<div class="lead-card">
+            <div class="section-title mt-3">
+                <i class="fa fa-building"></i>
+                Company & Contact Information
+            </div>
 
-		<!-- HEADER -->
-		<div class="lead-header">
-			<i class="fa @(Model.ID == 0 ? "fa-user-plus" : "fa-edit")"></i>
-			@(Model.ID == 0 ? " Create New Lead" : " Edit Lead")
-		</div>
+            <div class="row">
 
-		<div class="lead-body">
+                <!-- Company Name -->
+                <div class="col-md-4 mb-3">
+                    <label asp-for="CompanyName" class="form-label">
+                        Company Name <span class="required">*</span>
+                    </label>
 
+                    <input asp-for="CompanyName"
+                           class="form-control"
+                           placeholder="Enter company name" />
 
-			@if (ViewBag.ValidationErrors != null)
-			{
-				<div class="alert alert-danger">
-					<strong>Please fix the following:</strong>
+                    <span asp-validation-for="CompanyName"></span>
+                </div>
 
-					<ul class="mb-0">
-						@foreach (var error in ViewBag.ValidationErrors)
-						{
-							<li>@error</li>
-						}
-					</ul>
-				</div>
-			}
 
-			<div asp-validation-summary="All" class="text-danger"></div>
+                <!-- Company ID -->
+                <div class="col-md-4 mb-3">
+                    <label asp-for="CompanyId" class="form-label">
+                        Company ID
+                    </label>
 
+                    <input asp-for="CompanyId"
+                           class="form-control"
+                           placeholder="Enter company ID" />
 
-			<form asp-controller="Lead"
-				  asp-action="CreateOrEdit"
-				  method="post">
+                    <span asp-validation-for="CompanyId"></span>
+                </div>
 
-				@Html.AntiForgeryToken()
 
-				<input type="hidden" asp-for="ID" />
+                <!-- Owner Name -->
+                <div class="col-md-4 mb-3">
+                    <label asp-for="OwnerName" class="form-label">
+                        Owner Name
+                    </label>
 
-				<!-- VALIDATION -->
-				<div asp-validation-summary="ModelOnly"
-					 class="validation-summary-errors">
-				</div>
+                    <input asp-for="OwnerName"
+                           class="form-control"
+                           placeholder="Enter owner name" />
 
+                    <span asp-validation-for="OwnerName"></span>
+                </div>
 
-				<!-- ================= LEAD INFORMATION ================= -->
 
-				<div class="section-title">
-					<i class="fa fa-info-circle"></i>
-					Lead Information
-				</div>
+                <!-- Mobile -->
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Mobile" class="form-label">
+                        Mobile <span class="required">*</span>
+                    </label>
 
-				<div class="row">
+                    <input asp-for="Mobile"
+                           class="form-control"
+                           placeholder="Enter mobile number"
+                           maxlength="15" />
 
-					<!-- Lead Code -->
-					<div class="col-md-4 mb-3">
-						<label asp-for="Leadcode" class="form-label">
-							Lead Code
-						</label>
+                    <span asp-validation-for="Mobile"></span>
+                </div>
 
-						<input asp-for="Leadcode"
-							   class="form-control readonly-field"
-							   placeholder="Enter lead code" />
 
-						<span asp-validation-for="Leadcode"></span>
-					</div>
+                <!-- Email -->
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Email" class="form-label">
+                        Email <span class="required">*</span>
+                    </label>
 
+                    <input asp-for="Email"
+                           type="email"
+                           class="form-control"
+                           placeholder="Enter email address" />
 
-					<!-- Status -->
-					<div class="col-md-4 mb-3">
-						<label asp-for="Status" class="form-label">
-							Status
-						</label>
+                    <span asp-validation-for="Email"></span>
+                </div>
 
-						<select asp-for="Status" class="form-select">
-							<option value="">Select Status</option>
-							<option value="New">New</option>
-							<option value="In Progress">In Progress</option>
-							<option value="Follow Up">Follow Up</option>
-							<option value="Converted">Converted</option>
-							<option value="Closed">Closed</option>
-							<option value="Lost">Lost</option>
-						</select>
 
-						<span asp-validation-for="Status"></span>
-					</div>
+                <!-- City -->
+                <div class="col-md-4 mb-3">
+                    <label asp-for="City" class="form-label">
+                        City <span class="required">*</span>
+                    </label>
 
+                    <input asp-for="City"
+                           class="form-control"
+                           placeholder="Enter city" />
 
-					<!-- Source -->
-					<div class="col-md-4 mb-3">
-						<label asp-for="Source" class="form-label">
-							Source <span class="required">*</span>
-						</label>
+                    <span asp-validation-for="City"></span>
+                </div>
 
-						<select asp-for="Source" class="form-select">
-							<option value="">Select Source</option>
-							<option value="Website">Website</option>
-							<option value="Email">Email</option>
-							<option value="Facebook">Facebook</option>
-							<option value="Meta">Meta</option>
-							<option value="Phone">Phone</option>
-							<option value="Reference">Reference</option>
-							<option value="Other">Other</option>
-						</select>
+            </div>
 
-						<span asp-validation-for="Source"></span>
-					</div>
 
-				</div>
+            <!-- ================= REQUIREMENT INFORMATION ================= -->
 
+            <div class="section-title mt-3">
+                <i class="fa fa-cubes"></i>
+                Requirement Information
+            </div>
 
-				<!-- ================= COMPANY INFORMATION ================= -->
+            <div class="row">
 
-				<div class="section-title mt-3">
-					<i class="fa fa-building"></i>
-					Company & Contact Information
-				</div>
+                <!-- Product -->
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Product" class="form-label">
+                        Product <span class="required">*</span>
+                    </label>
 
-				<div class="row">
+                    <input asp-for="Product"
+                           class="form-control"
+                           placeholder="Enter product" />
 
-					<!-- Company Name -->
-					<div class="col-md-4 mb-3">
-						<label asp-for="CompanyName" class="form-label">
-							Company Name <span class="required">*</span>
-						</label>
+                    <span asp-validation-for="Product"></span>
+                </div>
 
-						<input asp-for="CompanyName"
-							   class="form-control"
-							   placeholder="Enter company name" />
 
-						<span asp-validation-for="CompanyName"></span>
-					</div>
+                <!-- Quantity -->
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Quantity" class="form-label">
+                        Quantity <span class="required">*</span>
+                    </label>
 
+                    <input asp-for="Quantity"
+                           type="number"
+                           min="1"
+                           class="form-control"
+                           placeholder="Enter quantity" />
 
-					<!-- Company ID -->
-					<div class="col-md-4 mb-3">
-						<label asp-for="CompanyId" class="form-label">
-							Company ID
-						</label>
+                    <span asp-validation-for="Quantity"></span>
+                </div>
 
-						<input asp-for="CompanyId"
-							   class="form-control"
-							   placeholder="Enter company ID" />
 
-						<span asp-validation-for="CompanyId"></span>
-					</div>
+                <!-- Type -->
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Type" class="form-label">
+                        Type
+                    </label>
 
+                    <input asp-for="Type"
+                           class="form-control"
+                           placeholder="Enter type" />
 
-					<!-- Owner Name -->
-					<div class="col-md-4 mb-3">
-						<label asp-for="OwnerName" class="form-label">
-							Owner Name
-						</label>
+                    <span asp-validation-for="Type"></span>
+                </div>
 
-						<input asp-for="OwnerName"
-							   class="form-control"
-							   placeholder="Enter owner name" />
 
-						<span asp-validation-for="OwnerName"></span>
-					</div>
+                <!-- Requirements -->
+                <div class="col-md-8 mb-3">
+                    <label asp-for="Requirements" class="form-label">
+                        Requirements <span class="required">*</span>
+                    </label>
 
+                    <textarea asp-for="Requirements"
+                              class="form-control"
+                              placeholder="Enter customer requirements"></textarea>
 
-					<!-- Mobile -->
-					<div class="col-md-4 mb-3">
-						<label asp-for="Mobile" class="form-label">
-							Mobile <span class="required">*</span>
-						</label>
+                    <span asp-validation-for="Requirements"></span>
+                </div>
 
-						<input asp-for="Mobile"
-							   class="form-control"
-							   placeholder="Enter mobile number"
-							   maxlength="15" />
 
-						<span asp-validation-for="Mobile"></span>
-					</div>
+                <!-- Notes -->
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Notes" class="form-label">
+                        Notes
+                    </label>
 
+                    <textarea asp-for="Notes"
+                              class="form-control"
+                              placeholder="Enter notes"></textarea>
 
-					<!-- Email -->
-					<div class="col-md-4 mb-3">
-						<label asp-for="Email" class="form-label">
-							Email <span class="required">*</span>
-						</label>
+                    <span asp-validation-for="Notes"></span>
+                </div>
 
-						<input asp-for="Email"
-							   type="email"
-							   class="form-control"
-							   placeholder="Enter email address" />
+            </div>
 
-						<span asp-validation-for="Email"></span>
-					</div>
 
+            <!-- ================= ASSIGNMENT ================= -->
 
-					<!-- City -->
-					<div class="col-md-4 mb-3">
-						<label asp-for="City" class="form-label">
-							City <span class="required">*</span>
-						</label>
+            <div class="section-title mt-3">
+                <i class="fa fa-users"></i>
+                Lead Assignment
+            </div>
 
-						<input asp-for="City"
-							   class="form-control"
-							   placeholder="Enter city" />
+            <div class="row">
 
-						<span asp-validation-for="City"></span>
-					</div>
+                <!-- User Name -->
+                <div class="col-md-4 mb-3">
+                    <label asp-for="UserName" class="form-label">
+                        Assigned User <span class="required">*</span>
+                    </label>
 
-				</div>
+                    <input asp-for="UserName"
+                           class="form-control"
+                           placeholder="Enter assigned user" />
 
+                    <span asp-validation-for="UserName"></span>
+                </div>
 
-				<!-- ================= REQUIREMENT INFORMATION ================= -->
 
-				<div class="section-title mt-3">
-					<i class="fa fa-cubes"></i>
-					Requirement Information
-				</div>
+                <!-- User ID -->
+                <div class="col-md-4 mb-3">
+                    <label asp-for="UserID" class="form-label">
+                        User ID
+                    </label>
 
-				<div class="row">
+                    <input asp-for="UserID"
+                           class="form-control"
+                           placeholder="Enter user ID" />
 
-					<!-- Product -->
-					<div class="col-md-4 mb-3">
-						<label asp-for="Product" class="form-label">
-							Product <span class="required">*</span>
-						</label>
+                    <span asp-validation-for="UserID"></span>
+                </div>
 
-						<input asp-for="Product"
-							   class="form-control"
-							   placeholder="Enter product" />
 
-						<span asp-validation-for="Product"></span>
-					</div>
+                <!-- Page ID -->
+                <div class="col-md-4 mb-3">
+                    <label asp-for="PageId" class="form-label">
+                        Page ID
+                    </label>
 
+                    <input asp-for="PageId"
+                           class="form-control"
+                           placeholder="Enter page ID" />
 
-					<!-- Quantity -->
-					<div class="col-md-4 mb-3">
-						<label asp-for="Quantity" class="form-label">
-							Quantity <span class="required">*</span>
-						</label>
+                    <span asp-validation-for="PageId"></span>
+                </div>
 
-						<input asp-for="Quantity"
-							   type="number"
-							   min="1"
-							   class="form-control"
-							   placeholder="Enter quantity" />
+            </div>
 
-						<span asp-validation-for="Quantity"></span>
-					</div>
 
+            <!-- ================= BUTTONS ================= -->
 
-					<!-- Type -->
-					<div class="col-md-4 mb-3">
-						<label asp-for="Type" class="form-label">
-							Type
-						</label>
+            <div class="row justify-content-center mt-3">
+                <div class="col-md-3 text-end">
+                    <button type="submit"
+                            class="btn btn-success">
+                        <i class="fa fa-save"></i>
+                        @(Model.ID == 0 ? " Save Lead" : " Update Lead")
 
-						<input asp-for="Type"
-							   class="form-control"
-							   placeholder="Enter type" />
+                    </button>
+                </div>
+                <div class="col-md-3 text-start">
+                    <a asp-controller="Lead"
+                       asp-action="Index"
+                       class="btn btn-danger">
+                        <i class="fa fa-arrow-left"></i> Back
+                   </a>
+                </div>
+            </div>
 
-						<span asp-validation-for="Type"></span>
-					</div>
+        </form>
 
-
-					<!-- Requirements -->
-					<div class="col-md-8 mb-3">
-						<label asp-for="Requirements" class="form-label">
-							Requirements <span class="required">*</span>
-						</label>
-
-						<textarea asp-for="Requirements"
-								  class="form-control"
-								  placeholder="Enter customer requirements"></textarea>
-
-						<span asp-validation-for="Requirements"></span>
-					</div>
-
-
-					<!-- Notes -->
-					<div class="col-md-4 mb-3">
-						<label asp-for="Notes" class="form-label">
-							Notes
-						</label>
-
-						<textarea asp-for="Notes"
-								  class="form-control"
-								  placeholder="Enter notes"></textarea>
-
-						<span asp-validation-for="Notes"></span>
-					</div>
-
-				</div>
-
-
-				<!-- ================= ASSIGNMENT ================= -->
-
-				<div class="section-title mt-3">
-					<i class="fa fa-users"></i>
-					Lead Assignment
-				</div>
-
-				<div class="row">
-
-					<!-- User Name -->
-					<div class="col-md-4 mb-3">
-						<label asp-for="UserName" class="form-label">
-							Assigned User <span class="required">*</span>
-						</label>
-
-						<input asp-for="UserName"
-							   class="form-control"
-							   placeholder="Enter assigned user" />
-
-						<span asp-validation-for="UserName"></span>
-					</div>
-
-
-					<!-- User ID -->
-					<div class="col-md-4 mb-3">
-						<label asp-for="UserID" class="form-label">
-							User ID
-						</label>
-
-						<input asp-for="UserID"
-							   class="form-control"
-							   placeholder="Enter user ID" />
-
-						<span asp-validation-for="UserID"></span>
-					</div>
-
-
-					<!-- Page ID -->
-					<div class="col-md-4 mb-3">
-						<label asp-for="PageId" class="form-label">
-							Page ID
-						</label>
-
-						<input asp-for="PageId"
-							   class="form-control"
-							   placeholder="Enter page ID" />
-
-						<span asp-validation-for="PageId"></span>
-					</div>
-
-				</div>
-
-
-				<!-- ================= BUTTONS ================= -->
-
-				<div class="button-area">
-
-					<div class="row">
-
-						<div class="col-md-6 mb-2">
-							<button type="submit"
-									class="btn-save">
-
-								<i class="fa fa-save"></i>
-								@(Model.ID == 0 ? " Save Lead" : " Update Lead")
-
-							</button>
-						</div>
-
-
-						<div class="col-md-6 mb-2">
-
-							<a asp-controller="Lead"
-							   asp-action="Index"
-							   class="btn-back d-flex align-items-center justify-content-center text-decoration-none">
-
-								<i class="fa fa-arrow-left"></i>
-								&nbsp; Back
-
-							</a>
-
-						</div>
-
-					</div>
-
-				</div>
-
-			</form>
-
-		</div>
-	</div>
-
+    </div>
 </div>
 
+<script>
 
-@section Scripts {
+    // Automatically capitalize City
+    document.addEventListener("DOMContentLoaded", function () {
 
-	@{
-		await Html.RenderPartialAsync("_ValidationScriptsPartial");
-	}
+        const city = document.getElementById("City");
 
-	<script>
+        if (city) {
+            city.addEventListener("input", function () {
 
-		// Automatically capitalize City
-		document.addEventListener("DOMContentLoaded", function () {
+                let value = this.value;
 
-			const city = document.getElementById("City");
+                this.value = value
+                    .toLowerCase()
+                    .replace(/\b\w/g, function (letter) {
+                        return letter.toUpperCase();
+                    });
 
-			if (city) {
-				city.addEventListener("input", function () {
+            });
+        }
 
-					let value = this.value;
+    });
 
-					this.value = value
-						.toLowerCase()
-						.replace(/\b\w/g, function (letter) {
-							return letter.toUpperCase();
-						});
-
-				});
-			}
-
-		});
-
-	</script>
-}
+</script>

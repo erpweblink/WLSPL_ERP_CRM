@@ -17,11 +17,31 @@
 
 
     .btn {
-        border-radius: 10px;
-        padding: 10px 25px;
-        width: 100%;
-        margin-bottom: 10px;
+        border-radius: 8px;
+        height: 43px;
+        font-weight: 600;
+        transition: .3s;
     }
+
+    .btn-success {
+        background: #198754;
+        border: none;
+    }
+
+        .btn-success:hover {
+            background: #157347;
+            transform: translateY(-2px);
+        }
+
+    .btn-danger {
+        background: #dc3545;
+        border: none;
+    }
+
+        .btn-danger:hover {
+            background: #bb2d3b;
+            transform: translateY(-2px);
+        }
 
 </style>
 
@@ -345,7 +365,7 @@
 
                 <div class="col-md-3 text-start">
                     <a asp-action="Index"
-                       class="btn btn-secondary btn-sm px-3">
+                       class="btn btn-danger">
                         <i class="fa fa-arrow-left me-1"></i>
                         Back
                     </a>

@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
 using WEBLINK_CRM.Models;
 
@@ -14,37 +15,43 @@ namespace WEBLINK_CRM.repository
             _configuration = configuration;
         }
 
-        public async Task<int> Delete(string ID, string CreatedBy)
-        {
-            using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_String")))
-            {
-                await connection.OpenAsync();
-
-                var itemParameters = new DynamicParameters();
-                itemParameters.Add("@id", ID);
-                itemParameters.Add("@Action", "Deleteservices");
-                itemParameters.Add("@Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
-
-                await connection.ExecuteAsync("SP_Quotation", itemParameters, commandType: CommandType.StoredProcedure);
-
-                int result = itemParameters.Get<int>("@Result");
-                return result;
-            }
-        }
-
-
-        public async Task<List<Services>> GetDepartment(string action)
+        public async Task<int> DeleteServices(string ID, string UpdatedBy)
         {
             using (var connection = new SqlConnection(
-                _configuration.GetConnectionString("Conn_String")))
+                _configuration.GetConnectionString("Conn_Stringg")))
             {
                 await connection.OpenAsync();
 
                 var parameters = new DynamicParameters();
-                parameters.Add("@Action", action);
 
-                var result = await connection.QueryAsync<Services>(
-                    "SP_Quotation",
+                parameters.Add("@ID", ID);
+                parameters.Add("@UpdatedBy", UpdatedBy);
+                parameters.Add("@Action", "DeleteRecords");
+
+                var result = await connection.QuerySingleAsync<int>(
+                    "SP_Services",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result;
+            }
+        }
+        public async Task<List<Department>> Getdepartments(
+            Department model,
+            string Action)
+        {
+            using (var connection = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg")))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+
+                parameters.Add("@Action", Action);
+
+                var result = await connection.QueryAsync<Department>(
+                    "SP_Department",
                     parameters,
                     commandType: CommandType.StoredProcedure
                 );
@@ -52,35 +59,92 @@ namespace WEBLINK_CRM.repository
                 return result.ToList();
             }
         }
-        public async Task<int?> Submitservices(Services Model, string Action)
+
+
+
+        public async Task<Services> GetServicesById(string ID)
+        
         {
-            using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_String")))
+            try
             {
+                using var connection = new SqlConnection(
+                    _configuration.GetConnectionString("Conn_Stringg"));
+
                 await connection.OpenAsync();
+
                 var parameters = new DynamicParameters();
-                parameters.Add("@id", Model.ID);
-                parameters.Add("@Department", Model.DepartmentName);
-                parameters.Add("@ServicesDesc", Model.ServicesDesc);
-                parameters.Add("@Price", Model.Price);
-                parameters.Add("@Currency", Model.Currency);
-                parameters.Add("@Action", Action);
-                parameters.Add("@TypeofIndustry", Model.TypeofIndustry);
-                parameters.Add("@pagesize", Model.pagesize);
-                parameters.Add("@Typeofwebsite", Model.Typeofwebsite);
-                parameters.Add("@Years", Model.Years);
-                parameters.Add("@City", Model.City);
-                parameters.Add("@Keywords", Model.Keywords);
-                parameters.Add("@CreatedBy", Model.CreatedBy);
-                parameters.Add("@Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
-                await connection.ExecuteAsync("SP_Quotation", parameters, commandType: CommandType.StoredProcedure);
-                int isSuccess = parameters.Get<int>("@Result");
-                return isSuccess;
+
+                parameters.Add("@ID", ID);
+                parameters.Add("@Action", "GetByID");
+
+                var data = await connection.QueryFirstOrDefaultAsync<Services>(
+                    "SP_Services",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return data;
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 
-        Task<List<Services>> IServicesRepo.GetDepartment(string Action)
+        public async Task<int> SubmitServices(Services Model, string Action)
         {
-            throw new NotImplementedException();
+            using (var connection = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg")))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+
+                parameters.Add("@Action", Action);
+                parameters.Add("@ID", Model.ID);
+                parameters.Add("@ServiceName", Model.ServiceName);
+                parameters.Add("@ServiceCode", Model.ServiceCode);
+                parameters.Add("@ServicesDesc", Model.ServicesDesc);
+                parameters.Add("@Price", Model.Price);
+                parameters.Add("@Currency", Model.Currency);
+                parameters.Add("@Years", Model.Years);
+                parameters.Add("@City", Model.City);
+                parameters.Add("@IsActive", Model.IsActive);
+
+                parameters.Add("@DepartmentName", Model.DepartmentName);
+                parameters.Add("@CreatedBy", Model.CreatedBy);
+                parameters.Add("@UpdatedBy", Model.UpdatedBy);
+
+                var result = await connection.QueryFirstOrDefaultAsync<int>(
+                    "SP_Services",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result;
+            }
+        }
+
+
+        public async Task<List<Services>> GetServices(Services Model, string Action)
+        {
+            using (var connection = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg")))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+
+                parameters.Add("@Action", Action);
+
+                var result = await connection.QueryAsync<Services>(
+                    "SP_Services",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result.ToList();
+            }
         }
     }
 }

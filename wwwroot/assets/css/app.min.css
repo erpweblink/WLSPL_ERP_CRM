@@ -752,7 +752,7 @@ input.add-file-input {
 }
 
 :root {
-    --bs-topbar-height: 120px;
+    --bs-topbar-height: 100px;
     --bs-topbar-bg: #fff;
     --bs-topbar-b-border-color: #dee2e6;
     --bs-topbar-nav-icon-bg: #96a0b5;

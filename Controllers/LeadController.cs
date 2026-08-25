@@ -7,26 +7,29 @@ namespace WEBLINK_CRM.Controllers
     public class LeadController : Controller
     {
         private readonly ILeadRepository _leadRepository;
+        private readonly IinquiryRepo _inquiryRepository;
 
-        public LeadController(ILeadRepository leadRepository)
+        public LeadController(
+            IinquiryRepo inquiryRepo,
+            ILeadRepository leadRepository)
         {
+            _inquiryRepository = inquiryRepo;
             _leadRepository = leadRepository;
         }
-
         // GET: /Lead/Index
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             try
             {
-                var leads = _leadRepository.GetAllLeads();
+                var Lead = await _inquiryRepository.Getlead();
 
-                if (leads == null)
+                if (Lead == null)
                 {
-                    leads = new List<LeadGenration>();
+                    return NotFound();
                 }
 
-                return View(leads);
+                return View(Lead);
             }
             catch (Exception ex)
             {
@@ -34,8 +37,6 @@ namespace WEBLINK_CRM.Controllers
             }
         }
 
-        // GET: /Lead/CreateOrEdit
-        // GET: /Lead/CreateOrEdit/5
         [HttpGet]
         public IActionResult CreateOrEdit(int? id)
         {
@@ -123,11 +124,147 @@ namespace WEBLINK_CRM.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
         [HttpGet]
-        public IActionResult InquiryList()
+        public async Task<IActionResult> InquiryList()
+
         {
-            return View();
+            try
+            {
+
+
+                var apiInquiries =
+                    await _inquiryRepository.GetInquiries();
+
+                if (apiInquiries != null && apiInquiries.Any())
+                {
+                    foreach (var inquiry in apiInquiries)
+                    {
+                        await _inquiryRepository.Insertinquiry(
+                            inquiry,
+                            "Insert"
+                        );
+                    }
+                }
+
+
+                var inquiries =
+                    await _inquiryRepository.GetInquiriesFromDatabase();
+
+
+                var employees =
+                    await _inquiryRepository.GetSalesPersons();
+
+
+
+                var salesPersons =
+                 employees ?? new List<Employee>();
+
+                foreach (var inquiry in inquiries)
+                {
+                    inquiry.SalesPersons = salesPersons;
+                }
+
+                return View(inquiries);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+
+                return View(new List<Inquiry>());
+            }
+        }
+
+        public async Task<IActionResult> Whatsappinquiry()
+        {
+            // 1. Get inquiries from WhatsApp API
+            var apiInquiries =
+                await _inquiryRepository.GetWhatsappInquiries();
+
+            // 2. Save WhatsApp inquiries into database
+            if (apiInquiries != null && apiInquiries.Any())
+            {
+                foreach (var inquiry in apiInquiries)
+                {
+                    await _inquiryRepository.InsertWhatsappinquiry(
+                        inquiry,
+                        "Insertwhatsappinquiry"
+                    );
+                }
+            }
+
+            // 3. Get WhatsApp inquiries from database
+            var inquiries =
+                await _inquiryRepository.GetWhatsappInquiriesFromDatabase();
+
+            // 4. Get salespersons
+            var employees =
+                await _inquiryRepository.GetSalesPersons();
+
+            var salesPersons =
+                employees ?? new List<Employee>();
+
+            // 5. Attach salespersons to every inquiry
+            foreach (var inquiry in inquiries)
+            {
+                inquiry.SalesPersons = salesPersons;
+            }
+
+            // 6. Send to View
+            return View(inquiries);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> AssignSalesPerson(int inquiryId, string salesEmpCode, string Action)
+        {
+            try
+            {
+                if (inquiryId <= 0)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Invalid inquiry ID."
+                    });
+                }
+
+                if (string.IsNullOrWhiteSpace(salesEmpCode))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Please select a sales person."
+                    });
+                }
+
+                int result = await _inquiryRepository.AssignSalesPerson(
+                    inquiryId,
+                    salesEmpCode, Action
+                );
+
+                if (result > 0)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Sales person assigned successfully."
+                    });
+                }
+
+                return Json(new
+                {
+                    success = false,
+                    message = "Inquiry not found or assignment failed."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
         }
     }
 }
