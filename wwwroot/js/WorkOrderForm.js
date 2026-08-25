@@ -179,9 +179,7 @@
                     }
                 }
                 else {
-                    showToast(
-                        "Unable to load  details.", "error"
-                    );
+                
                 }
             },
             error: function (xhr, ajaxOptions, thrownError) {
@@ -536,9 +534,8 @@
                             }
                         }
                         else {
-                            showToast(
-                                "Unable to load  details.", "error"
-                            );
+                         
+                        
 
                         }
                     },
