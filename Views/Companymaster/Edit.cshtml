@@ -1,0 +1,454 @@
+﻿@model WEBLINK_CRM.Models.Companymaster
+
+@{
+    ViewData["Title"] = "Edit Company";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid mt-3">
+
+    <div class="card">
+
+        <div class="card-header bg-primary text-white">
+            <h3>
+                <i class="fa fa-building"></i>
+                Edit Company
+            </h3>
+        </div>
+
+
+        <div class="card-body p-4">
+
+            <form asp-action="Update" method="post" onsubmit="return validateForm();">
+
+                @Html.AntiForgeryToken()
+
+                <input asp-for="Id" type="hidden" />
+
+
+                <div class="row">
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">
+                            Company Code <span class="req">*</span>
+                        </label>
+
+                        <input asp-for="CCode"
+                               class="form-control"
+                               placeholder="Enter Company Code" />
+
+                        <span asp-validation-for="CCode"
+                              class="text-danger"></span>
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">
+                            Company Name <span class="req">*</span>
+                        </label>
+
+                        <input asp-for="CName"
+                               id="CName"
+                               class="form-control"
+                               placeholder="Enter Company Name" />
+
+                        <span asp-validation-for="CName"
+                              class="text-danger"></span>
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">
+                            Owner Name <span class="req">*</span>
+                        </label>
+
+                        <input asp-for="OName"
+                               class="form-control"
+                               placeholder="Enter Owner Name" />
+
+                        <span asp-validation-for="OName"
+                              class="text-danger"></span>
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">
+                            Email
+                        </label>
+
+                        <input asp-for="Email"
+                               class="form-control" />
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">
+                            Mobile
+                        </label>
+
+                        <input asp-for="Mobile"
+                               id="Mobile"
+                               maxlength="10"
+                               class="form-control" />
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">
+                            GST No
+                        </label>
+
+                        <input asp-for="GSTNo"
+                               id="GSTNo"
+                               maxlength="15"
+                               class="form-control"
+                               onblur="getGSTDetails()" />
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">
+                            Area
+                        </label>
+
+                        <input asp-for="Area"
+                               class="form-control" />
+                    </div>
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            State
+                        </label>
+
+                        <select asp-for="State"
+                                class="form-select"
+                                id="State">
+
+                            <option value="">
+                                -- Select State --
+                            </option>
+
+                            <option value="Andhra Pradesh">Andhra Pradesh</option>
+                            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                            <option value="Assam">Assam</option>
+                            <option value="Bihar">Bihar</option>
+                            <option value="Chhattisgarh">Chhattisgarh</option>
+                            <option value="Goa">Goa</option>
+                            <option value="Gujarat">Gujarat</option>
+                            <option value="Haryana">Haryana</option>
+                            <option value="Himachal Pradesh">Himachal Pradesh</option>
+                            <option value="Jharkhand">Jharkhand</option>
+                            <option value="Karnataka">Karnataka</option>
+                            <option value="Kerala">Kerala</option>
+                            <option value="Madhya Pradesh">Madhya Pradesh</option>
+                            <option value="Maharashtra">Maharashtra</option>
+                            <option value="Manipur">Manipur</option>
+                            <option value="Meghalaya">Meghalaya</option>
+                            <option value="Mizoram">Mizoram</option>
+                            <option value="Nagaland">Nagaland</option>
+                            <option value="Odisha">Odisha</option>
+                            <option value="Punjab">Punjab</option>
+                            <option value="Rajasthan">Rajasthan</option>
+                            <option value="Sikkim">Sikkim</option>
+                            <option value="Tamil Nadu">Tamil Nadu</option>
+                            <option value="Telangana">Telangana</option>
+                            <option value="Tripura">Tripura</option>
+                            <option value="Uttar Pradesh">Uttar Pradesh</option>
+                            <option value="Uttarakhand">Uttarakhand</option>
+                            <option value="West Bengal">West Bengal</option>
+
+                            <!-- Union Territories -->
+                            <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                            <option value="Chandigarh">Chandigarh</option>
+                            <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                            <option value="Delhi">Delhi</option>
+                            <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                            <option value="Ladakh">Ladakh</option>
+                            <option value="Lakshadweep">Lakshadweep</option>
+                            <option value="Puducherry">Puducherry</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Country Name
+                        </label>
+
+                        <select asp-for="CountryName"
+                                class="form-select"
+                                id="CountryName">
+
+                            <option value="">
+                                -- Select Country --
+                            </option>
+                            <option value="Afghanistan">Afghanistan</option>
+                            <option value="Australia">Australia</option>
+                            <option value="Bangladesh">Bangladesh</option>
+                            <option value="Brazil">Brazil</option>
+                            <option value="Canada">Canada</option>
+                            <option value="China">China</option>
+                            <option value="France">France</option>
+                            <option value="Germany">Germany</option>
+                            <option value="India">India</option>
+                            <option value="Indonesia">Indonesia</option>
+                            <option value="Italy">Italy</option>
+                            <option value="Japan">Japan</option>
+                            <option value="Malaysia">Malaysia</option>
+                            <option value="Mexico">Mexico</option>
+                            <option value="Nepal">Nepal</option>
+                            <option value="New Zealand">New Zealand</option>
+                            <option value="Pakistan">Pakistan</option>
+                            <option value="Russia">Russia</option>
+                            <option value="Saudi Arabia">Saudi Arabia</option>
+                            <option value="Singapore">Singapore</option>
+                            <option value="South Africa">South Africa</option>
+                            <option value="South Korea">South Korea</option>
+                            <option value="Spain">Spain</option>
+                            <option value="Sri Lanka">Sri Lanka</option>
+                            <option value="Switzerland">Switzerland</option>
+                            <option value="Thailand">Thailand</option>
+                            <option value="Turkey">Turkey</option>
+                            <option value="UAE">United Arab Emirates</option>
+                            <option value="United Kingdom">United Kingdom</option>
+                            <option value="United States">United States</option>
+                            <option value="Vietnam">Vietnam</option>
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Country Code
+                        </label>
+
+                        <input asp-for="CountryCode"
+                               class="form-control"
+                               placeholder="Country Code" />
+
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">
+                            Website
+                        </label>
+
+                        <input asp-for="Website"
+                               class="form-control" />
+                    </div>
+
+
+                    <div class="col-md-12 mb-3">
+
+                        <label class="form-label">
+                            Address
+                        </label>
+
+                        <textarea asp-for="Address"
+                                  class="form-control"
+                                  rows="3"></textarea>
+
+                    </div>
+
+
+                    <hr />
+
+                    <h5 class="text-primary">
+                        Billing Details
+                    </h5>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label>
+                            Billing Location
+                        </label>
+
+                        <input asp-for="BillingLocation"
+                               id="BillingLocation"
+                               class="form-control" />
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label>
+                            Billing Pincode
+                        </label>
+
+                        <input asp-for="BillingPincode"
+                               id="BillingPincode"
+                               class="form-control" />
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label>
+                            Billing State Code
+                        </label>
+
+                        <input asp-for="BillingStateCode"
+                               id="BillingStateCode"
+                               class="form-control" />
+
+                    </div>
+
+
+                    <div class="col-md-12 mb-3">
+
+                        <label>
+                            Billing Address
+                        </label>
+
+                        <textarea asp-for="Address"
+                                  id="BillingAddress"
+                                  class="form-control"></textarea>
+
+                    </div>
+
+
+
+                    <div class="form-check mb-3">
+
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="sameBilling"
+                               onchange="copyBillingToShipping()" />
+
+                        <label class="form-check-label">
+                            Shipping Same As Billing
+                        </label>
+
+                    </div>
+
+
+                    <hr />
+
+                    <h5 class="text-primary">
+                        Shipping Details
+                    </h5>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label>
+                            Shipping Location
+                        </label>
+
+                        <input asp-for="ShippingLocation"
+                               id="ShippingLocation"
+                               class="form-control" />
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label>
+                            Shipping Pincode
+                        </label>
+
+                        <input asp-for="ShippingPincode"
+                               id="ShippingPincode"
+                               class="form-control" />
+
+                    </div>
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label>
+                            Shipping State Code
+                        </label>
+
+                        <input asp-for="ShippingStateCode"
+                               id="ShippingStateCode"
+                               class="form-control" />
+
+                    </div>
+
+
+                    <div class="col-md-12 mb-3">
+
+                        <label>
+                            Shipping Address
+                        </label>
+
+                        <textarea asp-for="ShippingAddress"
+                                  id="ShippingAddress"
+                                  class="form-control"></textarea>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="mt-4">
+
+                    <button type="submit"
+                            class="btn btn-success">
+
+                        <i class="fa fa-save"></i>
+                        Update Company
+
+                    </button>
+
+
+                    <a asp-action="Index"
+                       class="btn btn-secondary">
+
+                        Back
+
+                    </a>
+
+                </div>
+
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        function copyBillingToShipping() {
+
+            if ($("#sameBilling").is(":checked")) {
+
+                $("#ShippingAddress").val($("#BillingAddress").val());
+                $("#ShippingLocation").val($("#BillingLocation").val());
+                $("#ShippingPincode").val($("#BillingPincode").val());
+                $("#ShippingStateCode").val($("#BillingStateCode").val());
+
+            }
+            else {
+
+                $("#ShippingAddress").val("");
+                $("#ShippingLocation").val("");
+                $("#ShippingPincode").val("");
+                $("#ShippingStateCode").val("");
+
+            }
+        }
+
+    </script>
+
+}

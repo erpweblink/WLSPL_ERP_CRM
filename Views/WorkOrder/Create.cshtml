@@ -1,0 +1,368 @@
+﻿@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- jQuery UI -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css" />
+
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+<!-- Select2 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- DataTables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" />
+
+<script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+<form id="WorkOrderform">
+    <div class="page-wrapper">
+        <div class="page-body">
+            <center>
+                <div id='loader' style='display: none;'>
+                    <img src="~/assets/images/loader.gif" class="loader-gif" />
+                </div>
+            </center>
+            <div class="container-fluid">
+                <div class="card">
+                    <div class="card-header  text-uppercase text-black"
+                         style="display:flex; align-items:center; justify-content:space-between;">
+
+                        <h5 style="color:black; margin:0;" id="lblHeader">
+                            Create Work Order
+                        </h5>
+
+                        <button type="button"
+                                class="btn btn-primary"
+                                onclick="window.history.back();">
+                            <i class="fa fa-arrow-left"></i> Back
+                        </button>
+
+                    </div>
+
+                    <div class="card" style="margin-top:20px;">
+                        <div class="card-header text-uppercase" style="background-color:#194462;color:white;"><b>Company Details</b></div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                 <div class="form-group row">
+                                        <input type="hidden" id="WorkOrderID" />
+                                        <div class="col-md-4 font-weight-bold spancls"><span class="text-danger">*</span>Company Name:</div>
+                                        <div class="col-md-8">
+                                            <select class="form-control ddlselect" id="ddlCompanyname" name="ddlCompanyname"></select>
+                                        </div>
+                                    </div>
+                                    <br />
+                                    <div class="form-group row">
+                                        <label for="ddlType" class="col-md-4 col-form-label font-weight-bold"><span class="text-danger">*</span>Type:</label>
+                                        <div class="col-md-8">
+                                            <select class="form-control" id="ddlType" name="ddlType">
+                                                <option value="">--Select Type--</option>
+                                                <option>WLSPL</option>
+                                                <option>WLS</option>
+                                            </select>
+                                        </div>
+                                        <br />
+                                    </div>
+
+                                    <!-- Add other form groups for company details -->
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group row">
+                                        <label for="ddlWOStatus" class="col-md-4 col-form-label font-weight-bold"><span class="text-danger">*</span>W.O. Status:</label>
+                                        <div class="col-md-8">
+                                            <select class="form-control" id="ddlWOStatus" name="ddlWOStatus">
+                                                <option value="">--Select Status--</option>
+                                                <option>New</option>
+                                                <option>Upgrade</option>
+                                                <option>Renewal</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4 font-weight-bold spancls"><span class="text-danger">*</span>Owner Name:</div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" placeholder="Owner Name" id="txtOwnerName" name="txtOwnerName" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group row">
+                                        <div class="col-md-4 font-weight-bold spancls"><span class="text-danger">*</span>Address :</div>
+                                        <div class="col-md-8">
+                                            <textarea ID="txtAddress" class="form-control" placeholder="Address" id="txtAddress" rows="2" name="txtAddress" readonly></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <div class="col-md-4 font-weight-bold spancls"><span class="text-danger">*</span>GST No. :</div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" placeholder="GST No." id="txtGSTNo" name="txtGSTNo" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                               @*      <div class="form-group row">
+                                        <div class="col-md-4 font-weight-bold spancls"><span class="text-danger">*</span>Work Order No. :</div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" placeholder="Work Order No." id="txtWorkOrderNo" name="txtWorkOrderNo" readonly>
+                                        </div>
+                                    </div> *@
+                                    <div class="form-group row">
+                                        <div class="col-md-4 font-weight-bold spancls"><span class="text-danger">*</span>Email ID :</div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" placeholder="Email ID" id="txtEmailID" name="txtEmailID" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group row">
+                                        <div class="col-md-4 font-weight-bold spancls"><span class="text-danger">*</span>Renewal Date :</div>
+                                        <div class="col-md-8">
+                                            <div class="input-group date">
+                                                <input type="text" class="form-control RDate" placeholder="Renewal Date" id="txtRenewalDate" name="txtRenewalDate">
+                                                <div class="input-group-addon">
+                                                    <span class="glyphicon glyphicon-th"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group row">
+                                        <div class="col-md-4 font-weight-bold spancls"><span class="text-danger">*</span>Today Date :</div>
+
+                                        <div class="col-md-8">
+                                            <div class="input-group date">
+                                                <input type="text" class="form-control Date" placeholder="Today's Date" id="txtTodayDate" name="txtTodayDate" readonly>
+                                                <div class="input-group-addon">
+                                                    <span class="glyphicon glyphicon-th"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="container-fluid">
+                            <div class="card">
+                                <div class="card-header text-uppercase" style="background-color:#194462;">
+                                    <h5 style="color:white">Add Services</h5>
+                                </div>
+                                <div class="container-fluid">
+                                    <div class="row">
+                                        <div class="col-md-12">
+
+                                            <div class="panel panel-default">
+                                                <div class="panel-body">
+
+                                                    <div class="table-responsive">
+                                                        <input type="hidden" id="rowID" />
+                                                        <table style="width:100%!important" id="tblsparedetails" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0">
+                                                            <thead class="clsthed">
+                                                                <tr>
+                                                                    <th>Service Name</th>
+                                                                    <th>Department</th>
+                                                                    <th>Remark</th>
+                                                                    <th>QTY</th>
+                                                                    <th>Year</th>
+                                                                    <th>Rate</th>
+                                                                    <th>Total</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    <td style="width: 30%;"><select class="form-control" id="ddlServicenname" name="ddlServicenname"></select><span id="spnQtyQuat" style="color:red;"></span></td>
+                                                                    <td><input type="text" class="form-control" id="txtDepartment" name="txtDepartment" readonly /></td>
+                                                                    <td><input type="text" class="form-control" id="txtRemark" name="txtRemark" /></td>
+                                                                    <td style="width: 7%;"><input type="text" class="form-control" value="1" id="txtQTY" name="txtQTY" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" /></td>
+                                                                    <td style="width: 10%;"><input type="text" class="form-control" value="1" id="txtYear" name="txtYear" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" /></td>
+                                                                    <td style="width: 10%;"><input type="text" class="form-control" id="txtRate" name="txtRate" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')" readonly /></td>
+                                                                    <td><input type="text" class="form-control" id="txtTotal" name="txtTotal" readonly="readonly" /></td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <div class="col-md-12" style="text-align:center">
+                                                            <input type="button" class="btn btn-primary btn-sm add-row1" value="Add Service" id="btnaddrow">
+                                                            <input type="button" class="btn btn-primary btn-sm update-row" style="display:none" value="Update Row" id="btnupdaterow">
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="table-responsive" style="display:none;" id="divtableservice">
+                                                        <center>
+                                                            <table style="width:100%!important" id="tblService" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0">
+                                                                <thead class="clsthead">
+                                                                    <tr>
+                                                                        <th style="width:10px;">Action</th>
+                                                                        <th>Service Name</th>
+                                                                        <th>Department</th>
+                                                                        <th>Remark</th>
+                                                                        <th>QTY</th>
+                                                                        <th>Year</th>
+                                                                        <th>Rate</th>
+                                                                        <th>Total</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody style="text-align:center"></tbody>
+
+                                                            </table>
+                                                            @*<button type="button" class="btn btn-danger btn-sm delete-row1"><i class="fa fa-trash"></i></button>*@
+                                                        </center>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header text-uppercase" style="background-color:#194462;color:white;"><b>Payment</b></div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <div class="row">
+                                            <div class="col-md-3 font-weight-bold spancls">Payment Mode  :</div>
+                                            <div class="col-md-6">
+                                                <select class="form-control ddlselect" id="ddlPaymentMode" name="ddlPaymentMode">
+                                                    <option value="">--Select Payment Mode--</option>
+                                                    <option>Online</option>
+                                                    <option>Cheque</option>
+                                                    <option>UPI</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <br />
+
+                                        <div class="form-group row">
+                                            <div class="col-md-2">
+                                                <label class="form-label font-weight-bold">Bank Name:</label>
+                                                <input type="text" class="form-control" id="txtBankName" name="txtBankName">
+                                            </div>
+                                            <div class="col-md-4">
+                                                <label class="form-label font-weight-bold">Cheque No./Transaction No.:</label>
+                                                <input type="text" class="form-control numeric" id="txtChequeNo" name="txtChequeNo">
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="form-label font-weight-bold">Date:</label>
+                                                <div class="input-group date">
+                                                    <input type="text" class="form-control Date" id="txtChequedate" name="txtChequedate">
+                                                    <div class="input-group-addon">
+                                                        <span class="glyphicon glyphicon-th"></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <label class="form-label font-weight-bold">Amount:</label>
+                                                <input type="text" class="form-control numeric" id="txtAmount" name="txtAmount">
+                                            </div>
+                                            <div class="col-md-1" style="margin-top:20px;">
+                                                <input type="button" class="btn btn-primary btn-sm add-row" value="ADD">
+                                            </div>
+                                        </div>
+                                        <br />
+                                        <div class="table-responsive" style="display:none;" id="divtable">
+                                            <table id="tblBankDetail" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0">
+                                                <thead class="clsthead">
+                                                    <tr>
+                                                        <th>Select</th>
+                                                        <th>Bank Name</th>
+                                                        <th>Cheque No./Transaction No.</th>
+                                                        <th>Date</th>
+                                                        <th>Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody></tbody>
+                                            </table>
+                                            <button type="button" class="btn btn-danger btn-sm delete-row"><i class="fa fa-trash"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="table-responsive">
+                                            <table style="width:100%!important" id="tblAccountDetails" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0">
+                                                <thead class="clsthead">
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td id="lblTotalDealBasicAmount">Total Deal Basic Amount</td>
+                                                        <td><input class="form-control numeric" value="0" id="txtTotalDealBasicAmount" name="txtTotalDealBasicAmount" /></td>
+                                                    </tr>
+                                                    <tr id="trTotalDealGSTAmount">
+                                                        <td>Total Deal GST Amount (<span id="spnGSTper"></span>%) </td>
+                                                        <td><input class="form-control" value="0" id="txtTotalDealGSTAmount" name="txtTotalDealGSTAmount" readonly /></td>
+                                                    </tr>
+                                                    <tr><td style="background-color:#194462;"></td><td style="background-color:#194462;"></td></tr>
+                                                    <tr>
+                                                        <td>Received Basic Amount</td>
+                                                        <td><input class="form-control numeric" id="txtBasicAmountReceived" name="txtBasicAmountReceived" value="0" /></td>
+                                                    </tr>
+                                                    <tr id="trGSTAmountReceived">
+                                                        <td>Received GST Amount</td>
+                                                        <td><input class="form-control numeric" id="txtGSTAmountReceived" name="txtGSTAmountReceived" value="0" /></td>
+                                                    </tr>
+                                                    <tr><td style="background-color:#194462;"></td><td style="background-color:#194462;"></td></tr>
+                                                    <tr>
+                                                        <td>Balance Basic Amount</td>
+                                                        <td><input class="form-control" id="txtBalanceBasicAmount" name="txtBalanceBasicAmount" value="0" readonly /></td>
+                                                    </tr>
+                                                    <tr id="trBalanceGSTAmount">
+                                                        <td>Balance GST Amount </td>
+                                                        <td><input class="form-control" id="txtBalanceGSTAmount" name="txtBalanceGSTAmount" value="0" readonly /></td>
+                                                    </tr>
+                                                    <tr><td style="background-color:#194462;"></td><td style="background-color:#194462;"></td></tr>
+                                                    <tr>
+                                                        <td>Balance Total Amount</td>
+                                                        <td><input class="form-control" id="txtTotalAmountBalance" name="txtTotalAmountBalance" readonly /></td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <center>
+                                <button type="submit" id="btnSubmit" class="btn btn-primary">Save</button>
+                                <a href="~/WorkOrder/Index">
+                                    <input type="button" id="btnCancel" value="Cancel" class="btn btn-warning" />
+                                </a>
+                            </center>
+                        </div>
+                        <br />
+                        <br />
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {   
+    <script src="~/js/WorkOrderForm.js"></script>
+    <script type="text/javascript">
+         $(document).ready(function () {
+
+                 $('.ddlselect').select2({
+            selectOnClose: true
+        });
+        $(document).ready(function ($) {         
+            GetWorkOrderForm.init();
+        });
+    </script>
+
+}
+

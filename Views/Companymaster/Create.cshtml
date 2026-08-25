@@ -1,0 +1,1389 @@
+﻿@model  WEBLINK_CRM.Models.Companymaster
+
+@{
+    ViewData["Title"] = "Create Company";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+
+
+<style>
+
+    body {
+        background: #f5f7fb;
+        font-family: 'Segoe UI',sans-serif;
+    }
+
+
+    .card {
+        border: none;
+        border-radius: 18px;
+        box-shadow: 0 8px 25px rgba(0,0,0,.08);
+    }
+
+
+    .card-header {
+        background: #0d6efd;
+        color: white;
+        padding: 20px;
+        border-radius: 18px 18px 0 0 !important;
+    }
+
+
+        .card-header h3 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+
+    .form-label {
+        font-weight: 600;
+    }
+
+
+    .form-control,
+    .form-select {
+        height: 45px;
+        border-radius: 10px;
+    }
+
+
+    textarea.form-control {
+        height: auto;
+    }
+
+
+    .btn {
+        border-radius: 10px;
+        padding: 10px 25px;
+    }
+
+
+    .text-danger {
+        font-size: 13px;
+    }
+
+
+    .req {
+        color: red;
+    }
+
+</style>
+
+
+
+<div class="container-fluid mt-3">
+
+
+    <div class="card">
+
+
+        <div class="card-header">
+
+            <h3>
+                <i class="fa fa-building"></i>
+                Create New Company
+            </h3>
+
+        </div>
+
+
+
+        <div class="card-body p-4">
+
+
+
+            <form asp-action="Create" method="post" onsubmit="return validateForm();">
+
+                @Html.AntiForgeryToken()
+
+
+
+                <div class="row">
+
+
+
+              
+
+                    <!-- Register Type -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Register Type
+                        </label>
+
+
+                        <select asp-for="RegisterType"
+                                class="form-select" onchange="checkRegisterType()">
+
+
+                            <option value="">
+                                Select Type
+                            </option>
+
+                            <option value="WLSPL">
+                                WLSPL
+                            </option>
+
+                            <option value="WLS">
+                                WLS
+                            </option>
+
+
+
+                        </select>
+
+
+                    </div>
+
+                    <!-- GST -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            GST No
+                        </label>
+
+                        <input asp-for="GSTNo"
+                               id="GSTNo"
+                               maxlength="15"
+                               class="form-control"
+                               placeholder="Enter GST Number"
+                               onblur="getGSTDetails()" />
+
+
+
+                        <span asp-validation-for="GSTNo"
+                              class="text-danger"></span>
+                        <a href="https://services.gst.gov.in/services/searchtp" target="_blank" class="btn btn-link">(Check GST Number)</a>
+
+                    </div>
+
+                    <!-- Company Name -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Company Name <span class="req">*</span>
+                        </label>
+
+
+                        <input asp-for="CName"
+                               id="CName"
+                               class="form-control"
+                               placeholder="Enter Company Name" />
+
+
+                        <span asp-validation-for="CName"
+                              class="text-danger"></span>
+
+
+                    </div>
+
+
+
+
+                    <!-- Owner Name -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Owner Name <span class="req">*</span>
+                        </label>
+
+
+                        <input asp-for="OName"
+                               class="form-control"
+                               placeholder="Enter Owner Name" />
+
+
+                        <span asp-validation-for="OName"
+                              class="text-danger"></span>
+
+                    </div>
+
+
+
+
+                    <!-- Email -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Email <span class="req">*</span>
+                        </label>
+
+
+                        <input asp-for="Email"
+                               class="form-control"
+                               placeholder="Enter Email" />
+
+
+                        <span asp-validation-for="Email"
+                              class="text-danger"></span>
+
+
+                    </div>
+
+
+
+
+                    <!-- Mobile -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Mobile <span class="req">*</span>
+                        </label>
+
+
+                        <input asp-for="Mobile"
+                               id="Mobile"
+                               maxlength="10"
+                               class="form-control"
+                               placeholder="Enter Mobile Number" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0,10);" />
+
+
+                        <span asp-validation-for="Mobile"
+                              class="text-danger"></span>
+
+
+                    </div>
+
+                    <!-- Category -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Category
+                        </label>
+
+
+                        <input asp-for="Category"
+                               class="form-control"
+                               placeholder="Enter Category" />
+
+                    </div>
+
+
+
+
+
+                    <!-- BDE -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            BDE
+                        </label>
+
+
+                        <input asp-for="BDE"
+                               class="form-control"
+                               placeholder="Enter BDE Name" />
+
+
+                    </div>
+
+
+
+
+
+                    <!-- Area -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Area <span class="req">*</span>
+                        </label>
+
+
+                        <input asp-for="Area"
+                               class="form-control"
+                               placeholder="Enter Area" />
+
+
+                        <span asp-validation-for="Area"
+                              class="text-danger"></span>
+
+
+                    </div>
+
+
+
+                    <!-- Country -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Country Name
+                        </label>
+
+                        <select asp-for="CountryName"
+                                class="form-select"
+                                id="CountryName">
+
+                            <option value="">
+                                -- Select Country --
+                            </option>
+
+                            <option value="Afghanistan">Afghanistan</option>
+                            <option value="Australia">Australia</option>
+                            <option value="Bangladesh">Bangladesh</option>
+                            <option value="Brazil">Brazil</option>
+                            <option value="Canada">Canada</option>
+                            <option value="China">China</option>
+                            <option value="France">France</option>
+                            <option value="Germany">Germany</option>
+                            <option value="India">India</option>
+                            <option value="Indonesia">Indonesia</option>
+                            <option value="Italy">Italy</option>
+                            <option value="Japan">Japan</option>
+                            <option value="Malaysia">Malaysia</option>
+                            <option value="Mexico">Mexico</option>
+                            <option value="Nepal">Nepal</option>
+                            <option value="New Zealand">New Zealand</option>
+                            <option value="Pakistan">Pakistan</option>
+                            <option value="Russia">Russia</option>
+                            <option value="Saudi Arabia">Saudi Arabia</option>
+                            <option value="Singapore">Singapore</option>
+                            <option value="South Africa">South Africa</option>
+                            <option value="South Korea">South Korea</option>
+                            <option value="Spain">Spain</option>
+                            <option value="Sri Lanka">Sri Lanka</option>
+                            <option value="Switzerland">Switzerland</option>
+                            <option value="Thailand">Thailand</option>
+                            <option value="Turkey">Turkey</option>
+                            <option value="UAE">United Arab Emirates</option>
+                            <option value="United Kingdom">United Kingdom</option>
+                            <option value="United States">United States</option>
+                            <option value="Vietnam">Vietnam</option>
+
+                        </select>
+
+                    </div>
+
+                    <!-- State -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            State <span class="req">*</span>
+                        </label>
+
+                        <select asp-for="State"
+                                class="form-select"
+                                id="State">
+
+                            <option value="">
+                                -- Select State --
+                            </option>
+
+                            <option value="Andhra Pradesh">Andhra Pradesh</option>
+                            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                            <option value="Assam">Assam</option>
+                            <option value="Bihar">Bihar</option>
+                            <option value="Chhattisgarh">Chhattisgarh</option>
+                            <option value="Goa">Goa</option>
+                            <option value="Gujarat">Gujarat</option>
+                            <option value="Haryana">Haryana</option>
+                            <option value="Himachal Pradesh">Himachal Pradesh</option>
+                            <option value="Jharkhand">Jharkhand</option>
+                            <option value="Karnataka">Karnataka</option>
+                            <option value="Kerala">Kerala</option>
+                            <option value="Madhya Pradesh">Madhya Pradesh</option>
+                            <option value="Maharashtra">Maharashtra</option>
+                            <option value="Manipur">Manipur</option>
+                            <option value="Meghalaya">Meghalaya</option>
+                            <option value="Mizoram">Mizoram</option>
+                            <option value="Nagaland">Nagaland</option>
+                            <option value="Odisha">Odisha</option>
+                            <option value="Punjab">Punjab</option>
+                            <option value="Rajasthan">Rajasthan</option>
+                            <option value="Sikkim">Sikkim</option>
+                            <option value="Tamil Nadu">Tamil Nadu</option>
+                            <option value="Telangana">Telangana</option>
+                            <option value="Tripura">Tripura</option>
+                            <option value="Uttar Pradesh">Uttar Pradesh</option>
+                            <option value="Uttarakhand">Uttarakhand</option>
+                            <option value="West Bengal">West Bengal</option>
+
+                            <!-- Union Territories -->
+                            <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                            <option value="Chandigarh">Chandigarh</option>
+                            <option value="Dadra and Nagar Haveli and Daman and Diu">Dadra and Nagar Haveli and Daman and Diu</option>
+                            <option value="Delhi">Delhi</option>
+                            <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                            <option value="Ladakh">Ladakh</option>
+                            <option value="Lakshadweep">Lakshadweep</option>
+                            <option value="Puducherry">Puducherry</option>
+
+                        </select>
+
+
+                        <span asp-validation-for="State"
+                              class="text-danger"></span>
+
+                    </div>
+
+
+
+
+
+             
+
+
+
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Country Code
+                        </label>
+
+
+                        <input asp-for="CountryCode"
+                               class="form-control"
+                               placeholder="Country Code" />
+
+
+                    </div>
+
+
+                    <!-- Address -->
+
+                    <div class="col-md-6 mb-3">
+
+                        <label class="form-label">
+                            Address <span class="req">*</span>
+                        </label>
+
+
+<textarea asp-for="Address"
+          class="form-control"
+          rows="3"
+          placeholder="Enter Address"></textarea>
+
+
+                        <span asp-validation-for="Address"
+                              class="text-danger"></span>
+
+
+                    </div>
+
+
+
+
+
+                    <!-- Website -->
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+                            Website
+                        </label>
+
+
+                        <input asp-for="Website"
+                               class="form-control"
+                               placeholder="Enter Website" />
+
+
+                    </div>
+
+
+
+
+
+                    <!-- Visit Date -->
+
+                    <div class="col-md-3 mb-3">
+
+                        <label class="form-label">
+                            Visit Date
+                        </label>
+
+
+                        <input asp-for="VisitDate"
+                               type="date"
+                               class="form-control" />
+
+
+                    </div>
+
+
+
+
+
+              
+
+
+                    <!-- Supply Type -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Type Of Supply
+                        </label>
+
+
+                        <select asp-for="EInvTypeOfSupply"
+                                class="form-select">
+
+
+                            <option value="">
+                                Select Supply
+                            </option>
+
+
+                            <option value="B2B">
+                                B2B
+                            </option>
+
+
+                            <option value="B2C">
+                                B2C
+                            </option>
+
+
+                            <option value="SEZ">
+                                SEZ
+                            </option>
+
+
+                            <option value="Export">
+                                Export
+                            </option>
+
+
+                        </select>
+
+
+                    </div>
+
+
+
+
+
+                    <!-- Status -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Status
+                        </label>
+
+
+                        <select asp-for="Status"
+                                class="form-select">
+
+
+                            <option value="true">
+                                Active
+                            </option>
+
+
+                            <option value="false">
+                                Inactive
+                            </option>
+
+
+                        </select>
+
+
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">
+                            Client Type
+                        </label>
+
+                        <select asp-for="type" class="form-select">
+                            <option value="">-- Select Client Type --</option>
+                            <option value="Paid">Paid</option>
+                            <option value="Un-Paid">Un-Paid</option>
+                            <option value="Downloaded">Downloaded</option>
+                        </select>
+
+                        <span asp-validation-for="type"
+                              class="text-danger"></span>
+                    </div>
+
+
+
+                    <hr />
+
+                    <h5 class="text-primary">
+                        Billing Details
+                    </h5>
+
+
+
+                    <!-- Billing Location -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Billing Location
+                        </label>
+
+
+                        <input asp-for="BillingLocation"
+                               id="BillingLocation"
+                               class="form-control"
+                               placeholder="Billing Location" />
+
+
+                    </div>
+
+
+
+
+
+                    <!-- Billing Pincode -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Billing Pincode
+                        </label>
+
+
+                        <input asp-for="BillingPincode"
+                               id="BillingPincode"
+                               maxlength="6"
+                               class="form-control"
+                               placeholder="Billing Pincode" />
+
+
+                    </div>
+
+
+
+
+
+                    <!-- Billing State Code -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Billing State Code
+                        </label>
+
+
+                        <input asp-for="BillingStateCode"
+                               id="BillingStateCode"
+                               class="form-control"
+                               placeholder="State Code" />
+
+
+                    </div>
+
+
+
+
+
+                    <div class="col-md-12 mb-3">
+
+                        <label class="form-label">
+                            Billing Address
+                        </label>
+
+
+<textarea asp-for="Address"
+          id="BillingAddress"
+          class="form-control"
+          rows="3"></textarea>
+
+
+                    </div>
+
+
+
+
+
+                    <div class="form-check mb-3">
+
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="sameBilling" onchange="copyBillingToShipping()">
+
+
+                        <label class="form-check-label">
+
+                            Shipping Same As Billing
+
+                        </label>
+
+
+                    </div>
+
+
+
+
+
+                    <hr />
+
+                    <h5 class="text-primary">
+                        Shipping Details
+                    </h5>
+
+
+
+
+                    <!-- Shipping Location -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Shipping Location
+                        </label>
+
+
+                        <input asp-for="ShippingLocation"
+                               id="ShippingLocation"
+                               class="form-control"
+                               placeholder="Shipping Location" />
+
+
+                    </div>
+
+
+
+
+
+                    <!-- Shipping Pincode -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Shipping Pincode
+                        </label>
+
+
+                        <input asp-for="ShippingPincode"
+                               id="ShippingPincode"
+                               maxlength="6"
+                               class="form-control"
+                               placeholder="Shipping Pincode" />
+
+
+                    </div>
+
+
+
+
+
+                    <!-- Shipping State -->
+
+                    <div class="col-md-4 mb-3">
+
+                        <label class="form-label">
+                            Shipping State Code
+                        </label>
+
+
+                        <input asp-for="ShippingStateCode"
+                               id="ShippingStateCode"
+                               class="form-control"
+                               placeholder="State Code" />
+
+
+                    </div>
+
+
+
+
+
+                    <div class="col-md-12 mb-3">
+
+                        <label class="form-label">
+                            Shipping Address
+                        </label>
+
+
+<textarea asp-for="ShippingAddress"
+          id="ShippingAddress"
+          class="form-control"
+          rows="3"></textarea>
+
+
+                    </div>
+
+
+
+
+                </div>
+
+
+
+                <div class="mt-4">
+
+
+                    <button type="submit"
+                            class="btn btn-success">
+
+                        <i class="fa fa-save"></i>
+
+                        Save Company
+
+                    </button>
+
+
+
+                    <a asp-action="Index"
+                       class="btn btn-secondary">
+
+                        <i class="fa fa-arrow-left"></i>
+
+                        Back
+
+                    </a>
+
+
+                </div>
+
+
+
+            </form>
+
+
+
+        </div>
+
+
+    </div>
+
+
+</div>
+
+
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+
+        function validateForm() {
+
+            let isValid = true;
+
+
+            // Clear old messages
+            $(".text-danger").text("");
+
+            $(".form-control, .form-select")
+                .removeClass("is-invalid");
+
+
+
+            // ==========================
+            // Mandatory Fields
+            // ==========================
+
+            let requiredFields = [
+                "CCode",
+                "CName",
+                "OName",
+                "Email",
+                "Mobile",
+                "Area",
+                "CountryName",
+                "Address",
+                "RegisterType",
+                "EInvTypeOfSupply",
+                "Status"
+            ];
+
+
+            requiredFields.forEach(function(fieldName){
+
+                let field = $("[name='" + fieldName + "']");
+
+
+                if(field.length > 0)
+                {
+
+                    if(field.val() == null || field.val().trim() == "")
+                    {
+
+                        field.addClass("is-invalid");
+
+
+                        $("[data-valmsg-for='" + fieldName + "']")
+                        .text(fieldName + " is required");
+
+
+                        isValid = false;
+
+                    }
+
+                }
+
+            });
+
+
+
+
+
+            // ==========================
+            // Mobile Validation
+            // ==========================
+
+            let mobile = $("#Mobile").val();
+
+
+            if(mobile != null && mobile != "")
+            {
+
+                if(mobile.length != 10)
+                {
+
+                    $("#Mobile")
+                    .addClass("is-invalid");
+
+
+                    $("[data-valmsg-for='Mobile']")
+                    .text("Mobile number must be 10 digits");
+
+
+                    isValid = false;
+
+                }
+
+            }
+
+
+
+
+
+            // ==========================
+            // Register Type GST Validation
+            // ==========================
+
+            let registerType = $("#RegisterType").val();
+
+            let gstNo = $("#GSTNo").val().trim();
+
+
+
+            if(registerType == "WLSPL")
+            {
+
+                if(gstNo == "")
+                {
+
+                    $("#GSTNo")
+                    .addClass("is-invalid");
+
+
+                    $("[data-valmsg-for='GSTNo']")
+                    .text("GST Number is required for WLSPL");
+
+
+                    isValid = false;
+
+                }
+                else if(gstNo.length != 15)
+                {
+
+                    $("#GSTNo")
+                    .addClass("is-invalid");
+
+
+                    $("[data-valmsg-for='GSTNo']")
+                    .text("GST Number must be 15 digits");
+
+
+                    isValid = false;
+
+                }
+
+            }
+
+
+
+            if(registerType == "WLS")
+            {
+
+                $("#GSTNo")
+                .removeClass("is-invalid");
+
+
+                $("[data-valmsg-for='GSTNo']")
+                .text("");
+
+            }
+
+
+
+
+
+
+            // ==========================
+            // Country Wise State Validation
+            // ==========================
+
+            let country = $("#CountryName").val();
+
+            let state = $("#State").val();
+
+
+
+            if(country == "India")
+            {
+
+                if(state == null || state.trim() == "")
+                {
+
+                    $("#State")
+                    .addClass("is-invalid");
+
+
+                    $("[data-valmsg-for='State']")
+                    .text("State is required for India");
+
+
+                    isValid = false;
+
+                }
+
+            }
+            else
+            {
+
+                $("#State")
+                .removeClass("is-invalid");
+
+
+                $("[data-valmsg-for='State']")
+                .text("");
+
+            }
+
+
+
+
+
+            // ==========================
+            // Scroll To Error
+            // ==========================
+
+            if(!isValid)
+            {
+
+                window.scrollTo({
+
+                    top:0,
+
+                    behavior:"smooth"
+
+                });
+
+            }
+
+
+
+            return isValid;
+
+        }
+
+    </script>
+
+}
+
+
+<script>
+     function getGSTDetails() {
+
+         debugger
+
+        var gstNo = $("#GSTNo").val().trim();
+
+
+
+        fetch(`/Companymaster/GetGSTDetails?gstNo=${gstNo}`)
+            .then(res => res.json())
+            .then(data => {
+
+                if (data.success) {
+
+                    // Company Name
+                    $("#CName").val(data.tradeName || "");
+
+                    // Billing Details
+                    $("#BillingAddress").val(data.address || "");
+
+                    $("#BillingLocation").val(data.location || "");
+
+                    $("#BillingPincode").val(data.pincode || "");
+
+                    $("#BillingStateCode").val(data.stateCode || "");
+
+                }
+                else {
+
+                    alert(data.message || "GST details not found");
+
+                    $("#CName").val("");
+
+                    $("#BillingAddress").val("");
+
+                    $("#BillingLocation").val("");
+
+                    $("#BillingPincode").val("");
+
+                    $("#BillingStateCode").val("");
+
+                }
+
+            })
+            .catch(function(error){
+
+                console.log(error);
+
+                alert("GST API error");
+
+            });
+
+    }
+</script>
+
+<script>
+                            // Copy Billing Details To Shipping Details
+
+    function copyBillingToShipping() {
+
+
+        if ($("#sameBilling").is(":checked")) {
+
+
+            $("#ShippingAddress").val(
+                $("#BillingAddress").val()
+            );
+
+
+            $("#ShippingLocation").val(
+                $("#BillingLocation").val()
+            );
+
+
+            $("#ShippingPincode").val(
+                $("#BillingPincode").val()
+            );
+
+
+            $("#ShippingStateCode").val(
+                $("#BillingStateCode").val()
+            );
+
+
+        }
+        else {
+
+
+            $("#ShippingAddress").val("");
+
+            $("#ShippingLocation").val("");
+
+            $("#ShippingPincode").val("");
+
+            $("#ShippingStateCode").val("");
+
+
+        }
+
+    }
+</script>
+
+<script>
+                    function checkRegisterType() {
+
+        var registerType = $("#RegisterType").val();
+
+        if (registerType == "WLSPL") {
+
+            // GST Mandatory
+            $("#gstRequired").show();
+
+        }
+        else if (registerType == "WLS") {
+
+            // GST Optional
+            $("#gstRequired").hide();
+
+            $("#GSTNo").removeClass("is-invalid");
+
+            $("[data-valmsg-for='GSTNo']").text("");
+
+        }
+        else {
+
+            $("#gstRequired").hide();
+
+        }
+
+    }
+</script>
+
+<script>
+
+    const countryStates = {
+
+        "India": [
+            "Andhra Pradesh",
+            "Arunachal Pradesh",
+            "Assam",
+            "Bihar",
+            "Chhattisgarh",
+            "Goa",
+            "Gujarat",
+            "Haryana",
+            "Himachal Pradesh",
+            "Jharkhand",
+            "Karnataka",
+            "Kerala",
+            "Madhya Pradesh",
+            "Maharashtra",
+            "Manipur",
+            "Meghalaya",
+            "Mizoram",
+            "Nagaland",
+            "Odisha",
+            "Punjab",
+            "Rajasthan",
+            "Sikkim",
+            "Tamil Nadu",
+            "Telangana",
+            "Tripura",
+            "Uttar Pradesh",
+            "Uttarakhand",
+            "West Bengal",
+            "Delhi",
+            "Jammu and Kashmir",
+            "Ladakh",
+            "Puducherry"
+        ],
+
+        "Australia": [
+            "New South Wales",
+            "Queensland",
+            "South Australia",
+            "Tasmania",
+            "Victoria",
+            "Western Australia",
+            "Northern Territory",
+            "Australian Capital Territory"
+        ],
+
+        "Canada": [
+            "Alberta",
+            "British Columbia",
+            "Manitoba",
+            "New Brunswick",
+            "Newfoundland and Labrador",
+            "Nova Scotia",
+            "Ontario",
+            "Prince Edward Island",
+            "Quebec",
+            "Saskatchewan"
+        ],
+
+        "United States": [
+            "Alabama",
+            "Alaska",
+            "Arizona",
+            "California",
+            "Florida",
+            "New York",
+            "Texas",
+            "Washington"
+        ],
+
+        "United Kingdom": [
+            "England",
+            "Scotland",
+            "Wales",
+            "Northern Ireland"
+        ]
+
+    };
+
+
+    const countryDropdown =
+        document.getElementById("CountryName");
+
+    const stateDropdown =
+        document.getElementById("State");
+
+    const countryCode =
+        document.getElementById("CountryCode");
+
+
+    countryDropdown.addEventListener("change", function () {
+
+        const country = this.value;
+
+        // ============================
+        // COUNTRY CODE
+        // ============================
+
+        const selectedOption =
+            this.options[this.selectedIndex];
+
+        const code =
+            selectedOption.getAttribute("data-code");
+
+        countryCode.value = code || "";
+
+
+        // ============================
+        // STATE
+        // ============================
+
+        stateDropdown.innerHTML =
+            '<option value="">-- Select State --</option>';
+
+
+        if (countryStates[country]) {
+
+            countryStates[country].forEach(function (state) {
+
+                const option =
+                    document.createElement("option");
+
+                option.value = state;
+                option.textContent = state;
+
+                stateDropdown.appendChild(option);
+
+            });
+
+        }
+
+    });
+
+
+    // ============================
+    // DEFAULT INDIA
+    // ============================
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        countryDropdown.value = "India";
+
+        countryDropdown.dispatchEvent(
+            new Event("change")
+        );
+
+        // Default Maharashtra
+        stateDropdown.value = "Maharashtra";
+
+    });
+
+</script>

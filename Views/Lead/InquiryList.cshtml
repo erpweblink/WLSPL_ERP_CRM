@@ -1,0 +1,1402 @@
+﻿@{
+    ViewData["Title"] = "Inquiry List";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1" />
+
+    <title>Inquiry List</title>
+
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet" />
+
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+          rel="stylesheet" />
+
+
+    <!-- SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    <style>
+
+        body {
+            background: #f4f6f9;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+
+        /* Main Card */
+
+        .main-card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,.08);
+            background: #ffffff;
+        }
+
+
+        /* Header */
+
+        .card-header-custom {
+            background: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 18px 20px;
+        }
+
+
+        .page-title {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+
+        .page-title i {
+            color: #0d6efd;
+            margin-right: 8px;
+        }
+
+
+        /* Fetch Button */
+
+        .btn-fetch {
+            background: #0d6efd;
+            border: none;
+            color: white;
+            padding: 9px 18px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+
+        .btn-fetch:hover {
+            background: #0b5ed7;
+            color: white;
+        }
+
+
+        .btn-fetch:disabled {
+            opacity: .7;
+            cursor: not-allowed;
+        }
+
+
+        .btn-fetch i {
+            margin-right: 6px;
+        }
+
+
+        /* Refresh Animation */
+
+        .btn-fetch.loading i {
+            animation: spin 1s linear infinite;
+        }
+
+
+        @@keyframes spin {
+
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+
+        }
+
+
+        /* Status */
+
+        #statusMessage {
+            font-size: 14px;
+            margin-left: 10px;
+        }
+
+
+        #statusMessage.loading {
+            color: #0d6efd;
+        }
+
+
+        #statusMessage.success {
+            color: #198754;
+        }
+
+
+        #statusMessage.error {
+            color: #dc3545;
+        }
+
+
+        /* Search */
+
+        .search-box {
+            max-width: 350px;
+        }
+
+
+        .search-box i {
+            color: #6c757d;
+        }
+
+
+        /* Record Count */
+
+        .record-info {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+
+        .record-info strong {
+            color: #0d6efd;
+        }
+
+
+        /* Table */
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+
+        #dataTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+
+        #dataTable th,
+        #dataTable td {
+
+            padding: 12px;
+
+            text-align: left;
+
+            border-bottom: 1px solid #dee2e6;
+
+            font-size: 13px;
+
+            vertical-align: middle;
+
+            white-space: nowrap;
+
+        }
+
+
+        #dataTable thead th {
+
+            background: #2c3e50;
+
+            color: white;
+
+            font-weight: 600;
+
+            border: none;
+
+        }
+
+
+        #dataTable tbody tr:hover {
+
+            background-color: #f8f9fa;
+
+        }
+
+
+        /* ID */
+
+        .id-badge {
+
+            background: #e9f2ff;
+
+            color: #0d6efd;
+
+            padding: 5px 9px;
+
+            border-radius: 5px;
+
+            font-weight: 600;
+
+        }
+
+
+        /* Action */
+
+        .btn-add-lead {
+
+            background: #198754;
+
+            color: white;
+
+            border: none;
+
+            padding: 6px 11px;
+
+            border-radius: 5px;
+
+            font-size: 12px;
+
+        }
+
+
+        .btn-add-lead:hover {
+
+            background: #157347;
+
+            color: white;
+
+        }
+
+
+        /* Pagination */
+
+        .pagination {
+
+            margin-bottom: 0;
+
+        }
+
+
+        .page-link {
+
+            font-size: 13px;
+
+        }
+
+
+        /* Empty */
+
+        .empty-row {
+
+            text-align: center !important;
+
+            padding: 35px !important;
+
+            color: #6c757d;
+
+        }
+
+
+        .empty-row i {
+
+            font-size: 30px;
+
+            margin-bottom: 10px;
+
+            display: block;
+
+        }
+
+
+        /* Mobile */
+
+        @@media (max-width: 768px) {
+
+            .page-title {
+
+                font-size: 18px;
+
+            }
+
+            .btn-fetch {
+
+                margin-top: 10px;
+
+            }
+
+            #statusMessage {
+
+                display: block;
+
+                margin: 8px 0 0 0;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+<div class="container-fluid py-4">
+
+
+    <div class="card main-card">
+
+
+        <!-- HEADER -->
+
+        <div class="card-header-custom">
+
+            <div class="row align-items-center">
+
+
+                <div class="col-md-6">
+
+                    <h2 class="page-title">
+
+                        <i class="fa fa-envelope-open-text"></i>
+
+                        Inquiry Management
+
+                    </h2>
+
+                </div>
+
+
+                <div class="col-md-6 text-md-end mt-3 mt-md-0">
+
+
+                    <button type="button"
+                            id="fetchButton"
+                            class="btn-fetch"
+                            onclick="fetchData()">
+
+                        <i class="fa fa-refresh"></i>
+
+                        Fetch Inquiries
+
+                    </button>
+
+
+                    <span id="statusMessage">
+
+                        Click the button to load data.
+
+                    </span>
+
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- BODY -->
+
+        <div class="card-body">
+
+
+            <!-- SEARCH / RECORD COUNT -->
+
+            <div class="row mb-3 align-items-center">
+
+
+                <div class="col-md-5">
+
+
+                    <div class="input-group search-box">
+
+
+                        <span class="input-group-text">
+
+                            <i class="fa fa-search"></i>
+
+                        </span>
+
+
+                        <input type="text"
+                               id="searchInput"
+                               class="form-control"
+                               placeholder="Search inquiry..." />
+
+                    </div>
+
+
+                </div>
+
+
+                <div class="col-md-7 text-md-end mt-3 mt-md-0">
+
+
+                    <span class="record-info">
+
+                        Total Records :
+
+                        <strong id="totalRecords">
+
+                            0
+
+                        </strong>
+
+                    </span>
+
+
+                </div>
+
+
+            </div>
+
+
+
+            <!-- TABLE -->
+
+            <div class="table-responsive">
+
+
+                <table id="dataTable"
+                       class="table table-hover">
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th>ID</th>
+
+                            <th>Name</th>
+
+                            <th>Mobile</th>
+
+                            <th>Email</th>
+
+                            <th>Inquiry</th>
+
+                            <th>Date</th>
+
+                            <th>Remarks</th>
+
+                            <th>Location</th>
+
+                            <th>Created At</th>
+
+                            <th>IP Address</th>
+
+                            <th>Page URL</th>
+
+                            <th>Action</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="tableBody">
+
+
+                        <tr>
+
+                            <td colspan="12"
+                                class="empty-row">
+
+                                <i class="fa fa-database"></i>
+
+                                No data loaded yet.
+
+                                <br />
+
+                                Click
+                                <strong>Fetch Inquiries</strong>
+                                to load records.
+
+                            </td>
+
+                        </tr>
+
+
+                    </tbody>
+
+
+                </table>
+
+
+            </div>
+
+
+
+            <!-- PAGINATION -->
+
+            <div class="row mt-3">
+
+
+                <div class="col-md-12">
+
+                    <nav>
+
+                        <ul class="pagination justify-content-center"
+                            id="pagination">
+
+                        </ul>
+
+                    </nav>
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+
+    // =====================================================
+    // API CONFIGURATION
+    // =====================================================
+
+    const API_URL =
+        'https://www.weblinkservices.net/career/inquiry/wlspl-api/api.php';
+
+
+    // IMPORTANT:
+    // Replace this with your actual PHP API token.
+
+    const API_TOKEN =
+        'your_super_secret_token_12345';
+
+
+
+    // =====================================================
+    // VARIABLES
+    // =====================================================
+
+    let allRecords = [];
+
+    let filteredRecords = [];
+
+    let currentPage = 1;
+
+    const rowsPerPage = 10;
+
+
+
+    // =====================================================
+    // FETCH DATA
+    // =====================================================
+
+    async function fetchData() {
+
+
+        const tableBody =
+            document.getElementById('tableBody');
+
+
+        const statusMessage =
+            document.getElementById('statusMessage');
+
+
+        const fetchButton =
+            document.getElementById('fetchButton');
+
+
+        try {
+
+
+            // Loading
+
+            fetchButton.disabled = true;
+
+            fetchButton.classList.add('loading');
+
+
+            statusMessage.textContent =
+                'Loading data...';
+
+            statusMessage.className =
+                'loading';
+
+
+            tableBody.innerHTML = `
+
+                <tr>
+
+                    <td colspan="12"
+                        class="empty-row">
+
+                        <i class="fa fa-refresh fa-spin"></i>
+
+                        Fetching inquiries...
+
+                    </td>
+
+                </tr>
+
+            `;
+
+
+
+            console.log(
+                'Calling API:',
+                API_URL
+            );
+
+
+
+            // =====================================================
+            // API REQUEST
+            // =====================================================
+
+            const response = await fetch(
+
+                API_URL,
+
+                {
+
+                    method: 'GET',
+
+                    headers: {
+
+                        'API-Token':
+                            API_TOKEN,
+
+                        'Accept':
+                            'application/json'
+
+                    }
+
+                }
+
+            );
+
+
+
+            console.log(
+                'HTTP Status:',
+                response.status
+            );
+
+
+
+            // =====================================================
+            // READ RESPONSE
+            // =====================================================
+
+            const result =
+                await response.json();
+
+
+
+            console.log(
+                'API Response:',
+                result
+            );
+
+
+
+            // =====================================================
+            // CHECK ERROR
+            // =====================================================
+
+            if (
+                !response.ok ||
+                result.status === 'error'
+            ) {
+
+                throw new Error(
+
+                    result.message ||
+
+                    `HTTP Error: ${response.status}`
+
+                );
+
+            }
+
+
+
+            // =====================================================
+            // SUCCESS
+            // =====================================================
+
+            if (
+
+                result.status === 'success' &&
+
+                result.count > 0 &&
+
+                Array.isArray(result.data)
+
+            ) {
+
+
+                allRecords =
+                    result.data;
+
+
+                filteredRecords =
+                    [...allRecords];
+
+
+                currentPage = 1;
+
+
+                statusMessage.textContent =
+                    `Success! Loaded ${result.count} records.`;
+
+
+                statusMessage.className =
+                    'success';
+
+
+                document.getElementById(
+                    'totalRecords'
+                ).textContent =
+                    allRecords.length;
+
+
+                renderTable();
+
+
+            }
+
+
+            else {
+
+
+                allRecords = [];
+
+                filteredRecords = [];
+
+
+                document.getElementById(
+                    'totalRecords'
+                ).textContent = '0';
+
+
+                statusMessage.textContent =
+                    'Success, but no records found.';
+
+
+                statusMessage.className =
+                    'success';
+
+
+                tableBody.innerHTML = `
+
+                    <tr>
+
+                        <td colspan="12"
+                            class="empty-row">
+
+                            <i class="fa fa-inbox"></i>
+
+                            No inquiries found.
+
+                        </td>
+
+                    </tr>
+
+                `;
+
+
+                createPagination();
+
+            }
+
+
+        }
+
+
+        catch (error) {
+
+
+            console.error(
+                'Error fetching data:',
+                error
+            );
+
+
+            statusMessage.textContent =
+                `Error: ${error.message}`;
+
+
+            statusMessage.className =
+                'error';
+
+
+            tableBody.innerHTML = `
+
+                <tr>
+
+                    <td colspan="12"
+                        class="empty-row"
+                        style="color:#dc3545;">
+
+                        <i class="fa fa-triangle-exclamation"></i>
+
+                        Failed to load data.
+
+                        <br />
+
+                        Check browser Console (F12)
+                        for details.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+
+            Swal.fire({
+
+                title: 'Error',
+
+                text: error.message,
+
+                icon: 'error',
+
+                confirmButtonColor: '#dc3545'
+
+            });
+
+        }
+
+
+        finally {
+
+
+            fetchButton.disabled = false;
+
+            fetchButton.classList.remove(
+                'loading'
+            );
+
+        }
+
+    }
+
+
+
+    // =====================================================
+    // RENDER TABLE
+    // =====================================================
+
+    function renderTable() {
+
+
+        const tableBody =
+            document.getElementById('tableBody');
+
+
+        tableBody.innerHTML = '';
+
+
+        if (
+            filteredRecords.length === 0
+        ) {
+
+            tableBody.innerHTML = `
+
+                <tr>
+
+                    <td colspan="12"
+                        class="empty-row">
+
+                        <i class="fa fa-search"></i>
+
+                        No matching records found.
+
+                    </td>
+
+                </tr>
+
+            `;
+
+
+            createPagination();
+
+            return;
+
+        }
+
+
+
+        const startIndex =
+            (currentPage - 1) *
+            rowsPerPage;
+
+
+        const endIndex =
+            startIndex +
+            rowsPerPage;
+
+
+        const pageRecords =
+            filteredRecords.slice(
+                startIndex,
+                endIndex
+            );
+
+
+
+        pageRecords.forEach(
+            function (row) {
+
+
+                const tr =
+                    document.createElement('tr');
+
+
+                tr.innerHTML = `
+
+                    <td>
+
+                        <span class="id-badge">
+
+                            ${escapeHTML(row.id)}
+
+                        </span>
+
+                    </td>
+
+
+                    <td>
+
+                        <strong>
+
+                            ${escapeHTML(row.i_name)}
+
+                        </strong>
+
+                    </td>
+
+
+                    <td>
+
+                        ${escapeHTML(row.mobile_no)}
+
+                    </td>
+
+
+                    <td>
+
+                        ${escapeHTML(row.mail)}
+
+                    </td>
+
+
+                    <td>
+
+                        ${escapeHTML(row.inq)}
+
+                    </td>
+
+
+                    <td>
+
+                        ${escapeHTML(row.date)}
+
+                    </td>
+
+
+                    <td>
+
+                        ${escapeHTML(row.remarks)}
+
+                    </td>
+
+
+                    <td>
+
+                        ${escapeHTML(row.location)}
+
+                    </td>
+
+
+                    <td>
+
+                        ${escapeHTML(row.created_at)}
+
+                    </td>
+
+
+                    <td>
+
+                        ${escapeHTML(row.ip_address)}
+
+                    </td>
+
+
+                    <td>
+
+                        ${escapeHTML(row.page_url)}
+
+                    </td>
+
+
+                    <td>
+
+                        <button type="button"
+                                class="btn-add-lead"
+                                onclick="addLead(${escapeHTML(row.id)})">
+
+                            <i class="fa fa-plus"></i>
+
+                            Add Lead
+
+                        </button>
+
+                    </td>
+
+                `;
+
+
+                tableBody.appendChild(tr);
+
+            }
+        );
+
+
+        createPagination();
+
+    }
+
+
+
+    // =====================================================
+    // SEARCH
+    // =====================================================
+
+    document
+        .getElementById('searchInput')
+        .addEventListener(
+            'input',
+            function () {
+
+
+                const searchValue =
+                    this.value
+                        .toLowerCase()
+                        .trim();
+
+
+                filteredRecords =
+                    allRecords.filter(
+
+                        function (row) {
+
+                            return JSON
+                                .stringify(row)
+                                .toLowerCase()
+                                .includes(searchValue);
+
+                        }
+
+                    );
+
+
+                currentPage = 1;
+
+
+                document.getElementById(
+                    'totalRecords'
+                ).textContent =
+                    filteredRecords.length;
+
+
+                renderTable();
+
+            }
+        );
+
+
+
+    // =====================================================
+    // PAGINATION
+    // =====================================================
+
+    function createPagination() {
+
+
+        const pagination =
+            document.getElementById(
+                'pagination'
+            );
+
+
+        pagination.innerHTML = '';
+
+
+        const totalPages =
+            Math.ceil(
+                filteredRecords.length /
+                rowsPerPage
+            );
+
+
+        if (totalPages <= 1) {
+            return;
+        }
+
+
+
+        // Previous
+
+        const previous =
+            document.createElement('li');
+
+
+        previous.className =
+            'page-item ' +
+            (currentPage === 1
+                ? 'disabled'
+                : '');
+
+
+        previous.innerHTML = `
+
+            <a class="page-link"
+               href="javascript:void(0);">
+
+                Previous
+
+            </a>
+
+        `;
+
+
+        previous.onclick =
+            function () {
+
+                if (currentPage > 1) {
+
+                    currentPage--;
+
+                    renderTable();
+
+                }
+
+            };
+
+
+        pagination.appendChild(
+            previous
+        );
+
+
+
+        // Page numbers
+
+        for (
+            let i = 1;
+            i <= totalPages;
+            i++
+        ) {
+
+
+            const li =
+                document.createElement('li');
+
+
+            li.className =
+                'page-item ' +
+                (
+                    i === currentPage
+                        ? 'active'
+                        : ''
+                );
+
+
+            li.innerHTML = `
+
+                <a class="page-link"
+                   href="javascript:void(0);">
+
+                    ${i}
+
+                </a>
+
+            `;
+
+
+            li.onclick =
+                function () {
+
+                    currentPage = i;
+
+                    renderTable();
+
+                };
+
+
+            pagination.appendChild(li);
+
+        }
+
+
+
+        // Next
+
+        const next =
+            document.createElement('li');
+
+
+        next.className =
+            'page-item ' +
+
+            (
+                currentPage === totalPages
+                    ? 'disabled'
+                    : ''
+            );
+
+
+        next.innerHTML = `
+
+            <a class="page-link"
+               href="javascript:void(0);">
+
+                Next
+
+            </a>
+
+        `;
+
+
+        next.onclick =
+            function () {
+
+                if (
+                    currentPage <
+                    totalPages
+                ) {
+
+                    currentPage++;
+
+                    renderTable();
+
+                }
+
+            };
+
+
+        pagination.appendChild(
+            next
+        );
+
+    }
+
+
+
+    // =====================================================
+    // ADD LEAD
+    // =====================================================
+
+    function addLead(id) {
+
+
+        const record =
+            allRecords.find(
+
+                function (item) {
+
+                    return String(item.id) ===
+                        String(id);
+
+                }
+
+            );
+
+
+        if (!record) {
+
+            Swal.fire({
+
+                title: 'Error',
+
+                text: 'Inquiry record not found.',
+
+                icon: 'error'
+
+            });
+
+            return;
+
+        }
+
+
+
+        // You can change this URL
+        // according to your LeadController.
+
+        window.location.href =
+            `/Lead/CreateOrEdit?inquiryId=${encodeURIComponent(id)}`;
+
+    }
+
+
+
+    // =====================================================
+    // ESCAPE HTML
+    // =====================================================
+
+    function escapeHTML(str) {
+
+
+        if (
+            str === null ||
+            str === undefined
+        ) {
+
+            return '';
+
+        }
+
+
+        return String(str)
+
+            .replace(
+                /&/g,
+                '&amp;'
+            )
+
+            .replace(
+                /</g,
+                '&lt;'
+            )
+
+            .replace(
+                />/g,
+                '&gt;'
+            )
+
+            .replace(
+                /"/g,
+                '&quot;'
+            )
+
+            .replace(
+                /'/g,
+                '&#039;'
+            );
+
+    }
+
+</script>
+
+
+</body>
+
+</html>

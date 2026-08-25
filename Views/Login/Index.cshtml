@@ -1,0 +1,527 @@
+﻿@{
+	Layout = null;
+}
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" />
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+<head>
+
+	<!-- <link rel="stylesheet" href="~/login/assets/css/colorvariants/default.css" id="defaultscheme"> -->
+
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Login</title>
+
+	<!-- font-awesome -->
+	<link rel="stylesheet" href="../../../../cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+
+	<!-- Bootstrap-5 -->
+	<link rel="stylesheet" href="~/login/assets/css/bootstrap.min.css">
+
+	<!-- custom-styles -->
+	<link rel="stylesheet" href="~/login/assets/css/style.css">
+	<link rel="stylesheet" href="~/login/assets/css/responsive.css">
+	<link rel="stylesheet" href="~/login/assets/css/animation.css">
+
+	<style>
+
+		/* ==========================================
+							   BACKGROUND VIDEO
+							   ========================================== */
+
+		.ls-bg {
+			position: fixed !important;
+			inset: 0;
+			width: 100vw;
+			height: 100vh;
+			overflow: hidden !important;
+			z-index: -1;
+		}
+
+		.ls-bg-inner {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+		}
+
+
+		/* ==========================================
+							   LOGIN FORM
+							   ========================================== */
+
+		.form {
+			max-width: 470px;
+			width: 100%;
+			margin: auto;
+		}
+
+
+
+		/* ==========================================
+							   TABLET
+							   ========================================== */
+
+		@@media (max-width: 991px) {
+
+			html,
+			body {
+				height: auto;
+				min-height: 100%;
+				overflow-x: hidden !important;
+				overflow-y: auto !important;
+			}
+
+			main,
+			.wrapper,
+			.main-inner {
+				height: auto;
+				min-height: 100vh;
+				overflow: visible !important;
+			}
+
+			.form {
+				max-width: 450px;
+				margin: 30px auto;
+			}
+
+			.side-text {
+				text-align: center;
+				margin: 30px auto;
+			}
+		}
+
+
+		/* ==========================================
+							   MOBILE
+							   ========================================== */
+
+		@@media (max-width: 767px) {
+
+			html,
+			body {
+				width: 100%;
+				min-height: 100%;
+				overflow-x: hidden !important;
+				overflow-y: auto !important;
+			}
+
+			main,
+			.wrapper,
+			.main-inner {
+				width: 100%;
+				height: auto;
+				min-height: 100vh;
+				overflow: visible !important;
+			}
+
+			.row {
+				margin-left: 0;
+				margin-right: 0;
+			}
+
+			.tab-100 {
+				width: 100%;
+			}
+
+			.side-text {
+				width: 100%;
+				padding: 20px 15px;
+				margin: 0 auto 20px auto;
+				text-align: center;
+			}
+
+			.main-heading {
+				font-size: 32px !important;
+			}
+
+			.side-text article p {
+				font-size: 14px;
+				line-height: 1.6;
+			}
+
+			.form {
+				width: calc(100% - 30px);
+				max-width: 450px;
+				margin: 15px auto 30px auto;
+				padding: 30px 20px;
+			}
+
+			.login-logo {
+				max-width: 180px !important;
+			}
+
+			.login-form.form-title,
+			.login-title {
+				font-size: 28px !important;
+			}
+
+			.input-field input {
+				width: 100%;
+				height: 50px;
+			}
+
+			.login-btn button {
+				width: 100%;
+			}
+		}
+
+
+		/* ==========================================
+							   SMALL MOBILE
+							   ========================================== */
+
+		@@media (max-width: 480px) {
+
+			.side-text {
+				padding: 15px 10px;
+			}
+
+				.side-text article span {
+					font-size: 11px;
+				}
+
+			.main-heading {
+				font-size: 27px !important;
+			}
+
+			.side-text article p {
+				font-size: 13px;
+			}
+
+			.form {
+				width: calc(100% - 20px);
+				padding: 25px 18px;
+				border-radius: 15px;
+			}
+
+			.login-logo {
+				max-width: 160px !important;
+			}
+
+			.login-form.form-title,
+			.login-title {
+				font-size: 25px !important;
+			}
+
+			.login-subtitle {
+				font-size: 13px;
+			}
+
+			.input-field {
+				margin-bottom: 18px;
+			}
+
+				.input-field input {
+					height: 48px;
+					font-size: 14px;
+				}
+
+			.rememberme,
+			.forget {
+				font-size: 12px;
+			}
+		}
+
+	</style>
+
+
+</head>
+<body>
+
+
+	<!-- background -->
+	<div class="ls-bg">
+		<video playsinline autoplay muted loop class="ls-bg-inner">
+			<source src="~/login/assets/images/bg.mp4">
+		</video>
+	</div>
+
+	<main class="overflow-hidden">
+		<div class="wrapper">
+			<div class="main-inner">
+
+				<!-- logo -->
+				@*  <div class="logo">
+                <div class="logo-iconn">
+                <img src="~/login/assets/images/logo.png" alt="BeRifma">
+                </div>
+                <div class="logo-text">
+                Berifma
+                </div>
+                </div> *@
+				<div class="row h-100 align-content-center">
+					<div class="col-md-6 tab-100 order_2">
+
+						<!-- side text -->
+						<div class="side-text">
+							<article>
+								<span>Join Our Marketplace</span>
+								<h1 class="main-heading">Company</h1>
+								<p>
+									The next generation social network & community! Connect
+									with your friends and play with our quests and badges
+									gamification system!
+								</p>
+							</article>
+
+
+						</div>
+					</div>
+					<div class="col-md-6 tab-100">
+
+						<br />
+						<br />
+						<br />
+						<br />
+						<br />
+
+						<!-- form -->
+						<div class="form">
+
+							<!-- LOGO -->
+							<div class="text-center mb-4">
+
+								<img src="https://www.weblinkservices.net/assets-web/logo-main.png"
+									 alt="WEB LINK Services"
+									 class="login-logo"
+									 style="
+                 max-width: 220px;
+                 width: 100%;
+                 height: auto;
+                 object-fit: contain;
+             " />
+
+							</div>
+
+
+							<h2 class="login-form form-title text-center"
+								style="
+        font-size: 32px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        color: #172033;
+        letter-spacing: 0.3px;
+        line-height: 1.2;
+        margin-bottom: 10px;
+    ">
+								Welcome Back
+							</h2>
+
+							<p class="text-center text-muted mb-4">
+								Sign in to access your WEB LINK CRM account
+							</p>
+
+
+							<!-- LOGIN FORM -->
+							<form asp-controller="Login"
+								  asp-action="Index"
+								  method="post">
+
+								@Html.AntiForgeryToken()
+								<!-- USERNAME -->
+								<div class="input-field">
+
+									<input type="text"
+										   id="username"
+										   name="username"
+										   autocomplete="username"
+										   required />
+
+									<label for="username">
+										Username or Email
+									</label>
+
+								</div>
+
+
+								<!-- PASSWORD -->
+								<div class="input-field delay-100ms">
+
+									<input type="password"
+										   id="password"
+										   name="password"
+										   autocomplete="current-password"
+										   required />
+
+									<label for="password">
+										Password
+									</label>
+
+								</div>
+
+
+								<!-- REMEMBER / FORGOT -->
+								<div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+
+									<div class="rememberme">
+
+										<input type="checkbox"
+											   id="rememberMe"
+											   name="rememberMe"
+											   value="true" />
+
+										<label for="rememberMe">
+											Remember Me
+										</label>
+
+									</div>
+
+
+									<a href="#"
+									   class="forget">
+
+										Forgot Password?
+
+									</a>
+
+								</div>
+
+
+								<!-- LOGIN BUTTON -->
+								<div class="login-btn">
+
+									<button type="submit"
+											class="login w-100">
+
+										<i class="fa-solid fa-right-to-bracket me-2"></i>
+
+										Login to your Account
+
+									</button>
+
+								</div>
+
+
+							</form>
+
+
+							<!-- SECURITY TEXT -->
+							<div class="text-center mt-4">
+
+								<small class="text-muted">
+
+									<i class="fa-solid fa-shield-halved me-1"></i>
+
+									Secure login to WEB LINK CRM
+
+								</small>
+
+							</div>
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</main>
+
+
+	<div id="error">
+	</div>
+
+
+
+	<style>
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+			overflow: hidden !important;
+		}
+
+		main,
+		.wrapper,
+		.main-inner {
+			overflow: hidden !important;
+		}
+	</style>
+
+	<!-- Bootstrap-5 -->
+	<script src="~/login/assets/js/bootstrap.min.js"></script>
+
+	<!-- Jquery -->
+	<script src="~/login/assets/js/jquery-3.6.1.min.js"></script>
+
+	<!-- My js -->
+	<script src="~/login/assets/js/custom.js"></script>
+
+
+
+	<div id="error">
+	</div>
+
+	<style>
+		html,
+		body {
+			margin: 0;
+			padding: 0;
+			overflow: hidden !important;
+		}
+
+		main,
+		.wrapper,
+		.main-inner {
+			overflow: hidden !important;
+		}
+	</style>
+
+	<!-- Bootstrap -->
+	<script src="~/login/assets/js/bootstrap.min.js"></script>
+
+	<!-- jQuery -->
+	<script src="~/login/assets/js/jquery-3.6.1.min.js"></script>
+
+	<!-- Custom JS -->
+	<script src="~/login/assets/js/custom.js"></script>
+
+	<!-- SweetAlert2 -->
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+	<script>
+		document.addEventListener("DOMContentLoaded", function () {
+
+			@if (TempData["ErrorMessage"] != null)
+			{
+						var errorMessage = TempData["ErrorMessage"].ToString();
+
+						<text>
+						Swal.fire({
+							icon: 'error',
+							title: 'Login Failed',
+							text: @Html.Raw(
+																											System.Text.Json.JsonSerializer.Serialize(errorMessage)
+																							),
+					confirmButtonText: 'Try Again',
+					confirmButtonColor: '#dc3545'
+				});
+				</text>
+												}
+
+			@if (TempData["SuccessMessage"] != null)
+			{
+						var successMessage = TempData["SuccessMessage"].ToString();
+
+						<text>
+						Swal.fire({
+							icon: 'success',
+							title: 'Success!',
+							text: @Html.Raw(
+																											System.Text.Json.JsonSerializer.Serialize(successMessage)
+																							),
+					confirmButtonText: 'OK',
+					confirmButtonColor: '#198754'
+				});
+				</text>
+												}
+
+		});
+	</script>
+
+
+</body>
+</html>
+

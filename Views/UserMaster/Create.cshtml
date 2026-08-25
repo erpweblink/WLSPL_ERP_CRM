@@ -1,0 +1,347 @@
+﻿@model WEBLINK_CRM.Models.RegisterUserr
+
+@{
+    ViewData["Title"] = "Create User";
+}
+
+<style>
+    .form-label {
+        font-weight: 600;
+        color: #333;
+    }
+
+    .form-control,
+    .form-select {
+        height: 45px;
+        border-radius: 10px;
+    }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 .2rem rgba(13,110,253,.15);
+        }
+
+    .btn {
+        border-radius: 10px;
+        padding: 10px 25px;
+        font-weight: 500;
+    }
+
+    .btn-success {
+        background: #198754;
+    }
+
+    .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="card">
+    <div class="card-header">
+        <h3>
+            <i class="fa fa-user-plus"></i>
+            Create New User
+        </h3>
+    </div>
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly"
+                 class="text-danger">
+            </div>
+
+            <div class="row">
+
+                <!-- Employee Code Hidden -->
+                <div class="col-md-4 mb-3 d-none">
+
+                    <label class="form-label">
+                        Employee Code
+                    </label>
+
+                    <input asp-for="empcode"
+                           class="form-control" />
+
+                    <span asp-validation-for="empcode"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+                <!-- Username -->
+                <div class="col-md-4 mb-3">
+
+                    <label class="form-label">
+                        Username
+                    </label>
+
+                    <input asp-for="UserName"
+                           class="form-control"
+                           placeholder="Enter username" />
+
+                    <span asp-validation-for="UserName"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+                <!-- Name -->
+                <div class="col-md-4 mb-3">
+
+                    <label class="form-label">
+                        Name
+                    </label>
+
+                    <input asp-for="name"
+                           class="form-control"
+                           placeholder="Enter name" />
+
+                    <span asp-validation-for="name"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+                <!-- Email -->
+                <div class="col-md-4 mb-3">
+
+                    <label class="form-label">
+                        Email
+                    </label>
+
+                    <input asp-for="email"
+                           class="form-control"
+                           placeholder="Enter email" />
+
+                    <span asp-validation-for="email"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- Email Password -->
+                <div class="col-md-4 mb-3">
+
+                    <label class="form-label">
+                        Email Password
+                    </label>
+
+                    <input asp-for="emailpsw"
+                           type="password"
+                           class="form-control"
+                           placeholder="Enter email password" />
+
+                    <span asp-validation-for="emailpsw"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+                <!-- Panel Password -->
+                <div class="col-md-4 mb-3">
+
+                    <label class="form-label">
+                        Panel Password
+                    </label>
+
+                    <input asp-for="panelpsw"
+                           type="password"
+                           class="form-control"
+                           placeholder="Enter panel password" />
+
+                    <span asp-validation-for="panelpsw"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- Mobile -->
+                <div class="col-md-4 mb-3">
+
+                    <label class="form-label">
+                        Mobile
+                    </label>
+
+                    <input asp-for="mobile"
+                           class="form-control"
+                           placeholder="Enter mobile number" />
+
+                    <span asp-validation-for="mobile"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+
+
+
+                <!-- Role -->
+                <div class="col-md-4 mb-3">
+
+                    <label class="form-label">
+                        Role
+                    </label>
+
+
+                    <select asp-for="role"
+                            class="form-select">
+
+                        <option value="">
+                            Select Role
+                        </option>
+
+                        <option value="Admin">
+                            Admin
+                        </option>
+
+                        <option value="Sub Admin">
+                            Sub Admin
+                        </option>
+
+                        <option value="Sales">
+                            Sales
+                        </option>
+
+                        <option value="HR">
+                            HR
+                        </option>
+
+                        <option value="BDE">
+                            BDE
+                        </option>
+
+                        <option value="User">
+                            User
+                        </option>
+
+                    </select>
+
+
+                    <span asp-validation-for="role"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+                <!-- Status -->
+                <div class="col-md-4 mb-3">
+
+                    <label class="form-label">
+                        Status
+                    </label>
+
+
+                    <select asp-for="status"
+                            class="form-select">
+
+                        <option value="true">
+                            Active
+                        </option>
+
+                        <option value="false">
+                            Inactive
+                        </option>
+
+                    </select>
+
+
+                    <span asp-validation-for="status"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+                <!-- Designation -->
+                <div class="col-md-4 mb-3">
+
+                    <label class="form-label">
+                        Designation
+                    </label>
+
+
+                    <input asp-for="Designation"
+                           class="form-control"
+                           placeholder="Enter designation" />
+
+
+                    <span asp-validation-for="Designation"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+                <!-- Team Leader -->
+                <div class="col-md-4 mb-3">
+
+                    <label class="form-label">
+                        Team Leader
+                    </label>
+
+                    <select asp-for="TL_Manager"
+                            asp-items="Model.SalesTLList"
+                            class="form-select">
+
+                        <option value="">
+                            Select Team Leader
+                        </option>
+
+                    </select>
+
+                    <span asp-validation-for="TL_Manager"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <!-- Is Sales TL -->
+                <div class="col-md-4 mb-3">
+
+                    <label class="form-label">
+                        Is Sales TL
+                    </label>
+
+                    <select asp-for="Sales_TL_Manager"
+                            class="form-select">
+
+                        <option value="false">
+                            No
+                        </option>
+
+                        <option value="true">
+                            Yes
+                        </option>
+
+                    </select>
+
+                </div>
+            </div>
+
+            <div class="row justify-content-center mt-3">
+
+                <div class="col-md-3 text-end">
+                    <button type="submit" class="btn btn-success btn-sm px-3">
+                        <i class="fa fa-save me-1"></i>
+                        Save User
+                    </button>
+                </div>
+
+                <div class="col-md-3 text-start">
+                    <a asp-action="Index"
+                       class="btn btn-secondary btn-sm px-3">
+                        <i class="fa fa-arrow-left me-1"></i>
+                        Back
+                    </a>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
