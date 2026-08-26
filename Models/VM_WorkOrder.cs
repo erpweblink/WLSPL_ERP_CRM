@@ -33,10 +33,8 @@ namespace WEBLINK_CRM.Models
         public string? UpdatedBy { get; set; }
 
         public List<WorkOrderDetailVM>? objtblWorkOrderDtl { get; set; }
-            = new List<WorkOrderDetailVM>();
 
         public List<BankDetailVM>? objtblBankDetail { get; set; }
-            = new List<BankDetailVM>();
 
         public class WorkOrderDetailVM
         {

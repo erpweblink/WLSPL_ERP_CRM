@@ -1,9 +1,9 @@
 ﻿var GetWorkOrderForm = function () {
-    var WorkOrderId = window.location.pathname.split('/').pop();
+    var ID = window.location.pathname.split('/').pop();
 
     var IsCreate = $("#hdnCreate").val();
 
-    if (!WorkOrderId) {
+    if (!ID) {
 
         if (IsCreate == "F") {
 
@@ -168,7 +168,7 @@
                     var result = response.data[0];
                     if (result != null && result != undefined && result != "") {
 
-                        if (!WorkOrderId) {
+                        if (!ID) {
                             $('#ddlType').val(result.RegisterType).trigger('change');
                         }
                        
@@ -253,16 +253,18 @@
             } else {
                 $('#txtEmailID').removeClass('is-invalid');
             }
-
-            if (!$('#txtRenewalDate').val().trim()) {
-                errors.push("Renewal Date is required.");
+          
+            var renewalVal = $('#txtRenewalDate').val().trim();
+            if (!renewalVal) {
+                errors.push("Please enter a valid Renewal Date.");
                 $('#txtRenewalDate').addClass('is-invalid');
             } else {
                 $('#txtRenewalDate').removeClass('is-invalid');
             }
 
-            if (!$('#txtTodayDate').val().trim()) {
-                errors.push("Today Date is required.");
+            var todayVal = $('#txtTodayDate').val().trim();
+            if (!todayVal) {
+                errors.push("Please enter a valid Today Date.");
                 $('#txtTodayDate').addClass('is-invalid');
             } else {
                 $('#txtTodayDate').removeClass('is-invalid');
@@ -289,14 +291,24 @@
             return errors;
         }
 
-        function toIsoDate(ddmmyyyy) {
-            var parts = ddmmyyyy.split('/');
-            return parts[2] + '-' + parts[1] + '-' + parts[0];
-        }
 
         $("#btnSubmit").click(function (e) {
             e.preventDefault();
+            function toIsoDate(ddmmyyyy) {
+                if (!ddmmyyyy) return null;
+                var parts = ddmmyyyy.trim().split('/');
+                if (parts.length !== 3) return null;
 
+                var day = parts[0];
+                var month = parts[1];
+                var year = parts[2];
+
+                if (!day || !month || !year || isNaN(day) || isNaN(month) || isNaN(year)) {
+                    return null;
+                }
+
+                return year + '-' + month.padStart(2, '0') + '-' + day.padStart(2, '0');
+            }
             // ---- Run validation first ----
             var errors = validateForm();
             if (errors.length > 0) {
@@ -309,7 +321,10 @@
 
             var submitted = false;
 
-            var WorkOrderID = $("#WorkOrderID").val();
+            var ID = $("#WorkOrderID").val();
+            if (ID == "") {
+                ID = 0;
+            }
 
             var Type = $('#ddlType option:selected').val();
             var WOStatus = $('#ddlWOStatus option:selected').val();
@@ -320,8 +335,13 @@
             var GSTNo = $('#txtGSTNo').val();
             var EmailID = $("#txtEmailID").val();
 
-            var RenewalDate = toIsoDate($("#txtRenewalDate").val().trim());
-            var TodayDate = toIsoDate($("#txtTodayDate").val().trim());
+            var RenewalDate = $("#txtRenewalDate").val().trim();
+            var TodayDate = $("#txtTodayDate").val().trim();
+
+            if (!RenewalDate || !TodayDate) {
+                showToast("Renewal Date / Today Date is invalid. Please reselect it.", "error");
+                return;
+            }
 
             var PaymentMode = $('#ddlPaymentMode option:selected').val();
 
@@ -356,34 +376,46 @@
             }
 
             var BankDetailList = new Array();
+
             var bankRowCount = $('#tblBankDetail >tbody >tr').length;
+
             if (bankRowCount > 0) {
+
                 $("#tblBankDetail TBODY TR").each(function () {
+
                     var row = $(this);
+
                     var BankDetaildata = {};
+
                     BankDetaildata.BankName = row.find("TD").eq(1).html();
                     BankDetaildata.ChequeNo = row.find("TD").eq(2).html();
 
                     var cheqDateCell = row.find("TD").eq(3).text().trim();
+
                     if (cheqDateCell) {
+
                         BankDetaildata.ChequeDate = toIsoDate(cheqDateCell);
+
                     } else {
-                        console.warn("Skipping row — missing cheque date cell:", row.html());
-                        return true; // skip this row, continue .each()
+
+                        return true;
                     }
 
                     BankDetaildata.Amount = row.find("TD").eq(4).html();
+
                     BankDetailList.push(BankDetaildata);
                 });
+
             } else {
+
                 BankDetailList = null;
             }
-
+         
             var DataList = {
-                ID: WorkOrderID || null,
+                ID: parseInt(ID) || 0, 
                 Type: Type || null,
                 WOStatus: WOStatus || null,
-                WONo: null,
+
                 CompanyName: Companyname || null,
                 CompanyCode: CompanyCode || null,
                 OwnerName: OwnerName || null,
@@ -396,23 +428,29 @@
 
                 PaymentMode: PaymentMode || null,
 
-                TotalDealBasicAmount: TotalDealBasicAmount || 0,
-                TotalDealGSTAmount: TotalDealGSTAmount || 0,
-                BasicAmountReceived: BasicAmountReceived || 0,
-                GSTAmountReceived: GSTAmountReceived || 0,
-                BalanceBasicAmount: BalanceBasicAmount || 0,
-                BalanceGSTAmount: BalanceGSTAmount || 0,
-                TotalAmountBalance: TotalAmountBalance || 0,
+                TotalDealBasicAmount: parseFloat(TotalDealBasicAmount) || 0,
+                TotalDealGSTAmount: parseFloat(TotalDealGSTAmount) || 0,
+                BasicAmountReceived: parseFloat(BasicAmountReceived) || 0,
+                GSTAmountReceived: parseFloat(GSTAmountReceived) || 0,
+                BalanceBasicAmount: parseFloat(BalanceBasicAmount) || 0,
+                BalanceGSTAmount: parseFloat(BalanceGSTAmount) || 0,
+                TotalAmountBalance: parseFloat(TotalAmountBalance) || 0,
 
                 CreatedBy: null,
                 UpdatedBy: null,
 
-                objtblWorkOrderDtl: ServiceDescriptionList || [],
-                objtblBankDetail: BankDetailList || []
-            };
+                objtblWorkOrderDtl: Array.isArray(ServiceDescriptionList)
+                    ? ServiceDescriptionList
+                    : [],
 
+                objtblBankDetail: Array.isArray(BankDetailList)
+                    ? BankDetailList
+                    : []
+            };
+            console.log(DataList);
+            console.log(JSON.stringify(DataList));
             if (count == 0) {
-                $("#loader").show();
+               
                 $.ajax({
                     url: "/WorkOrder/CreateOrEdit",
                     data: JSON.stringify(DataList),
@@ -445,11 +483,11 @@
     };
 
     var loadWorkOrderData = function () {
-        if (WorkOrderId != null && WorkOrderId != undefined && WorkOrderId != "") {
+        if (ID != null && ID != undefined && ID != "") {
             try {
                 $.ajax({
                     url: "/WorkOrder/GetWorkOrderDataById",
-                    data: { "ID": WorkOrderId },
+                    data: { "ID": ID },
                     type: "post",
                     cache: false,
                     success: function (response) {
@@ -474,11 +512,9 @@
                                 $('#txtGSTNo').val(result.workOrderHdr.gstno);
                                 $("#txtEmailID").val(result.workOrderHdr.emailID);
 
-                                var RenewalDate = formatDate(result.workOrderHdr.renewalDate);
-                                $("#txtRenewalDate").val(RenewalDate);
+                                $("#txtRenewalDate").val(formatDateToDDMMYYYY(result.workOrderHdr.renewalDate));
+                                $("#txtTodayDate").val(formatDateToDDMMYYYY(result.workOrderHdr.todayDate));
 
-                                var TodayDate = formatDate(result.workOrderHdr.todayDate);
-                                $("#txtTodayDate").val(TodayDate);
 
                                 $('#ddlPaymentMode')
                                     .val(result.workOrderHdr.paymentMode)
@@ -552,7 +588,19 @@
             }
         }
     }
+    function formatDateToDDMMYYYY(dateValue) {
+        if (!dateValue) return "";
 
+        var date = new Date(dateValue);
+
+        if (isNaN(date.getTime())) return "";
+
+        var day = String(date.getDate()).padStart(2, '0');
+        var month = String(date.getMonth() + 1).padStart(2, '0');
+        var year = date.getFullYear();
+
+        return year + "-" + month + "-" + day ;
+    }
     function bindBankData(data) {
         $('#divtable').show();
         $('#tblBankDetail').find('tbody').remove();
@@ -564,7 +612,7 @@
 
             var ChequeDate;
             if (result.chequeDate != null) {
-                ChequeDate = formatDate(result.chequeDate);
+                ChequeDate = formatDateToDDMMYYYY(result.chequeDate);
             }
             else {
                 ChequeDate = "";
@@ -704,19 +752,6 @@
         $(this).val(val);
     });
 
-    function formatDate(dateString) {
-        if (!dateString) return "";
-
-        var date = new Date(dateString);
-
-        var day = String(date.getDate()).padStart(2, "0");
-        var month = String(date.getMonth() + 1).padStart(2, "0");
-        var year = date.getFullYear();
-
-        return day + "/" + month + "/" + year;
-    }
-
-  
     //------------------------------------------------------------------------------------
 
     var Servicetext = "";
@@ -1089,32 +1124,9 @@
 
     return {
         init: function () {
-            $('.Date').datepicker({
-                todayHighlight: true,
-                format: 'dd/mm/yyyy',
-                startDate: '-30d',
-                autoclose: true,
-                orientation: "top left",
-                clearBtn: true
-            });
-            $('.Date').datepicker('setDate', 'today');
-            var today = new Date();
+          
 
-            // Add 11 months to today's date
-            var elevenMonthsLater = new Date(today.getFullYear(), today.getMonth() + 11, today.getDate());
-            $('.RDate').datepicker({
-                todayHighlight: true,
-                format: 'dd/mm/yyyy',
-                startDate: '-30d',
-                autoclose: true,
-                orientation: "top left",
-                clearBtn: true
-            });
-            // Set the datepicker to 11 months later
-            $('.RDate').datepicker('setDate', elevenMonthsLater);
-            $("#txtTodayDate").attr('disabled', 'disabled');
-
-            if (WorkOrderId != null && WorkOrderId != undefined && WorkOrderId != "") {
+            if (ID != null && ID != undefined && ID != "") {
                 loadWorkOrderData();
             }
             formValidator();

@@ -67,7 +67,9 @@ namespace WEBLINK_CRM.Controllers
 
             if (result)
             {
-                TempData["Success"] = "User saved successfully.";
+                TempData["ToastMessage"] = "User saved successfully.";
+                TempData["ToastType"] = "success";
+            
                 return RedirectToAction("Index");
             }
 
@@ -104,7 +106,9 @@ namespace WEBLINK_CRM.Controllers
 
                 if (result)
                 {
-                    TempData["Success"] = "User updated successfully.";
+                    TempData["ToastMessage"] = "User updated successfully.";
+                    TempData["ToastType"] = "success";
+                    
                     return RedirectToAction("Index");
                 }
             }
@@ -123,11 +127,15 @@ namespace WEBLINK_CRM.Controllers
 
             if (result)
             {
-                TempData["Success"] = "User deleted successfully.";
+                TempData["ToastMessage"] = "User deleted successfully.";
+                TempData["ToastType"] = "success";
+              
             }
             else
             {
-                TempData["Error"] = "Unable to delete user.";
+                TempData["ToastMessage"] = "Unable to delete user.";
+                TempData["ToastType"] = "error";
+
             }
 
             return RedirectToAction(nameof(Index));

@@ -136,6 +136,8 @@ namespace WEBLINK_CRM.repository
                     mobile = dr["mobile"]?.ToString(),
 
                     role = dr["role"]?.ToString(),
+                    emailpsw = dr["emailpsw"]?.ToString(),
+                    panelpsw = dr["panelpsw"]?.ToString(),
 
                     status = Convert.ToBoolean(dr["status"]),
 

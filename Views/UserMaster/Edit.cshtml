@@ -148,8 +148,7 @@
                         Email Password
                     </label>
 
-                    <input asp-for="emailpsw"
-                           type="password"
+                    <input asp-for="emailpsw"                     
                            class="form-control"
                            placeholder="Enter email password" />
 
@@ -169,10 +168,23 @@
                         Panel Password
                     </label>
 
-                    <input asp-for="panelpsw"
-                           type="password"
-                           class="form-control"
-                           placeholder="Enter panel password" />
+                    <div class="input-group">
+
+                        <input asp-for="panelpsw"
+                               type="password"
+                               class="form-control"
+                               placeholder="Enter panel password"
+                               id="panelpsw" />
+
+                        <button type="button"
+                                class="btn btn-outline-secondary"
+                                id="togglePassword">
+
+                            <i class="fa fa-eye" id="toggleIcon"></i>
+
+                        </button>
+
+                    </div>
 
                     <span asp-validation-for="panelpsw"
                           class="text-danger">
@@ -375,3 +387,30 @@
         </form>
     </div>
 </div>
+<script>
+        $("#togglePassword").on("click", function () {
+
+        var passwordInput = $("#panelpsw");
+        var icon = $("#toggleIcon");
+
+        if (passwordInput.attr("type") === "password") {
+
+            passwordInput.attr("type", "text");
+
+            icon
+                .removeClass("fa-eye")
+                .addClass("fa-eye-slash");
+
+        }
+        else {
+
+            passwordInput.attr("type", "password");
+
+            icon
+                .removeClass("fa-eye-slash")
+                .addClass("fa-eye");
+
+        }
+
+    });
+</script>
