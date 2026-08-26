@@ -4,7 +4,27 @@
     ViewData["Title"] = "Work Order";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<style>
+    .active-status {
+        background-color: #198754 !important;
+        color: #ffffff !important;
+        padding: 10px 12px !important;
+        border-radius: 20px !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        display: inline-block;
+    }
 
+    .inactive-status {
+        background-color: #dc3545 !important;
+        color: #ffffff !important;
+        padding: 10px 12px !important;
+        border-radius: 20px !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        display: inline-block;
+    }
+</style>
 <!-- Loader -->
 <div id="loader" style="display:none;">
     <div class="text-center">
@@ -184,18 +204,18 @@
                                                     onclick="AdminApproveWorkOrder('@item.ID')">
                                                 <i class="fa fa-check"></i>
                                             </button>
-                                        }
-                                        @if (!User.IsInRole("Admin") && item.Status != "2")
+                                        }else
+                                        @if ( item.Status != "2")
                                         {
-                                            <span class="badge bg-warning">
+                                            <small class="badge inactive-status">
                                                 Pending
-                                            </span>
+                                            </small>
                                         }
                                         else
                                         {
-                                            <span class="badge bg-success">
+                                            <small class="badge active-status">
                                                 Approved
-                                            </span>
+                                            </small>
                                         }
 
                                     </div>
