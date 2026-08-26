@@ -412,7 +412,7 @@ namespace WEBLINK_CRM.repository
                         CreatedBy = r.SessionName,
                         Area = r.Area,
                         UpdateFor = r.UpdateFor,
-                        CallUpdateStatus = r.UpdateStatus,
+                        CallUpdateStatus = r.UpdateFor + "- " + r.UpdateStatus,
                         TypeofClient = r.TypeOfClient,
                         DealDetails = r.DealDetails,
                         FollowDate = r.FollowUpDate,
