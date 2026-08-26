@@ -1,4 +1,8 @@
-﻿using WEBLINK_CRM.Models;
+﻿using Dapper;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using System.Data;
+using WEBLINK_CRM.Models;
 using static WEBLINK_CRM.Models.VM_WorkOrder;
 
 namespace WEBLINK_CRM.repository
@@ -21,5 +25,8 @@ namespace WEBLINK_CRM.repository
 
         Task<List<BankDetailVM>> GetBankDetailsById(string ID);
         Task<bool> DeleteWorkOrder(int id);
+
+        Task<bool> AdminApproveWorkOrder(int ID);
+      
     }
 }

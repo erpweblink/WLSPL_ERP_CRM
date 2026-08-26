@@ -176,6 +176,27 @@
                                             <i class="fa fa-trash"></i>
 
                                         </button>
+                                @if (User.IsInRole("Admin") && item.Status != "2")
+                                        {
+                                            <button type="button"
+                                                    class="btn btn-sm btn-success"
+                                                    title="Admin Approval"
+                                                    onclick="AdminApproveWorkOrder('@item.ID')">
+                                                <i class="fa fa-check"></i>
+                                            </button>
+                                        }
+                                        @if (!User.IsInRole("Admin") && item.Status != "2")
+                                        {
+                                            <span class="badge bg-warning">
+                                                Pending
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">
+                                                Approved
+                                            </span>
+                                        }
 
                                     </div>
 
@@ -183,7 +204,7 @@
 
                             </tr>
 
-                                        count++;
+                            count++;
                         }
                     }
                     else
@@ -540,6 +561,45 @@
             },
             error: function (xhr) {
                 showToast("Something went wrong while deleting Work Order.", "error");
+            }
+        });
+    }
+
+        function AdminApproveWorkOrder(id) {
+
+        if (!id) {
+            alert("Invalid Work Order ID.");
+            return;
+        }
+
+        if (!confirm("Are you sure you want to approve this Work Order?")) {
+            return;
+        }
+
+        $.ajax({
+            url: '/WorkOrder/AdminApproveWorkOrder',
+            type: 'POST',
+            data: {
+                ID: id
+            },
+            success: function (response) {
+
+                if (response.success) {
+
+                    alert(response.message);
+
+                    // Reload list
+                    location.reload();
+                }
+                else {
+                    alert(response.message);
+                }
+            },
+            error: function (xhr) {
+
+                console.log(xhr.responseText);
+
+                alert("Error while approving Work Order.");
             }
         });
     }
