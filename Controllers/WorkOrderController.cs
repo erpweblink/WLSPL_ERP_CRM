@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Data;
@@ -394,6 +395,48 @@ namespace WEBLINK_CRM.Controllers
                 {
                     Success = false,
                     Message = e.Message
+                });
+            }
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AdminApproveWorkOrder(int ID)
+        {
+            try
+            {
+                if (ID <= 0)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Invalid Work Order ID."
+                    });
+                }
+
+                bool result = await objWorkOrder.AdminApproveWorkOrder(ID);
+
+                if (result)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Work Order approved successfully."
+                    });
+                }
+
+                return Json(new
+                {
+                    success = false,
+                    message = "Work Order approval failed."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
                 });
             }
         }

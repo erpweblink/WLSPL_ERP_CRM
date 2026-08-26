@@ -441,5 +441,26 @@ namespace WEBLINK_CRM.repository
                 }
             }
         }
+
+        public async Task<bool> AdminApproveWorkOrder(int ID)
+        {
+            using (SqlConnection con = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg")))
+            {
+                await con.OpenAsync();
+
+                var parameters = new DynamicParameters();
+
+                parameters.Add("@ID", ID);              
+                parameters.Add("@Action", "AdminApproveWorkOrder");
+                int result = await con.ExecuteAsync(
+                    "SP_WorkOrder",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result > 0;
+            }
+        }
     }
 }

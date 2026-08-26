@@ -8,6 +8,7 @@ namespace WEBLINK_CRM.Models
 
         public string? Type { get; set; }
         public string? WOStatus { get; set; }
+        public string? Status { get; set; }
         public string? WONo { get; set; }
         public string? CompanyCode { get; set; }
         public string? CompanyName { get; set; }
