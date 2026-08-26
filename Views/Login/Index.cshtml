@@ -110,12 +110,12 @@
                 '<button class="toast-close" onclick="dismissToast(this.closest(\'.toast\'))">&#x2715;</button>' +
                 '<div class="toast-bar"></div>';
             root.appendChild(t);
-            setTimeout(function () { dismissToast(t); }, 3500);
+            setTimeout(function () { dismissToast(t); }, 1000);
         }
 
         function dismissToast(t) {
             t.classList.add('hide');
-            setTimeout(function () { t.remove(); }, 300);
+            setTimeout(function () { t.remove(); }, 100);
         }
 
         /* ── Password toggle ── */

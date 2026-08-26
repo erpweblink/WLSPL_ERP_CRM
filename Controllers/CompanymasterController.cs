@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WEBLINK_CRM.Models;
 using WEBLINK_CRM.repository;
 
 
 namespace WEBLINK_CRM.Controllers
 {
+    [Authorize]
     public class CompanymasterController : Controller
     {
         private readonly IcomapnymasterRepo _companymaster;
@@ -29,16 +31,25 @@ namespace WEBLINK_CRM.Controllers
 
         // Create Page
         [HttpGet]
-        public IActionResult Create()
+        public IActionResult Create(
+     string? leadCode,
+     string? mobile,
+     string? email,
+     string? ownerName)
         {
             Companymaster model = new Companymaster();
 
             // Generate Company Code
             model.CCode = GenerateCompanyCode();
 
+            // Assign values received from URL
+            model.LeadCode = leadCode;
+            model.Mobile = mobile;
+            model.Email = email;
+            model.OName = ownerName;
+
             return View(model);
         }
-
 
 
         private string GenerateCompanyCode()
@@ -62,7 +73,7 @@ namespace WEBLINK_CRM.Controllers
             try
             {
 
-                string userName = HttpContext.Session.GetString("userName");
+                string userName = HttpContext.Session.GetString("UserName");
 
                 model.CreatedBy = userName;
 
@@ -134,7 +145,7 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-                string userName = HttpContext.Session.GetString("userName");
+                string userName = HttpContext.Session.GetString("UserName");
 
                 var result = await _companymaster.DeleteReord(
                     id.ToString(),
@@ -191,7 +202,7 @@ namespace WEBLINK_CRM.Controllers
             try
             {
 
-                string userName = HttpContext.Session.GetString("userName");
+                string userName = HttpContext.Session.GetString("UserName");
 
                 model.CreatedBy = userName;
 

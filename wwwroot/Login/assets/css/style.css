@@ -520,7 +520,7 @@ body {
     height: 3px;
     background: currentColor;
     border-radius: 0 0 0 12px;
-    animation: shrinkBar 3.5s linear forwards;
+    animation: shrinkBar 2.5s linear forwards;
 }
 
 .toast:not(.error):not(.warning):not(.info) .toast-bar {

@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WEBLINK_CRM.Models;
 using WEBLINK_CRM.Repositories;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace WEBLINK_CRM.Controllers
 {
@@ -21,7 +24,7 @@ namespace WEBLINK_CRM.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Index(LoginViewModel model)
+        public async Task<IActionResult> Index(LoginViewModel model)
         {
             if (!ModelState.IsValid)
                 return View(model);
@@ -34,6 +37,10 @@ namespace WEBLINK_CRM.Controllers
                 return View(model);
             }
 
+            // ============================
+            // SESSION VALUES
+            // ============================
+
             HttpContext.Session.SetInt32("EmployeeId", employee.id);
             HttpContext.Session.SetString("EmployeeName", employee.name ?? "");
             HttpContext.Session.SetString("EmpCode", employee.empcode ?? "");
@@ -41,18 +48,86 @@ namespace WEBLINK_CRM.Controllers
             HttpContext.Session.SetString("UserName", employee.UserName ?? "");
             HttpContext.Session.SetString("Role", employee.role ?? "");
 
-            // ✅ ViewBag — safe to read multiple times in same view
-            ViewBag.LoginSuccess = "Login successful! Welcome, " + employee.name + ".";
-            ViewBag.RedirectUrl = Url.Action("Index", "Dashboard");
+
+            // ============================
+            // COOKIE AUTHENTICATION
+            // ============================
+
+            var claims = new List<Claim>
+    {
+        new Claim(
+            ClaimTypes.NameIdentifier,
+            employee.id.ToString()
+        ),
+
+        new Claim(
+            ClaimTypes.Name,
+            employee.UserName ?? ""
+        ),
+
+        new Claim(
+            ClaimTypes.Email,
+            employee.email ?? ""
+        ),
+
+        new Claim(
+            ClaimTypes.Role,
+            employee.role ?? ""
+        ),
+
+        new Claim(
+            "EmployeeName",
+            employee.name ?? ""
+        ),
+
+        new Claim(
+            "EmpCode",
+            employee.empcode ?? ""
+        )
+    };
+
+            var identity = new ClaimsIdentity(
+                claims,
+                CookieAuthenticationDefaults.AuthenticationScheme
+            );
+
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                principal
+            );
+
+
+            // ============================
+            // SUCCESS MESSAGE
+            // ============================
+
+            ViewBag.LoginSuccess =
+                "Login successful! Welcome, " + employee.name + ".";
+
+            ViewBag.RedirectUrl =
+                Url.Action("Index", "Dashboard");
 
             return View(model);
         }
 
-        public IActionResult Logout()
+        [HttpGet]
+        public async Task<IActionResult> Logout()
         {
+            await HttpContext.SignOutAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme
+            );
+
             HttpContext.Session.Clear();
-            TempData["LogoutMessage"] = "You have been logged out successfully.";
-            return RedirectToAction("Index", "Login");
+
+            TempData["LogoutMessage"] =
+                "You have been logged out successfully.";
+
+            return RedirectToAction(
+                "Index",
+                "Login"
+            );
         }
     }
 }

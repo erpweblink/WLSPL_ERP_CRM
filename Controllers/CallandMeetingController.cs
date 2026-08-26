@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics.Metrics;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using WEBLINK_CRM.Models;
 using WEBLINK_CRM.repository;
 
 namespace WEBLINK_CRM.Controllers
 {
+    [Authorize]
     public class CallAndMeetingController : Controller
     {
         private readonly ICallandMeetingRepo _callmeetmaster;

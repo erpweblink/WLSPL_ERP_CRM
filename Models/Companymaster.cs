@@ -88,7 +88,7 @@ namespace WEBLINK_CRM.Models
 
         public string? LeadCode { get; set; }
 
-
+        public string ? OwnerName { get; set; }
         public string? BillingAddress { get; set; }
 
     }
