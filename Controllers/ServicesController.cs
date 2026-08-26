@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 using WEBLINK_CRM.Models;
 using WEBLINK_CRM.repository;
 
 namespace WEBLINK_CRM.Controllers
 {
+    [Authorize]
     public class ServicesController : Controller
     {
         private readonly IServicesRepo _services;

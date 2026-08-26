@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WEBLINK_CRM.Models;
 using WEBLINK_CRM.repository;
 
 namespace WEBLINK_CRM.Controllers
 {
+    [Authorize]
     public class LeadController : Controller
     {
         private readonly ILeadRepository _leadRepository;
