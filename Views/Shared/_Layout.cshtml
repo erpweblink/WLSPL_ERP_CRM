@@ -166,6 +166,40 @@
                 top: 12px;
             }
         }
+
+
+        .confirm-toast {
+            min-width: 350px;
+        }
+
+        .confirm-buttons {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+        }
+
+            .confirm-buttons button {
+                border: none;
+                padding: 6px 16px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 13px;
+                font-weight: 600;
+            }
+
+        .confirm-yes {
+            background: #28a745;
+            color: #fff;
+        }
+
+        .confirm-no {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .confirm-buttons button:hover {
+            opacity: 0.85;
+        }
     </style>
 </head>
 
@@ -555,13 +589,84 @@
 
                 setTimeout(function () {
                     toast.remove();
-                }, 300);
+                }, 400);
             }
 
             toast.querySelector(".toast-close")
                 .addEventListener("click", removeToast);
 
-            setTimeout(removeToast, 3000);
+            setTimeout(removeToast, 4000);
+        }
+
+           function showConfirmToast(message, onYes, onNo) {
+
+            var toast = document.createElement("div");
+
+            toast.className = "app-toast warning confirm-toast";
+
+            toast.innerHTML =
+                '<div class="toast-icon-wrap">' +
+                    '<i class="fas fa-question-circle toast-icon"></i>' +
+                '</div>' +
+
+                '<div class="toast-message">' +
+                    '<div>' + message + '</div>' +
+
+                    '<div class="confirm-buttons">' +
+                        '<button type="button" class="confirm-yes">Yes</button>' +
+                        '<button type="button" class="confirm-no">No</button>' +
+                    '</div>' +
+
+                '</div>' +
+
+                '<div class="toast-progress"></div>';
+
+            var container = document.getElementById("toastContainer");
+
+            container.appendChild(toast);
+
+            requestAnimationFrame(function () {
+                toast.classList.add("show");
+            });
+
+            var yesButton = toast.querySelector(".confirm-yes");
+            var noButton = toast.querySelector(".confirm-no");
+
+            var closed = false;
+
+            function removeToast() {
+
+                if (closed) return;
+
+                closed = true;
+
+                toast.classList.add("hide");
+                toast.classList.remove("show");
+
+                setTimeout(function () {
+                    toast.remove();
+                }, 300);
+            }
+
+            yesButton.addEventListener("click", function () {
+
+                removeToast();
+
+                if (typeof onYes === "function") {
+                    onYes();
+                }
+
+            });
+
+            noButton.addEventListener("click", function () {
+
+                removeToast();
+
+                if (typeof onNo === "function") {
+                    onNo();
+                }
+
+            });
         }
     </script>
 </body>

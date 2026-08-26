@@ -37,10 +37,6 @@ namespace WEBLINK_CRM.Controllers
                 return View(model);
             }
 
-            // ============================
-            // SESSION VALUES
-            // ============================
-
             HttpContext.Session.SetInt32("EmployeeId", employee.id);
             HttpContext.Session.SetString("EmployeeName", employee.name ?? "");
             HttpContext.Session.SetString("EmpCode", employee.empcode ?? "");
@@ -49,42 +45,39 @@ namespace WEBLINK_CRM.Controllers
             HttpContext.Session.SetString("Role", employee.role ?? "");
 
 
-            // ============================
-            // COOKIE AUTHENTICATION
-            // ============================
 
             var claims = new List<Claim>
-    {
-        new Claim(
-            ClaimTypes.NameIdentifier,
-            employee.id.ToString()
-        ),
+                {
+                    new Claim(
+                        ClaimTypes.NameIdentifier,
+                        employee.id.ToString()
+                    ),
 
-        new Claim(
-            ClaimTypes.Name,
-            employee.UserName ?? ""
-        ),
+                    new Claim(
+                        ClaimTypes.Name,
+                        employee.UserName ?? ""
+                    ),
 
-        new Claim(
-            ClaimTypes.Email,
-            employee.email ?? ""
-        ),
+                    new Claim(
+                        ClaimTypes.Email,
+                        employee.email ?? ""
+                    ),
 
-        new Claim(
-            ClaimTypes.Role,
-            employee.role ?? ""
-        ),
+                    new Claim(
+                        ClaimTypes.Role,
+                        employee.role ?? ""
+                    ),
 
-        new Claim(
-            "EmployeeName",
-            employee.name ?? ""
-        ),
+                    new Claim(
+                        "EmployeeName",
+                        employee.name ?? ""
+                    ),
 
-        new Claim(
-            "EmpCode",
-            employee.empcode ?? ""
-        )
-    };
+                    new Claim(
+                        "EmpCode",
+                        employee.empcode ?? ""
+                    )
+                };
 
             var identity = new ClaimsIdentity(
                 claims,
@@ -98,18 +91,10 @@ namespace WEBLINK_CRM.Controllers
                 principal
             );
 
+            TempData["ToastMessage"] = "Login successful! Welcome, " + employee.name + ".";
+            TempData["ToastType"] = "success";
 
-            // ============================
-            // SUCCESS MESSAGE
-            // ============================
-
-            ViewBag.LoginSuccess =
-                "Login successful! Welcome, " + employee.name + ".";
-
-            ViewBag.RedirectUrl =
-                Url.Action("Index", "Dashboard");
-
-            return View(model);
+            return RedirectToAction("Index", "Dashboard");
         }
 
         [HttpGet]

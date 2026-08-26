@@ -273,6 +273,15 @@ body {
             background: #fff;
         }
 
+        .field input::placeholder {
+            color: transparent;
+        }
+
+        .field input[type="password"],
+        .field input[name="password"] {
+            padding-right: 44px;
+        }
+
     .field label {
         position: absolute;
         left: 16px;

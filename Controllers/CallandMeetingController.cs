@@ -169,7 +169,6 @@ namespace WEBLINK_CRM.Controllers
             }
         }
 
-
         [HttpPost]
         public async Task<IActionResult> UpdateCompanyUser(string newName, string CompCode)
         {
@@ -179,8 +178,8 @@ namespace WEBLINK_CRM.Controllers
                 {
                     return Json(new { success = false, message = "Invalid name" });
                 }
-
-                var result = await _callmeetmaster.UpdateCompanyCreatedByName(newName, CompCode);
+                string SessionName = HttpContext.Session.GetString("EmpCode")?.ToString() ?? "NA";
+                var result = await _callmeetmaster.UpdateCompanyCreatedByName(newName, CompCode, SessionName);
 
                 return Json(new { success = true, message = "" });
             }
@@ -193,9 +192,8 @@ namespace WEBLINK_CRM.Controllers
         [HttpPost]
         public async Task<IActionResult> SaveCompanyUpdate([FromBody] CallandMeeting model)
         {
-            model.CreatedBy = HttpContext.Session.GetString("userName").ToString();
-            model.FromMail = HttpContext.Session.GetString("MailID").ToString();
-            model.AdminMail = "test@gmail.com";
+            model.CreatedBy = HttpContext.Session.GetString("EmpCode")?.ToString();
+            model.FromMail = HttpContext.Session.GetString("EmailId")?.ToString();
             if (model == null)
                 return Json(new { success = false, message = "Invalid data" });
 

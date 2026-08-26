@@ -5,7 +5,7 @@
 }
 
 <style type="text/css">
-    /* Filter Toggle Button */
+    /* ── all your existing styles unchanged ── */
     .btn-filter-toggle {
         background: #fff;
         border: 1px solid #ddd;
@@ -22,7 +22,6 @@
             border-color: #bbb;
         }
 
-    /* Filter Card */
     #filterCard {
         overflow: hidden;
         max-height: 1000px;
@@ -30,7 +29,6 @@
         transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.35s ease;
     }
 
-        /* Collapsed */
         #filterCard.filter-collapsed {
             max-height: 0;
             opacity: 0;
@@ -38,7 +36,6 @@
             padding-top: 0;
             padding-bottom: 0;
         }
-
 
     .table tbody td {
         font-size: 15px;
@@ -62,14 +59,13 @@
         .pagination .active .page-link {
             background-color: #142c45;
             border-color: #142d47;
-            color: #ffffff;
+            color: #fff;
         }
 
         .pagination .page-link:hover {
             background-color: #e9f2ff;
         }
 
-    /* Filter section separation */
     .row.mb-3.g-2 {
         padding-bottom: 4px;
     }
@@ -80,13 +76,12 @@
         color: #777;
     }
 
-
     .modelprofile1 {
         border-radius: 15px;
     }
 
     .headingcls {
-        background: linear-gradient( 314deg, #23262a, #1a4373);
+        background: linear-gradient(314deg, #23262a, #1a4373);
     }
 
     .reqcls {
@@ -104,6 +99,7 @@
     .lbls {
         font-size: 12px;
         text-align: left;
+        color: black !important;
     }
 
     .feedback-scroll {
@@ -112,7 +108,7 @@
         white-space: pre-wrap;
         word-break: break-word;
         padding: 30px 20px;
-        background: #ffffff;
+        background: #fff;
         border: 1px solid #b5cae3;
         border-radius: 6px;
         font-size: 12px;
@@ -124,7 +120,7 @@
         border-top: none !important;
     }
 
-    /* ── Trigger ── */
+    /* select2 premium theme — unchanged */
     .select2-container--premium .select2-selection--single {
         height: 50px;
         background: #fff;
@@ -146,7 +142,6 @@
         outline: none;
     }
 
-    /* ── Text & placeholder ── */
     .select2-container--premium .select2-selection--single .select2-selection__rendered {
         line-height: 50px;
         padding-left: 16px;
@@ -161,7 +156,6 @@
         font-weight: 400;
     }
 
-    /* ── Arrow ── */
     .select2-container--premium .select2-selection--single .select2-selection__arrow {
         height: 50px;
         right: 14px;
@@ -177,7 +171,6 @@
         border-width: 0 4px 5px 4px;
     }
 
-    /* ── Clear button ── */
     .select2-container--premium .select2-selection--single .select2-selection__clear {
         font-size: 18px;
         color: #d90000;
@@ -188,7 +181,6 @@
             color: #e74c3c;
         }
 
-    /* ── Dropdown panel ── */
     .select2-container--premium .select2-dropdown {
         background: #fff;
         border: 1.5px solid #111;
@@ -198,14 +190,13 @@
         box-shadow: 0 8px 30px rgba(0,0,0,.10);
     }
 
-    /* ── Search box ── */
     .select2-container--premium .select2-search--dropdown {
         padding: 10px 10px 6px;
     }
 
         .select2-container--premium .select2-search--dropdown .select2-search__field {
             background: #f7f7f7;
-            border: 1.5px solid #000000;
+            border: 1.5px solid #000;
             border-radius: 8px;
             padding: 9px 14px;
             font-size: 13px;
@@ -225,7 +216,6 @@
                 box-shadow: 0 0 0 3px rgba(0,0,0,.06);
             }
 
-    /* ── Options ── */
     .select2-container--premium .select2-results__options {
         padding: 4px 0;
         max-height: 220px;
@@ -263,14 +253,15 @@
         color: #ccc;
     }
 
+    /* filter card */
     .filter-card {
-        background: #ffffff;
+        background: #fff;
         border: 1px solid #e7ebf0;
         border-radius: 14px;
-        box-shadow: 0 4px 18px rgba(30, 41, 59, 0.06);
+        box-shadow: 0 4px 18px rgba(30,41,59,.06);
         overflow: visible;
         margin-bottom: 10px;
-        padding: 5px 5px 5px 5px;
+        padding: 5px;
     }
 
     .modern-label {
@@ -305,7 +296,7 @@
 
         .modern-control:focus {
             border-color: #6b7cff !important;
-            box-shadow: 0 0 0 3px rgba(107, 124, 255, .10) !important;
+            box-shadow: 0 0 0 3px rgba(107,124,255,.10) !important;
         }
 
         .modern-control:disabled {
@@ -313,7 +304,6 @@
             color: #9aa4b2 !important;
             cursor: not-allowed;
         }
-
 
     input[type="date"] {
         cursor: pointer;
@@ -339,7 +329,7 @@
 
     .select2-container--open .select2-selection--single {
         border-color: #6b7cff !important;
-        box-shadow: 0 0 0 3px rgba(107, 124, 255, .10);
+        box-shadow: 0 0 0 3px rgba(107,124,255,.10);
     }
 
     .select2-container .select2-selection__rendered {
@@ -362,7 +352,7 @@
     .select2-dropdown {
         border: 1px solid #dce2e9 !important;
         border-radius: 7px !important;
-        box-shadow: 0 8px 25px rgba(30, 41, 59, .12);
+        box-shadow: 0 8px 25px rgba(30,41,59,.12);
         overflow: hidden;
     }
 
@@ -377,9 +367,7 @@
         color: #4f46e5 !important;
     }
 
-    .select2-container--default
-    .select2-selection--single
-    .select2-selection__clear {
+    .select2-container--default .select2-selection--single .select2-selection__clear {
         margin-right: 8px;
     }
 
@@ -390,7 +378,6 @@
         padding-top: 16px;
         border-top: 1px solid #edf0f4;
     }
-
 
     .search-wrapper {
         position: relative;
@@ -426,7 +413,7 @@
 
         .search-input:focus {
             border-color: #6b7cff;
-            box-shadow: 0 0 0 3px rgba(107, 124, 255, .10);
+            box-shadow: 0 0 0 3px rgba(107,124,255,.10);
         }
 
     .filter-actions {
@@ -447,17 +434,17 @@
     .btn-searchss {
         background: linear-gradient(135deg, #2563eb, #4f46e5);
         color: #fff;
-        box-shadow: 0 3px 8px rgba(37, 99, 235, .20);
+        box-shadow: 0 3px 8px rgba(37,99,235,.20);
     }
 
         .btn-searchss:hover {
             color: #fff;
             transform: translateY(-1px);
-            box-shadow: 0 5px 12px rgba(37, 99, 235, .28);
+            box-shadow: 0 5px 12px rgba(37,99,235,.28);
         }
 
     .btn-search {
-        background: #ffffff;
+        background: #fff;
         color: #2563eb;
         border: 1px solid #2563eb !important;
     }
@@ -465,12 +452,11 @@
         .btn-search:hover {
             background: linear-gradient(135deg, #2563eb, #4f46e5);
             color: #fff;
-            box-shadow: 0 3px 8px rgba(37, 99, 235, .20);
+            box-shadow: 0 3px 8px rgba(37,99,235,.20);
         }
 
-
     .btn-reset {
-        background: #ffffff;
+        background: #fff;
         color: #f50000;
         border: 1px solid #fd001f !important;
     }
@@ -504,7 +490,6 @@
         }
 
     @@media (max-width: 768px) {
-
         .filter-footer {
             flex-wrap: wrap;
         }
@@ -519,13 +504,18 @@
         }
     }
 </style>
-<style>
-    /* ===== Company Detail Modal — Compact ===== */
+
+<style type="text/css">
+    .hidden {
+        display: none !important;
+    }
+
+    /* ===== Unified Company Modal ===== */
     #companyDetailModal .modal-content {
         border: none;
         border-radius: 14px;
         overflow: hidden;
-        box-shadow: 0 15px 45px rgba(15, 23, 42, .22);
+        box-shadow: 0 15px 45px rgba(15,23,42,.22);
     }
 
     #companyDetailModal .modal-header {
@@ -564,7 +554,7 @@
     }
 
     .cm-card {
-        background: #fff;
+        background: #cbcbcb;
         border: 1px solid #e7ebf0;
         border-radius: 12px;
         padding: 14px 16px;
@@ -591,7 +581,6 @@
             color: #6b7cff;
         }
 
-    /* Profile fields grid */
     .cm-profile-fields {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -631,7 +620,7 @@
 
         .cm-manager-row .cm-select-wrap {
             flex: 1;
-            min-width: 0; /* prevents select2/select from overflowing its grid cell */
+            min-width: 0;
         }
 
     .cm-form-label {
@@ -642,7 +631,6 @@
         display: block;
     }
 
-    /* Dense responsive form grid */
     .cm-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -714,6 +702,16 @@
         font-size: 13.5px;
     }
 
+    .btn-cm-back {
+        background: #fff;
+        border: 1px solid #6c757d;
+        color: #6c757d;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13.5px;
+    }
+
     .btn-cm-change {
         background: #fff;
         border: 1px solid #f04438 !important;
@@ -723,6 +721,14 @@
         border-radius: 7px !important;
         padding: 0 12px;
         font-size: 12.5px;
+    }   
+
+    /* History panel inside the single modal */
+
+    #historyScrollArea {
+        overflow-x: hidden;
+        overflow-y: scroll;
+        height: 460px;
     }
 
     @@media (max-width: 768px) {
@@ -737,9 +743,7 @@
         <h3>
             <i class="fa-solid fa-phone-volume"></i> Call & Meeting Report
         </h3>
-        <button type="button"
-                id="btnToggleFilter"
-                class="btn btn-filter-toggle">
+        <button type="button" id="btnToggleFilter" class="btn btn-filter-toggle">
             <i class="fa-solid fa-filter"></i>
             <span>Show Filters</span>
         </button>
@@ -747,30 +751,17 @@
     <div class="card-body">
         <div class="filter-card" id="filterCard">
             <div class="row g-3">
-                <!-- Type -->
                 <div class="col-xl-3 col-lg-3 col-md-6">
-                    <label class="modern-label">
-                        <i class="bi bi-arrow-repeat"></i>
-                        Type of Update
-                    </label>
-
+                    <label class="modern-label"><i class="bi bi-arrow-repeat"></i> Type of Update</label>
                     <select id="ddlfollowup" class="form-control modern-control">
                         <option value="">Select Type of Update</option>
                         <option value="Call">Call</option>
                         <option value="Meeting">Meeting</option>
                     </select>
                 </div>
-
-                <!-- Status -->
                 <div class="col-xl-3 col-lg-3 col-md-6">
-                    <label class="modern-label">
-                        <i class="bi bi-check2-circle"></i>
-                        Status of Update
-                    </label>
-
-                    <select id="ddlfollowupStatus"
-                            class="form-control modern-control"
-                            disabled>
+                    <label class="modern-label"><i class="bi bi-check2-circle"></i> Status of Update</label>
+                    <select id="ddlfollowupStatus" class="form-control modern-control" disabled>
                         <option value="">Select Status of Update</option>
                         <option value="Not interested">Not interested</option>
                         <option value="Ringing">Ringing</option>
@@ -779,147 +770,71 @@
                         <option value="Closed">Closed</option>
                     </select>
                 </div>
-
-                <!-- Sales Manager -->
                 <div class="col-xl-3 col-lg-3 col-md-6">
-                    <label class="modern-label">
-                        <i class="bi bi-person-badge"></i>
-                        Sales Manager
-                    </label>
-
+                    <label class="modern-label"><i class="bi bi-person-badge"></i> Sales Manager</label>
                     <select id="ddlTeamuser" class="form-control">
                         <option value="">Select Sales Manager</option>
-
                         @if (ViewBag.SalesManagers != null)
                         {
                             string currentEmpCode = Context.Session.GetString("EmpCode");
-
                             foreach (var mgr in (IEnumerable<dynamic>)ViewBag.SalesManagers)
                             {
                                 string userCode = mgr.UserCode;
-
-                                <option value="@userCode"
-                                        selected="@(userCode == currentEmpCode ? "selected" : null)">
-                                    @mgr.FullName
-                                </option>
+                                <option value="@userCode" selected="@(userCode == currentEmpCode ? "selected" : null)">@mgr.FullName</option>
                             }
                         }
                     </select>
                 </div>
-
-                <!-- Meeting With -->
                 <div class="col-xl-3 col-lg-3 col-md-6">
-                    <label class="modern-label">
-                        <i class="bi bi-people"></i>
-                        Meeting With Manager
-                    </label>
-
+                    <label class="modern-label"><i class="bi bi-people"></i> Meeting With Manager</label>
                     <select id="ddlmeetingwith" class="form-control">
                         <option value="">Select Manager</option>
                         <option value="1">Individual</option>
-
                         @if (ViewBag.MeetingWithManagers != null)
                         {
                             foreach (var mgr in (IEnumerable<dynamic>)ViewBag.MeetingWithManagers)
                             {
-                                <option value="@mgr.UserCode">
-                                    @mgr.FullName
-                                </option>
+                                <option value="@mgr.UserCode">@mgr.FullName</option>
                             }
                         }
                     </select>
                 </div>
-
             </div>
             <div class="row g-3">
-
-                <!-- From Date -->
                 <div class="col-xl-3 col-lg-3 col-md-6">
-                    <label class="modern-label">
-                        <i class="bi bi-calendar3"></i>
-                        From Date
-                    </label>
-
-                    <input type="date"
-                           id="txtfromdate"
-                           class="form-control modern-control" />
+                    <label class="modern-label"><i class="bi bi-calendar3"></i> From Date</label>
+                    <input type="date" id="txtfromdate" class="form-control modern-control" />
                 </div>
-
-                <!-- To Date -->
                 <div class="col-xl-3 col-lg-3 col-md-6">
-                    <label class="modern-label">
-                        <i class="bi bi-calendar3"></i>
-                        To Date
-                    </label>
-
-                    <input type="date"
-                           id="txttodate"
-                           class="form-control modern-control" />
+                    <label class="modern-label"><i class="bi bi-calendar3"></i> To Date</label>
+                    <input type="date" id="txttodate" class="form-control modern-control" />
                 </div>
-
-                <!-- Follow Up -->
                 <div class="col-xl-3 col-lg-3 col-md-6">
-                    <label class="modern-label">
-                        <i class="bi bi-calendar-check"></i>
-                        Follow-Up Date
-                    </label>
-
-                    <input type="date"
-                           id="txtfollowupdate"
-                           class="form-control modern-control" />
+                    <label class="modern-label"><i class="bi bi-calendar-check"></i> Follow-Up Date</label>
+                    <input type="date" id="txtfollowupdate" class="form-control modern-control" />
                 </div>
-
-                <!-- Area -->
                 <div class="col-xl-3 col-lg-3 col-md-6">
-                    <label class="modern-label">
-                        <i class="bi bi-geo-alt"></i>
-                        Area
-                    </label>
-
-                    <input type="text"
-                           id="txtarea"
-                           class="form-control modern-control"
-                           placeholder="Enter area" />
+                    <label class="modern-label"><i class="bi bi-geo-alt"></i> Area</label>
+                    <input type="text" id="txtarea" class="form-control modern-control" placeholder="Enter area" />
                 </div>
-
             </div>
             <div class="filter-footer">
-
                 <div class="search-wrapper">
                     <i class="bi bi-search"></i>
-
-                    <input type="text"
-                           id="searchInput"
-                           class="search-input"
-                           placeholder="Search company name..." />
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search company name..." />
                 </div>
-
                 <div class="filter-actions">
-
-                    <button type="button"
-                            id="btnSearchData"
-                            class="btn btn-search">
+                    <button type="button" id="btnSearchData" class="btn btn-search">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
-
-                    <button type="button"
-                            id="btnresetfilter"
-                            class="btn btn-reset">
+                    <button type="button" id="btnresetfilter" class="btn btn-reset">
                         <i class="fa-solid fa-arrow-rotate-left"></i>
                     </button>
-
                 </div>
-
                 <div class="record-info">
-                    <span>
-                        Total Records
-                    </span>
-
-                    <strong id="totalRecords">
-                        @Model.Count()
-                    </strong>
+                    <span>Total Records</span>
+                    <strong id="totalRecords">@Model.Count()</strong>
                 </div>
-
             </div>
         </div>
 
@@ -944,14 +859,15 @@
                     {
                         Count++;
                         <tr data-feedback="@callandMeet.FeedBack" data-remarks="@callandMeet.AdminRemark">
-                            <td><i class="fa fa-plus toggle-row" style="font-weight: bolder;cursor:pointer;color: #ff0707;"></i></td>
+                            <td><i class="fa fa-plus toggle-row" style="font-weight:bolder;cursor:pointer;color:#ff0707;"></i></td>
                             <td>@Count</td>
                             <td>@callandMeet.CompanyName</td>
                             <td>@callandMeet.CommentDateTime?.ToString("dd-MM-yyyy")</td>
                             <td><strong>@callandMeet.CallUpdateStatus</strong></td>
                             <td>@(callandMeet?.FollowDate?.ToString("dd-MM-yyyy") ?? "-")</td>
                             <td>
-                                <a href="javascript:void(0)" style="font-weight: 700!important;text-decoration: none !important;color: #074993;" class="open-company-modal" data-id="@callandMeet.Id">Close Follow-up</a>
+                                <a href="javascript:void(0)" style="font-weight:700!important;text-decoration:none!important;color:#074993;"
+                                   class="open-company-modal" data-id="@callandMeet.Id">Close Follow-up</a>
                             </td>
                         </tr>
                     }
@@ -965,208 +881,212 @@
         <div class="modal fade" id="companyDetailModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
             <div class="modal-dialog modal-xl modal-dialog-scrollable">
                 <div class="modal-content modelprofile1">
-
                     <div class="modal-header d-flex align-items-center">
-                        <h4 class="modal-title mb-0">Company Detail</h4>
-                        <button type="button" class="btn-close-cm" data-bs-dismiss="modal"><i class="fa-solid fa-xmark"></i></button>
+                        <h4 class="modal-title mb-0" id="modalMainTitle">Company Detail</h4>
+                        <button type="button" class="btn-close-cm" data-bs-dismiss="modal">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
                     </div>
 
                     <div class="modal-body">
-
-                        <!-- Profile -->
-                        <div class="cm-card">
-                            <div class="cm-profile-fields">
-                                <div>
-                                    <span class="cm-field-label">Company Code</span>
-                                    <div class="cm-field-value lblpopup" id="lblccode" name="Ccode"></div>
-                                    <input type="hidden" id="commenthistoryId" name="Id" />
-                                </div>
-                                <div>
-                                    <span class="cm-field-label">Company Name</span>
-                                    <div class="cm-field-value lblpopup" id="lblcname" name="CompanyName"></div>
-                                </div>
-                                <div>
-                                    <span class="cm-field-label">Owner Name</span>
-                                    <div class="cm-field-value lblpopup" id="lbloname" name="PersonName"></div>
-                                </div>
-                                <div>
-                                    <span class="cm-field-label">Email Id</span>
-                                    <div class="cm-field-value lblpopup" id="lblemail" name="ClientMail"></div>
-                                </div>
-                                <div>
-                                    <span class="cm-field-label">Mobile No.</span>
-                                    <div class="cm-field-value"><a id="hrefmob" href="#"><span id="lblmobile" name="ContactNo"></span></a></div>
-                                </div>
-                                <div>
-                                    <div class="cm-manager-row">
-                                        <div class="cm-select-wrap">
-                                            <label class="cm-field-label">Sales Manager</label>
-                                            <select id="ddlregbypopup" class="form-control" name="SessionName"></select>
+                        <div id="detailPanel">
+                            <div class="cm-card">
+                                <div class="cm-profile-fields">
+                                    <div>
+                                        <span class="cm-field-label">Company Code</span>
+                                        <div class="cm-field-value lblpopup" id="lblccode" name="Ccode"></div>
+                                        <input type="hidden" id="commenthistoryId" name="Id" />
+                                        <input type="hidden" id="companyid" name="Ids" />
+                                    </div>
+                                    <div>
+                                        <span class="cm-field-label">Company Name</span>
+                                        <div class="cm-field-value lblpopup" id="lblcname" name="CompanyName"></div>
+                                    </div>
+                                    <div>
+                                        <span class="cm-field-label">Owner Name</span>
+                                        <div class="cm-field-value lblpopup" id="lbloname" name="PersonName"></div>
+                                    </div>
+                                    <div>
+                                        <span class="cm-field-label">Email Id</span>
+                                        <div class="cm-field-value lblpopup" id="lblemail" name="ClientMail"></div>
+                                    </div>
+                                    <div>
+                                        <span class="cm-field-label">Mobile No.</span>
+                                        <div class="cm-field-value">
+                                            <a id="hrefmob" href="#">
+                                                <span id="lblmobile" name="ContactNo"></span>
+                                            </a>
                                         </div>
-                                        <button type="button" id="btnChange" class="btn-cm-change" onclick="ChangeCompanyUser()">Change</button>
+                                    </div>
+                                    <div>
+                                        <div class="cm-manager-row">
+                                            <div class="cm-select-wrap">
+                                                <label class="cm-field-label">Sales Manager</label>
+                                                <select id="ddlregbypopup" class="form-control" name="SessionName"></select>
+                                            </div>
+                                            <button type="button" id="btnChange" class="btn-cm-change" onclick="ChangeCompanyUser()">Change</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                            <div class="cm-card">
+                                <div class="cm-grid full">
+                                    <div>
+                                        <label class="cm-form-label">Feedback</label>
+                                        <textarea id="txtcomment" name="FeedBack" class="form-control" placeholder="Write Something..." rows="2"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="cm-form-label">Additional Emails</label>
+                                        <input type="text" id="txtaddemail" name="AdditionalMail" class="form-control" placeholder="Comma separated emails" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cm-card">
+                                <div class="cm-card-title"><i class="fa-solid fa-list-check"></i>Update Details</div>
 
-                        <!-- Feedback -->
-                        <div class="cm-card">
-                            <div class="cm-grid full">
-                                <div>
-                                    <label class="cm-form-label">Feedback</label>
-                                    <textarea id="txtcomment" name="FeedBack" class="form-control" placeholder="Write Something..." rows="2"></textarea>
+                                <div class="cm-grid">
+                                    <div class="cm-profile-fields">
+                                        <div>
+                                            <label class="cm-form-label">Type of Update <i class="reqcls">*</i></label>
+                                            <select id="ddlupdatefor" name="UpdateFor" class="form-control required-field" onchange="CheckUpdateFor()">
+                                                <option>--Select--</option>
+                                                <option value="Call">Call</option>
+                                                <option value="Meeting">Meeting</option>
+                                            </select>
+                                            <span class="text-danger validation-error"></span>
+                                        </div>
+                                        <div></div>
+                                        <div>
+                                            <label class="cm-form-label">Type <i class="reqcls">*</i></label>
+                                            <select id="ddltype" name="Type" class="form-control required-field">
+                                                <option value="">- Select Type -</option>
+                                                <option value="Fresh">Fresh</option>
+                                                <option value="Follow-up">Follow-up</option>
+                                                <option value="Services">Services</option>
+                                            </select>
+                                            <span class="text-danger validation-error"></span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="cm-form-label">Additional Emails</label>
-                                    <input type="text" id="txtaddemail" name="Area" class="form-control" placeholder="Comma separated emails" />
+
+                                <div class="cm-grid">
+                                    <div class="cm-profile-fields">
+                                        <div id="lblfolldate">
+                                            <label class="cm-form-label">Follow-Up Date <i class="reqcls">*</i></label>
+                                            <input type="date" id="txtfollowupdatee" name="FollowDate" class="form-control required-field" />
+                                            <span class="text-danger validation-error"></span>
+                                        </div>
+                                    </div>
                                 </div>
+
+                                <div class="cm-grid" id="DivCallUpdate">
+                                    <div class="cm-profile-fields">
+                                        <div>
+                                            <label class="cm-form-label">Call Status <i class="reqcls">*</i></label>
+                                            <select id="ddlcallstatus" name="CallUpdateStatus" class="form-control required-field" onchange="CheckCallMeetingUpdate()">
+                                                <option value="">--Select--</option>
+                                                <option value="Not Interested">Not Interested</option>
+                                                <option value="Ringing">Ringing</option>
+                                                <option value="Follow-up">Follow-up</option>
+                                                <option value="Busy">Busy</option>
+                                                <option value="Closed">Closed</option>
+                                            </select>
+                                            <span class="text-danger validation-error"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="cm-grid" id="DivMeetingUpdate">
+                                    <div class="cm-profile-fields">
+                                        <div>
+                                            <label class="cm-form-label">Meeting Update <i class="reqcls">*</i></label>
+                                            <select class="form-control required-field" id="ddlmeetingupdate" name="MeetUpdateStatus" onchange="CheckCallMeetingUpdate()">
+                                                <option value="">--Select--</option>
+                                                <option value="Not Interested">Not Interested</option>
+                                                <option value="Follow-up">Follow-up</option>
+                                                <option value="Closed">Closed</option>
+                                            </select>
+                                            <span class="text-danger validation-error"></span>
+                                        </div>
+                                        <div></div>
+                                        <div>
+                                            <label class="cm-form-label">Meeting With <i class="reqcls">*</i></label>
+                                            <select class="form-control required-field" id="ddlmeetingwithm" name="MeetingwithManager">
+                                                <option value="1">Individual</option>
+                                                <option value="WLSPL/01">Admin</option>
+                                                <option value="WLSPL/081">Vaibhav Zope</option>
+                                                <option value="WLSPL/0141">Vikrant</option>
+                                            </select>
+                                            <span class="text-danger validation-error"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="cm-grid" id="DivTypeofclient">
+                                    <div class="cm-profile-fields">
+                                        <div>
+                                            <label class="cm-form-label">Type of Client <i class="reqcls">*</i></label>
+                                            <select class="form-control required-field" id="ddltypeofclient" name="TypeofClient">
+                                                <option>--Select--</option>
+                                                <option>New</option>
+                                                <option>Renewal</option>
+                                                <option>Upgrade</option>
+                                                <option>Renewal + Upgrade</option>
+                                            </select>
+                                            <span class="text-danger validation-error"></span>
+                                        </div>
+                                        <div>
+                                            <label class="cm-form-label">Deal Details <i class="reqcls">*</i></label>
+                                            <textarea id="txtdealdetails" name="DealDetails" class="form-control required-field" rows="1"></textarea>
+                                            <span class="text-danger validation-error"></span>
+                                            <span class="cm-hint">Amount, cheque no., online/UPI ref, etc.</span>
+                                        </div>
+                                        <div>
+                                            <label class="cm-form-label">Meeting Time <i class="reqcls">*</i></label>
+                                            <input id="txtmeetingtime" name="MeetingTimeView" type="time" class="form-control required-field" />
+                                            <span class="text-danger validation-error"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer-cm">
+                                <button type="button" class="btn-cm-history" onclick="OpenHistory()">
+                                    <i class="fa-solid fa-clock-rotate-left"></i> History
+                                </button>
+                                <button type="button" class="btn-cm-save" id="btnSave">
+                                    <i class="fa-solid fa-floppy-disk"></i> Save
+                                </button>
                             </div>
                         </div>
 
-                        <!-- Update Details -->
-                        <div class="cm-card">
-                            <div class="cm-card-title"><i class="fa-solid fa-list-check"></i>Update Details</div>
-
-                            <div class="cm-grid">
-                                <div>
-                                    <label class="cm-form-label">Type of Update <i class="reqcls">*</i></label>
-                                    <select id="ddlupdatefor" name="UpdateFor" class="form-control required-field" onchange="CheckUpdateFor()">
-                                        <option>--Select--</option>
-                                        <option value="Call">Call</option>
-                                        <option value="Meeting">Meeting</option>
-                                    </select>
-                                    <span class="text-danger validation-error"></span>
-                                </div>
-                                <div>
-                                    <label class="cm-form-label">Type <i class="reqcls">*</i></label>
-                                    <select id="ddltype" name="Type" class="form-control required-field">
-                                        <option value="">- Select Type -</option>
-                                        <option value="Fresh">Fresh</option>
-                                        <option value="Follow-up">Follow-up</option>
-                                        <option value="Services">Services</option>
-                                    </select>
-                                    <span class="text-danger validation-error"></span>
-                                </div>
-                                <div id="lblfolldate">
-                                    <label class="cm-form-label">Follow-Up Date <i class="reqcls">*</i></label>
-                                    <input type="date" id="txtfollowupdatee" name="FollowDate" class="form-control required-field" />
-                                    <span class="text-danger validation-error"></span>
+                        <div id="historyPanel" class="hidden">
+                            <div style="background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:12px 16px;margin-bottom:12px;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <b>Company Name :</b>
+                                        <span id="lblHistorycname" class="ms-2"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <b>Company Code :</b>
+                                        <span id="lblHistoryccode" class="ms-2"></span>
+                                    </div>
                                 </div>
                             </div>
-
-                            <div class="cm-grid" id="DivCallUpdate">
-                                <div>
-                                    <label class="cm-form-label">Call Status <i class="reqcls">*</i></label>
-                                    <select id="ddlcallstatus" name="CallUpdateStatus" class="form-control required-field" onchange="CheckCallMeetingUpdate()">
-                                        <option value="">--Select--</option>
-                                        <option value="Not Interested">Not Interested</option>
-                                        <option value="Ringing">Ringing</option>
-                                        <option value="Follow-up">Follow-up</option>
-                                        <option value="Busy">Busy</option>
-                                        <option value="Closed">Closed</option>
-                                    </select>
-                                    <span class="text-danger validation-error"></span>
-                                </div>
+                            <div id="historyScrollArea">
+                                <div id="commentHistoryContainer"></div>
+                            </div>
+                            <div class="modal-footer-cm" style="margin-top:12px;">
+                                <button type="button" class="btn-cm-back" onclick="ShowDetailPanel()">
+                                    <i class="fa-solid fa-arrow-left"></i> Back
+                                </button>
                             </div>
 
-                            <div class="cm-grid" id="DivMeetingUpdate">
-                                <div>
-                                    <label class="cm-form-label">Meeting Update <i class="reqcls">*</i></label>
-                                    <select class="form-control required-field" ID="ddlmeetingupdate" name="MeetUpdateStatus" onchange="CheckCallMeetingUpdate()">
-                                        <option value="">--Select--</option>
-                                        <option value="Not Interested">Not Interested</option>
-                                        <option value="Follow-up">Follow-up</option>
-                                        <option value="Closed">Closed</option>
-                                    </select>
-                                    <span class="text-danger validation-error"></span>
-                                </div>
-                                <div>
-                                    <label class="cm-form-label">Meeting With <i class="reqcls">*</i></label>
-                                    <select class="form-control required-field" ID="ddlmeetingwithm" name="MeetingwithManager">
-                                        <option Value="1">Individual</option>
-                                        <option Value="WLSPL/01">Admin</option>
-                                        <option Value="WLSPL/081">Vaibhav Zope</option>
-                                        <option Value="WLSPL/0141">Vikrant</option>
-                                    </select>
-                                    <span class="text-danger validation-error"></span>
-                                </div>
-                            </div>
-
-                            <div class="cm-grid" id="DivTypeofclient">
-                                <div>
-                                    <label class="cm-form-label">Type of Client <i class="reqcls">*</i></label>
-                                    <select class="form-control required-field" ID="ddltypeofclient" name="TypeofClient">
-                                        <option>--Select--</option>
-                                        <option>New</option>
-                                        <option>Renewal</option>
-                                        <option>Upgrade</option>
-                                        <option>Renewal + Upgrade</option>
-                                    </select>
-                                    <span class="text-danger validation-error"></span>
-                                </div>
-                                <div>
-                                    <label class="cm-form-label">Deal Details <i class="reqcls">*</i></label>
-                                    <textarea ID="txtdealdetails" name="DealDetails" class="form-control required-field" rows="1"></textarea>
-                                    <span class="text-danger validation-error"></span>
-                                    <span class="cm-hint">Amount, cheque no., online/UPI ref, etc.</span>
-                                </div>
-                            </div>
-
-                            <div class="cm-grid" id="DivMeetingtime">
-                                <div>
-                                    <label class="cm-form-label">Meeting Time <i class="reqcls">*</i></label>
-                                    <input ID="txtmeetingtime" name="MeetingTimeView" type="time" class="form-control required-field" />
-                                    <span class="text-danger validation-error"></span>
-                                </div>
-                            </div>
                         </div>
-
-                        <div class="modal-footer-cm">
-                            <button type="button" class="btn-cm-history" onclick="OpenHistory()">
-                                <i class="fa-solid fa-clock-rotate-left"></i> History
-                            </button>
-                            <button type="button" class="btn-cm-save" id="btnSave">
-                                <i class="fa-solid fa-floppy-disk"></i> Save
-                            </button>
-                        </div>
-
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="modal fade" id="companyHistoryModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
-            <div class="modal-dialog modal-xl modal-dialog-scrollable">
-                <div class="modal-content modelprofile1">
-                    <div class="modal-header headingcls d-flex align-items-center">
-                        <h4 class="modal-title mb-0">Company Comment History</h4>
-                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row container p-0 m-0">
-                            <div class="profilemodel2">
-                                <div class="row ms-2">
-                                    <div class="col-md-12" style="background-color:#f9f7f7">
-                                        <div class="row p-1 bg-light">
-                                            <div class="col-md-4"><b>Company Name :</b></div>
-                                            <div class="col-md-8 lblpopup" id="lblHistorycname"></div>
-                                        </div>
-                                        <div class="row p-1 bg-light">
-                                            <div class="col-md-4"><b>Company Code :</b></div>
-                                            <div class="col-md-8 lblpopup" id="lblHistoryccode"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <hr class="new1" />
-                                <div class="row ms-2" style="overflow-y:scroll;height:500px;">
-                                    <div class="col-md-12" id="commentHistoryContainer"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -1177,77 +1097,62 @@
     const rowsPerPage = 20;
     let currentPage = 1;
     let allRows = [];
+
+
+    function ShowDetailPanel() {
+        document.getElementById("detailPanel").classList.remove("hidden");
+        document.getElementById("historyPanel").classList.add("hidden");
+        document.getElementById("modalMainTitle").textContent = "Company Detail";
+    }
+
+    function ShowHistoryPanel() {
+        document.getElementById("detailPanel").classList.add("hidden");
+        document.getElementById("historyPanel").classList.remove("hidden");
+        document.getElementById("modalMainTitle").textContent = "Company Comment History";
+    }
+
     $(document).ready(function () {
 
-            // COLLAPSED BY DEFAULT
+        // collapsed by default
         $("#filterCard").addClass("filter-collapsed");
 
         $("#btnToggleFilter").on("click", function () {
-
             $("#filterCard").toggleClass("filter-collapsed");
-
             if ($("#filterCard").hasClass("filter-collapsed")) {
-
-                // Collapsed
                 $(this).find("span").text("Show Filters");
-
-                $(this).find("i")
-                    .removeClass("fa-filter-circle-xmark")
-                    .addClass("fa-filter");
-
+                $(this).find("i").removeClass("fa-filter-circle-xmark").addClass("fa-filter");
             } else {
-
-                // Expanded
                 $(this).find("span").text("Hide Filters");
-
-                $(this).find("i")
-                    .removeClass("fa-filter")
-                    .addClass("fa-filter-circle-xmark");
+                $(this).find("i").removeClass("fa-filter").addClass("fa-filter-circle-xmark");
             }
-
         });
 
+        $("#ddlTeamuser").select2({ placeholder: "Select Sales Manager", allowClear: true, width: "100%" });
+        $("#ddlmeetingwith").select2({ placeholder: "Select Manager", allowClear: true, width: "100%" });
 
-
-        $("#ddlTeamuser").select2({
-            placeholder: "Select Sales Manager",
-            allowClear: true,
-            width: "100%"
+        $("#ddlfollowupStatus").prop("disabled", true);
+        $("#ddlfollowup").on("change", function () {
+            if ($(this).val()) {
+                $("#ddlfollowupStatus").prop("disabled", false);
+            } else {
+                if ($("#ddlfollowupStatus").val()) showToast("Please select Type of Update first", "error");
+                $("#ddlfollowupStatus").val("").prop("disabled", true);
+            }
         });
 
-        $("#ddlmeetingwith").select2({
-            placeholder: "Select Manager",
-            allowClear: true,
-            width: "100%"
-        });
-
+        currentPage = 1;
+        displayFilteredTable(1);
     });
 
     $("#ddlregbypopup").select2({
         theme: "premium",
-        placeholder: "Select Session",
+        placeholder: "Select Sales Manager",
         allowClear: true,
         width: "100%",
         dropdownParent: $("#companyDetailModal")
     });
 
-    $(document).ready(function () {
-        $("#ddlfollowupStatus").prop("disabled", true);
-
-        $("#ddlfollowup").on("change", function () {
-            if ($(this).val()) {
-                $("#ddlfollowupStatus").prop("disabled", false);
-            } else {
-                if ($("#ddlfollowupStatus").val()) {
-                    showToast("Please select Type of Update first", "error");
-                }
-                $("#ddlfollowupStatus").val("").prop("disabled", true);
-            }
-        });
-        currentPage = 1;
-        displayFilteredTable(1);
-    });
-
+    /* ── Table rendering ── */
     function renderTable(data) {
         allRows = data;
         const tbody = $("#companyTableBody");
@@ -1260,28 +1165,22 @@
             return;
         }
 
-           data.forEach((item, index) => {
-                const followDate = item.followDate
-                    ? new Date(item.followDate).toLocaleDateString("en-GB").split("/").join("-")
-                    : "-";
-                const createdDate = item.commentDateTime
-                    ? new Date(item.commentDateTime).toLocaleDateString("en-GB").split("/").join("-")
-                    : "-";
-
-              const row = `
-                    <tr data-feedback="${(item.feedBack ?? "").replace(/"/g, '&quot;')}" data-remarks="${(item.adminRemark ?? "").replace(/"/g, '&quot;')}">
-                        <td><i class="fa fa-plus toggle-row" style="font-weight:bolder;cursor:pointer;color:#ff0707;"></i></td>
-                        <td>${index + 1}</td>
-                        <td>${item.companyName}</td>
-                        <td>${createdDate}</td>
-                        <td><strong>${item.callUpdateStatus ?? ""}</strong></td>
-                        <td>${followDate}</td>
-                        <td>
-                            <a href="javascript:void(0)" style="color: rgba(var(--bs-link-color-rgb), var(--bs-link-opacity, 1))!important;font-weight:700!important;text-decoration:none!important;" class="open-company-modal" data-id="${item.id}">Close Follow-up</a>
-                        </td>
-                    </tr>`;
-                tbody.append(row);
-          });
+        data.forEach((item, index) => {
+            const followDate  = item.followDate       ? new Date(item.followDate).toLocaleDateString("en-GB").split("/").join("-") : "-";
+            const createdDate = item.commentDateTime  ? new Date(item.commentDateTime).toLocaleDateString("en-GB").split("/").join("-") : "-";
+            const row = `
+                <tr data-feedback="${(item.feedBack ?? "").replace(/"/g, '&quot;')}" data-remarks="${(item.adminRemark ?? "").replace(/"/g, '&quot;')}">
+                    <td><i class="fa fa-plus toggle-row" style="font-weight:bolder;cursor:pointer;color:#ff0707;"></i></td>
+                    <td>${index + 1}</td>
+                    <td>${item.companyName}</td>
+                    <td>${createdDate}</td>
+                    <td><strong>${item.callUpdateStatus ?? ""}</strong></td>
+                    <td>${followDate}</td>
+                    <td><a href="javascript:void(0)" style="color:rgba(var(--bs-link-color-rgb),var(--bs-link-opacity,1))!important;font-weight:700!important;text-decoration:none!important;"
+                           class="open-company-modal" data-id="${item.id}">Close Follow-up</a></td>
+                </tr>`;
+            tbody.append(row);
+        });
 
         $("#totalRecords").text(data.length);
         currentPage = 1;
@@ -1290,19 +1189,19 @@
 
     function displayFilteredTable(page) {
         const rows = document.querySelectorAll("#companyTable tbody tr");
-        let start = (page - 1) * rowsPerPage;
-        let end = start + rowsPerPage;
-        rows.forEach((row, index) => { row.style.display = (index >= start && index < end) ? "" : "none"; });
+        const start = (page - 1) * rowsPerPage;
+        const end   = start + rowsPerPage;
+        rows.forEach((row, i) => { row.style.display = (i >= start && i < end) ? "" : "none"; });
         createFilteredPagination(rows.length);
     }
 
     function createFilteredPagination(totalRows) {
-        let pages = Math.ceil(totalRows / rowsPerPage);
-        let pagination = document.getElementById("pagination");
+        const pages = Math.ceil(totalRows / rowsPerPage);
+        const pagination = document.getElementById("pagination");
         pagination.innerHTML = "";
         for (let i = 1; i <= pages; i++) {
-            let li = document.createElement("li");
-            li.className = "page-item " + (i == currentPage ? "active" : "");
+            const li = document.createElement("li");
+            li.className = "page-item " + (i === currentPage ? "active" : "");
             li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
             li.onclick = function () { currentPage = i; displayFilteredTable(i); };
             pagination.appendChild(li);
@@ -1311,15 +1210,15 @@
 
     function getFilterPayload() {
         return {
-            UpdateFor: $("#ddlfollowup").val() || null,
-            Status: $("#ddlfollowupStatus").val() || null,
-            SalesManager: $("#ddlTeamuser").val() || null,
-            MeetingWith: $("#ddlmeetingwith").val() || null,
-            FromDate: $("#txtfromdate").val() || null,
-            ToDate: $("#txttodate").val() || null,
-            FollowUpDate: $("#txtfollowupdate").val() || null,
-            Area: $("#txtarea").val() || null,
-            CompanyName: $("#searchInput").val() || null
+            UpdateFor:   $("#ddlfollowup").val()       || null,
+            Status:      $("#ddlfollowupStatus").val() || null,
+            SalesManager:$("#ddlTeamuser").val()       || null,
+            MeetingWith: $("#ddlmeetingwith").val()    || null,
+            FromDate:    $("#txtfromdate").val()        || null,
+            ToDate:      $("#txttodate").val()          || null,
+            FollowUpDate:$("#txtfollowupdate").val()   || null,
+            Area:        $("#txtarea").val()            || null,
+            CompanyName: $("#searchInput").val()        || null
         };
     }
 
@@ -1341,13 +1240,14 @@
         $("#ddlfollowup, #ddlfollowupStatus, #ddlTeamuser, #ddlmeetingwith").val("");
         $("#ddlfollowupStatus").prop("disabled", true);
         $("#txtfromdate, #txttodate, #txtfollowupdate, #txtarea, #searchInput").val("");
-        $("#btnSearchData").trigger("click"); // fetch unfiltered set from server
+        $("#btnSearchData").trigger("click");
     });
 
+    /* ── Expand row (feedback + remarks) ── */
     let remarksSaveTimers = {};
     $(document).on("click", ".toggle-row", function () {
         const $icon = $(this);
-        const $row = $icon.closest("tr");
+        const $row  = $icon.closest("tr");
         const $existingDetail = $row.next("tr.detail-row");
 
         if ($existingDetail.length) {
@@ -1355,18 +1255,18 @@
             $icon.removeClass("fa-minus").addClass("fa-plus");
         } else {
             const feedback = $row.data("feedback") || "No feedback available.";
-            const remarks = $row.data("remarks") || "";
-            const rowId = $row.find(".open-company-modal").data("id");
+            const remarks  = $row.data("remarks")  || "";
+            const rowId    = $row.find(".open-company-modal").data("id");
 
-          const remarksControl = isAdmin
+            const remarksControl = isAdmin
                 ? `<div class="remarks-wrapper" style="position:relative;">
                        <textarea class="form-control remarks-edit" data-id="${rowId}" rows="4" placeholder="Enter remarks..." style="padding-right:32px;">${remarks}</textarea>
                        <i class="fa-solid fa-broom clear-remarks-btn" data-id="${rowId}" title="Clear remark"
-                          style="position:absolute; top:8px; right:10px; cursor:pointer; color:#6c757d; z-index:2;"></i>
+                          style="position:absolute;top:8px;right:10px;cursor:pointer;color:#6c757d;z-index:2;"></i>
                    </div>
                    <small class="remarks-status text-muted" data-id="${rowId}"></small>`
                 : (remarks
-                    ? `<div class="feedback-scroll" style="color:red; font-weight:bold;">${remarks}</div>`
+                    ? `<div class="feedback-scroll" style="color:red;font-weight:bold;">${remarks}</div>`
                     : `<div class="feedback-scroll">No remarks added.</div>`);
 
             const detailRow = `
@@ -1387,12 +1287,11 @@
 
     $(document).on("keyup", ".remarks-edit", function () {
         const $textarea = $(this);
-        const id = $textarea.data("id");
-        const value = $textarea.val();
-        const $status = $textarea.closest("td").find(".remarks-status[data-id='" + id + "']");
+        const id        = $textarea.data("id");
+        const value     = $textarea.val();
+        const $status   = $textarea.closest("td").find(".remarks-status[data-id='" + id + "']");
 
         $status.text("Saving...");
-
         clearTimeout(remarksSaveTimers[id]);
         remarksSaveTimers[id] = setTimeout(function () {
             $.ajax({
@@ -1418,26 +1317,24 @@
     });
 
     $(document).on("click", ".clear-remarks-btn", function () {
-        const $broom = $(this);
-        const id = $broom.data("id");
-        const $td = $broom.closest("td");
-        const $textarea = $td.find(".remarks-edit[data-id='" + id + "']");
-        const $status = $td.find(".remarks-status[data-id='" + id + "']");
+        const $broom   = $(this);
+        const id       = $broom.data("id");
+        const $td      = $broom.closest("td");
+        const $textarea= $td.find(".remarks-edit[data-id='" + id + "']");
+        const $status  = $td.find(".remarks-status[data-id='" + id + "']");
 
         $textarea.val("");
         $status.text("Clearing...");
-
         $.ajax({
             url: "/CallAndMeeting/UpdateRemarks",
             type: "POST",
             data: { id: id, remarks: "" },
             success: function (res) {
+                $status.text("");
                 if (res.success) {
-                    $status.text("");
                     showToast("Remark cleared", "success");
                     $textarea.closest("tr.detail-row").prev("tr").data("remarks", "");
                 } else {
-                    $status.text("");
                     showToast(res.message, "error");
                 }
             },
@@ -1448,117 +1345,107 @@
         });
     });
 
+    /* ── Open detail modal ── */
     $(document).on("click", ".open-company-modal", function () {
-        debugger;
-        let companyId = $(this).data("id");
+        const companyId = $(this).data("id");
         $.ajax({
             url: "/CallAndMeeting/CloseFollowUpClick",
             type: "GET",
             data: { id: companyId },
             success: function (res) {
-                debugger;
                 if (!res.success) { showToast(res.message, "error"); return; }
 
-                $("#commenthistoryId").text(res.commentId[0].Id);
+                $("#commenthistoryId").text(res.commentId[0].ID_CommentHistory);
+                $("#companyid").text(res.commentId[0].id);
                 $("#lblccode").text(res.commentId[0].ccode);
                 $("#lblcname").text(res.commentId[0].cname);
                 $("#lbloname").text(res.commentId[0].oname);
                 $("#lblemail").text(res.commentId[0].clientmail);
                 $("#lblmobile").text(res.commentId[0].mobile);
                 $("#hrefmob").attr("href", "tel:" + res.commentId[0].mobile);
-                $("#Imgvisitingcard").attr("src", "https://www.weblinkservices.net/assets-web/logo-main.png");
 
                 $("#ddlregbypopup").empty().append('<option value="NoName">-- Select Sales Manager --</option>');
                 $.each(res.userList, function (i, user) {
                     $("#ddlregbypopup").append($("<option>", { value: user.UserCode, text: user.FullName }));
                 });
-                $("#ddlregbypopup").val(res.commentId[0].BDE);
+                $("#ddlregbypopup").val(res.commentId[0].sessionname);
 
                 const SessionRole = "@Context.Session.GetString("Role")";
-                $("#ddlregbypopup").prop("disabled", !(SessionRole && (SessionRole === "Admin" || SessionRole === "Sub Admin")));
-                   if (SessionRole === "Admin" || SessionRole === "Sub Admin") {
-                        $("#btnChange").show();
-                    } else {
-                        $("#btnChange").hide();
-                    }
+                const isAdminRole = (SessionRole === "Admin" || SessionRole === "Sub Admin");
+                $("#ddlregbypopup").prop("disabled", !isAdminRole);
+                isAdminRole ? $("#btnChange").show() : $("#btnChange").hide();
 
                 $("#ddlupdatefor").val(res.commentId[0].Updatefor);
                 hideAll();
-
                 if (res.commentId[0].Updatefor === "Call") {
-                    document.getElementById("DivCallUpdate").style.display = "flex";
+                    document.getElementById("DivCallUpdate").classList.remove("hidden");
                     $("#ddlcallstatus").val(res.commentId[0].UpdateStatus);
                     if (res.commentId[0].UpdateStatus === "Follow-up") {
-                        document.getElementById("lblfolldate").style.display = "block";
-                        document.getElementById("txtfollowupdatee").style.display = "block";
+                        document.getElementById("lblfolldate").classList.remove("hidden");
+                        document.getElementById("txtfollowupdatee").classList.remove("hidden");
                     }
                 } else {
-                    document.getElementById("DivMeetingUpdate").style.display = "flex";
+                    document.getElementById("DivMeetingUpdate").classList.remove("hidden");
                     $("#ddlmeetingupdate").val(res.commentId[0].UpdateStatus);
                     if (res.commentId[0].UpdateStatus === "Follow-up") {
-                        document.getElementById("lblfolldate").style.display = "block";
-                        document.getElementById("txtfollowupdatee").style.display = "block";
+                        document.getElementById("lblfolldate").classList.remove("hidden");
+                        document.getElementById("txtfollowupdatee").classList.remove("hidden");
                     }
                 }
 
-                var modal = new bootstrap.Modal(document.getElementById("companyDetailModal"));
-                modal.show();
+                // Always open on the detail panel
+                ShowDetailPanel();
+                new bootstrap.Modal(document.getElementById("companyDetailModal")).show();
             },
             error: function () { showToast("Failed to load company details.", "error"); }
         });
     });
 
+    /* ── Visibility helpers ── */
     function hideAll() {
-        document.getElementById("DivMeetingUpdate").style.display = "none";
-        document.getElementById("DivTypeofclient").style.display = "none";
-        document.getElementById("DivMeetingtime").style.display = "none";
-        document.getElementById("DivCallUpdate").style.display = "none";
-        document.getElementById("lblfolldate").style.display = "none";
-        document.getElementById("txtfollowupdatee").style.display = "none";
+        ["DivMeetingUpdate", "DivTypeofclient", "DivCallUpdate", "lblfolldate"].forEach(function (id) {
+            document.getElementById(id).classList.add("hidden");
+        });
+        document.getElementById("txtfollowupdatee").classList.add("hidden");
     }
 
     function CheckUpdateFor() {
-        var updateForType = document.getElementById("ddlupdatefor").value;
+        const updateForType = document.getElementById("ddlupdatefor").value;
         hideAll();
         document.getElementById("txtfollowupdatee").value = "";
 
         if (updateForType === "Call") {
-            document.getElementById("ddlmeetingupdate").value = "";
-            document.getElementById("ddlmeetingwithm").value = "1";
-            document.getElementById("ddltypeofclient").value = "";
-            document.getElementById("txtdealdetails").value = "";
-            document.getElementById("txtmeetingtime").value = "";
-            document.getElementById("DivCallUpdate").style.display = "flex";
+            document.getElementById("ddlmeetingupdate").value   = "";
+            document.getElementById("ddlmeetingwithm").value    = "1";
+            document.getElementById("ddltypeofclient").value    = "";
+            document.getElementById("txtdealdetails").value     = "";
+            document.getElementById("txtmeetingtime").value     = "";
+            document.getElementById("DivCallUpdate").classList.remove("hidden");
         } else if (updateForType === "Meeting") {
             document.getElementById("ddlcallstatus").value = "";
-            document.getElementById("DivMeetingUpdate").style.display = "flex";
-        } else if (updateForType === "") {
-            document.getElementById("ddlcallstatus").value = "";
-            document.getElementById("ddlmeetingupdate").value = "";
-            document.getElementById("ddlmeetingwithm").value = "1";
-            document.getElementById("ddltypeofclient").value = "";
-            document.getElementById("txtdealdetails").value = "";
-            document.getElementById("txtmeetingtime").value = "";
+            document.getElementById("DivMeetingUpdate").classList.remove("hidden");
+        } else {
+            document.getElementById("ddlcallstatus").value      = "";
+            document.getElementById("ddlmeetingupdate").value   = "";
+            document.getElementById("ddlmeetingwithm").value    = "1";
+            document.getElementById("ddltypeofclient").value    = "";
+            document.getElementById("txtdealdetails").value     = "";
+            document.getElementById("txtmeetingtime").value     = "";
         }
     }
 
     function CheckCallMeetingUpdate() {
-        var CallUpdateStatus = document.getElementById("ddlcallstatus").value;
-        var MeetUpdateStatus = document.getElementById("ddlmeetingupdate").value;
+        const CallUpdateStatus = document.getElementById("ddlcallstatus").value;
+        const MeetUpdateStatus = document.getElementById("ddlmeetingupdate").value;
         hideAll();
         CheckUpdateFor();
 
-        if (CallUpdateStatus === "Follow-up") {
-            document.getElementById("lblfolldate").style.display = "block";
-            document.getElementById("txtfollowupdatee").style.display = "block";
-        }
-        if (MeetUpdateStatus === "Follow-up") {
-            document.getElementById("lblfolldate").style.display = "block";
-            document.getElementById("txtfollowupdatee").style.display = "block";
+        if (CallUpdateStatus === "Follow-up" || MeetUpdateStatus === "Follow-up") {
+            document.getElementById("lblfolldate").classList.remove("hidden");
+            document.getElementById("txtfollowupdatee").classList.remove("hidden");
         }
         if (MeetUpdateStatus === "Closed") {
-            document.getElementById("DivTypeofclient").style.display = "flex";
-            document.getElementById("DivMeetingtime").style.display = "flex";
+            document.getElementById("DivTypeofclient").classList.remove("hidden");
         }
     }
 
@@ -1569,15 +1456,13 @@
 
         $(".required-field").each(function () {
             if (!$(this).is(":visible")) return;
-            let value = $(this).val();
-            let field = $(this);
-
+            const value = $(this).val();
             if (!value || value.trim() === "" || value === "--Select--") {
                 isValid = false;
-                field.addClass("is-invalid");
-                let labelText = field.closest(".row").find("b, label").first().text().replace("*", "").trim();
-                field.next(".validation-error").text(labelText + " required");
-                field.focus();
+                $(this).addClass("is-invalid");
+                const labelText = $(this).closest(".row").find("b, label").first().text().replace("*", "").trim();
+                $(this).next(".validation-error").text(labelText + " required");
+                $(this).focus();
                 return false;
             }
         });
@@ -1586,26 +1471,34 @@
     }
 
     function ChangeCompanyUser() {
-        const newName = $("#ddlregbypopup").val();
-        const CompCode = $("#lblccode").text();
+        const newName  = $("#ddlregbypopup").val();
+        const id       = $("#companyid").text();
 
-        if (!confirm("Are you sure you want to change the company user?")) return;
+        if (newName === "NoName" || newName === null) {
+            showToast("Please Select Sales Person First", "warning");
+            return;
+        }
 
-        $.ajax({
-            url: "/CallAndMeeting/UpdateCompanyUser",
-            type: "POST",
-            data: { newName: newName, CompCode: CompCode },
-            success: function (res) {
-                if (res.success) showToast("Updated successfully", "success");
-                else showToast(res.message, "error");
+        showConfirmToast(
+            "Are you sure you want to change the company user?",
+            function () {
+                $.ajax({
+                    url: "/CallAndMeeting/UpdateCompanyUser",
+                    type: "POST",
+                    data: { newName: newName, CompCode: id },
+                    success: function (res) {
+                        showToast(res.success ? "Updated successfully" : res.message, res.success ? "success" : "error");
+                    },
+                    error: function () { showToast("Something went wrong while updating.", "error"); }
+                });
             },
-            error: function () { showToast("Something went wrong while updating.", "error"); }
-        });
+            function () { showToast("Update cancelled.", "warning"); }
+        );
     }
 
     $("#btnSave").on("click", function () {
         if (!validateCompanyForm()) return;
-        let companyData = getCompanyFormData();
+        const companyData = getCompanyFormData();
 
         $.ajax({
             url: "/CallAndMeeting/SaveCompanyUpdate",
@@ -1627,74 +1520,75 @@
     });
 
     function getCompanyFormData() {
-        let data = {};
+        const data = {};
 
         $("#companyDetailModal").find("input, select, textarea").each(function () {
             if (!$(this).is(":visible")) return;
-            let propName = $(this).attr("name");
+            const propName = $(this).attr("name");
             if (!propName) return;
             let value = $(this).val();
             if (value === undefined || value === null) value = "";
 
-            if ($(this).attr("type") === "date") data[propName] = value ? new Date(value).toISOString() : null;
-            else if ($(this).attr("type") === "time") data[propName] = value ? value : null;
-            else data[propName] = value.trim();
+            if ($(this).attr("type") === "date")      data[propName] = value ? new Date(value).toISOString() : null;
+            else if ($(this).attr("type") === "time") data[propName] = value || null;
+            else                                       data[propName] = value.trim();
         });
 
-        const labelFields = [
-            { name: "Ccode", selector: "#lblccode" },
+        [
+            { name: "Ccode",       selector: "#lblccode" },
             { name: "CompanyName", selector: "#lblcname" },
-            { name: "PersonName", selector: "#lbloname" },
-            { name: "ClientMail", selector: "#lblemail" },
-            { name: "ContactNo", selector: "#lblmobile" },
-            { name: "Address", selector: "#lbladdress" },
-            { name: "Id", selector: "#commenthistoryId" }
-        ];
-
-        labelFields.forEach(function (field) {
-            let text = $(field.selector).text().trim();
+            { name: "PersonName",  selector: "#lbloname" },
+            { name: "ClientMail",  selector: "#lblemail" },
+            { name: "ContactNo",   selector: "#lblmobile" },
+            { name: "Address",     selector: "#lbladdress" },
+            { name: "Id",          selector: "#commenthistoryId" }
+        ].forEach(function (field) {
+            const text = $(field.selector).text().trim();
             if (text) data[field.name] = text;
         });
 
         return data;
     }
 
+    /* ── History — now loads inside the same modal ── */
     function OpenHistory() {
-        var CompanyCode = $("#lblccode").text();
-        var CompanyName = $("#lblcname").text();
+        const CompanyCode = $("#lblccode").text();
+        const CompanyName = $("#lblcname").text();
 
         $.ajax({
             url: "/CallAndMeeting/GetCommmentHistory",
             type: "GET",
             data: { CompanyCode: CompanyCode },
             success: function (res) {
+                debugger;
                 if (!res.success) { showToast(res.message, "error"); return; }
 
                 $("#lblHistoryccode").text(CompanyCode);
                 $("#lblHistorycname").text(CompanyName);
 
-                var container = $("#commentHistoryContainer");
+                const container = $("#commentHistoryContainer");
                 container.empty();
 
-                if (res.comments.length === 0) container.append('<p class="text-center">No comments found.</p>');
+                if (res.comments.length === 0) {
+                    container.append('<p class="text-center">No comments found.</p>');
+                }
 
                 $.each(res.comments, function (i, item) {
-                    var html = `
-                        <div class="row" style="background-color: rgb(193 104 62); padding: 5px;">
-                            <div class="col-md-4">&nbsp;- <span class="lbls">${item.Name}</span></div>
-                            <div class="col-md-4"><span class="lbls">${item.CommentDateTime}</span></div>
-                            <div class="col-md-4"><span class="lbls">${item.Typeoftbl}</span></div>
+                    container.append(`
+                        <div class="row" style="background:#cbcbcb;padding:5px;">
+                            <div class="col-md-4">&nbsp;- <span class="lbls">${item.name}</span></div>
+                            <div class="col-md-4"><span class="lbls">${item.commentdatetime}</span></div>
+                            <div class="col-md-4"><span class="lbls">${item.typeoftbl}</span></div>
                         </div>
-                        <div class="row p-1"><div class="col-md-12"><p>${item.Message}</p></div></div>
+                        <div class="row p-1"><div class="col-md-12"><p>${item.message}</p></div></div>
                         <hr class="new1" />
-                    `;
-                    container.append(html);
+                    `);
                 });
 
-                var companyHistoryModal = new bootstrap.Modal(document.getElementById("companyHistoryModal"));
-                companyHistoryModal.show();
+                // Switch panels — no second modal
+                ShowHistoryPanel();
             },
-            error: function () { showToast("Failed to load company details.", "error"); }
+            error: function () { showToast("Failed to load company history.", "error"); }
         });
     }
 </script>
