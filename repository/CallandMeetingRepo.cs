@@ -24,10 +24,24 @@ namespace WEBLINK_CRM.repository
             using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
             {
                 await connection.OpenAsync();
-                string query = "SELECT ccode,cname,name,UserName FROM Company cm LEFT JOIN employees em ON cm.sessionname = em.empcode WHERE (@actionBy = 'ddlList' AND cname LIKE '%' + @companyName + '%') OR (@actionBy <> 'ddlList' AND cname = @companyName)";
+                //string query = "SELECT ccode,cname,name,UserName FROM Company cm LEFT JOIN employees em ON cm.sessionname = em.empcode WHERE (@actionBy = 'ddlList' AND cname LIKE '%' + @companyName + '%') OR (@actionBy <> 'ddlList' AND cname = @companyName)";
+                string query = @"WITH Employee AS(
+                                            SELECT ccode,cname,name,UserName 
+                                            FROM Company cm 
+                                            LEFT JOIN employees em 
+                                            ON cm.sessionname = em.empcode 
+                                            WHERE (@actionBy = 'ddlList' AND cname LIKE '%' + @companyName + '%') 
+                                            OR (@actionBy <> 'ddlList' AND cname = @companyName)
+                                ),NUMBERED AS(
+                                   SELECT *,ROW_NUMBER() OVER (ORDER BY ccode ASC) AS Rn
+                                   FROM Employee 
+                                )
+                                SELECT * FROM NUMBERED
+                                WHERE @ShowRecords =0 OR Rn <= @ShowRecords";
                 var parameters = new DynamicParameters();
                 parameters.Add("@CompanyName", Name);
                 parameters.Add("@actionby", actionby);
+                parameters.Add("@ShowRecords", _configuration["DatabaseRecords:ShowRecords"]);
                 var result = await connection.QueryAsync<dynamic>(
                     query,
                     parameters);

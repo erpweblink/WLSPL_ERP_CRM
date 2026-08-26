@@ -79,12 +79,14 @@ namespace WEBLINK_CRM.repository
                     Email2 = data.email2,
                     Mobile = data.mobile,
                     CountryName = data.CountryName,
-            
-
+                    typess = data.type,
+                    Category = data.Category,
                     GSTNo = data.gstno,
+                    VisitDate = data.visitdate,
 
                     Address = data.address,
                     ShippingAddress = data.shippingaddress,
+                    BillingAddress = data.BillingAddress,
 
                     BillingLocation = data.BillingLocation,
                     ShippingLocation = data.ShippingLocation,
@@ -110,7 +112,7 @@ namespace WEBLINK_CRM.repository
 
                 return company;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
@@ -435,7 +437,9 @@ namespace WEBLINK_CRM.repository
                     parameters.Add("@BillLocation", Model.BillingLocation);
                     parameters.Add("@BillingPincode", Model.BillingPincode);
                     parameters.Add("@BillStateCode", Model.BillingStateCode);
+                    parameters.Add("@type", Model.typess);
 
+                    parameters.Add("@visitdate", Model.VisitDate);
                     parameters.Add("@ShippLocation", Model.ShippingLocation);
                     parameters.Add("@ShippingPincode", Model.ShippingPincode);
                     parameters.Add("@ShippStateCode", Model.ShippingStateCode);

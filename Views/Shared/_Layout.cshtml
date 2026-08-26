@@ -13,6 +13,10 @@
     <link href="~/assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="~/assets/css/app.min.css" rel="stylesheet" type="text/css" />
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+          integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -507,18 +511,30 @@
     }
 
     <script type="text/javascript">
-         // TosterScxript
-        function showToast(message, type) {
+                 // TosterScxript
+           function showToast(message, type) {
             type = type || "info";
-            var iconClass = "bi-info-circle-fill";
-            if (type === "success") iconClass = "bi-check-circle-fill";
-            else if (type === "error") iconClass = "bi-x-circle-fill";
-            else if (type === "warning") iconClass = "bi-exclamation-triangle-fill";
+
+            var iconClass = "fas fa-info-circle";
+
+            if (type === "success") {
+                iconClass = "fas fa-check-circle";
+            }
+            else if (type === "error") {
+                iconClass = "fas fa-times-circle";
+            }
+            else if (type === "warning") {
+                iconClass = "fas fa-exclamation-triangle";
+            }
 
             var toast = document.createElement("div");
+
             toast.className = "app-toast " + type;
+
             toast.innerHTML =
-                '<div class="toast-icon-wrap"><i class="bi ' + iconClass + ' toast-icon"></i></div>' +
+                '<div class="toast-icon-wrap">' +
+                    '<i class="' + iconClass + ' toast-icon"></i>' +
+                '</div>' +
                 '<div class="toast-message"></div>' +
                 '<button type="button" class="toast-close">&times;</button>' +
                 '<div class="toast-progress"></div>';
@@ -526,6 +542,7 @@
             toast.querySelector(".toast-message").textContent = message;
 
             var container = document.getElementById("toastContainer");
+
             container.appendChild(toast);
 
             requestAnimationFrame(function () {
@@ -535,13 +552,16 @@
             function removeToast() {
                 toast.classList.add("hide");
                 toast.classList.remove("show");
+
                 setTimeout(function () {
                     toast.remove();
-                }, 400);
+                }, 300);
             }
 
-            toast.querySelector(".toast-close").addEventListener("click", removeToast);
-            setTimeout(removeToast, 5000);
+            toast.querySelector(".toast-close")
+                .addEventListener("click", removeToast);
+
+            setTimeout(removeToast, 3000);
         }
     </script>
 </body>

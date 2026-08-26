@@ -2,11 +2,11 @@
 
 namespace WEBLINK_CRM.Models
 {
-    public class Companymaster 
+    public class Companymaster
     {
         public int? Id { get; set; }
         [Required(ErrorMessage = "Company Code is required")]
-        public string ? CCode  { get; set; }
+        public string? CCode { get; set; }
         [Required(ErrorMessage = "Company Name is required")]
         public string? CName { get; set; }
         [Required(ErrorMessage = "Owner Name is required")]
@@ -16,11 +16,11 @@ namespace WEBLINK_CRM.Models
         public string? Email { get; set; }
         [Required(ErrorMessage = "Mobile Number is required")]
         [StringLength(10, MinimumLength = 10, ErrorMessage = "Mobile number must be 10 digits")]
-        public string ? Mobile { get; set; }
+        public string? Mobile { get; set; }
 
         public string? VisitingCard { get; set; }
 
-        public string? Type { get; set; }
+        //public string? Type { get; set; }
 
         public string? Address { get; set; }
 
@@ -48,7 +48,7 @@ namespace WEBLINK_CRM.Models
 
         public string? Email2 { get; set; }
 
-        public string?  GSTNo { get; set; }
+        public string? GSTNo { get; set; }
 
         public string? Area { get; set; }
 
@@ -74,7 +74,7 @@ namespace WEBLINK_CRM.Models
 
         public string? ShippingPincode { get; set; }
 
-        public string ShippingStateCode { get; set; }
+        public string? ShippingStateCode { get; set; }
 
         public string? EInvTypeOfSupply { get; set; }
 
@@ -84,6 +84,12 @@ namespace WEBLINK_CRM.Models
 
         public string? CreatedBy { get; set; }
 
-        public string? type { get; set; }
+        public string? typess { get; set; }
+
+        public string? LeadCode { get; set; }
+
+
+        public string? BillingAddress { get; set; }
+
     }
 }
