@@ -31,16 +31,25 @@ namespace WEBLINK_CRM.Controllers
 
         // Create Page
         [HttpGet]
-        public IActionResult Create()
+        public IActionResult Create(
+     string? leadCode,
+     string? mobile,
+     string? email,
+     string? ownerName)
         {
             Companymaster model = new Companymaster();
 
             // Generate Company Code
             model.CCode = GenerateCompanyCode();
 
+            // Assign values received from URL
+            model.LeadCode = leadCode;
+            model.Mobile = mobile;
+            model.Email = email;
+            model.OName = ownerName;
+
             return View(model);
         }
-
 
 
         private string GenerateCompanyCode()
