@@ -92,10 +92,8 @@ namespace WEBLINK_CRM.repository
 
             RegisterUserr user = null;
 
-
             using SqlConnection con = new SqlConnection(
                 _configuration.GetConnectionString("Conn_Stringg"));
-
 
 
             string query = @"
@@ -103,21 +101,13 @@ namespace WEBLINK_CRM.repository
                 FROM employees
                 WHERE id=@id";
 
-
             SqlCommand cmd = new SqlCommand(query, con);
-
 
             cmd.Parameters.AddWithValue("@id", id);
 
-
-
             con.Open();
 
-
-
             SqlDataReader dr = cmd.ExecuteReader();
-
-
 
             if (dr.Read())
             {
@@ -136,7 +126,9 @@ namespace WEBLINK_CRM.repository
                     mobile = dr["mobile"]?.ToString(),
 
                     role = dr["role"]?.ToString(),
+
                     emailpsw = dr["emailpsw"]?.ToString(),
+
                     panelpsw = dr["panelpsw"]?.ToString(),
 
                     status = Convert.ToBoolean(dr["status"]),
@@ -146,23 +138,24 @@ namespace WEBLINK_CRM.repository
                     Designation = dr["Designation"]?.ToString(),
 
                     TL_Manager = dr["TL_Manager"] == DBNull.Value
-    ? null
-    : dr["TL_Manager"].ToString(),
+                            ? null
+                            : dr["TL_Manager"].ToString(),
 
-                    Sales_TL_Manager = dr["Sales_TL_Manager"] != DBNull.Value
-    && Convert.ToBoolean(dr["Sales_TL_Manager"]),
+                                            Sales_TL_Manager = dr["Sales_TL_Manager"] != DBNull.Value
+                            && Convert.ToBoolean(dr["Sales_TL_Manager"]),
+
+                   ProfileImagePath = dr["ProfileImagePath"] == DBNull.Value
+                            ? null
+                            : dr["ProfileImagePath"].ToString()
 
                 };
 
             }
-
-
             return user;
 
         }
 
         // ================= CREATE USER =================
-
 
         public bool CreateUser(RegisterUserr model)
         {
@@ -419,6 +412,21 @@ namespace WEBLINK_CRM.repository
             return list;
         }
 
+
+        public bool UpdateUserAvatar(int userId, string avatarPath)
+        {
+            using SqlConnection con = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg"));
+            string query = @"
+                UPDATE employees
+                SET ProfileImagePath = @avatarPath
+                WHERE id = @userId";
+            SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@avatarPath", avatarPath ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@userId", userId);
+            con.Open();
+            return cmd.ExecuteNonQuery() > 0;
+        }
 
     }
 }

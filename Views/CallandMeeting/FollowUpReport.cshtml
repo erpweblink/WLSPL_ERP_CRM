@@ -1176,7 +1176,7 @@
                     <td>${createdDate}</td>
                     <td><strong>${item.callUpdateStatus ?? ""}</strong></td>
                     <td>${followDate}</td>
-                    <td><a href="javascript:void(0)" style="color:rgba(var(--bs-link-color-rgb),var(--bs-link-opacity,1))!important;font-weight:700!important;text-decoration:none!important;"
+                    <td><a href="javascript:void(0)" style="font-weight:700!important;text-decoration:none!important;color:#074993;"
                            class="open-company-modal" data-id="${item.id}">Close Follow-up</a></td>
                 </tr>`;
             tbody.append(row);
@@ -1241,6 +1241,7 @@
         $("#ddlfollowupStatus").prop("disabled", true);
         $("#txtfromdate, #txttodate, #txtfollowupdate, #txtarea, #searchInput").val("");
         $("#btnSearchData").trigger("click");
+        //window.location.href = window.location.href;
     });
 
     /* ── Expand row (feedback + remarks) ── */
@@ -1560,7 +1561,6 @@
             type: "GET",
             data: { CompanyCode: CompanyCode },
             success: function (res) {
-                debugger;
                 if (!res.success) { showToast(res.message, "error"); return; }
 
                 $("#lblHistoryccode").text(CompanyCode);
