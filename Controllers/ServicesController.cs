@@ -65,9 +65,9 @@ namespace WEBLINK_CRM.Controllers
 
                 if (result == -1)
                 {
-                    TempData["Save_Record"] = "Service already exists.";
-                    TempData["icon"] = "warning";
-                    TempData["Time"] = "2000";
+                    TempData["ToastMessage"] = "Service already exists.";
+                    TempData["ToastType"] = "warning";
+          
 
                     return RedirectToAction("Index", "Services");
                 }
@@ -75,26 +75,22 @@ namespace WEBLINK_CRM.Controllers
 
                 if (result > 0)
                 {
-                    TempData["Save_Record"] = "Service created successfully.";
-                    TempData["icon"] = "success";
-                    TempData["Time"] = "2000";
-
+                    TempData["ToastMessage"] = "Service created successfully.";
+                    TempData["ToastType"] = "success";
+              
                     return RedirectToAction("Index", "Services");
                 }
 
-                // Insert failed
-                TempData["Save_Record"] = "Unable to create service.";
-                TempData["icon"] = "error";
-                TempData["Time"] = "2000";
+                TempData["ToastMessage"] = "Unable to create service.";
+                TempData["ToastType"] = "error";
+             
 
                 return View("Create", model);
             }
             catch (Exception ex)
             {
-                // Ideally log the exception
-                TempData["Save_Record"] = "Something went wrong while creating the service.";
-                TempData["icon"] = "error";
-                TempData["Time"] = "3000";
+                TempData["ToastMessage"] = "Something went wrong while creating the service.";
+                TempData["ToastType"] = "error";            
 
                 return View("Create", model);
             }
@@ -141,24 +137,23 @@ namespace WEBLINK_CRM.Controllers
 
                 if (result > 0)
                 {
-                    TempData["Save_Record"] = "Service deleted successfully.";
-                    TempData["icon"] = "success";
-                    TempData["Time"] = "2000";
+                    TempData["ToastMessage"] = "Service deleted successfully.";
+                    TempData["ToastType"] = "success";
+                 
                 }
                 else
                 {
-                    TempData["Save_Record"] = "Unable to delete service.";
-                    TempData["icon"] = "error";
-                    TempData["Time"] = "2000";
+                    TempData["ToastMessage"] = "Unable to delete service.";
+                    TempData["ToastType"] = "error";
+       
                 }
 
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                TempData["Save_Record"] = "Something went wrong while deleting the service.";
-                TempData["icon"] = "error";
-                TempData["Time"] = "3000";
+                TempData["ToastMessage"] = "Something went wrong while deleting the service.";
+                TempData["ToastType"] = "error";            
 
                 return RedirectToAction("Index");
             }
@@ -181,36 +176,32 @@ namespace WEBLINK_CRM.Controllers
 
                 if (result == -1)
                 {
-                    TempData["Save_Record"] = "Service Updated exists.";
-                    TempData["icon"] = "warning";
-                    TempData["Time"] = "2000";
-
+                    TempData["ToastMessage"] = "Service Updated exists.";
+                    TempData["ToastType"] = "warning";
+             
                     return RedirectToAction("Index", "Services");
                 }
 
 
                 if (result > 0)
                 {
-                    TempData["Save_Record"] = "Service Updated successfully.";
-                    TempData["icon"] = "success";
-                    TempData["Time"] = "2000";
+                    TempData["ToastMessage"] = "Service Updated successfully.";
+                    TempData["ToastType"] = "success";
+                   
 
                     return RedirectToAction("Index", "Services");
                 }
 
-                // Insert failed
-                TempData["Save_Record"] = "Unable to Update service.";
-                TempData["icon"] = "error";
-                TempData["Time"] = "2000";
+                TempData["ToastMessage"] = "Unable to Update service.";
+                TempData["ToastType"] = "error";
+         
 
                 return View("Create", model);
             }
             catch (Exception ex)
             {
-                // Ideally log the exception
-                TempData["Save_Record"] = "Something went wrong while Updating the service.";
-                TempData["icon"] = "error";
-                TempData["Time"] = "3000";
+                TempData["ToastMessage"] = "Something went wrong while Updating the service.";
+                TempData["ToastType"] = "error";           
 
                 return View("Create", model);
             }

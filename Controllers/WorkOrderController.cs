@@ -8,6 +8,7 @@ using WEBLINK_CRM.repository;
 
 namespace WEBLINK_CRM.Controllers
 {
+    [Authorize]
     public class WorkOrderController : Controller
     {
         private readonly IWorkOrder objWorkOrder;
