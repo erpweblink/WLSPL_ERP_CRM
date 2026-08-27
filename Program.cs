@@ -3,6 +3,7 @@ using WEBLINK_CRM.Repositories;
 using WEBLINK_CRM.repository;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
+using WLSPL_ERP_CRM.repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,6 +39,7 @@ builder.Services.AddScoped<IGoveServices, GovServicesRepo>();
 builder.Services.AddScoped<IMailingRepo, MailingRepo>();
 builder.Services.AddScoped<IWorkOrder, RepoWorkOrder>();
 builder.Services.AddScoped<IServicesRepo, ServicesRepo>();
+builder.Services.AddScoped<ITaxinvoiceRepo, TaxinvoiceRepo>();
 
 
 // ======================================================

@@ -1,0 +1,2251 @@
+﻿@model WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoicePdfViewModel
+
+@{
+    Layout = null;
+
+    var main = Model.Main;
+
+    // =========================================================
+    // INVOICE DETAILS
+    // =========================================================
+
+    var invoiceNo = main.invoiceno ?? "";
+
+    var invoiceDate = main.invoicedate.HasValue
+        ? main.invoicedate.Value.ToString("dd/MM/yyyy")
+        : "";
+
+    var reverseCharge = main.reversecharge ?? "";
+    var state = main.state ?? "";
+
+    // =========================================================
+    // CUSTOMER DETAILS
+    // =========================================================
+
+    var customerName = main.companyname ?? "";
+
+    var customerAddress =
+        main.BillingAddress
+        ?? main.address
+        ?? "";
+
+    var customerGstin =
+        main.BillingGST
+        ?? main.cgstin
+        ?? "";
+
+    /*
+       Do NOT use main.BillingState here if your InvoiceMain
+       model does not contain BillingState.
+
+       Using billstate prevents:
+       "InvoiceMain does not contain BillingState"
+    */
+    var customerState = main.billstate ?? "";
+
+    // =========================================================
+    // COMPANY DETAILS
+    // =========================================================
+
+    var companyName = Model.CompanyName ?? "";
+    var companyAddress = Model.CompanyAddress ?? "";
+    var companyPhone = Model.CompanyPhone ?? "";
+    var companyEmail = Model.CompanyEmail ?? "";
+    var companyGstin = Model.CompanyGSTIN ?? "";
+
+    // =========================================================
+    // BANK DETAILS
+    // =========================================================
+
+    var bankName = Model.BankName ?? "";
+    var accountNo = Model.AccountNo ?? "";
+    var ifsc = Model.IFSC ?? "";
+    var branch = Model.Branch ?? "";
+
+    // =========================================================
+    // TOTALS
+    // =========================================================
+
+    var totalQuantity = Model.TotalQuantity;
+    var totalAmount = Model.TotalAmount;
+    var totalTaxableValue = Model.TotalTaxableValue;
+
+    var totalCgst = Model.TotalCGST;
+    var totalSgst = Model.TotalSGST;
+    var totalIgst = Model.TotalIGST;
+
+    var totalTax = Model.TotalTaxAmount;
+    var grandTotal = Model.GrandTotal;
+    var roundOff = Model.RoundOff;
+
+    var amountInWords = Model.AmountInWords ?? "";
+
+    var remark =
+        Model.Remark
+        ?? "Thank you for your business.";
+
+    var detailsCount =
+        Model.Details == null
+            ? 0
+            : Model.Details.Count;
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>
+        Tax Invoice - @invoiceNo
+    </title>
+
+
+    <style>
+
+        /* =========================================================
+                   RESET
+                ========================================================= */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #eef2f7;
+            color: #172033;
+            font-size: 11px;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+
+        /* =========================================================
+                   PAGE
+                ========================================================= */
+
+        .page-container {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 20px auto;
+            background: #ffffff;
+            box-shadow: 0 12px 35px rgba(15, 23, 42, 0.14);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .invoice {
+            width: 100%;
+            min-height: 297mm;
+            padding: 9mm;
+        }
+
+
+        /* =========================================================
+                   TOOLBAR
+                ========================================================= */
+
+        .toolbar {
+            width: 210mm;
+            margin: 15px auto 0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+            .toolbar button {
+                border: 0;
+                border-radius: 7px;
+                padding: 9px 16px;
+                color: #ffffff;
+                font-size: 12px;
+                font-weight: 700;
+                cursor: pointer;
+                transition: .2s;
+            }
+
+        .btn-back {
+            background: #475569;
+        }
+
+            .btn-back:hover {
+                background: #334155;
+            }
+
+        .btn-print {
+            background: linear-gradient( 135deg, #2563eb, #1d4ed8 );
+            box-shadow: 0 4px 10px rgba(37, 99, 235, .25);
+        }
+
+            .btn-print:hover {
+                transform: translateY(-1px);
+            }
+
+
+        /* =========================================================
+                   COMPANY HEADER
+                ========================================================= */
+
+        .company-header {
+            display: grid;
+            grid-template-columns: 155px 1fr;
+            min-height: 92px;
+            border: 1px solid #172033;
+            background: #ffffff;
+        }
+
+
+        /* =========================================================
+                   LOGO
+                ========================================================= */
+
+        .company-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            border-right: 1px solid #172033;
+            background: linear-gradient( 145deg, #ffffff, #f8fafc );
+        }
+
+        .logo-wrapper {
+            width: 135px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .company-logo img {
+            display: block;
+            width: 125px;
+            max-width: 100%;
+            height: auto;
+            max-height: 65px;
+            object-fit: contain;
+        }
+
+
+        /* =========================================================
+                   COMPANY INFORMATION
+                ========================================================= */
+
+        .company-details {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 8px 20px;
+        }
+
+        .company-name {
+            font-size: 20px;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: .2px;
+            margin-bottom: 5px;
+        }
+
+        .company-address {
+            max-width: 720px;
+            font-size: 10px;
+            line-height: 1.45;
+            color: #475569;
+        }
+
+        .company-contact {
+            margin-top: 5px;
+            font-size: 10px;
+            color: #334155;
+            font-weight: 600;
+        }
+
+        .company-gstin {
+            margin-top: 4px;
+            font-size: 10px;
+            font-weight: 800;
+            color: #1d4ed8;
+        }
+
+
+        /* =========================================================
+                   INVOICE TITLE
+                ========================================================= */
+
+        .invoice-title {
+            position: relative;
+            text-align: center;
+            padding: 9px;
+            background: linear-gradient( 90deg, #1d4ed8, #2563eb, #1d4ed8 );
+            color: #ffffff;
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            border-left: 1px solid #172033;
+            border-right: 1px solid #172033;
+            border-bottom: 1px solid #172033;
+        }
+
+            .invoice-title::before {
+                content: "";
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 5px;
+                height: 100%;
+                background: #f59e0b;
+            }
+
+
+        /* =========================================================
+                   INVOICE META
+                ========================================================= */
+
+        .meta-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            .meta-table td {
+                border: 1px solid #334155;
+                padding: 6px 8px;
+                height: 28px;
+            }
+
+        .meta-label {
+            width: 50%;
+            background: #f1f5f9;
+            color: #334155;
+            font-weight: 700;
+        }
+
+        .meta-value {
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+
+        /* =========================================================
+                   SECTION TITLE
+                ========================================================= */
+
+        .section-title {
+            margin-top: 10px;
+            padding: 7px;
+            text-align: center;
+            color: #ffffff;
+            background: linear-gradient( 90deg, #0f3f8f, #2563eb );
+            border: 1px solid #172033;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+        }
+
+
+        /* =========================================================
+                   CUSTOMER
+                ========================================================= */
+
+        .customer-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            .customer-table td {
+                border: 1px solid #334155;
+                padding: 7px 8px;
+                vertical-align: middle;
+                line-height: 1.4;
+            }
+
+        .customer-label {
+            width: 32%;
+            background: #f8fafc;
+            color: #334155;
+            font-weight: 700;
+        }
+
+        .customer-value {
+            width: 68%;
+            color: #0f172a;
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+
+        /* =========================================================
+                   ITEMS
+                ========================================================= */
+
+        .items-scroll {
+            width: 100%;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            table-layout: fixed;
+        }
+
+            .items-table th {
+                border: 1px solid #1e293b;
+                padding: 6px 3px;
+                background: linear-gradient( 180deg, #dbeafe, #bfdbfe );
+                color: #0f172a;
+                font-size: 8.5px;
+                font-weight: 800;
+                text-align: center;
+                vertical-align: middle;
+                line-height: 1.15;
+            }
+
+            .items-table td {
+                border: 1px solid #64748b;
+                padding: 7px 4px;
+                font-size: 9px;
+                color: #172033;
+                vertical-align: middle;
+                height: 32px;
+                overflow-wrap: anywhere;
+            }
+
+            .items-table .center {
+                text-align: center;
+            }
+
+            .items-table .right {
+                text-align: right;
+                white-space: nowrap;
+            }
+
+        .description {
+            font-weight: 600;
+            line-height: 1.4;
+            text-align: left;
+            word-break: break-word;
+        }
+
+        .total-row td {
+            background: linear-gradient( 90deg, #eff6ff, #dbeafe );
+            color: #0f172a;
+            font-weight: 800;
+            font-size: 9.5px;
+        }
+
+
+        /* =========================================================
+                   SUMMARY
+                ========================================================= */
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            border-left: 1px solid #334155;
+            border-right: 1px solid #334155;
+            border-bottom: 1px solid #334155;
+        }
+
+        .amount-words {
+            min-width: 0;
+            padding: 12px;
+            border-right: 1px solid #334155;
+            background: linear-gradient( 145deg, #ffffff, #f8fafc );
+        }
+
+        .amount-words-title {
+            color: #64748b;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            margin-bottom: 9px;
+        }
+
+        .amount-words-value {
+            color: #0f172a;
+            font-size: 11px;
+            font-weight: 800;
+            line-height: 1.55;
+            word-break: break-word;
+        }
+
+
+        /* =========================================================
+                   AMOUNT SUMMARY
+                ========================================================= */
+
+        .amount-summary {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+
+            .amount-summary td {
+                padding: 6px 8px;
+                border-bottom: 1px solid #cbd5e1;
+                height: 27px;
+                word-break: break-word;
+            }
+
+                .amount-summary td:first-child {
+                    width: 65%;
+                    color: #475569;
+                    font-weight: 700;
+                }
+
+                .amount-summary td:last-child {
+                    width: 35%;
+                    text-align: right;
+                    color: #0f172a;
+                    font-weight: 700;
+                    white-space: nowrap;
+                }
+
+        .grand-total-row td {
+            background: linear-gradient( 90deg, #1d4ed8, #2563eb );
+            color: #ffffff !important;
+            font-size: 12px;
+            font-weight: 800 !important;
+        }
+
+        .round-row td {
+            background: #f8fafc;
+        }
+
+
+        /* =========================================================
+                   REMARK
+                ========================================================= */
+
+        .remark-box {
+            border: 1px solid #334155;
+            border-top: 0;
+            padding: 9px 10px;
+            min-height: 48px;
+            background: #ffffff;
+            word-break: break-word;
+        }
+
+        .remark-title {
+            color: #1d4ed8;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+
+
+        /* =========================================================
+                   FOOTER
+                ========================================================= */
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 140px minmax(0, 1fr);
+            min-height: 120px;
+            margin-top: 10px;
+            border: 1px solid #334155;
+        }
+
+
+        /* =========================================================
+                   BANK
+                ========================================================= */
+
+        .bank-details {
+            min-width: 0;
+            border-right: 1px solid #334155;
+        }
+
+        .footer-title {
+            padding: 7px;
+            text-align: center;
+            background: linear-gradient( 90deg, #dbeafe, #bfdbfe );
+            color: #0f172a;
+            border-bottom: 1px solid #334155;
+            font-weight: 800;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        .bank-content {
+            padding: 9px;
+            line-height: 1.75;
+            color: #475569;
+            font-size: 9px;
+            word-break: break-word;
+        }
+
+            .bank-content strong {
+                color: #0f172a;
+            }
+
+
+        /* =========================================================
+                   SEAL
+                ========================================================= */
+
+        .seal-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            border-right: 1px solid #334155;
+        }
+
+        .seal {
+            width: 64px;
+            height: 64px;
+            border: 2px solid #2563eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #2563eb;
+            font-size: 7px;
+            line-height: 1.35;
+            font-weight: 800;
+            transform: rotate(-12deg);
+            box-shadow: inset 0 0 0 2px #dbeafe;
+        }
+
+        .seal-text {
+            margin-top: 5px;
+            color: #64748b;
+            font-size: 7px;
+            font-weight: 700;
+        }
+
+
+        /* =========================================================
+                   SIGNATURE
+                ========================================================= */
+
+        .signature-area {
+            position: relative;
+            text-align: center;
+            padding-top: 9px;
+            min-width: 0;
+        }
+
+        .signature-for {
+            color: #0f172a;
+            font-size: 9px;
+            font-weight: 800;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .signature-space {
+            height: 54px;
+        }
+
+        .signature-line {
+            width: 78%;
+            margin: 0 auto 5px;
+            border-top: 1px solid #64748b;
+        }
+
+        .authorized {
+            color: #334155;
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+
+        /* =========================================================
+                   FOOTER NOTE
+                ========================================================= */
+
+        .bottom-note {
+            text-align: center;
+            margin-top: 7px;
+            color: #64748b;
+            font-size: 8px;
+            font-style: italic;
+        }
+
+
+        /* =========================================================
+                   MOBILE
+                ========================================================= */
+
+        @@media (max-width: 900px) {
+
+            body {
+                background: #ffffff;
+            }
+
+            .toolbar {
+                width: 100%;
+                padding: 10px;
+                margin: 0;
+                position: sticky;
+                top: 0;
+                z-index: 100;
+                background: #ffffff;
+                box-shadow: 0 2px 10px rgba(0,0,0,.08);
+            }
+
+                .toolbar button {
+                    padding: 9px 13px;
+                    font-size: 11px;
+                }
+
+            .page-container {
+                width: 100%;
+                min-height: auto;
+                margin: 0;
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            .invoice {
+                width: 100%;
+                min-height: auto;
+                padding: 10px;
+            }
+            /* HEADER */
+
+            .company-header {
+                grid-template-columns: 105px minmax(0, 1fr);
+                min-height: 82px;
+            }
+
+            .company-logo {
+                padding: 6px;
+            }
+
+            .logo-wrapper {
+                width: 95px;
+                height: 60px;
+            }
+
+            .company-logo img {
+                width: 90px;
+                max-height: 52px;
+            }
+
+            .company-details {
+                padding: 6px 8px;
+            }
+
+            .company-name {
+                font-size: 15px;
+                margin-bottom: 3px;
+            }
+
+            .company-address {
+                font-size: 8px;
+                line-height: 1.3;
+            }
+
+            .company-contact {
+                font-size: 8px;
+                margin-top: 3px;
+            }
+
+            .company-gstin {
+                font-size: 8px;
+                margin-top: 2px;
+            }
+            /* TITLE */
+
+            .invoice-title {
+                padding: 7px;
+                font-size: 14px;
+            }
+            /* META */
+
+            .meta-table td {
+                padding: 6px;
+                height: auto;
+                font-size: 10px;
+            }
+            /* CUSTOMER */
+
+            .section-title {
+                margin-top: 7px;
+                padding: 6px;
+                font-size: 10px;
+            }
+
+            .customer-table td {
+                padding: 6px;
+                font-size: 9px;
+                line-height: 1.3;
+            }
+            /* ITEMS */
+
+            .items-scroll {
+                width: 100%;
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+                border-bottom: 1px solid #cbd5e1;
+            }
+
+            .items-table {
+                width: 100%;
+                min-width: 900px;
+                margin-top: 7px;
+            }
+
+                .items-table th {
+                    font-size: 8px;
+                    padding: 6px 3px;
+                }
+
+                .items-table td {
+                    font-size: 8px;
+                    padding: 6px 3px;
+                    height: 28px;
+                }
+            /* =====================================================
+                       TOTAL / SUMMARY MOBILE FIX
+                    ===================================================== */
+
+            .summary-grid {
+                display: grid;
+                grid-template-columns: 1fr;
+                width: 100%;
+                border-left: 1px solid #334155;
+                border-right: 1px solid #334155;
+                border-bottom: 1px solid #334155;
+            }
+
+            .amount-words {
+                width: 100%;
+                border-right: 0;
+                border-bottom: 1px solid #334155;
+                padding: 10px;
+            }
+
+            .amount-words-title {
+                font-size: 8px;
+                margin-bottom: 6px;
+            }
+
+            .amount-words-value {
+                font-size: 10px;
+                line-height: 1.45;
+            }
+
+            .amount-summary {
+                width: 100%;
+                table-layout: fixed;
+            }
+
+                .amount-summary td {
+                    height: auto;
+                    padding: 7px 8px;
+                    font-size: 9px;
+                }
+
+                    .amount-summary td:first-child {
+                        width: 65%;
+                        white-space: normal;
+                    }
+
+                    .amount-summary td:last-child {
+                        width: 35%;
+                        white-space: nowrap;
+                        text-align: right;
+                    }
+
+            .grand-total-row td {
+                font-size: 11px;
+            }
+            /* REMARK */
+
+            .remark-box {
+                min-height: 45px;
+                padding: 8px;
+                font-size: 9px;
+            }
+            /* FOOTER */
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+                min-height: auto;
+                margin-top: 8px;
+            }
+
+            .bank-details {
+                border-right: 0;
+                border-bottom: 1px solid #334155;
+            }
+
+            .bank-content {
+                font-size: 9px;
+                padding: 8px;
+            }
+
+            .seal-area {
+                min-height: 100px;
+                border-right: 0;
+                border-bottom: 1px solid #334155;
+            }
+
+            .signature-area {
+                min-height: 105px;
+                padding-top: 10px;
+            }
+
+            .signature-space {
+                height: 45px;
+            }
+        }
+
+
+        /* =========================================================
+                   SMALL MOBILE
+                ========================================================= */
+
+        @@media (max-width: 480px) {
+
+            .invoice {
+                padding: 7px;
+            }
+
+            .company-header {
+                grid-template-columns: 85px minmax(0, 1fr);
+            }
+
+            .logo-wrapper {
+                width: 75px;
+                height: 50px;
+            }
+
+            .company-logo img {
+                width: 72px;
+                max-height: 45px;
+            }
+
+            .company-name {
+                font-size: 12px;
+            }
+
+            .company-address {
+                font-size: 7px;
+            }
+
+            .company-contact {
+                font-size: 7px;
+            }
+
+            .company-gstin {
+                font-size: 7px;
+            }
+
+            .meta-table td {
+                font-size: 9px;
+                padding: 5px;
+            }
+
+            .customer-table td {
+                font-size: 8px;
+                padding: 5px;
+            }
+
+            .amount-summary td {
+                padding: 6px;
+                font-size: 8px;
+            }
+
+            .grand-total-row td {
+                font-size: 10px;
+            }
+        }
+
+
+        /* =========================================================
+                   PRINT - ONE A4 PAGE
+                ========================================================= */
+
+        @@media print {
+
+            html,
+            body {
+                width: 210mm !important;
+                height: 297mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #ffffff !important;
+                overflow: hidden !important;
+            }
+
+            body {
+                font-size: 9px !important;
+            }
+            /* HIDE TOOLBAR */
+
+            .toolbar {
+                display: none !important;
+            }
+            /* A4 CONTAINER */
+
+            .page-container {
+                width: 210mm !important;
+                height: 297mm !important;
+                min-height: 297mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #ffffff !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+                overflow: hidden !important;
+            }
+            /* PRINTABLE INVOICE */
+
+            .invoice {
+                width: 210mm !important;
+                height: 297mm !important;
+                min-height: 297mm !important;
+                padding: 6mm !important;
+                overflow: hidden !important;
+            }
+            /* =====================================================
+                       HEADER
+                    ===================================================== */
+
+            .company-header {
+                min-height: 78px !important;
+            }
+
+            .company-logo {
+                padding: 6px !important;
+            }
+
+            .logo-wrapper {
+                width: 120px !important;
+                height: 60px !important;
+            }
+
+            .company-logo img {
+                width: 110px !important;
+                max-height: 55px !important;
+            }
+
+            .company-details {
+                padding: 6px 12px !important;
+            }
+
+            .company-name {
+                font-size: 17px !important;
+                margin-bottom: 3px !important;
+            }
+
+            .company-address {
+                font-size: 8px !important;
+                line-height: 1.25 !important;
+            }
+
+            .company-contact {
+                font-size: 8px !important;
+                margin-top: 3px !important;
+            }
+
+            .company-gstin {
+                font-size: 8px !important;
+                margin-top: 2px !important;
+            }
+            /* =====================================================
+                       TITLE
+                    ===================================================== */
+
+            .invoice-title {
+                padding: 6px !important;
+                font-size: 14px !important;
+            }
+            /* =====================================================
+                       META
+                    ===================================================== */
+
+            .meta-table td {
+                height: 22px !important;
+                padding: 4px 7px !important;
+                font-size: 8px !important;
+            }
+            /* =====================================================
+                       CUSTOMER
+                    ===================================================== */
+
+            .section-title {
+                margin-top: 6px !important;
+                padding: 5px !important;
+                font-size: 9px !important;
+            }
+
+            .customer-table td {
+                padding: 5px 7px !important;
+                font-size: 8px !important;
+                line-height: 1.2 !important;
+            }
+            /* =====================================================
+                       ITEMS
+                    ===================================================== */
+
+            .items-scroll {
+                width: 100% !important;
+                overflow: visible !important;
+                border-bottom: 0 !important;
+            }
+
+            .items-table {
+                width: 100% !important;
+                min-width: 0 !important;
+                margin-top: 6px !important;
+                table-layout: fixed !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+                .items-table th {
+                    padding: 4px 2px !important;
+                    font-size: 7px !important;
+                    line-height: 1.1 !important;
+                }
+
+                .items-table td {
+                    padding: 4px 3px !important;
+                    height: 24px !important;
+                    font-size: 7.5px !important;
+                    line-height: 1.15 !important;
+                }
+
+            .description {
+                line-height: 1.15 !important;
+            }
+
+            .items-table .right {
+                white-space: nowrap !important;
+            }
+
+            .total-row td {
+                font-size: 8px !important;
+                padding: 4px 3px !important;
+            }
+            /* =====================================================
+                       SUMMARY
+                    ===================================================== */
+
+            .summary-grid {
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+                width: 100% !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            .amount-words {
+                padding: 8px !important;
+            }
+
+            .amount-words-title {
+                font-size: 7px !important;
+                margin-bottom: 5px !important;
+            }
+
+            .amount-words-value {
+                font-size: 8px !important;
+                line-height: 1.25 !important;
+            }
+
+            .amount-summary td {
+                height: 21px !important;
+                padding: 4px 6px !important;
+                font-size: 8px !important;
+            }
+
+            .grand-total-row td {
+                font-size: 9px !important;
+            }
+            /* =====================================================
+                       REMARK
+                    ===================================================== */
+
+            .remark-box {
+                min-height: 35px !important;
+                padding: 6px 8px !important;
+                font-size: 8px !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            .remark-title {
+                margin-bottom: 3px !important;
+            }
+            /* =====================================================
+                       FOOTER
+                    ===================================================== */
+
+            .footer-grid {
+                grid-template-columns: minmax(0, 1fr) 110px minmax(0, 1fr) !important;
+                min-height: 85px !important;
+                height: 85px !important;
+                margin-top: 6px !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            .footer-title {
+                padding: 5px !important;
+                font-size: 8px !important;
+            }
+
+            .bank-content {
+                padding: 6px !important;
+                font-size: 7px !important;
+                line-height: 1.45 !important;
+            }
+
+            .seal {
+                width: 50px !important;
+                height: 50px !important;
+                font-size: 5.5px !important;
+            }
+
+            .seal-text {
+                font-size: 6px !important;
+                margin-top: 3px !important;
+            }
+
+            .signature-area {
+                padding-top: 6px !important;
+            }
+
+            .signature-for {
+                font-size: 7px !important;
+            }
+
+            .signature-space {
+                height: 32px !important;
+            }
+
+            .signature-line {
+                width: 70% !important;
+                margin-bottom: 3px !important;
+            }
+
+            .authorized {
+                font-size: 7px !important;
+            }
+            /* =====================================================
+                       BOTTOM NOTE
+                    ===================================================== */
+
+            .bottom-note {
+                margin-top: 4px !important;
+                font-size: 6.5px !important;
+            }
+            /* =====================================================
+                       PREVENT PAGE BREAKS
+                    ===================================================== */
+
+            .invoice,
+            .page-container,
+            .items-table,
+            .summary-grid,
+            .remark-box,
+            .footer-grid {
+                page-break-before: auto !important;
+                page-break-after: auto !important;
+            }
+            /* =====================================================
+                       A4
+                    ===================================================== */
+
+            @@page {
+                size: A4 portrait;
+                margin: 0 !important;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================================================
+         TOOLBAR
+    ========================================================= -->
+
+    <div class="toolbar">
+
+        <button type="button"
+                class="btn-back"
+                onclick="history.back()">
+
+            ← Back
+
+        </button>
+
+        <button type="button"
+                class="btn-print"
+                onclick="window.print()">
+
+            🖨 Print / Save PDF
+
+        </button>
+
+    </div>
+
+
+    <!-- =========================================================
+         A4 PAGE
+    ========================================================= -->
+
+    <div class="page-container">
+
+        <div class="invoice">
+
+
+            <!-- =================================================
+                 COMPANY HEADER
+            ================================================== -->
+
+            <div class="company-header">
+
+
+                <!-- LOGO -->
+
+                <div class="company-logo">
+
+                    <div class="logo-wrapper">
+
+                        <img src="@Url.Content(
+                                                         Model.CompanyLogo
+                                                         ?? "~/assets/images/logo-dark.png"
+                                                     )"
+                             alt="@companyName"
+                             onerror="this.style.display='none';" />
+
+                    </div>
+
+                </div>
+
+
+                <!-- COMPANY DETAILS -->
+
+                <div class="company-details">
+
+                    <div class="company-name">
+
+                        @companyName
+
+                    </div>
+
+
+                    <div class="company-address">
+
+                        @companyAddress
+
+                    </div>
+
+
+                    <div class="company-contact">
+
+                        Mobile:
+                        @companyPhone
+
+                        &nbsp;&nbsp; | &nbsp;&nbsp;
+
+                        Email:
+                        @companyEmail
+
+                    </div>
+
+
+                    <div class="company-gstin">
+
+                        GSTIN :
+                        @companyGstin
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 INVOICE TITLE
+            ================================================== -->
+
+            <div class="invoice-title">
+
+                TAX INVOICE
+
+            </div>
+
+
+            <!-- =================================================
+                 INVOICE INFORMATION
+            ================================================== -->
+
+            <table class="meta-table">
+
+                <tr>
+
+                    <td class="meta-label">
+
+                        Invoice No.
+
+                    </td>
+
+                    <td class="meta-value">
+
+                        @invoiceNo
+
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="meta-label">
+
+                        Invoice Date
+
+                    </td>
+
+                    <td class="meta-value">
+
+                        @invoiceDate
+
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="meta-label">
+
+                        Reverse Charge (Y/N)
+
+                    </td>
+
+                    <td class="meta-value">
+
+                        @reverseCharge
+
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="meta-label">
+
+                        State
+
+                    </td>
+
+                    <td class="meta-value">
+
+                        @state
+
+                    </td>
+
+                </tr>
+
+            </table>
+
+
+            <!-- =================================================
+                 BILL TO PARTY
+            ================================================== -->
+
+            <div class="section-title">
+
+                Bill To Party
+
+            </div>
+
+
+            <table class="customer-table">
+
+                <tr>
+
+                    <td class="customer-label">
+
+                        Company Name
+
+                    </td>
+
+                    <td class="customer-value">
+
+                        @customerName
+
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="customer-label">
+
+                        Address
+
+                    </td>
+
+                    <td class="customer-value">
+
+                        @customerAddress
+
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="customer-label">
+
+                        GSTIN
+
+                    </td>
+
+                    <td class="customer-value">
+
+                        @customerGstin
+
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="customer-label">
+
+                        State
+
+                    </td>
+
+                    <td class="customer-value">
+
+                        @customerState
+
+                    </td>
+
+                </tr>
+
+            </table>
+
+
+            <!-- =================================================
+                 ITEMS
+            ================================================== -->
+
+            <div class="items-scroll">
+
+                <table class="items-table">
+
+                    <colgroup>
+
+                        <col style="width:5%;" />
+
+                        <col style="width:19%;" />
+
+                        <col style="width:8%;" />
+
+                        <col style="width:5%;" />
+
+                        <col style="width:8%;" />
+
+                        <col style="width:9%;" />
+
+                        <col style="width:10%;" />
+
+                        <col style="width:6%;" />
+
+                        <col style="width:9%;" />
+
+                        <col style="width:6%;" />
+
+                        <col style="width:9%;" />
+
+                        <col style="width:10%;" />
+
+                    </colgroup>
+
+
+                    <thead>
+
+                        <tr>
+
+                            <th rowspan="2">
+
+                                Sr.<br />
+
+                                No.
+
+                            </th>
+
+
+                            <th rowspan="2">
+
+                                Description
+
+                            </th>
+
+
+                            <th rowspan="2">
+
+                                SAC<br />
+
+                                Code
+
+                            </th>
+
+
+                            <th rowspan="2">
+
+                                Qty
+
+                            </th>
+
+
+                            <th rowspan="2">
+
+                                Rate
+
+                            </th>
+
+
+                            <th rowspan="2">
+
+                                Amount
+
+                            </th>
+
+
+                            <th rowspan="2">
+
+                                Taxable<br />
+
+                                Value
+
+                            </th>
+
+
+                            <th colspan="2">
+
+                                CGST
+
+                            </th>
+
+
+                            <th colspan="2">
+
+                                SGST
+
+                            </th>
+
+
+                            <th rowspan="2">
+
+                                Total
+
+                            </th>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <th>
+
+                                Rate
+
+                            </th>
+
+                            <th>
+
+                                Amount
+
+                            </th>
+
+                            <th>
+
+                                Rate
+
+                            </th>
+
+                            <th>
+
+                                Amount
+
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @{
+                            var srNo = 1;
+                        }
+
+
+                        @if (Model.Details != null)
+                        {
+
+                            foreach (var item in Model.Details)
+                            {
+
+                                <tr>
+
+                                    <td class="center">
+
+                                        @srNo
+
+                                    </td>
+
+
+                                    <td class="description">
+
+                                        @item.productdescription
+
+                                    </td>
+
+
+                                    <td class="center">
+
+                                        @item.saccode
+
+                                    </td>
+
+
+                                    <td class="center">
+
+                                        @(item.qty.HasValue
+                                                                        ? item.qty.Value.ToString("0.##")
+                                                                        : "0")
+
+                            </td>
+
+
+                                    <td class="right">
+
+                                        ₹@(item.rate.HasValue
+                                                                ? item.rate.Value.ToString("N2")
+                                                                : "0.00")
+
+                            </td>
+
+
+                                    <td class="right">
+
+                                        ₹@(item.amount.HasValue
+                                                                ? item.amount.Value.ToString("N2")
+                                                                : "0.00")
+
+                            </td>
+
+
+                                    <td class="right">
+
+                                        ₹@(item.taxablevalue.HasValue
+                                                                ? item.taxablevalue.Value.ToString("N2")
+                                                                : "0.00")
+
+                            </td>
+
+
+                            <td class="center">
+
+                                @(item.cgstrate.HasValue
+                                                                ? item.cgstrate.Value.ToString("0.##")
+                                                                : "0")%
+
+                            </td>
+
+
+                            <td class="right">
+
+                                ₹@(item.cgstamt.HasValue
+                                                                ? item.cgstamt.Value.ToString("N2")
+                                                                : "0.00")
+
+                            </td>
+
+
+                            <td class="center">
+
+                                @(item.sgstrate.HasValue
+                                                                ? item.sgstrate.Value.ToString("0.##")
+                                                                : "0")%
+
+                            </td>
+
+
+                            <td class="right">
+
+                                ₹@(item.sgstamt.HasValue
+                                                                ? item.sgstamt.Value.ToString("N2")
+                                                                : "0.00")
+
+                            </td>
+
+
+                            <td class="right">
+
+                                ₹@(item.total.HasValue
+                                                                ? item.total.Value.ToString("N2")
+                                                                : "0.00")
+
+                            </td>
+
+                                                </tr>
+
+                                                srNo++;
+                            }
+                        }
+
+
+                        <!-- =================================================
+                             TOTAL
+                        ================================================== -->
+
+                        <tr class="total-row">
+
+                            <td colspan="3"
+                                class="right">
+
+                                Total
+
+                            </td>
+
+
+                            <td class="center">
+
+                                @totalQuantity.ToString("0.##")
+
+                            </td>
+
+
+                            <td></td>
+
+
+                            <td class="right">
+
+                                ₹@totalAmount.ToString("N2")
+
+                            </td>
+
+
+                            <td class="right">
+
+                                ₹@totalTaxableValue.ToString("N2")
+
+                            </td>
+
+
+                            <td></td>
+
+
+                            <td class="right">
+
+                                ₹@totalCgst.ToString("N2")
+
+                            </td>
+
+
+                            <td></td>
+
+
+                            <td class="right">
+
+                                ₹@totalSgst.ToString("N2")
+
+                            </td>
+
+
+                            <td class="right">
+
+                                ₹@grandTotal.ToString("N2")
+
+                            </td>
+
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <!-- =================================================
+                 SUMMARY
+            ================================================== -->
+
+            <div class="summary-grid">
+
+
+                <!-- AMOUNT IN WORDS -->
+
+                <div class="amount-words">
+
+                    <div class="amount-words-title">
+
+                        Total Invoice Amount in Words
+
+                    </div>
+
+
+                    <div class="amount-words-value">
+
+                        @amountInWords
+
+                    </div>
+
+                </div>
+
+
+                <!-- AMOUNT SUMMARY -->
+
+                <div>
+
+                    <table class="amount-summary">
+
+                        <tr>
+
+                            <td>
+
+                                Total Amount Before Tax
+
+                            </td>
+
+                            <td>
+
+                                ₹@totalAmount.ToString("N2")
+
+                            </td>
+
+                        </tr>
+
+
+                        @if (totalCgst > 0)
+                        {
+
+                            <tr>
+
+                                <td>
+
+                                    Add: CGST
+
+                                </td>
+
+                                <td>
+
+                                    ₹@totalCgst.ToString("N2")
+
+                                </td>
+
+                            </tr>
+
+                        }
+
+
+                        @if (totalSgst > 0)
+                        {
+
+                            <tr>
+
+                                <td>
+
+                                    Add: SGST
+
+                                </td>
+
+                                <td>
+
+                                    ₹@totalSgst.ToString("N2")
+
+                                </td>
+
+                            </tr>
+
+                        }
+
+
+                        @if (totalIgst > 0)
+                        {
+
+                            <tr>
+
+                                <td>
+
+                                    Add: IGST
+
+                                </td>
+
+                                <td>
+
+                                    ₹@totalIgst.ToString("N2")
+
+                                </td>
+
+                            </tr>
+
+                        }
+
+
+                        <tr>
+
+                            <td>
+
+                                Total Tax Amount
+
+                            </td>
+
+                            <td>
+
+                                ₹@totalTax.ToString("N2")
+
+                            </td>
+
+                        </tr>
+
+
+                        <tr class="grand-total-row">
+
+                            <td>
+
+                                Total Amount After Tax
+
+                            </td>
+
+                            <td>
+
+                                ₹@grandTotal.ToString("N2")
+
+                            </td>
+
+                        </tr>
+
+
+                        <tr class="round-row">
+
+                            <td>
+
+                                Round Off
+
+                            </td>
+
+                            <td>
+
+                                ₹@roundOff.ToString("N2")
+
+                            </td>
+
+                        </tr>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 REMARK
+            ================================================== -->
+
+            <div class="remark-box">
+
+                <div class="remark-title">
+
+                    Remark :
+
+                </div>
+
+
+                <div>
+
+                    @remark
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 FOOTER
+            ================================================== -->
+
+            <div class="footer-grid">
+
+
+                <!-- BANK DETAILS -->
+
+                <div class="bank-details">
+
+                    <div class="footer-title">
+
+                        Bank Details
+
+                    </div>
+
+
+                    <div class="bank-content">
+
+                        <div>
+
+                            <strong>
+
+                                Bank A/C :
+
+                            </strong>
+
+                            @accountNo
+
+                        </div>
+
+
+                        <div>
+
+                            <strong>
+
+                                Bank IFSC :
+
+                            </strong>
+
+                            @ifsc
+
+                        </div>
+
+
+                        <div>
+
+                            <strong>
+
+                                Bank Name :
+
+                            </strong>
+
+                            @bankName
+
+                        </div>
+
+
+                        <div>
+
+                            <strong>
+
+                                Branch :
+
+                            </strong>
+
+                            @branch
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- SEAL -->
+
+                <div class="seal-area">
+
+                    <div class="seal">
+
+                        WEB LINK<br />
+
+                        SERVICES<br />
+
+                        PVT. LTD.
+
+                    </div>
+
+
+                    <div class="seal-text">
+
+                        Common Seal
+
+                    </div>
+
+                </div>
+
+
+                <!-- SIGNATURE -->
+
+                <div class="signature-area">
+
+                    <div class="signature-for">
+
+                        For,<br />
+
+                        @companyName
+
+                    </div>
+
+
+                    <div class="signature-space">
+                    </div>
+
+
+                    <div class="signature-line">
+                    </div>
+
+
+                    <div class="authorized">
+
+                        Authorized Signatory
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 FOOT NOTE
+            ================================================== -->
+
+            <div class="bottom-note">
+
+                This is a computer generated tax invoice.
+
+            </div>
+
+
+        </div>
+
+    </div>
+
+
+</body>
+
+</html>
