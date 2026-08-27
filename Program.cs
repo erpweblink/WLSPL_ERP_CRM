@@ -37,6 +37,7 @@ builder.Services.AddScoped<ICallandMeetingRepo, CallandMeetingRepo>();
 builder.Services.AddScoped<IGoveServices, GovServicesRepo>();
 builder.Services.AddScoped<IMailingRepo, MailingRepo>();
 builder.Services.AddScoped<IWorkOrder, RepoWorkOrder>();
+builder.Services.AddScoped<IProforma, RepoProforma>();
 builder.Services.AddScoped<IServicesRepo, ServicesRepo>();
 
 

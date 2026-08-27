@@ -400,7 +400,7 @@ namespace WEBLINK_CRM.repository
                 return result.Cast<WorkOrderDetailVM>().ToList();
             }
         }
-        public async Task<List<BankDetailVM>> GetBankDetailsById(string ID)
+        public async Task<List<VM_WorkOrder.BankDetailVM>> GetBankDetailsById(string ID)
         {
             using (var connection = new SqlConnection(
                 _configuration.GetConnectionString("Conn_Stringg")))
@@ -412,13 +412,13 @@ namespace WEBLINK_CRM.repository
                 parameters.Add("@Action", "GetBankDetailsById");
                 parameters.Add("@ID", ID);
 
-                var result = await connection.QueryAsync<BankDetailVM>(
+                var result = await connection.QueryAsync<VM_WorkOrder.BankDetailVM>(
                     "SP_WorkOrder",
                     parameters,
                     commandType: CommandType.StoredProcedure
                 );
 
-                return result.Cast<BankDetailVM>().ToList();
+                return result.Cast<VM_WorkOrder.BankDetailVM>().ToList();
             }
         }
 
@@ -462,5 +462,7 @@ namespace WEBLINK_CRM.repository
                 return result > 0;
             }
         }
+
+       
     }
 }
