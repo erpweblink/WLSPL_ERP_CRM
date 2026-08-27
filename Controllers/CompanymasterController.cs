@@ -17,6 +17,7 @@ namespace WEBLINK_CRM.Controllers
             _companymaster = CompanymasterRepo;
             _govServices = govServices;
         }
+
         // Company List
         public async Task<IActionResult> Index(Companymaster companymaster)
         {
@@ -216,12 +217,9 @@ namespace WEBLINK_CRM.Controllers
 
                 ViewBag.BDEList = bdeList;
 
-                // Debug
-                Console.WriteLine("Existing BDE = " + companymaster.BDE);
-
                 return View(companymaster);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
             }
