@@ -24,7 +24,9 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-                var Lead = await _inquiryRepository.Getlead();
+                string EmpCode = HttpContext.Session.GetString("EmpCode");
+                string userrole = HttpContext.Session.GetString("Role");
+                var Lead = await _inquiryRepository.Getlead(user : EmpCode, role:userrole);
 
                 if (Lead == null)
                 {

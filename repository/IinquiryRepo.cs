@@ -19,7 +19,7 @@ namespace WEBLINK_CRM.repository
         Task<List<Inquiry>> GetWhatsappInquiriesFromDatabase();
         Task<int> AssignSalesPerson(int inquiryId, string salesEmpCode, string Action);
 
-        Task<List<Inquiry>> Getlead();
+        Task<List<Inquiry>> Getlead(string user, string role);
 
     }
 }
