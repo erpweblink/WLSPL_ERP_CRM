@@ -6,6 +6,7 @@ using WEBLINK_CRM.repository;
 
 namespace WEBLINK_CRM.Controllers
 {
+    [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
     [Authorize]
     public class CompanymasterController : Controller
     {
@@ -27,14 +28,8 @@ namespace WEBLINK_CRM.Controllers
             return View(companyList);
         }
 
-
-
         [HttpGet]
-        public async Task<IActionResult> Create(
-    string? leadCode,
-    string? mobile,
-    string? email,
-    string? ownerName)
+        public async Task<IActionResult> Create(string? leadCode,string? mobile,string? email,string? ownerName)
         {
             var model = new Companymaster();
 
@@ -66,8 +61,6 @@ namespace WEBLINK_CRM.Controllers
             return View(model);
         }
 
-
-
         private string GenerateCompanyCode()
         {
             string prefix = "WLS";
@@ -79,8 +72,6 @@ namespace WEBLINK_CRM.Controllers
 
             return prefix + number.ToString("00000");
         }
-
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -235,8 +226,6 @@ namespace WEBLINK_CRM.Controllers
                 throw;
             }
         }
-
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]

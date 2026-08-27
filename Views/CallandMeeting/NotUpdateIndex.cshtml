@@ -3,17 +3,49 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<link rel="stylesheet" href="~/assets/libs/vanilla-datatables/vanilla-dataTables.min.css" asp-append-version="true">
-    <link rel="stylesheet" href="~/assets/libs/vanilla-datatables-editable/datatable.editable.min.css" asp-append-version="true">
-        <script src="~/assets/libs/vanilla-datatables/vanilla-dataTables.min.js" asp-append-version="true"></script>
-        <script src="~/assets/libs/vanilla-datatables-editable/datatable.editable.min.js" asp-append-version="true"></script>
 <style type="text/css">
+    /* ── all your existing styles unchanged ── */
+    .table tbody td {
+        font-size: 15px;
+        vertical-align: middle;
+    }
+
+    .table tbody tr:hover {
+        background: #f4f8ff;
+    }
+
+    .pagination {
+        margin-bottom: 0;
+    }
+
+        .pagination .page-link {
+            font-size: 12px;
+            padding: 6px 11px;
+            color: #0d6efd;
+        }
+
+        .pagination .active .page-link {
+            background-color: #142c45;
+            border-color: #142d47;
+            color: #fff;
+        }
+
+        .pagination .page-link:hover {
+            background-color: #e9f2ff;
+        }
+
+    .no-record {
+        text-align: center;
+        padding: 30px !important;
+        color: #777;
+    }
+
     .modelprofile1 {
-        border-radius: 5px;
+        border-radius: 15px;
     }
 
     .headingcls {
-        background-color: #423f3f;
+        background: linear-gradient(314deg, #23262a, #1a4373);
     }
 
     .reqcls {
@@ -31,18 +63,182 @@
     .lbls {
         font-size: 12px;
         text-align: left;
+        color: black !important;
+    }
+
+    .search-wrapper {
+        position: relative;
+        max-width: 320px;
+    }
+
+        .search-wrapper > i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #98a2b3;
+            font-size: 14px;
+            z-index: 2;
+        }
+
+    .search-input {
+        width: 100%;
+        height: 38px;
+        padding: 0 12px 0 35px;
+        border: 1px solid #1e2022 !important;
+        border-radius: 7px;
+        outline: none;
+        color: #344054;
+        font-size: 13px;
+        transition: all .2s ease;
+    }
+
+        .search-input::placeholder {
+            color: #98a2b3;
+        }
+
+        .search-input:focus {
+            border-color: #6b7cff;
+            box-shadow: 0 0 0 3px rgba(107,124,255,.10);
+        }
+
+    .record-info {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #8a94a6;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+        .record-info strong {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 34px;
+            height: 26px;
+            padding: 0 8px;
+            border-radius: 20px;
+            background: #eef2ff;
+            color: #4f46e5;
+            font-size: 12px;
+        }
+
+    /* select2 premium theme — used for the row-level Sales Manager dropdowns */
+    .select2-container--premium .select2-selection--single {
+        height: 38px;
+        background: #fff;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        transition: border-color .2s, box-shadow .2s;
+    }
+
+        .select2-container--premium .select2-selection--single:hover {
+            border-color: #aaa;
+        }
+
+    .select2-container--premium.select2-container--focus .select2-selection--single,
+    .select2-container--premium.select2-container--open .select2-selection--single {
+        border-color: #111;
+        box-shadow: 0 0 0 3px rgba(0,0,0,.07);
+        outline: none;
+    }
+
+    .select2-container--premium .select2-selection--single .select2-selection__rendered {
+        line-height: 38px;
+        padding-left: 12px;
+        padding-right: 35px;
+        color: #111;
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .select2-container--premium .select2-selection--single .select2-selection__placeholder {
+        color: #bbb;
+        font-weight: 400;
+    }
+
+    .select2-container--premium .select2-selection--single .select2-selection__arrow {
+        height: 38px;
+        right: 10px;
+    }
+
+        .select2-container--premium .select2-selection--single .select2-selection__arrow b {
+            border-color: #999 transparent transparent transparent;
+            border-width: 5px 4px 0 4px;
+        }
+
+    .select2-container--premium.select2-container--open .select2-selection--single .select2-selection__arrow b {
+        border-color: transparent transparent #111 transparent;
+        border-width: 0 4px 5px 4px;
+    }
+
+    .select2-container--premium .select2-selection--single .select2-selection__clear {
+        font-size: 16px;
+        color: #d90000;
+        line-height: 38px;
+    }
+
+        .select2-container--premium .select2-selection--single .select2-selection__clear:hover {
+            color: #e74c3c;
+        }
+
+    .select2-container--premium .select2-dropdown {
+        background: #fff;
+        border: 1.5px solid #111;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 6px;
+        box-shadow: 0 8px 30px rgba(0,0,0,.10);
+    }
+
+    .select2-container--premium .select2-search--dropdown {
+        padding: 10px 10px 6px;
+    }
+
+        .select2-container--premium .select2-search--dropdown .select2-search__field {
+            background: #f7f7f7;
+            border: 1.5px solid #000;
+            border-radius: 8px;
+            padding: 9px 14px;
+            font-size: 13px;
+            color: #111;
+            width: 100%;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+    .select2-container--premium .select2-results__options {
+        padding: 4px 0;
+        max-height: 220px;
+        overflow-y: auto;
+    }
+
+    .select2-container--premium .select2-results__option {
+        font-size: 14px;
+        color: #060505;
+        padding: 11px 16px;
+    }
+
+    .select2-container--premium .select2-results__option--highlighted[aria-selected] {
+        background: #f2f2f2;
+        color: #111;
+        font-weight: 600;
+    }
+
+    .select2-container--premium .select2-results__option[aria-selected=true] {
+        background: #f9f9f9;
+        color: #111;
+        font-weight: 600;
     }
 </style>
-<!-- Include SweetAlert2 CSS and JS -->
-<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.9/dist/sweetalert2.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.9/dist/sweetalert2.min.js"></script>
-
 
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center text-dark text-uppercase">
-        <h5 class="mb-0">Not Updated List</h5>
-        <select id="ddlDays" class="form-control w-auto" onchange="OpenHistory();">
-            <option value="0">All</option>
+        <h3><i class="fa-solid fa-clock-rotate-left"></i> Not Updated List</h3>
+        <select id="ddlDays" class="form-control w-auto" onchange="GetNotUpdatedList();">
             <option value="7">7 Days</option>
             <option value="15">15 Days</option>
             <option value="30">1 Month</option>
@@ -50,9 +246,33 @@
         </select>
     </div>
     <div class="card-body">
-        <div class="table-responsive">
-            <div class="col-md-12" id="notUpdatedList">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div class="search-wrapper">
+                <i class="fa fa-search"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search..." />
             </div>
+            <div class="record-info">
+                Total Records: <strong id="totalRecords">0</strong>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover" id="companyTable">
+                <thead>
+                    <tr>
+                        <th>Sr.No.</th>
+                        <th>Customer Name</th>
+                        <th>Sales Manager</th>
+                        <th>Transfer To</th>
+                        <th>Day Date</th>
+                    </tr>
+                </thead>
+                <tbody id="companyTableBody">
+                </tbody>
+            </table>
+            <nav>
+                <ul class="pagination justify-content-center mt-4" id="pagination"></ul>
+            </nav>
         </div>
 
         <!--  Commnet History Modal -->
@@ -70,23 +290,20 @@
                     <div class="modal-body">
                         <div class="row container p-0 m-0">
                             <div class="profilemodel2">
-                                <!-- Company Info -->
-                                <div class="row ms-2">
-                                    <div class="col-md-12" style="background-color:#f9f7f7">
-                                        <div class="row p-1 bg-light">
-                                            <div class="col-md-4"><b>Company Name :</b></div>
-                                            <div class="col-md-8 lblpopup" id="lblHistorycname"></div>
+                                <div style="background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:12px 16px;margin-bottom:12px;">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <b>Company Name :</b>
+                                            <span id="lblHistorycname" class="ms-2"></span>
                                         </div>
-                                        <div class="row p-1 bg-light">
-                                            <div class="col-md-4"><b>Company Code :</b></div>
-                                            <div class="col-md-8 lblpopup" id="lblHistoryccode"></div>
+                                        <div class="col-md-6">
+                                            <b>Company Code :</b>
+                                            <span id="lblHistoryccode" class="ms-2"></span>
                                         </div>
                                     </div>
                                 </div>
-                                <hr class="new1" />
-                                <div class="row ms-2">
-                                    <div class="col-md-12" id="commentHistoryContainer">
-                                    </div>
+                                <div id="historyScrollArea">
+                                    <div id="commentHistoryContainer"></div>
                                 </div>
                             </div>
                         </div>
@@ -97,15 +314,26 @@
     </div>
 </div>
 
-
 <script type="text/javascript">
+    const rowsPerPage = 20;
+    const pageWindowSize = 10; 
+    let currentPage = 1;
+    let allRows = [];
+    let filteredRows = [];
 
-    window.onload = function(){
-        OpenHistory();
+    const table = document.getElementById("companyTable");
+    const tbody = table.querySelector("tbody");
+    const searchInput = document.getElementById("searchInput");
+    const pagination = document.getElementById("pagination");
+    const totalRecords = document.getElementById("totalRecords");
+
+    window.onload = function () {
+        GetNotUpdatedList();
     };
 
-    function OpenHistory() {
+    function GetNotUpdatedList() {
         var Days = $('#ddlDays').val();
+
         $.ajax({
             url: '/CallAndMeeting/GetNotUpdatedList',
             type: 'GET',
@@ -115,135 +343,235 @@
                     alert(res.message);
                     return;
                 }
-
-                var container = $('#notUpdatedList');
-                container.empty();
-
-                if (!res.comments || res.comments.length === 0) {
-                    container.append('<p class="text-center">No List Found.</p>');
-                    return;
-                }
-
-                var table = `
-                    <table class="table" id="CallMettUpdate">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Sr.No.</th>
-                                <th>Customer Name</th>
-                                <th>Sales Manager</th>
-                                <th>Transfer To</th>
-                                <th>Day Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-                var count = 0;
-                $.each(res.comments, function (i, item) {
-                    count++;
-                    table += `
-                        <tr>
-                            <td>${count}</td>
-                            <td><a href="javascript:void(0)"
-                                       class="open-company-modal"
-                                      data-code="${item.ccode}" data-name="${item.cname}">${item.cname}</a></td>
-                            <td>${item.name}</td>
-                        <td><select class="form-control ddlregbypopup" style="width: 70% !important;" onchange="ChangBDE()"></select></td>
-                            <td>${item.DAYDATE}</td>
-                        </tr>
-                    `;
-                });
-
-                table += `
-                        </tbody>
-                    </table>
-                `;
-                container.append(table);
-
-               $('.ddlregbypopup').each(function () {
-
-                var ddl = $(this);
-                ddl.empty().append('<option value="">-- Select Sales Manager --</option>');
-
-                $.each(res.userList, function (i, user) {
-                    ddl.append(
-                        $('<option>', {
-                            value: user.userCode,
-                            text: user.fullName
-                        })
-                    );
-                });
-
-                const SessionRole = "@Context.Session.GetString("Role")";
-                if (SessionRole && (SessionRole === 'Admin' || SessionRole === 'Sub Admin')) {
-                    ddl.prop("disabled", false);
-                } else {
-                    ddl.prop("disabled", true);
-                }
-
-            });
-
-
-
-
-            const dataTable = new DataTable("#CallMettUpdate", {
-            searchable: true,
-            fixedHeight: true,
-            });
+                renderTable(res.comments, res.userList);
             },
             error: function () {
                 alert("Failed to load list.");
             }
         });
-    };
+    }
 
-           
+    function renderTable(data, userList) {
+        $(tbody).empty();
+
+        if (!data || data.length === 0) {
+            $(tbody).append('<tr><td colspan="5" class="no-record">No List Found.</td></tr>');
+            allRows = [];
+            filteredRows = [];
+            totalRecords.innerText = 0;
+            pagination.innerHTML = "";
+            return;
+        }
+        data.forEach(function (item) {
+            const row = `
+                <tr>
+                    <td class="row-number"></td>
+                    <td>
+                        <a href="javascript:void(0)"
+                           style="font-weight:700!important;text-decoration:none!important;color:#074993;"
+                           class="open-company-modal"  data-id="${item.cid}"
+                           data-code="${item.ccode}" data-name="${item.cname}">${item.cname}</a>
+                    </td>
+                    <td>${item.name}</td>
+                    <td>
+                        <select class="form-control ddlregbypopup" style="width: 100%;" onchange="ChangBDE(this)"></select>
+                    </td>
+                    <td>${item.DAYDATE}</td>
+                </tr>`;
+            $(tbody).append(row);
+        });
+
+        $('.ddlregbypopup').each(function () {
+            var ddl = $(this);
+            ddl.empty().append('<option value="">-- Select Sales Manager --</option>');
+
+            $.each(userList || [], function (i, user) {
+                ddl.append($('<option>', { value: user.UserCode, text: user.FullName }));
+            });
+
+            const SessionRole = "@Context.Session.GetString("Role")";
+            const isAdminRole = (SessionRole === 'Admin' || SessionRole === 'Sub Admin');
+            ddl.prop("disabled", !isAdminRole);
+        });
+
+        $('.ddlregbypopup').select2({
+            theme: "premium",
+            placeholder: "Select Sales Manager",
+            allowClear: true,
+            width: "100%",
+            dropdownParent: $("body")
+        });
+
+        allRows = Array.from(tbody.querySelectorAll("tr")).filter(row => !row.id);
+        filteredRows = allRows;
+
+        totalRecords.innerText = filteredRows.length;
+        searchInput.value = "";
+
+        currentPage = 1;
+        displayTable(1);
+    }
+
+    function displayTable(page) {
+        currentPage = page;
+
+        allRows.forEach(row => {
+            row.style.display = "none";
+        });
+
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        filteredRows.slice(start, end).forEach((row) => {
+            row.style.display = "";
+        });
+
+        filteredRows.slice(start, end).forEach((row, index) => {
+            const numberCell = row.querySelector(".row-number");
+            if (numberCell) {
+                numberCell.innerText = start + index + 1;
+            }
+        });
+
+        createPagination();
+    }
+
+    function createPagination() {
+        pagination.innerHTML = "";
+
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+
+        if (totalPages <= 1) {
+            return;
+        }
+
+        // Which window of page numbers is currentPage in? e.g. pages 1-10, 11-20, ...
+        const windowStart = Math.floor((currentPage - 1) / pageWindowSize) * pageWindowSize + 1;
+        const windowEnd = Math.min(windowStart + pageWindowSize - 1, totalPages);
+
+        // PREVIOUS (single page back)
+        const previousLi = document.createElement("li");
+        previousLi.className = "page-item " + (currentPage === 1 ? "disabled" : "");
+        previousLi.innerHTML = `
+            <a class="page-link" href="javascript:void(0)">
+                <i class="fa fa-chevron-left"></i>
+            </a>
+        `;
+        previousLi.onclick = function () {
+            if (currentPage > 1) {
+                displayTable(currentPage - 1);
+            }
+        };
+        pagination.appendChild(previousLi);
+
+        // PREV BLOCK (jump back a full window, e.g. "<< 1-10")
+        if (windowStart > 1) {
+            const prevBlockLi = document.createElement("li");
+            prevBlockLi.className = "page-item";
+            const prevBlockEnd = windowStart - 1;
+            const prevBlockStart = Math.max(1, prevBlockEnd - pageWindowSize + 1);
+            prevBlockLi.innerHTML = `
+                <a class="page-link" href="javascript:void(0)">
+                    ${prevBlockStart} to ${prevBlockEnd}
+                </a>
+            `;
+            prevBlockLi.onclick = function () {
+                displayTable(prevBlockEnd);
+            };
+            pagination.appendChild(prevBlockLi);
+        }
+
+        // PAGE NUMBERS — only within the current window (max 10 shown)
+        for (let i = windowStart; i <= windowEnd; i++) {
+            const li = document.createElement("li");
+            li.className = "page-item " + (i === currentPage ? "active" : "");
+            li.innerHTML = `
+                <a class="page-link" href="javascript:void(0)">
+                    ${i}
+                </a>
+            `;
+            li.onclick = function () {
+                displayTable(i);
+            };
+            pagination.appendChild(li);
+        }
+
+        // NEXT BLOCK (jump forward a full window, e.g. "11 to 20 >>")
+        if (windowEnd < totalPages) {
+            const nextBlockLi = document.createElement("li");
+            nextBlockLi.className = "page-item";
+            const nextBlockStart = windowEnd + 1;
+            const nextBlockEndCalc = Math.min(nextBlockStart + pageWindowSize - 1, totalPages);
+            nextBlockLi.innerHTML = `
+                <a class="page-link" href="javascript:void(0)">
+                    ${nextBlockStart} to ${nextBlockEndCalc}
+                </a>
+            `;
+            nextBlockLi.onclick = function () {
+                displayTable(nextBlockStart);
+            };
+            pagination.appendChild(nextBlockLi);
+        }
+
+        // NEXT (single page forward)
+        const nextLi = document.createElement("li");
+        nextLi.className = "page-item " + (currentPage === totalPages ? "disabled" : "");
+        nextLi.innerHTML = `
+            <a class="page-link" href="javascript:void(0)">
+                <i class="fa fa-chevron-right"></i>
+            </a>
+        `;
+        nextLi.onclick = function () {
+            if (currentPage < totalPages) {
+                displayTable(currentPage + 1);
+            }
+        };
+        pagination.appendChild(nextLi);
+    }
+
+    searchInput.addEventListener("keyup", function () {
+        const value = this.value.toLowerCase().trim();
+
+        filteredRows = allRows.filter(row => {
+            return row.innerText.toLowerCase().includes(value);
+        });
+
+        totalRecords.innerText = filteredRows.length;
+        currentPage = 1;
+        displayTable(1);
+    });
+
     $(document).on("click", ".open-company-modal", function () {
         let CompanyCode = $(this).data("code");
         let CompanyName = $(this).data("name");
+
         $.ajax({
             url: '/CallAndMeeting/GetCommmentHistory',
             type: 'GET',
             data: { CompanyCode: CompanyCode },
             success: function (res) {
-                if (!res.success) {
-                    alert(res.message);
-                    return;
-                }
+                 if (!res.success) { showToast(res.message, "error"); return; }
 
                 $("#lblHistoryccode").text(CompanyCode);
                 $("#lblHistorycname").text(CompanyName);
 
-                var container = $('#commentHistoryContainer');
+                const container = $("#commentHistoryContainer");
                 container.empty();
 
                 if (res.comments.length === 0) {
                     container.append('<p class="text-center">No comments found.</p>');
-                    return;
                 }
 
                 $.each(res.comments, function (i, item) {
-                    var html = `
-                        <div class="row" style="background-color: rgb(193 104 62);padding: 5px;">
-                            <div class="col-md-4">
-                                &nbsp;- <span class="lbls">${item.Name}</span>
-                            </div>
-                            <div class="col-md-4">
-                                <span class="lbls">${item.CommentDateTime}</span>
-                            </div>
-                            <div class="col-md-4">
-                                <span class="lbls">${item.Typeoftbl}</span>
-                            </div>
+                    container.append(`
+                        <div class="row" style="background:#cbcbcb;padding:5px;">
+                            <div class="col-md-4">&nbsp;- <span class="lbls">${item.name}</span></div>
+                            <div class="col-md-4"><span class="lbls">${item.commentdatetime}</span></div>
+                            <div class="col-md-4"><span class="lbls">${item.typeoftbl}</span></div>
                         </div>
-
-                        <div class="row p-1">
-                            <div class="col-md-12">
-                                <p>${item.Message}</p>
-                            </div>
-                        </div>
-
+                        <div class="row p-1"><div class="col-md-12"><p>${item.message}</p></div></div>
                         <hr class="new1" />
-                    `;
-                    container.append(html);
+                    `);
                 });
 
                 new bootstrap.Modal(
@@ -252,6 +580,67 @@
             }
         });
     });
+    
+    function ChangBDE(selectElement) {
+        const $select = $(selectElement);
 
+        if ($select.data("resetting")) {
+            return;
+        }
+
+        const SessionRole = "@Context.Session.GetString("Role")";
+        const isAdminRole = (SessionRole === 'Admin' || SessionRole === 'Sub Admin');
+
+        if (!isAdminRole) {
+            showToast("Only Admin can change the Sales Manager.", "warning");
+            resetSelect($select);
+            return;
+        }
+
+        const $row = $select.closest("tr");
+        const $companyLink = $row.find(".open-company-modal");
+        const companyId = $companyLink.data("id");
+        const companyName = $companyLink.data("name");
+
+        const newUserCode = $select.val();
+        const newUserName = $select.find("option:selected").text();
+
+        if (!newUserCode) {
+            showToast("Please select a Sales Manager.", "warning");
+            return;
+        }
+
+        showConfirmToast(
+            `Transfer <b>${companyName}</b> to <b>${newUserName}</b>?`,
+            function () {
+                $.ajax({
+                    url: "/CallAndMeeting/UpdateCompanyUser",
+                    type: "POST",
+                    data: { newName: newUserCode, CompCode: companyId },
+                    success: function (res) {
+                        if (res.success) {
+                            showToast("Sales Manager updated successfully.", "success");
+                        } else {
+                            showToast(res.message || "Failed to update Sales Manager.", "error");
+                        }
+                        resetSelect($select);
+                    },
+                    error: function () {
+                        showToast("Something went wrong while updating.", "error");
+                        resetSelect($select);
+                    }
+                });
+            },
+            function () {
+                resetSelect($select);
+                showToast("Update cancelled.", "warning");
+            }
+        );
+    }
+
+    function resetSelect($select) {
+        $select.data("resetting", true);
+        $select.val("").trigger("change");
+        $select.data("resetting", false);
+    }
 </script>
-

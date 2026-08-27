@@ -675,16 +675,17 @@ namespace WEBLINK_CRM.repository
         {
             try
             {
+                // Add  c.id as companyId, in this action 
                 using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
                 {
                     await connection.OpenAsync();
                     var parameters = new DynamicParameters();
-                    parameters.Add("@Sp_Mode", "NotUpdateList");
-                    parameters.Add("@Typeoftbl", days);
-                    parameters.Add("@SessionName", "");
-                    parameters.Add("@CompanyName", "");
+                    parameters.Add("@Mode", "GetNotUpdatedList");
+                    parameters.Add("@DaysFilter", days);
+                    parameters.Add("@Users","");
+                    parameters.Add("@Company","");
                     var result = await connection.QueryAsync<dynamic>(
-                        "SP_CALLANDMEETING",
+                        "[stswlspl].[GetNotUpdatedCompany]",
                         parameters,
                         commandType: CommandType.StoredProcedure
                     );

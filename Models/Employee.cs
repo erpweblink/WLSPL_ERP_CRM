@@ -17,5 +17,7 @@
         public string? UserName { get; set; }
         public string? Sales_TL_Manager { get; set; }
         public string? Designation { get; set; }
+
+        public string? ProfileImagePath { get; set; }
     }
 }
