@@ -33,13 +33,13 @@
     }
 
     .company-code {
-        color: #0d6efd;
+        color: #111;
         font-weight: 600;
     }
 
     .company-name {
         font-weight: 600;
-        color: #111;
+        color: #0d6efd;
     }
 
     .active-status {
@@ -107,6 +107,316 @@
             background-color: #e9f2ff;
         }
 
+
+
+
+    /* ===== Unified Company Modal ===== */
+    #companyDetailModal .modal-content {
+        border: none;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 15px 45px rgba(15,23,42,.22);
+    }
+
+    #companyDetailModal .modal-header {
+        background: linear-gradient(135deg, #1a4373 0%, #23262a 100%);
+        padding: 14px 20px;
+        border: none;
+    }
+
+    #companyDetailModal .modal-title {
+        color: #fff;
+        font-weight: 700;
+        font-size: 16px;
+    }
+
+    #companyDetailModal .btn-close-cm {
+        width: 30px;
+        height: 30px;
+        border-radius: 7px;
+        border: none;
+        background: rgba(255,255,255,.12);
+        color: #fff !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: auto;
+        transition: .2s;
+    }
+
+        #companyDetailModal .btn-close-cm:hover {
+            background: #f04438;
+        }
+
+    #companyDetailModal .modal-body {
+        background: #f6f8fb;
+        padding: 18px 20px;
+    }
+
+
+    #companyDetailModal .form-control {
+        border: 1px solid #dbe2ea !important;
+        border-radius: 7px !important;
+        font-size: 13px;
+        padding: 6px 10px;
+        box-shadow: none !important;
+    }
+
+        #companyDetailModal .form-control:focus {
+            border-color: #6b7cff !important;
+            box-shadow: 0 0 0 3px rgba(107,124,255,.12) !important;
+        }
+
+        #companyDetailModal .form-control.is-invalid {
+            border-color: #f04438 !important;
+        }
+
+    #companyDetailModal .validation-error {
+        font-size: 10.5px;
+    }
+
+    #companyDetailModal .cm-hint {
+        color: #b42318 !important;
+        font-size: 10.5px;
+        margin-top: 2px;
+        display: block;
+    }
+
+</style>
+
+<style type="text/css">
+    .hidden {
+        display: none !important;
+    }
+
+    .cm-card {
+        background: #cbcbcb;
+        border: 1px solid #e7ebf0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+    }
+
+        .cm-card:last-of-type {
+            margin-bottom: 0;
+        }
+
+    .cm-card-title {
+        font-size: 11.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        color: #1a4373;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+        .cm-card-title i {
+            color: #6b7cff;
+        }
+
+    .cm-profile-fields {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px 16px;
+    }
+
+    .cm-field-label {
+        font-size: 10px;
+        font-weight: 700;
+        color: #8a94a6;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    .cm-field-value {
+        font-size: 13.5px;
+        font-weight: 600;
+        color: #1e2022;
+        line-height: 1.4;
+    }
+
+        .cm-field-value a {
+            color: #1a4373;
+            text-decoration: none;
+        }
+
+            .cm-field-value a:hover {
+                text-decoration: underline;
+            }
+
+    .cm-manager-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+    }
+
+        .cm-manager-row .cm-select-wrap {
+            flex: 1;
+            min-width: 0;
+        }
+
+    .cm-form-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #344054;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .cm-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px 14px;
+        margin-bottom: 10px;
+    }
+
+        .cm-grid:last-child {
+            margin-bottom: 0;
+        }
+
+        .cm-grid.full {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+
+    .modal-footer-cm {
+        display: flex;
+        justify-content: space-between;
+        padding-top: 12px;
+        margin-top: 2px;
+        border-top: 1px solid #e7ebf0;
+    }
+
+    .btn-cm-save {
+        background: linear-gradient(135deg, #16a34a, #15803d);
+        border: none;
+        color: #fff;
+        font-weight: 600;
+        padding: 8px 22px;
+        border-radius: 8px;
+        font-size: 13.5px;
+    }
+
+    .btn-cm-history {
+        background: #fff;
+        border: 1px solid #1a4373;
+        color: #1a4373;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13.5px;
+    }
+
+    .btn-cm-back {
+        background: #fff;
+        border: 1px solid #6c757d;
+        color: #6c757d;
+        font-weight: 600;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13.5px;
+    }
+
+    .btn-cm-change {
+        background: #fff;
+        border: 1px solid #f04438 !important;
+        color: #f04438;
+        font-weight: 600;
+        height: 34px;
+        border-radius: 7px !important;
+        padding: 0 12px;
+        font-size: 12.5px;
+    }
+
+    #historyScrollArea {
+        overflow-x: hidden;
+        overflow-y: scroll;
+        height: 460px;
+    }
+
+    hr.new1 {
+        border-top: 1px dashed green !important;
+        border: 0;
+        margin-top: 5px !important;
+        margin-bottom: 5px !important;
+        width: 100%;
+    }
+
+    .lbls {
+        font-size: 12px;
+        text-align: left;
+        color: black !important;
+    }
+
+    /* select2 premium theme — unchanged */
+    .select2-container--premium .select2-selection--single {
+        height: 50px;
+        background: #fff;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        transition: border-color .2s, box-shadow .2s;
+    }
+
+        .select2-container--premium .select2-selection--single:hover {
+            border-color: #aaa;
+        }
+
+    .select2-container--premium.select2-container--focus .select2-selection--single,
+    .select2-container--premium.select2-container--open .select2-selection--single {
+        border-color: #111;
+        box-shadow: 0 0 0 3px rgba(0,0,0,.07);
+        outline: none;
+    }
+
+    .select2-container--premium .select2-selection--single .select2-selection__rendered {
+        line-height: 50px;
+        padding-left: 16px;
+        padding-right: 42px;
+        color: #111;
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .select2-container--premium .select2-selection--single .select2-selection__placeholder {
+        color: #bbb;
+        font-weight: 400;
+    }
+
+    .select2-container--premium .select2-selection--single .select2-selection__arrow {
+        height: 50px;
+        right: 14px;
+    }
+
+        .select2-container--premium .select2-selection--single .select2-selection__arrow b {
+            border-color: #999 transparent transparent transparent;
+            border-width: 5px 4px 0 4px;
+        }
+
+    .select2-container--premium.select2-container--open .select2-selection--single .select2-selection__arrow b {
+        border-color: transparent transparent #111 transparent;
+        border-width: 0 4px 5px 4px;
+    }
+
+    .select2-container--premium .select2-selection--single .select2-selection__clear {
+        font-size: 18px;
+        color: #d90000;
+        line-height: 50px;
+    }
+
+        .select2-container--premium .select2-selection--single .select2-selection__clear:hover {
+            color: #e74c3c;
+        }
+
+    @@media (max-width: 768px) {
+        .cm-profile-fields {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
 </style>
 
 <div class="card ">
@@ -122,8 +432,6 @@
             Add New Company
         </a>
     </div>
-
-    <!-- ================= BODY ================= -->
 
     <div class="card-body">
         <div class="row align-items-center">
@@ -188,9 +496,11 @@
                                 </td>
 
                                 <td>
-                                    <strong class="company-name">
+                                    <a href="javascript:void(0)"
+                                       class="company-name open-company-modal"
+                                       data-id="@item.Id">
                                         @item.CName
-                                    </strong>
+                                    </a>
                                 </td>
 
                                 <td>
@@ -260,304 +570,559 @@
                     }
                 </tbody>
             </table>
+            <nav>
+                <ul class="pagination justify-content-center mt-3"
+                    id="pagination">
+                </ul>
+            </nav>
         </div>
 
-        <!-- ================= PAGINATION ================= -->
-        <nav>
-            <ul class="pagination justify-content-center mt-3"
-                id="pagination">
-            </ul>
-        </nav>
+        <div class="modal fade" id="companyDetailModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+            <div class="modal-dialog modal-xl modal-dialog-scrollable">
+                <div class="modal-content modelprofile1">
+                    <div class="modal-header d-flex align-items-center">
+                        <h4 class="modal-title mb-0" id="modalMainTitle">Company Detail</h4>
+                        <button type="button" class="btn-close-cm" data-bs-dismiss="modal">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div id="detailPanel">
+                            <div class="cm-card">
+                                <div class="cm-profile-fields">
+                                    <div>
+                                        <span class="cm-field-label">Company Code</span>
+                                        <div class="cm-field-value lblpopup" id="lblccode" name="Ccode"></div>
+                                        <input type="hidden" id="commenthistoryId" name="Id" />
+                                        <input type="hidden" id="companyid" name="Ids" />
+                                    </div>
+                                    <div>
+                                        <span class="cm-field-label">Company Name</span>
+                                        <div class="cm-field-value lblpopup" id="lblcname" name="CompanyName"></div>
+                                    </div>
+                                    <div>
+                                        <span class="cm-field-label">Owner Name</span>
+                                        <div class="cm-field-value lblpopup" id="lbloname" name="PersonName"></div>
+                                    </div>
+                                    <div>
+                                        <span class="cm-field-label">Email Id</span>
+                                        <div class="cm-field-value lblpopup" id="lblemail" name="ClientMail"></div>
+                                    </div>
+                                    <div>
+                                        <span class="cm-field-label">Mobile No.</span>
+                                        <div class="cm-field-value">
+                                            <a id="hrefmob" href="#">
+                                                <span id="lblmobile" name="ContactNo"></span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="cm-manager-row">
+                                            <div class="cm-select-wrap">
+                                                <label class="cm-field-label">Sales Manager</label>
+                                                <select id="ddlregbypopup" class="form-control" name="SessionName"></select>
+                                            </div>
+                                            <button type="button" id="btnChange" class="btn-cm-change" onclick="ChangeCompanyUser()">Change</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cm-card">
+                                <div class="cm-grid full">
+                                    <div>
+                                        <label class="cm-form-label">Feedback</label>
+                                        <textarea id="txtcomment" name="FeedBack" class="form-control" placeholder="Write Something..." rows="2"></textarea>
+                                    </div>
+                                    <div>
+                                        <label class="cm-form-label">Additional Emails</label>
+                                        <input type="text" id="txtaddemail" name="AdditionalMail" class="form-control" placeholder="Comma separated emails" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cm-card">
+                                <div class="cm-card-title"><i class="fa-solid fa-list-check"></i>Update Details</div>
+
+                                <div class="cm-grid">
+                                    <div class="cm-profile-fields">
+                                        <div>
+                                            <label class="cm-form-label">Type of Update <i class="reqcls">*</i></label>
+                                            <select id="ddlupdatefor" name="UpdateFor" class="form-control required-field" onchange="CheckUpdateFor()">
+                                                <option>--Select--</option>
+                                                <option value="Call">Call</option>
+                                                <option value="Meeting">Meeting</option>
+                                            </select>
+                                            <span class="text-danger validation-error"></span>
+                                        </div>
+                                        <div></div>
+                                        <div>
+                                            <label class="cm-form-label">Type <i class="reqcls">*</i></label>
+                                            <select id="ddltype" name="Type" class="form-control required-field">
+                                                <option value="">- Select Type -</option>
+                                                <option value="Fresh">Fresh</option>
+                                                <option value="Follow-up">Follow-up</option>
+                                                <option value="Services">Services</option>
+                                            </select>
+                                            <span class="text-danger validation-error"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="cm-grid">
+                                    <div class="cm-profile-fields">
+                                        <div id="lblfolldate">
+                                            <label class="cm-form-label">Follow-Up Date <i class="reqcls">*</i></label>
+                                            <input type="date" id="txtfollowupdatee" name="FollowDate" class="form-control required-field" />
+                                            <span class="text-danger validation-error"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="cm-grid" id="DivCallUpdate">
+                                    <div class="cm-profile-fields">
+                                        <div>
+                                            <label class="cm-form-label">Call Status <i class="reqcls">*</i></label>
+                                            <select id="ddlcallstatus" name="CallUpdateStatus" class="form-control required-field" onchange="CheckCallMeetingUpdate()">
+                                                <option value="">--Select--</option>
+                                                <option value="Not Interested">Not Interested</option>
+                                                <option value="Ringing">Ringing</option>
+                                                <option value="Follow-up">Follow-up</option>
+                                                <option value="Busy">Busy</option>
+                                                <option value="Closed">Closed</option>
+                                            </select>
+                                            <span class="text-danger validation-error"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="cm-grid" id="DivMeetingUpdate">
+                                    <div class="cm-profile-fields">
+                                        <div>
+                                            <label class="cm-form-label">Meeting Update <i class="reqcls">*</i></label>
+                                            <select class="form-control required-field" id="ddlmeetingupdate" name="MeetUpdateStatus" onchange="CheckCallMeetingUpdate()">
+                                                <option value="">--Select--</option>
+                                                <option value="Not Interested">Not Interested</option>
+                                                <option value="Follow-up">Follow-up</option>
+                                                <option value="Closed">Closed</option>
+                                            </select>
+                                            <span class="text-danger validation-error"></span>
+                                        </div>
+                                        <div></div>
+                                        <div>
+                                            <label class="cm-form-label">Meeting With <i class="reqcls">*</i></label>
+                                            <select class="form-control required-field" id="ddlmeetingwithm" name="MeetingwithManager">
+                                                <option value="1">Individual</option>
+                                                <option value="WLSPL/01">Admin</option>
+                                                <option value="WLSPL/081">Vaibhav Zope</option>
+                                                <option value="WLSPL/0141">Vikrant</option>
+                                            </select>
+                                            <span class="text-danger validation-error"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="cm-grid" id="DivTypeofclient">
+                                    <div class="cm-profile-fields">
+                                        <div>
+                                            <label class="cm-form-label">Type of Client <i class="reqcls">*</i></label>
+                                            <select class="form-control required-field" id="ddltypeofclient" name="TypeofClient">
+                                                <option>--Select--</option>
+                                                <option>New</option>
+                                                <option>Renewal</option>
+                                                <option>Upgrade</option>
+                                                <option>Renewal + Upgrade</option>
+                                            </select>
+                                            <span class="text-danger validation-error"></span>
+                                        </div>
+                                        <div>
+                                            <label class="cm-form-label">Deal Details <i class="reqcls">*</i></label>
+                                            <textarea id="txtdealdetails" name="DealDetails" class="form-control required-field" rows="1"></textarea>
+                                            <span class="text-danger validation-error"></span>
+                                            <span class="cm-hint">Amount, cheque no., online/UPI ref, etc.</span>
+                                        </div>
+                                        <div>
+                                            <label class="cm-form-label">Meeting Time <i class="reqcls">*</i></label>
+                                            <input id="txtmeetingtime" name="MeetingTimeView" type="time" class="form-control required-field" />
+                                            <span class="text-danger validation-error"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer-cm">
+                                <button type="button" class="btn-cm-history" onclick="OpenHistory()">
+                                    <i class="fa-solid fa-clock-rotate-left"></i> History
+                                </button>
+                                <button type="button" class="btn-cm-save" id="btnSave">
+                                    <i class="fa-solid fa-floppy-disk"></i> Save
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="historyPanel" class="hidden">
+                            <div style="background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:12px 16px;margin-bottom:12px;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <b>Company Name :</b>
+                                        <span id="lblHistorycname" class="ms-2"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <b>Company Code :</b>
+                                        <span id="lblHistoryccode" class="ms-2"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="historyScrollArea">
+                                <div id="commentHistoryContainer"></div>
+                            </div>
+                            <div class="modal-footer-cm" style="margin-top:12px;">
+                                <button type="button" class="btn-cm-back" onclick="ShowDetailPanel()">
+                                    <i class="fa-solid fa-arrow-left"></i> Back
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script type="text/javascript">
-    const rowsPerPage = 100;
+    const rowsPerPage=100;
+    let currentPage=1;
+    let filteredRows=[];
+    const table=document.getElementById("companyTable");
+    const tbody=table.querySelector("tbody");
+    const searchInput=document.getElementById("searchInput");
+    const pagination=document.getElementById("pagination");
+    const totalRecords=document.getElementById("totalRecords");
+    const allRows=Array.from(tbody.querySelectorAll("tr")).filter(row=>!row.id);
+    filteredRows=allRows;
 
-    let currentPage = 1;
-
-    let filteredRows = [];
-
-
-    const table = document.getElementById("companyTable");
-
-    const tbody = table.querySelector("tbody");
-
-    const searchInput = document.getElementById("searchInput");
-
-    const pagination = document.getElementById("pagination");
-
-    const totalRecords = document.getElementById("totalRecords");
-
-
-    // Get all actual data rows
-    const allRows = Array.from(
-        tbody.querySelectorAll("tr")
-    ).filter(row => !row.id);
-
-
-    filteredRows = allRows;
-
-
-    // ==============================
-    // DISPLAY TABLE
-    // ==============================
-
-    function displayTable(page) {
-
-        currentPage = page;
-
-        // Hide all rows first
-
-        allRows.forEach(row => {
-
-            row.style.display = "none";
-
+    function displayTable(page){
+        currentPage=page;
+        allRows.forEach(row=>{row.style.display="none";});
+        const start=(page-1)*rowsPerPage;
+        const end=start+rowsPerPage;
+        filteredRows.slice(start,end).forEach(row=>{row.style.display="";});
+        filteredRows.slice(start,end).forEach((row,index)=>{
+            const numberCell=row.querySelector(".row-number");
+            if(numberCell){
+                numberCell.innerText=start+index+1;
+            }
         });
-
-
-        // Calculate start/end
-
-        const start =
-            (page - 1) * rowsPerPage;
-
-        const end =
-            start + rowsPerPage;
-
-
-        // Display current page
-
-        filteredRows
-            .slice(start, end)
-            .forEach((row, index) => {
-
-                row.style.display = "";
-
-            });
-
-
-        // Update serial numbers
-
-        filteredRows
-            .slice(start, end)
-            .forEach((row, index) => {
-
-                const numberCell =
-                    row.querySelector(".row-number");
-
-                if (numberCell) {
-
-                    numberCell.innerText =
-                        start + index + 1;
-
-                }
-
-            });
-
-
         createPagination();
-
     }
 
+    function createPagination(){
+        pagination.innerHTML="";
+        const totalPages=Math.ceil(filteredRows.length/rowsPerPage);
+        if(totalPages<=1)return;
 
-    // ==============================
-    // CREATE PAGINATION
-    // ==============================
-
-    function createPagination() {
-
-        pagination.innerHTML = "";
-
-
-        const totalPages =
-            Math.ceil(
-                filteredRows.length / rowsPerPage
-            );
-
-
-        if (totalPages <= 1) {
-
-            return;
-
-        }
-
-
-        // =========================
-        // PREVIOUS
-        // =========================
-
-        const previousLi =
-            document.createElement("li");
-
-        previousLi.className =
-            "page-item " +
-            (currentPage === 1 ? "disabled" : "");
-
-
-        previousLi.innerHTML = `
-
-            <a class="page-link" href="javascript:void(0)">
-
-                <i class="fa fa-chevron-left"></i>
-
-            </a>
-
-        `;
-
-
-        previousLi.onclick = function () {
-
-            if (currentPage > 1) {
-
-                displayTable(
-                    currentPage - 1
-                );
-
-            }
-
+        const previousLi=document.createElement("li");
+        previousLi.className="page-item "+(currentPage===1?"disabled":"");
+        previousLi.innerHTML=`<a class="page-link" href="javascript:void(0)"><i class="fa fa-chevron-left"></i></a>`;
+        previousLi.onclick=function(){
+            if(currentPage>1)displayTable(currentPage-1);
         };
-
-
         pagination.appendChild(previousLi);
 
-
-        // =========================
-        // PAGE NUMBERS
-        // =========================
-
-        for (
-            let i = 1;
-            i <= totalPages;
-            i++
-        ) {
-
-            const li =
-                document.createElement("li");
-
-
-            li.className =
-                "page-item " +
-                (i === currentPage
-                    ? "active"
-                    : "");
-
-
-            li.innerHTML = `
-
-                <a class="page-link"
-                   href="javascript:void(0)">
-
-                    ${i}
-
-                </a>
-
-            `;
-
-
-            li.onclick = function () {
-
-                displayTable(i);
-
-            };
-
-
+        for(let i=1;i<=totalPages;i++){
+            const li=document.createElement("li");
+            li.className="page-item "+(i===currentPage?"active":"");
+            li.innerHTML=`<a class="page-link" href="javascript:void(0)">${i}</a>`;
+            li.onclick=function(){displayTable(i);};
             pagination.appendChild(li);
-
         }
 
-
-        // =========================
-        // NEXT
-        // =========================
-
-        const nextLi =
-            document.createElement("li");
-
-
-        nextLi.className =
-            "page-item " +
-            (
-                currentPage === totalPages
-                    ? "disabled"
-                    : ""
-            );
-
-
-        nextLi.innerHTML = `
-
-            <a class="page-link"
-               href="javascript:void(0)">
-
-                <i class="fa fa-chevron-right"></i>
-
-            </a>
-
-        `;
-
-
-        nextLi.onclick = function () {
-
-            if (currentPage < totalPages) {
-
-                displayTable(
-                    currentPage + 1
-                );
-
-            }
-
+        const nextLi=document.createElement("li");
+        nextLi.className="page-item "+(currentPage===totalPages?"disabled":"");
+        nextLi.innerHTML=`<a class="page-link" href="javascript:void(0)"><i class="fa fa-chevron-right"></i></a>`;
+        nextLi.onclick=function(){
+            if(currentPage<totalPages)displayTable(currentPage+1);
         };
-
-
         pagination.appendChild(nextLi);
-
     }
 
-
-    // ==============================
-    // SEARCH
-    // ==============================
-
-    searchInput.addEventListener(
-        "keyup",
-        function () {
-
-            const value =
-                this.value
-                    .toLowerCase()
-                    .trim();
-
-
-            filteredRows =
-                allRows.filter(row => {
-
-                    return row.innerText
-                        .toLowerCase()
-                        .includes(value);
-
-                });
-
-
-            // Update total
-
-            totalRecords.innerText =
-                filteredRows.length;
-
-
-            // Go to first page
-
-            currentPage = 1;
-
-
-            displayTable(1);
-
-        }
-    );
-
-
-    // ==============================
-    // INITIAL LOAD
-    // ==============================
+    searchInput.addEventListener("keyup",function(){
+        const value=this.value.toLowerCase().trim();
+        filteredRows=allRows.filter(row=>row.innerText.toLowerCase().includes(value));
+        totalRecords.innerText=filteredRows.length;
+        currentPage=1;
+        displayTable(1);
+    });
 
     displayTable(1);
+</script>
 
+<script type="text/javascript">
+    const currentUserRole = "@Context.Session.GetString("Role")";
+    const isAdmin = (currentUserRole === "Admin" || currentUserRole === "Sub Admin");
+
+    $(document).ready(function () {
+        $("#ddlregbypopup").select2({
+            theme: "premium",
+            placeholder: "Select Sales Manager",
+            allowClear: true,
+            width: "100%",
+            dropdownParent: $("#companyDetailModal")
+        });
+    });
+
+    function ShowDetailPanel() {
+        document.getElementById("detailPanel").classList.remove("hidden");
+        document.getElementById("historyPanel").classList.add("hidden");
+        document.getElementById("modalMainTitle").textContent = "Company Detail";
+    }
+
+    function ShowHistoryPanel() {
+        document.getElementById("detailPanel").classList.add("hidden");
+        document.getElementById("historyPanel").classList.remove("hidden");
+        document.getElementById("modalMainTitle").textContent = "Company Comment History";
+    }
+
+    /* ── Open detail modal ── */
+    $(document).on("click", ".open-company-modal", function () {
+        const companyId = $(this).data("id");
+        $.ajax({
+            url: "/CallAndMeeting/CloseFollowUpClick",
+            type: "GET",
+            data: { id: companyId },
+            success: function (res) {
+                if (!res.success) { showToast(res.message, "error"); return; }
+
+                $("#commenthistoryId").text(res.commentId[0].ID_CommentHistory);
+                $("#companyid").text(res.commentId[0].id);
+                $("#lblccode").text(res.commentId[0].ccode);
+                $("#lblcname").text(res.commentId[0].cname);
+                $("#lbloname").text(res.commentId[0].oname);
+                $("#lblemail").text(res.commentId[0].clientmail);
+                $("#lblmobile").text(res.commentId[0].mobile);
+                $("#hrefmob").attr("href", "tel:" + res.commentId[0].mobile);
+
+                $("#ddlregbypopup").empty().append('<option value="NoName">-- Select Sales Manager --</option>');
+                $.each(res.userList, function (i, user) {
+                    $("#ddlregbypopup").append($("<option>", { value: user.UserCode, text: user.FullName }));
+                });
+                $("#ddlregbypopup").val(res.commentId[0].sessionname).trigger("change");
+
+                const SessionRole = "@Context.Session.GetString("Role")";
+                const isAdminRole = (SessionRole === "Admin" || SessionRole === "Sub Admin");
+                $("#ddlregbypopup").prop("disabled", !isAdminRole);
+                isAdminRole ? $("#btnChange").show() : $("#btnChange").hide();
+
+                $("#ddlupdatefor").val(res.commentId[0].Updatefor);
+                hideAll();
+                if (res.commentId[0].Updatefor === "Call") {
+                    document.getElementById("DivCallUpdate").classList.remove("hidden");
+                    $("#ddlcallstatus").val(res.commentId[0].UpdateStatus);
+                    if (res.commentId[0].UpdateStatus === "Follow-up") {
+                        document.getElementById("lblfolldate").classList.remove("hidden");
+                        document.getElementById("txtfollowupdatee").classList.remove("hidden");
+                    }
+                } else {
+                    document.getElementById("DivMeetingUpdate").classList.remove("hidden");
+                    $("#ddlmeetingupdate").val(res.commentId[0].UpdateStatus);
+                    if (res.commentId[0].UpdateStatus === "Follow-up") {
+                        document.getElementById("lblfolldate").classList.remove("hidden");
+                        document.getElementById("txtfollowupdatee").classList.remove("hidden");
+                    }
+                }
+
+                ShowDetailPanel();
+                new bootstrap.Modal(document.getElementById("companyDetailModal")).show();
+            },
+            error: function () { showToast("Failed to load company details.", "error"); }
+        });
+    });
+
+    /* ── Visibility helpers ── */
+    function hideAll() {
+        ["DivMeetingUpdate", "DivTypeofclient", "DivCallUpdate", "lblfolldate"].forEach(function (id) {
+            document.getElementById(id).classList.add("hidden");
+        });
+        document.getElementById("txtfollowupdatee").classList.add("hidden");
+    }
+
+    function CheckUpdateFor() {
+        const updateForType = document.getElementById("ddlupdatefor").value;
+        hideAll();
+        document.getElementById("txtfollowupdatee").value = "";
+
+        if (updateForType === "Call") {
+            document.getElementById("ddlmeetingupdate").value = "";
+            document.getElementById("ddlmeetingwithm").value = "1";
+            document.getElementById("ddltypeofclient").value = "";
+            document.getElementById("txtdealdetails").value = "";
+            document.getElementById("txtmeetingtime").value = "";
+            document.getElementById("DivCallUpdate").classList.remove("hidden");
+        } else if (updateForType === "Meeting") {
+            document.getElementById("ddlcallstatus").value = "";
+            document.getElementById("DivMeetingUpdate").classList.remove("hidden");
+        } else {
+            document.getElementById("ddlcallstatus").value = "";
+            document.getElementById("ddlmeetingupdate").value = "";
+            document.getElementById("ddlmeetingwithm").value = "1";
+            document.getElementById("ddltypeofclient").value = "";
+            document.getElementById("txtdealdetails").value = "";
+            document.getElementById("txtmeetingtime").value = "";
+        }
+    }
+
+    function CheckCallMeetingUpdate() {
+        const CallUpdateStatus = document.getElementById("ddlcallstatus").value;
+        const MeetUpdateStatus = document.getElementById("ddlmeetingupdate").value;
+        hideAll();
+        CheckUpdateFor();
+
+        if (CallUpdateStatus === "Follow-up" || MeetUpdateStatus === "Follow-up") {
+            document.getElementById("lblfolldate").classList.remove("hidden");
+            document.getElementById("txtfollowupdatee").classList.remove("hidden");
+        }
+        if (MeetUpdateStatus === "Closed") {
+            document.getElementById("DivTypeofclient").classList.remove("hidden");
+        }
+    }
+
+    function validateCompanyForm() {
+        let isValid = true;
+        $(".validation-error").text("");
+        $(".required-field").removeClass("is-invalid");
+
+        $(".required-field").each(function () {
+            if (!$(this).is(":visible")) return;
+            const value = $(this).val();
+            if (!value || value.trim() === "" || value === "--Select--") {
+                isValid = false;
+                $(this).addClass("is-invalid");
+                const labelText = $(this).closest(".row").find("b, label").first().text().replace("*", "").trim();
+                $(this).next(".validation-error").text(labelText + " required");
+                $(this).focus();
+                return false;
+            }
+        });
+
+        return isValid;
+    }
+
+    function ChangeCompanyUser() {
+        const newName = $("#ddlregbypopup").val();
+        const id = $("#companyid").text();
+
+        if (newName === "NoName" || newName === null) {
+            showToast("Please Select Sales Person First", "warning");
+            return;
+        }
+
+        showConfirmToast(
+            "Are you sure you want to change the company user?",
+            function () {
+                $.ajax({
+                    url: "/CallAndMeeting/UpdateCompanyUser",
+                    type: "POST",
+                    data: { newName: newName, CompCode: id },
+                    success: function (res) {
+                        showToast(res.success ? "Updated successfully" : res.message, res.success ? "success" : "error");
+                    },
+                    error: function () { showToast("Something went wrong while updating.", "error"); }
+                });
+            },
+            function () { showToast("Update cancelled.", "warning"); }
+        );
+    }
+
+    $("#btnSave").on("click", function () {
+        if (!validateCompanyForm()) return;
+        const companyData = getCompanyFormData();
+
+        $.ajax({
+            url: "/CallAndMeeting/SaveCompanyUpdate",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(companyData),
+            success: function (res) {
+                showToast(res.message, res.success ? "success" : "error");
+                if (res.success) {
+                    $("#companyDetailModal").modal("hide");
+                    setTimeout(() => { location.reload(); }, 1600);
+                }
+            },
+            error: function (err) {
+                console.error(err);
+                showToast("Something went wrong while saving.", "error");
+            }
+        });
+    });
+
+    function getCompanyFormData() {
+        const data = {};
+
+        $("#companyDetailModal").find("input, select, textarea").each(function () {
+            if (!$(this).is(":visible")) return;
+            const propName = $(this).attr("name");
+            if (!propName) return;
+            let value = $(this).val();
+            if (value === undefined || value === null) value = "";
+
+            if ($(this).attr("type") === "date") data[propName] = value ? new Date(value).toISOString() : null;
+            else if ($(this).attr("type") === "time") data[propName] = value || null;
+            else data[propName] = value.trim();
+        });
+
+        [
+            { name: "Ccode", selector: "#lblccode" },
+            { name: "CompanyName", selector: "#lblcname" },
+            { name: "PersonName", selector: "#lbloname" },
+            { name: "ClientMail", selector: "#lblemail" },
+            { name: "ContactNo", selector: "#lblmobile" },
+            { name: "Address", selector: "#lbladdress" },
+            { name: "Id", selector: "#commenthistoryId" }
+        ].forEach(function (field) {
+            const text = $(field.selector).text().trim();
+            if (text) data[field.name] = text;
+        });
+
+        return data;
+    }
+
+    /* ── History — loads inside the same modal ── */
+    function OpenHistory() {
+        const CompanyCode = $("#lblccode").text();
+        const CompanyName = $("#lblcname").text();
+
+        $.ajax({
+            url: "/CallAndMeeting/GetCommmentHistory",
+            type: "GET",
+            data: { CompanyCode: CompanyCode },
+            success: function (res) {
+                if (!res.success) { showToast(res.message, "error"); return; }
+
+                $("#lblHistoryccode").text(CompanyCode);
+                $("#lblHistorycname").text(CompanyName);
+
+                const container = $("#commentHistoryContainer");
+                container.empty();
+
+                if (res.comments.length === 0) {
+                    container.append('<p class="text-center">No comments found.</p>');
+                }
+
+                $.each(res.comments, function (i, item) {
+                    container.append(`
+                        <div class="row" style="background:#cbcbcb;padding:5px;">
+                            <div class="col-md-4">&nbsp;- <span class="lbls">${item.name}</span></div>
+                            <div class="col-md-4"><span class="lbls">${item.commentdatetime}</span></div>
+                            <div class="col-md-4"><span class="lbls">${item.typeoftbl}</span></div>
+                        </div>
+                        <div class="row p-1"><div class="col-md-12"><p>${item.message}</p></div></div>
+                        <hr class="new1" />
+                    `);
+                });
+
+                ShowHistoryPanel();
+            },
+            error: function () { showToast("Failed to load company history.", "error"); }
+        });
+    }
 </script>

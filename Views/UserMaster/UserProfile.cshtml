@@ -1,0 +1,1069 @@
+﻿@model RegisterUserr
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<style type="text/css">
+    .pg {
+        background: #f5f6f8;
+        min-height: calc(100vh - 80px);
+        display: flex;
+    }
+
+    /* ── Left Sidebar ── */
+    .pg-left {
+        width: 220px;
+        flex-shrink: 0;
+        background: #fff;
+        border-right: 1px solid #e8ebf0;
+        padding: 32px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0;
+    }
+
+    .pg-av-wrap {
+        position: relative;
+        margin-bottom: 16px;
+    }
+
+    .pg-av {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        background: linear-gradient(135deg,#1e3c72,#2a5298);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 42px;
+        font-weight: 700;
+        color: #fff;
+        box-shadow: 0 8px 24px rgba(42,82,152,.25);
+    }
+
+    .pg-av-edit {
+        position: absolute;
+        bottom: 4px;
+        right: 4px;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #2a5298;
+        border: 3px solid #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 11px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,.2);
+        transition: .2s;
+    }
+
+        .pg-av-edit:hover {
+            background: #1e3c72;
+            transform: scale(1.1);
+        }
+
+    .pg-name {
+        font-size: 17px;
+        font-weight: 700;
+        color: #1a1a2e;
+        text-align: center;
+        margin: 0 0 4px;
+    }
+
+    .pg-role {
+        font-size: 11px;
+        color: #f90606;
+        text-align: center;
+        margin: 0 0 28px;
+        font-weight: 600;
+    }
+
+    .pg-nav {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .pg-nav-item {
+        padding: 9px 14px;
+        border-radius: 9px;
+        font-size: 14px;
+        font-weight: 500;
+        color: #6b7280;
+        cursor: pointer;
+        transition: .15s;
+        text-decoration: none;
+        display: block;
+    }
+
+        .pg-nav-item:hover {
+            background: #f0f4ff;
+            color: #2a5298;
+        }
+
+        .pg-nav-item.active {
+            background: #f0f4ff;
+            color: #2a5298;
+            font-weight: 600;
+        }
+
+    /* ── Right Content ── */
+    .pg-right {
+        flex: 1;
+        padding: 32px 36px;
+        overflow-y: auto;
+    }
+
+    .pg-right-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+    }
+
+        .pg-right-head h2 {
+            font-size: 24px;
+            font-weight:700;
+            color: #1a1a2e;
+            margin: 0;
+        }
+
+    .btn-edit {
+        background: #fff;
+        border: 1.5px solid #e5e7eb;
+        color: #374151;
+        padding: 8px 18px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        transition: .2s;
+    }
+
+        .btn-edit:hover {
+            border-color: #2a5298;
+            color: #2a5298;
+            background: #f0f4ff;
+        }
+
+        .btn-edit.active {
+            background: linear-gradient(135deg,#1e3c72,#2a5298);
+            color: #fff;
+            border-color: transparent;
+        }
+
+    /* ── Info Cards ── */
+    .pg-section {
+        margin-bottom: 28px;
+    }
+
+    .pg-section-title {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: #9ca3af;
+        margin: 0 0 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #f0f2f5;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+        .pg-section-title i {
+            color: #2a5298;
+            font-size: 12px;
+        }
+
+    .info-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .info-row {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        background: #fff;
+        border-radius: 10px;
+        border: 1px solid #f0f2f5;
+        overflow: hidden;
+        transition: .15s;
+    }
+
+        .info-row:hover {
+            border-color: #dde5f5;
+        }
+
+    .info-row-icon {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #9ca3af;
+        font-size: 14px;
+        border-right: 1px solid #f0f2f5;
+        flex-shrink: 0;
+        background: #fafbfc;
+    }
+
+    .info-row-content {
+        flex: 1;
+        padding: 0 14px;
+    }
+
+    .info-row-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+    }
+
+    .info-row-value {
+        font-size: 13.5px;
+        font-weight: 500;
+        color: #1a1a2e;
+    }
+
+    /* Edit mode inputs inside rows */
+    .info-row input {
+        width: 100%;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: 13.5px;
+        font-weight: 500;
+        color: #1a1a2e;
+        padding: 0;
+        height: 24px;
+        font-family: inherit;
+        cursor: not-allowed;
+    }
+
+        .info-row input:disabled {
+            color: #9ca3af;
+        }
+
+    .info-row.editable input {
+        cursor: text;
+    }
+
+    .info-row.editable {
+        border-color: #c7d7f5;
+        background: #fafcff;
+    }
+
+        .info-row.editable input:focus {
+            color: #1e3c72;
+        }
+
+        .info-row.editable .info-row-icon {
+            border-right-color: #c7d7f5;
+            color: #2a5298;
+        }
+
+    .info-row.input-err {
+        border-color: #fca5a5 !important;
+    }
+
+    .val-err {
+        color: #dc3545;
+        font-size: 11px;
+        margin: 2px 0 4px 58px;
+        display: none;
+    }
+
+    /* Password row */
+    .info-row-pwd {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: center;
+    }
+
+        .info-row-pwd input {
+            padding-right: 32px;
+        }
+
+    .eye-btn {
+        position: absolute;
+        right: 14px;
+        border: 0;
+        background: transparent;
+        color: #9ca3af;
+        cursor: pointer;
+        font-size: 13px;
+        padding: 0;
+        line-height: 1;
+    }
+
+        .eye-btn:hover {
+            color: #2a5298;
+        }
+
+    /* Save/Cancel footer */
+    .pg-form-footer {
+        display: none;
+        gap: 10px;
+        margin-top: 24px;
+    }
+
+        .pg-form-footer.show {
+            display: flex;
+        }
+
+    .btn-save {
+        background: linear-gradient(135deg,#1e3c72,#2a5298);
+        color: #fff;
+        border: 0;
+        padding: 10px 24px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        transition: .2s;
+    }
+
+        .btn-save:hover {
+            opacity: .9;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(42,82,152,.3);
+        }
+
+    .btn-discard {
+        border: 1.5px solid #e5e7eb;
+        background: #fff;
+        color: #6b7280;
+        padding: 9px 20px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+        .btn-discard:hover {
+            background: #f9fafb;
+        }
+
+    @@media(max-width:700px) {
+        .pg {
+            flex-direction: column;
+        }
+
+        .pg-left {
+            width: 100%;
+            border-right: none;
+            border-bottom: 1px solid #e8ebf0;
+            padding: 24px 20px;
+        }
+
+        .pg-nav {
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+
+        .pg-right {
+            padding: 20px 16px;
+        }
+    }
+
+    /* ── Avatar Modal ── */
+    .av-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.45);
+        z-index: 1050;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(3px);
+    }
+
+        .av-modal-overlay.open {
+            display: flex;
+        }
+
+    .av-modal {
+        background: #fff;
+        border-radius: 18px;
+        width: 480px;
+        max-width: 94vw;
+        box-shadow: 0 24px 60px rgba(0,0,0,.18);
+        animation: modalIn .22s ease;
+        overflow: hidden;
+    }
+
+    @@keyframes modalIn {
+        from {
+            opacity: 0;
+            transform: scale(.94)
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1)
+        }
+    }
+
+    .av-modal-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 18px 22px;
+        border-bottom: 1px solid #f0f2f5;
+    }
+
+        .av-modal-head h3 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+    .av-modal-close {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        border: 0;
+        background: #f5f6f8;
+        color: #6b7280;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        transition: .15s;
+    }
+
+        .av-modal-close:hover {
+            background: #e8ebf0;
+            color: #1a1a2e;
+        }
+
+    .av-modal-body {
+        padding: 20px 22px;
+    }
+
+    /* Tabs */
+    .av-tabs {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 18px;
+        background: #f5f6f8;
+        border-radius: 10px;
+        padding: 4px;
+    }
+
+    .av-tab {
+        flex: 1;
+        padding: 8px;
+        border-radius: 7px;
+        border: 0;
+        background: transparent;
+        font-size: 13px;
+        font-weight: 600;
+        color: #6b7280;
+        cursor: pointer;
+        transition: .15s;
+    }
+
+        .av-tab.active {
+            background: #fff;
+            color: #2a5298;
+            box-shadow: 0 1px 6px rgba(0,0,0,.08);
+        }
+
+    /* Preset grid */
+    .av-preset-grid {
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+        gap: 10px;
+        max-height: 260px;
+        overflow-y: auto;
+        padding: 2px;
+    }
+
+        .av-preset-grid::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .av-preset-grid::-webkit-scrollbar-thumb {
+            background: #dde1ea;
+            border-radius: 4px;
+        }
+
+    .av-preset-item {
+        aspect-ratio: 1;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: .15s;
+        position: relative;
+    }
+
+        .av-preset-item:hover {
+            border-color: #2a5298;
+            transform: scale(1.04);
+        }
+
+        .av-preset-item.selected {
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42,82,152,.15);
+        }
+
+        .av-preset-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .av-preset-item .av-check {
+            position: absolute;
+            inset: 0;
+            background: rgba(42,82,152,.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 20px;
+            border-radius: 10px;
+        }
+
+        .av-preset-item.selected .av-check {
+            display: flex;
+        }
+
+    /* Upload tab */
+    .av-upload-zone {
+        border: 2px dashed #dde5f5;
+        border-radius: 12px;
+        padding: 36px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: .2s;
+        background: #fafcff;
+        position: relative;
+    }
+
+        .av-upload-zone:hover {
+            border-color: #2a5298;
+            background: #f0f4ff;
+        }
+
+        .av-upload-zone input[type=file] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .av-upload-zone i {
+            font-size: 32px;
+            color: #c7d7f5;
+            margin-bottom: 10px;
+        }
+
+        .av-upload-zone p {
+            margin: 0 0 4px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .av-upload-zone span {
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+    .av-upload-preview {
+        display: none;
+        text-align: center;
+        margin-top: 16px;
+    }
+
+        .av-upload-preview img {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #2a5298;
+            box-shadow: 0 4px 14px rgba(42,82,152,.2);
+        }
+
+        .av-upload-preview p {
+            margin: 8px 0 0;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+    .av-modal-foot {
+        display: flex;
+        gap: 10px;
+        padding: 16px 22px;
+        border-top: 1px solid #f0f2f5;
+        justify-content: flex-end;
+    }
+
+    .av-btn-apply {
+        background: linear-gradient(135deg,#1e3c72,#2a5298);
+        color: #fff;
+        border: 0;
+        padding: 9px 22px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+        .av-btn-apply:hover {
+            opacity: .9;
+            box-shadow: 0 6px 18px rgba(42,82,152,.3);
+        }
+
+    .av-btn-cancel {
+        border: 1.5px solid #e5e7eb;
+        background: #fff;
+        color: #6b7280;
+        padding: 8px 18px;
+        border-radius: 9px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+        .av-btn-cancel:hover {
+            background: #f9fafb;
+        }
+</style>
+
+<div class="pg">
+    <div class="pg-left">
+        @{
+            var fl = !string.IsNullOrEmpty(Model?.name) ? Model.name.Substring(0, 1).ToUpper() : "U";
+            var currentAvatar = Context.Session.GetString("Profile");
+        }
+
+        <div class="pg-av-wrap" onclick="openAvatarModal()" style="cursor:pointer;">
+            @if (!string.IsNullOrEmpty(currentAvatar))
+            {
+                <img src="@currentAvatar" id="pgAvImg"
+                     style="width:110px;height:110px;border-radius:50%;object-fit:cover;
+                        box-shadow:0 8px 24px rgba(42,82,152,.25);display:block;" />
+            }
+            else
+            {
+                <div class="pg-av" id="pgAvLetter">@fl</div>
+            }
+            <div class="pg-av-edit"><i class="fas fa-plus"></i></div>
+        </div>
+
+        <p class="pg-name">@Model?.name</p>
+        <p class="pg-role">@Model?.empcode</p>
+
+        <nav class="pg-nav d-none">
+            <a class="pg-nav-item active" href="#">Profile</a>
+            <a class="pg-nav-item d-none" href="#">Activity</a>
+            <a class="pg-nav-item d-none" href="#">Security</a>
+        </nav>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="pg-right">
+        <div class="pg-right-head">
+            <h2>Profile details</h2>
+            <button class="btn-edit" id="editBtn" onclick="toggleEdit()">
+                <i class="fas fa-pen" id="editIcon"></i>
+                <span id="editLabel">Edit profile</span>
+            </button>
+        </div>
+
+        <form asp-action="Profile" method="post" onsubmit="return validateForm()" id="profileForm">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="id" />
+
+            <!-- Personal -->
+            <div class="pg-section">
+                <p class="pg-section-title"><i class="fas fa-user"></i> Personal Information</p>
+                <div class="info-list">
+
+                    <div class="info-row" id="row-empcode">
+                        <div class="info-row-icon"><i class="fas fa-id-badge"></i></div>
+                        <div class="info-row-content">
+                            <div class="info-row-label">Employee Code</div>
+                            <input asp-for="empcode" readonly />
+                        </div>
+                    </div>
+
+                    <div class="info-row" id="row-name">
+                        <div class="info-row-icon"><i class="fas fa-user"></i></div>
+                        <div class="info-row-content">
+                            <div class="info-row-label">Full Name</div>
+                            <input asp-for="name" id="name" disabled />
+                        </div>
+                    </div>
+                    <span class="val-err" id="err-name"></span>
+
+                    <div class="info-row" id="row-email">
+                        <div class="info-row-icon"><i class="fas fa-envelope"></i></div>
+                        <div class="info-row-content">
+                            <div class="info-row-label">Email Address</div>
+                            <input asp-for="email" type="email" id="email" disabled />
+                        </div>
+                    </div>
+                    <span class="val-err" id="err-email"></span>
+
+                    <div class="info-row" id="row-emailpsw">
+                        <div class="info-row-icon"><i class="fas fa-key"></i></div>
+                        <div class="info-row-content info-row-pwd">
+                            <div style="flex:1;">
+                                <div class="info-row-label">Email Password</div>
+                                <input asp-for="emailpsw" type="text" id="emailPsw" autocomplete="off" disabled />
+                            </div>
+                            <button type="button" class="eye-btn" onclick="togglePwd('emailPsw',this)"><i class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                    <span class="val-err" id="err-emailpsw"></span>
+
+                    <div class="info-row" id="row-mobile">
+                        <div class="info-row-icon"><i class="fas fa-mobile-alt"></i></div>
+                        <div class="info-row-content">
+                            <div class="info-row-label">Mobile Number</div>
+                            <input asp-for="mobile" maxlength="10" id="mobile" disabled />
+                        </div>
+                    </div>
+                    <span class="val-err" id="err-mobile"></span>
+
+                </div>
+            </div>
+
+            <!-- Account -->
+            <div class="pg-section">
+                <p class="pg-section-title"><i class="fas fa-lock"></i> Account Information</p>
+                <div class="info-list">
+
+                    <div class="info-row" id="row-username">
+                        <div class="info-row-icon"><i class="fas fa-user-tag"></i></div>
+                        <div class="info-row-content">
+                            <div class="info-row-label">Username</div>
+                            <input asp-for="UserName" id="UserName" disabled />
+                        </div>
+                    </div>
+                    <span class="val-err" id="err-username"></span>
+
+                    <div class="info-row" id="row-panelpsw">
+                        <div class="info-row-icon"><i class="fas fa-lock"></i></div>
+                        <div class="info-row-content info-row-pwd">
+                            <div style="flex:1;">
+                                <div class="info-row-label">Panel Password</div>
+                                <input asp-for="panelpsw" type="text" id="panelPsw" autocomplete="off" disabled />
+                            </div>
+                            <button type="button" class="eye-btn" onclick="togglePwd('panelPsw',this)"><i class="fas fa-eye"></i></button>
+                        </div>
+                    </div>
+                    <span class="val-err" id="err-panelpsw"></span>
+
+                </div>
+            </div>
+
+            <div class="pg-form-footer" id="formFooter">
+                <button type="button" class="btn-discard" onclick="cancelEdit()">Discard</button>
+                <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save changes</button>
+            </div>
+
+        </form>
+    </div>
+
+    <!-- Avatar Picker Modal -->
+    <div class="av-modal-overlay" id="avModalOverlay" onclick="overlayClose(event)">
+        <div class="av-modal">
+
+            <div class="av-modal-head">
+                <h3><i class="fas fa-user-circle" style="color:#2a5298;margin-right:8px;"></i>Choose Profile Photo</h3>
+                <button class="av-modal-close" onclick="closeAvatarModal()"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="av-modal-body">
+                <!-- Tabs -->
+                <div class="av-tabs">
+                    <button class="av-tab active" onclick="switchTab('preset',this)">
+                        <i class="fas fa-images" style="margin-right:6px;"></i>Choose Avatar
+                    </button>
+                    <button class="av-tab" onclick="switchTab('upload',this)">
+                        <i class="fas fa-upload" style="margin-right:6px;"></i>Upload Photo
+                    </button>
+                </div>
+
+                <!-- Preset Tab -->
+                <div id="tabPreset">
+                    <div class="av-preset-grid" id="presetGrid">
+                        @{
+                            var avatars = new[] {
+                                                "/assets/images/users/avatar-1.jpg",
+                                                "/assets/images/users/avatar-2.jpg",
+                                                "/assets/images/users/avatar-3.jpg",
+                                                "/assets/images/users/avatar-4.jpg",
+                                                "/assets/images/users/avatar-5.jpg",
+                                                "/assets/images/users/avatar-6.jpg",
+                                                "/assets/images/users/avatar-7.jpg",
+                                                "/assets/images/users/avatar-8.jpg",
+                                                "/assets/images/users/avatar-9.jpg",
+                                                "/assets/images/users/avatar-10.jpg",
+                                                "/assets/images/users/avatar-11.jpg",
+                                                "/assets/images/users/avatar-12.jpg"
+                                                };
+                        }
+                        @foreach (var av in avatars)
+                        {
+                            <div class="av-preset-item" onclick="selectPreset(this,'@av')">
+                                <img src="@av" alt="avatar" onerror="this.parentElement.style.display='none'" />
+                                <div class="av-check"><i class="fas fa-check"></i></div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Upload Tab -->
+                <div id="tabUpload" style="display:none;">
+                    <div class="av-upload-zone" id="uploadZone">
+                        <input type="file" accept="image/*" onchange="previewUpload(this)" id="avatarFileInput" />
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Click or drag photo here</p>
+                        <span>JPG, PNG, GIF — max 2MB</span>
+                    </div>
+                    <div class="av-upload-preview" id="uploadPreview">
+                        <img id="uploadPreviewImg" src="" alt="preview" />
+                        <p>Looking good! Click Apply to save.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="av-modal-foot">
+                <button class="av-btn-cancel" onclick="closeAvatarModal()">Cancel</button>
+                <button class="av-btn-apply" onclick="applyAvatar()">
+                    <i class="fas fa-check" style="margin-right:6px;"></i>Apply
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Hidden form to save avatar -->
+    <form id="avatarForm" asp-action="UpdateAvatar" asp-controller="UserMaster" method="post" enctype="multipart/form-data" style="display:none;">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="avatarUrl" id="hiddenAvatarUrl" />
+        <input type="file" name="avatarFile" id="hiddenAvatarFile" />
+    </form>
+</div>
+
+<script type="text/javascript">
+    var selectedPresetUrl = null;
+    var uploadedFile      = null;
+    var activeTab         = 'preset';
+
+    /* ── Modal open/close ── */
+    function openAvatarModal() {
+        document.getElementById('avModalOverlay').classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeAvatarModal() {
+        document.getElementById('avModalOverlay').classList.remove('open');
+        document.body.style.overflow = '';
+    }
+    function overlayClose(e) {
+        if (e.target === document.getElementById('avModalOverlay')) closeAvatarModal();
+    }
+
+    /* ── Tabs ── */
+    function switchTab(tab, btn) {
+        activeTab = tab;
+        document.querySelectorAll('.av-tab').forEach(function(t) { t.classList.remove('active'); });
+        btn.classList.add('active');
+        document.getElementById('tabPreset').style.display = tab === 'preset' ? '' : 'none';
+        document.getElementById('tabUpload').style.display = tab === 'upload' ? '' : 'none';
+    }
+
+    /* ── Preset select ── */
+    function selectPreset(el, url) {
+        document.querySelectorAll('.av-preset-item').forEach(function(i) { i.classList.remove('selected'); });
+        el.classList.add('selected');
+        selectedPresetUrl = url;
+        uploadedFile = null;
+    }
+
+    /* ── Upload preview ── */
+    function previewUpload(input) {
+        var file = input.files[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) {
+            alert('File too large. Max 2MB.'); input.value=''; return;
+        }
+        uploadedFile = file;
+        selectedPresetUrl = null;
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('uploadPreviewImg').src = e.target.result;
+            document.getElementById('uploadPreview').style.display = 'block';
+            document.getElementById('uploadZone').style.borderColor = '#2a5298';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    /* ── Apply ── */
+    function applyAvatar() {
+        if (activeTab === 'preset' && selectedPresetUrl) {
+            updateAvatarUI(selectedPresetUrl);
+            document.getElementById('hiddenAvatarUrl').value = selectedPresetUrl;
+            document.getElementById('avatarForm').submit();
+            closeAvatarModal();
+        } else if (activeTab === 'upload' && uploadedFile) {
+            var dt = new DataTransfer();
+            dt.items.add(uploadedFile);
+            document.getElementById('hiddenAvatarFile').files = dt.files;
+            updateAvatarUIFromFile(uploadedFile);
+            document.getElementById('avatarForm').submit();
+            closeAvatarModal();
+        } else {
+            alert('Please select or upload a photo first.');
+        }
+    }
+
+    /* ── Update avatar in sidebar immediately ── */
+    function updateAvatarUI(url) {
+        var wrap = document.querySelector('.pg-av-wrap');
+        var existing = wrap.querySelector('img#pgAvImg');
+        var letter   = wrap.querySelector('#pgAvLetter');
+        if (letter) letter.style.display = 'none';
+        if (existing) {
+            existing.src = url;
+        } else {
+            var img = document.createElement('img');
+            img.id = 'pgAvImg';
+            img.src = url;
+            img.style.cssText = 'width:110px;height:110px;border-radius:50%;object-fit:cover;box-shadow:0 8px 24px rgba(42,82,152,.25);display:block;';
+            wrap.insertBefore(img, wrap.querySelector('.pg-av-edit'));
+        }
+    }
+
+    function updateAvatarUIFromFile(file) {
+        var reader = new FileReader();
+        reader.onload = function(e) { updateAvatarUI(e.target.result); };
+        reader.readAsDataURL(file);
+    }
+
+    var isEditing = false;
+    var editableFields = [
+        { id:'name',     rowId:'row-name' },
+        { id:'email',    rowId:'row-email' },
+        { id:'emailPsw', rowId:'row-emailpsw' },
+        { id:'mobile',   rowId:'row-mobile' },
+        { id:'UserName', rowId:'row-username' },
+        { id:'panelPsw', rowId:'row-panelpsw' },
+    ];
+
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('emailPsw').type = 'password';
+        document.getElementById('panelPsw').type = 'password';
+    });
+
+    function toggleEdit() {
+        isEditing ? cancelEdit() : startEdit();
+    }
+
+    function startEdit() {
+        isEditing = true;
+        editableFields.forEach(function(f) {
+            var inp = document.getElementById(f.id);
+            var row = document.getElementById(f.rowId);
+            if (inp) inp.disabled = false;
+            if (row) row.classList.add('editable');
+        });
+        document.getElementById('formFooter').classList.add('show');
+        document.getElementById('editIcon').className  = 'fas fa-times';
+        document.getElementById('editLabel').textContent = 'Cancel';
+        document.getElementById('editBtn').classList.add('active');
+    }
+
+    function cancelEdit() {
+        isEditing = false;
+        editableFields.forEach(function(f) {
+            var inp = document.getElementById(f.id);
+            var row = document.getElementById(f.rowId);
+            if (inp) { inp.disabled = true; inp.classList.remove('input-err'); }
+            if (row) row.classList.remove('editable','input-err');
+        });
+        document.getElementById('formFooter').classList.remove('show');
+        document.getElementById('editIcon').className   = 'fas fa-pen';
+        document.getElementById('editLabel').textContent = 'Edit profile';
+        document.getElementById('editBtn').classList.remove('active');
+        ['err-name','err-email','err-emailpsw','err-mobile','err-username','err-panelpsw'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) { el.textContent=''; el.style.display='none'; }
+        });
+    }
+
+    function togglePwd(id, btn) {
+        var inp = document.getElementById(id);
+        var ico = btn.querySelector('i');
+        if (inp.type === 'password') {
+            inp.type = 'text';
+            ico.classList.replace('fa-eye','fa-eye-slash');
+        } else {
+            inp.type = 'password';
+            ico.classList.replace('fa-eye-slash','fa-eye');
+        }
+    }
+
+    function validateForm() {
+        var valid = true;
+        var rules = [
+            { id:'name',     errId:'err-name',     rowId:'row-name',     msg:'Full name is required.',       minLen:2, minMsg:'At least 2 characters.' },
+            { id:'email',    errId:'err-email',    rowId:'row-email',    msg:'Email is required.' },
+            { id:'emailPsw', errId:'err-emailpsw', rowId:'row-emailpsw', msg:'Email password is required.' },
+            { id:'mobile',   errId:'err-mobile',   rowId:'row-mobile',   msg:'Mobile is required.' },
+            { id:'UserName', errId:'err-username', rowId:'row-username', msg:'Username is required.',         minLen:3, minMsg:'At least 3 characters.' },
+            { id:'panelPsw', errId:'err-panelpsw', rowId:'row-panelpsw', msg:'Panel password is required.',  minLen:4, minMsg:'At least 4 characters.' },
+        ];
+        rules.forEach(function(r) {
+            var inp = document.getElementById(r.id);
+            var err = document.getElementById(r.errId);
+            var row = document.getElementById(r.rowId);
+            if (!inp) return;
+            var val = inp.value.trim();
+            inp.classList.remove('input-err');
+            if (row) row.classList.remove('input-err');
+            if (err) { err.textContent=''; err.style.display='none'; }
+            if (!val) {
+                inp.classList.add('input-err');
+                if (row) row.classList.add('input-err');
+                if (err) { err.textContent=r.msg; err.style.display='block'; }
+                valid = false;
+            } else if (r.minLen && val.length < r.minLen) {
+                inp.classList.add('input-err');
+                if (row) row.classList.add('input-err');
+                if (err) { err.textContent=r.minMsg; err.style.display='block'; }
+                valid = false;
+            }
+        });
+        return valid;
+    }
+</script>

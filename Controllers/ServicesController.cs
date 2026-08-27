@@ -6,6 +6,7 @@ using WEBLINK_CRM.repository;
 
 namespace WEBLINK_CRM.Controllers
 {
+    [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
     [Authorize]
     public class ServicesController : Controller
     {
@@ -15,7 +16,6 @@ namespace WEBLINK_CRM.Controllers
         {
             _services = services;
         }
-
 
         public async Task<IActionResult> Index()
         {
@@ -54,7 +54,6 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-
                 string userName = HttpContext.Session.GetString("userName");
 
                 model.CreatedBy = userName;

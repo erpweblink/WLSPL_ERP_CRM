@@ -43,8 +43,7 @@ namespace WEBLINK_CRM.Controllers
             HttpContext.Session.SetString("EmailId", employee.email ?? "");
             HttpContext.Session.SetString("UserName", employee.UserName ?? "");
             HttpContext.Session.SetString("Role", employee.role ?? "");
-
-
+            HttpContext.Session.SetString("Profile", employee.ProfileImagePath ?? "");
 
             var claims = new List<Claim>
                 {
@@ -105,6 +104,8 @@ namespace WEBLINK_CRM.Controllers
             );
 
             HttpContext.Session.Clear();
+
+            Response.Cookies.Delete(".AspNetCore.Cookies");
 
             TempData["LogoutMessage"] =
                 "You have been logged out successfully.";

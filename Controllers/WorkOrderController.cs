@@ -8,6 +8,8 @@ using WEBLINK_CRM.repository;
 
 namespace WEBLINK_CRM.Controllers
 {
+    [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
+    [Authorize]
     public class WorkOrderController : Controller
     {
         private readonly IWorkOrder objWorkOrder;

@@ -1,8 +1,8 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
 using WEBLINK_CRM.Models;
 using WEBLINK_CRM.Repositories;
 using WEBLINK_CRM.repository;
-
-using Microsoft.AspNetCore.Authentication.Cookies;
+using WLSPL_ERP_CRM.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -81,6 +81,12 @@ builder.Services.AddAuthentication(
     options.Cookie.HttpOnly = true;
 
     options.Cookie.IsEssential = true;
+});
+
+
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add<NoCacheFilter>();
 });
 
 
