@@ -320,6 +320,29 @@ body {
             color: var(--text);
         }
 
+    /* Fix for browser autofill - label stays on top when autofilled */
+    .field input:-webkit-autofill ~ label,
+    .field input:-webkit-autofill:hover ~ label,
+    .field input:-webkit-autofill:focus ~ label,
+    .field input:-webkit-autofill:active ~ label {
+        top: 12px;
+        transform: none;
+        font-size: 11px;
+        font-weight: 600;
+        color: #e94560;
+        letter-spacing: .04em;
+        text-transform: uppercase;
+    }
+
+    /* Remove browser autofill background tint */
+    .field input:-webkit-autofill,
+    .field input:-webkit-autofill:hover,
+    .field input:-webkit-autofill:focus {
+        -webkit-box-shadow: 0 0 0px 1000px #f9fafb inset;
+        -webkit-text-fill-color: #1a1a2e;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+
 .row-meta {
     display: flex;
     justify-content: space-between;
