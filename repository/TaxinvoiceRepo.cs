@@ -13,6 +13,54 @@ namespace WLSPL_ERP_CRM.repository
             _configuration = configuration;
         }
 
+        public async Task<List<Taxinvoice.InvoiceMain>> Getcompany()
+        {
+            using var connection = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg"));
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@Action", "Getcompany");
+
+            var companies = await connection.QueryAsync<Taxinvoice.InvoiceMain>(
+                "SP_TaxInvoice",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+
+            return companies
+                .Where(x => !string.IsNullOrWhiteSpace(x.cname))
+                .ToList();
+        }
+
+        public async Task<Taxinvoice.InvoiceMain?> Getcompanybycname(string cname)
+        {
+            try
+            {
+                using var connection = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg"));
+
+                var parameters = new DynamicParameters();
+
+                parameters.Add("@Action", "Getcompanybycname");
+                parameters.Add("@cname", cname);
+
+                var result = await connection.QueryFirstOrDefaultAsync<Taxinvoice.InvoiceMain>(
+                    "SP_TaxInvoice",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+
+
         public async Task<List<Taxinvoice.InvoiceMonthSummary>> GetFinancialYearSummary(
        string financialYear)
         {
@@ -268,7 +316,7 @@ namespace WLSPL_ERP_CRM.repository
             );
 
 
-    
+
 
             var model = new Taxinvoice.TaxInvoicePdfViewModel
             {
@@ -277,7 +325,7 @@ namespace WLSPL_ERP_CRM.repository
             };
 
 
-         
+
 
             model.CompanyName = "Web Link Services Pvt. Ltd.";
 
@@ -355,7 +403,33 @@ namespace WLSPL_ERP_CRM.repository
             return model;
         }
 
+        public async Task<Taxinvoice.InvoiceMain?> Getinvoiceno()
+        {
+            try
+            {
+                using var connection = new SqlConnection(
+                    _configuration.GetConnectionString("Conn_Stringg"));
 
+                var parameters = new DynamicParameters();
+
+                parameters.Add("@Action", "GetInvoiceNo");
+                //parameters.Add("@id", id);
+
+                var result = await connection.QueryFirstOrDefaultAsync<Taxinvoice.InvoiceMain>(
+                    "SP_TaxInvoice",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        
     }
 }
 

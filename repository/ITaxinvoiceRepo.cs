@@ -12,5 +12,12 @@ namespace WLSPL_ERP_CRM.repository
 
         Task<Taxinvoice.TaxInvoicePdfViewModel?>GetInvoiceForPdfAsync(int id);
 
+        Task<Taxinvoice.InvoiceMain?>Getinvoiceno();
+
+        Task<List<Taxinvoice.InvoiceMain>>Getcompany();
+        Task<Taxinvoice.InvoiceMain?> Getcompanybycname(string cname);
+
+
+
     }
 }

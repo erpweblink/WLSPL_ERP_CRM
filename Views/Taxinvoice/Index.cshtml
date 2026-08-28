@@ -9,36 +9,23 @@
 
     var today = DateTime.Now;
 
-    // =========================================================
-    // CURRENT FINANCIAL YEAR
-    // =========================================================
+
 
     var currentFinancialYear =
         today.Month >= 4
             ? $"{today.Year}-{(today.Year + 1).ToString().Substring(2)}"
             : $"{today.Year - 1}-{today.Year.ToString().Substring(2)}";
 
-    // =========================================================
-    // CURRENT MONTH
-    // =========================================================
 
     var currentMonth = today.ToString("MM");
 
-    // =========================================================
-    // SELECTED FINANCIAL YEAR
-    // =========================================================
+
 
     var selectedFinancialYear =
         ViewBag.SelectedFinancialYear?.ToString()
         ?? currentFinancialYear;
 
-    // =========================================================
-    // SELECTED MONTH
-    //
-    // Controller:
-    // 0 = All Months
-    // 1-12 = Selected Month
-    // =========================================================
+  
 
     var selectedMonthNumber =
         ViewBag.SelectedMonth != null
@@ -50,39 +37,27 @@
             ? "all"
             : selectedMonthNumber.ToString("00");
 
-    // =========================================================
-    // FINANCIAL YEAR SUMMARY
-    // =========================================================
 
     var financialYearSummary =
         ViewBag.FinancialYearSummary
         as List<WLSPL_ERP_CRM.Models.Taxinvoice.InvoiceMonthSummary>
         ?? new List<WLSPL_ERP_CRM.Models.Taxinvoice.InvoiceMonthSummary>();
 
-    // =========================================================
-    // FY TOTAL
-    // =========================================================
+
 
     var financialYearTotal =
         financialYearSummary.Sum(x => x.GrandTotal);
 
-    // =========================================================
-    // FY TAX TOTAL
-    // =========================================================
 
     var financialYearTaxTotal =
         financialYearSummary.Sum(x => x.TotalTaxAmount);
 
-    // =========================================================
-    // FY INVOICE COUNT
-    // =========================================================
+
 
     var financialYearInvoiceCount =
         financialYearSummary.Sum(x => x.TotalInvoice);
 
-    // =========================================================
-    // SELECTED MONTH SUMMARY
-    // =========================================================
+ 
 
     var selectedMonthSummary =
         selectedMonthNumber == 0
@@ -90,36 +65,27 @@
             : financialYearSummary
                 .FirstOrDefault(x => x.Mon == selectedMonthNumber);
 
-    // =========================================================
-    // SELECTED MONTH TOTAL
-    // =========================================================
+
 
     var selectedMonthGrandTotal =
         selectedMonthNumber == 0
             ? financialYearTotal
             : selectedMonthSummary?.GrandTotal ?? 0;
 
-    // =========================================================
-    // SELECTED MONTH TAX
-    // =========================================================
+
 
     var selectedMonthTaxTotal =
         selectedMonthNumber == 0
             ? financialYearTaxTotal
             : selectedMonthSummary?.TotalTaxAmount ?? 0;
 
-    // =========================================================
-    // SELECTED MONTH COUNT
-    // =========================================================
+
 
     var selectedMonthInvoiceCount =
         selectedMonthNumber == 0
             ? financialYearInvoiceCount
             : selectedMonthSummary?.TotalInvoice ?? 0;
 
-    // =========================================================
-    // MONTH NAME
-    // =========================================================
 
     var selectedMonthName =
         selectedMonthNumber == 0
@@ -132,9 +98,6 @@
 
 <style>
 
-    /* =========================================================
-           PAGE
-        ========================================================= */
 
     .invoice-page {
         width: 100%;
@@ -151,9 +114,7 @@
     }
 
 
-    /* =========================================================
-           HEADER
-        ========================================================= */
+
 
     .invoice-header {
         padding: 16px 20px;
@@ -174,9 +135,7 @@
         }
 
 
-    /* =========================================================
-           FILTER SECTION
-        ========================================================= */
+
 
     .filter-section {
         padding: 16px 18px;
@@ -208,9 +167,7 @@
         }
 
 
-    /* =========================================================
-           SEARCH
-        ========================================================= */
+
 
     .search-wrapper {
         display: flex;
