@@ -1,6 +1,7 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Reflection;
 using WEBLINK_CRM.Models;
 
 namespace WEBLINK_CRM.repository
@@ -411,7 +412,7 @@ namespace WEBLINK_CRM.repository
                         CreatedBy = r.SessionName,
                         Area = r.Area,
                         UpdateFor = r.UpdateFor,
-                        CallUpdateStatus = r.UpdateStatus,
+                        CallUpdateStatus = r.UpdateFor + "- " + r.UpdateStatus,
                         TypeofClient = r.TypeOfClient,
                         DealDetails = r.DealDetails,
                         FollowDate = r.FollowUpDate,
@@ -477,17 +478,32 @@ namespace WEBLINK_CRM.repository
         {
             try
             {
+                string sql = @"SELECT [commentdatetime],[typeoftbl],[message],[name] 
+                            FROM (SELECT format(A.[commentdatetime],'dd-MMM-yyyy hh:mm tt') as [commentdatetime],
+                            A.[typeoftbl],A.[message],B.[name] FROM [CommentHistory] A 
+                            left join [employees] B ON A.[sessionname]=B.[empcode] 
+                            where A.ccode= @Ccode 
+
+                            UNION 
+
+                            SELECT format(A.[updateddatetime],'dd-MMM-yyyy hh:mm tt') as [commentdatetime]
+                            ,A.[typeoftbl],A.[message],B.[name] FROM [CompanyHistory] A 
+                            left join [employees] B ON A.[sessionname]=B.[empcode]
+                            where A.ccode= @Ccode 
+
+                            UNION 
+
+                            SELECT format(A.[setdatetime],'dd-MMM-yyyy hh:mm tt') as [commentdatetime],
+                            A.[typeoftbl],A.[remark] as message,B.[name] FROM [RemainderData] A 
+                            left join [employees] B ON A.[sessionname]=B.[empcode]
+                            where A.ccode= @Ccode) AS T order by convert(datetime, [commentdatetime]) desc";
+
                 using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
                 {
                     await connection.OpenAsync();
                     var parameters = new DynamicParameters();
-                    parameters.Add("@Sp_Mode", "GetCommentHistoryList");
-                    parameters.Add("@ActionBy", Ccode);
-                    var result = await connection.QueryAsync<dynamic>(
-                        "SP_CALLANDMEETING",
-                        parameters,
-                        commandType: CommandType.StoredProcedure
-                    );
+                    parameters.Add("@Ccode", Ccode);
+                    var result = await connection.QueryAsync<dynamic>(sql, parameters);
                     return result.ToList();
                 }
             }
@@ -517,44 +533,90 @@ namespace WEBLINK_CRM.repository
             }
         }
 
-        public async Task<int> UpdateCompanyCreatedByName(string newName, string CompCode)
+        public async Task<int> UpdateCompanyCreatedByName(string newName, string CompCode, string SessionName)
         {
             try
             {
-                using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
-                {
-                    await connection.OpenAsync();
-                    var parameters = new DynamicParameters();
-                    parameters.Add("@ActionBy", newName);
-                    parameters.Add("@Ccode", CompCode);
-                    parameters.Add("@Sp_Mode", "UpdateCompanyCreatedByName");
-                    parameters.Add("@Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
-                    await connection.ExecuteAsync("SP_CALLANDMEETING", parameters, commandType: CommandType.StoredProcedure);
-                    int isSuccess = parameters.Get<int>("@Result");
-                    return isSuccess;
-                }
+                using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+                await connection.OpenAsync();
+
+                bool flag = await SetCompanyHistory(newName, CompCode, SessionName);
+                const string sql = @"UPDATE Company SET sessionname = @newName, BDE=@newName WHERE id = @CompCode";
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@newName", newName);
+                parameters.Add("@CompCode", CompCode);
+
+                int rowsAffected = await connection.ExecuteAsync(sql, parameters);
+                return rowsAffected;
             }
             catch (Exception)
             {
                 throw;
             }
+        }
+
+        public async Task<bool> SetCompanyHistory(string newName, string Id, string CurrentSessionName)
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+            await connection.OpenAsync();
+
+            const string sql = @"SELECT c.ccode, c.sessionname, e1.name AS oldSessionName, c.BDE, e2.name AS oldBDEName
+                         FROM Company c
+                         LEFT JOIN employees e1 ON c.sessionname = e1.empcode
+                         LEFT JOIN employees e2 ON c.BDE = e2.empcode
+                         WHERE c.id = @Id;
+
+                         SELECT name AS NewSalesPName
+                         FROM employees
+                         WHERE empcode = @empcode;";
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@Id", Id);
+            parameters.Add("@empcode", newName);
+
+            using var multi = await connection.QueryMultipleAsync(sql, parameters);
+
+            var companyDetails = await multi.ReadFirstOrDefaultAsync<dynamic>();
+            var employeeDetails = await multi.ReadFirstOrDefaultAsync<dynamic>();
+
+            if (companyDetails == null || employeeDetails == null)
+                return false;
+
+            string ccode = companyDetails.ccode?.ToString() ?? "";
+            string oldSessionName = companyDetails.oldSessionName?.ToString() ?? "";
+            string oldBDEName = companyDetails.oldBDEName?.ToString() ?? "";
+            string newSalesPersonName = employeeDetails.NewSalesPName?.ToString() ?? "";
+
+            string updateHistoryMsg = $"Sales Person and BDE/TME Person has been changed from {oldSessionName} / {oldBDEName} to {newSalesPersonName}";
+
+            var historyParameters = new DynamicParameters();
+            historyParameters.Add("@Action", "Insert");
+            historyParameters.Add("@sessionname", CurrentSessionName);
+            historyParameters.Add("@ccode", ccode);
+            historyParameters.Add("@message", updateHistoryMsg);
+
+            await connection.ExecuteAsync("SP_CompanyHistory", historyParameters, commandType: CommandType.StoredProcedure);
+
+            return true;
         }
 
         public async Task<int> UpdateOldCommentHistory(int id)
         {
             try
             {
-                using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
-                {
-                    await connection.OpenAsync();
-                    var parameters = new DynamicParameters();
-                    parameters.Add("@ActionBy", id);
-                    parameters.Add("@Sp_Mode", "UpdateOldCommentHistory");
-                    parameters.Add("@Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
-                    await connection.ExecuteAsync("SP_CALLANDMEETING", parameters, commandType: CommandType.StoredProcedure);
-                    int isSuccess = parameters.Get<int>("@Result");
-                    return isSuccess;
-                }
+                using var connection = new SqlConnection(
+                   _configuration.GetConnectionString("Conn_Stringg"));
+                await connection.OpenAsync();
+
+                const string sql = @"UPDATE [dbo].[CommentHistory] SET UpdateStatus=@UpdateStatus WHERE id = @ID";
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@UpdateStatus", "Closed");
+                parameters.Add("@ID", id);
+
+                int rowsAffected = await connection.ExecuteAsync(sql, parameters);
+                return rowsAffected;
             }
             catch (Exception)
             {
@@ -562,25 +624,68 @@ namespace WEBLINK_CRM.repository
             }
         }
 
-        public async Task<int> FromListSubmitCommentHistory(CallandMeeting Model)
+        public async Task<int> FromListSubmitCommentHistory(CallandMeeting model)
         {
-            return 1;
+            try
+            {
+                using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+                await connection.OpenAsync();
+
+                var commentParameters = new DynamicParameters();
+
+                commentParameters.Add("@sessionname", model.CreatedBy);
+                commentParameters.Add("@ccode", model.Ccode);
+                commentParameters.Add("@commentdatetime", DateTime.Now);
+                commentParameters.Add("@message", string.IsNullOrEmpty(model.FeedBack) ? model.FeedBack : model.FeedBack.Replace("\n", "<br />"));
+                commentParameters.Add("@UpdateStatus", model.CallUpdateStatus);
+                commentParameters.Add("@Typeofclient", model.TypeofClient);
+                commentParameters.Add("@Dealdetails", model.DealDetails);
+                commentParameters.Add("@followupdate", model.FollowDate);
+                commentParameters.Add("@meetingwithmanager", model.MeetingwithManager);
+                commentParameters.Add("@meetingtime", model.MeetingTime);
+                commentParameters.Add("@clientmail", model.ClientMail);
+                commentParameters.Add("@frommail", model.FromMail);
+                commentParameters.Add("@adminmail", _configuration["MailSettings:AdminMail"]);
+                commentParameters.Add("@Updatefor", model.UpdateFor);
+                commentParameters.Add("@Type", model.Type);
+
+                const string commentSql = @"
+                    INSERT INTO [CommentHistory]
+                    (
+                        sessionname, ccode, commentdatetime, message, UpdateStatus, Typeofclient,
+                        Dealdetails,followupdate,meetingwithmanager, meetingtime, clientmail, frommail, adminmail, Updatefor, Type
+                    )
+                    VALUES
+                    (
+                        @sessionname, @ccode, @commentdatetime, @message, @UpdateStatus, @Typeofclient, @Dealdetails,
+                        @followupdate, @meetingwithmanager,@meetingtime, @clientmail, @frommail,  @adminmail, @Updatefor, @Type
+                    );";
+                await connection.ExecuteAsync(commentSql, commentParameters);
+
+                return 1;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+           
         }
 
         public async Task<List<dynamic>> GetNotUpdatedList(string days)
         {
             try
             {
+                // Add  c.id as companyId, in this action 
                 using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
                 {
                     await connection.OpenAsync();
                     var parameters = new DynamicParameters();
-                    parameters.Add("@Sp_Mode", "NotUpdateList");
-                    parameters.Add("@Typeoftbl", days);
-                    parameters.Add("@SessionName", "");
-                    parameters.Add("@CompanyName", "");
+                    parameters.Add("@Mode", "GetNotUpdatedList");
+                    parameters.Add("@DaysFilter", days);
+                    parameters.Add("@Users","");
+                    parameters.Add("@Company","");
                     var result = await connection.QueryAsync<dynamic>(
-                        "SP_CALLANDMEETING",
+                        "[stswlspl].[GetNotUpdatedCompany]",
                         parameters,
                         commandType: CommandType.StoredProcedure
                     );
@@ -591,6 +696,6 @@ namespace WEBLINK_CRM.repository
             {
                 throw;
             }
-        }    
+        }
     }
 }

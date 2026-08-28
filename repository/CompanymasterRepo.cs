@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
 using WEBLINK_CRM.Models;
 using static WEBLINK_CRM.Models.Company;
@@ -102,6 +103,7 @@ namespace WEBLINK_CRM.repository
 
                     Area = data.area,
                     Website = data.website,
+                    BDE = data.BDE,
 
                     IsDeleted = data.isdeleted,
 
@@ -443,9 +445,9 @@ namespace WEBLINK_CRM.repository
                     parameters.Add("@ShippLocation", Model.ShippingLocation);
                     parameters.Add("@ShippingPincode", Model.ShippingPincode);
                     parameters.Add("@ShippStateCode", Model.ShippingStateCode);
-
+                    parameters.Add("@LeadCode", Model.LeadCode);
                     parameters.Add("@CreatedBy", Model.CreatedBy);
-
+                    parameters.Add("@BDE", Model.BDE);
                     parameters.Add("@Action", Action);
 
                     parameters.Add("@Result",
@@ -468,6 +470,24 @@ namespace WEBLINK_CRM.repository
             catch (Exception)
             {
                 throw;
+            }
+        }
+
+        public async Task<List<Employee>> GetBDE(string Action)
+        {
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
+            {
+                await connection.OpenAsync();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@Action", Action);
+
+                var result = await connection.QueryAsync<Employee>(
+                    "SP_companymasterAWS",
+                    parameters,
+                    commandType: CommandType.StoredProcedure);
+
+                return result.ToList();
             }
         }
     }

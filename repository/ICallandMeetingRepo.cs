@@ -19,7 +19,7 @@ namespace WEBLINK_CRM.repository
         Task<dynamic>GetCommentHistoryById(int Id);
         Task<List<dynamic>> GetCommentHistoryList(string Ccode);
         Task<dynamic> GetHirechyWiseUser();
-        Task<int> UpdateCompanyCreatedByName(string newName, string CompCode);
+        Task<int> UpdateCompanyCreatedByName(string newName, string CompCode, string SessionName);
         Task<int> UpdateOldCommentHistory(int id);
         Task<List<dynamic>> GetNotUpdatedList(string days);
 
