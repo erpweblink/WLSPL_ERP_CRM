@@ -756,36 +756,53 @@
 
     var Servicetext = "";
     var BindServiceList = function () {
+
         var Dept = "";
+
         $.ajax({
             url: "/WorkOrder/BindServiceList",
-            data: { "Dept": Dept },
-            type: "post",
+            data: { Dept: Dept },
+            type: "POST",
             cache: false,
-            success: function (response) {          
-                if (response.success === true) {           // lowercase wrapper
-                    var users = response.data || [];        // lowercase wrapper
-                    var html = "<option value=''>-- Select Service Name --</option>";
+
+            success: function (response) {
+
+                if (response.success === true) {
+
+                    var users = response.data || [];
+
+                    var html =
+                        "<option value=''>-- Select Service Name --</option>";
+
                     $.each(users, function (key, data) {
-                        html += "<option value='" + data.ID + "'>" +   // PascalCase row data
+
+                        html +=
+                            "<option value='" + data.Name + "'>" +
                             data.Name +
                             "</option>";
                     });
+
+                    // IMPORTANT: Bind options to dropdown
                     $("#ddlServicenname").html(html);
+
+                    // Set selected service AFTER options are loaded
+                    if (Servicetext) {
+
+                        $("#ddlServicenname")
+                            .val(Servicetext)
+                            .trigger("change");
+                    }
                 }
-                else {
-                    pnotifymsg(
-                        response.Message,
-                        response.MsgType,
-                        response.TitleMsg
-                    );
-                }
+           
             },
+
             error: function (xhr, ajaxOptions, thrownError) {
-                //$('#lblCommentsNotification').text("Error encountered while saving the comments.");
+
+                console.log("BindServiceList Error:");
+                console.log(xhr.responseText);
             }
         });
-    }
+    };
 
 
     var BindServiceByID = function () {
@@ -813,11 +830,7 @@
 
                 }
                 else {
-                    pnotifymsg(
-                        response.Message,
-                        response.MsgType,
-                        response.TitleMsg
-                    );
+                 
                     console.log(response.Error);
 
                 }
@@ -866,11 +879,8 @@
 
             }
             else {
-                pnotifymsg(
-                    response.Message,
-                    response.MsgType,
-                    response.TitleMsg
-                );
+                showToast(response.message, response.MsgType);
+              
             }
 
             $("#txtRate").val("");
@@ -930,31 +940,7 @@
 
             var Total = (parseFloat(tbasicbasicamount) + parseFloat(tbasicbasicGSTamount));
             $('#txtTotalAmountBalance').val(Total);
-            //$('#txtTotalDealBasicAmount').val(sum);
-            //var gstper = $('#spnGSTper').text();
-            //var gstamount = (parseFloat(sum) * gstper / 100).toFixed(2);
-            //$('#txtTotalDealGSTAmount').val(gstamount);
-            //var BasicAmountReceived = $('#txtBasicAmountReceived').val();
-            //var TotalDealBasicAmount = $('#txtTotalDealBasicAmount').val();
-
-            //var BalanceBasicAmount = (parseFloat(TotalDealBasicAmount) - parseFloat(BasicAmountReceived)).toFixed(2);
-
-            //$('#txtBalanceBasicAmount').val(BalanceBasicAmount);
-
-
-            //var BalanceBasicAmount = $('#txtBalanceBasicAmount').val();
-            ////var BalanceGSTAmount = $('#txtBalanceGSTAmount').val();
-            //var TotalDealGSTAmount = $('#txtTotalDealGSTAmount').val();
-            //var txtGSTAmountReceived= $('#txtGSTAmountReceived').val();
-            //if (txtGSTAmountReceived == 0) {
-            //    var GST = TotalDealGSTAmount;
-            //}
-            //else {
-            //    var GST = (parseFloat(TotalDealGSTAmount) - parseFloat(txtGSTAmountReceived)).toFixed(2);
-            //}
-            //$('#txtBalanceGSTAmount').val(GST);
-            //var Total = (parseFloat(BalanceBasicAmount) + parseFloat(GST)).toFixed(2);
-
+          
 
         });
 
@@ -970,23 +956,12 @@
                 });
             }
             else {
-                pnotifymsg(
-                    response.Message,
-                    response.MsgType,
-                    response.TitleMsg
-                );
+                showToast(response.message, response.MsgType);
             }
 
         });
         $('#tblService').on('click', 'tbody .edit_btn', function () {
-            Servicetext = "";
-            //$('#tblService').dataTable({
-            //    "bPaginate": false,
-            //    "bFilter": false,
-            //    "bInfo": false,
-            //    "bSort": false,
-            //    "searching": false
-            //});
+            Servicetext = ""; 
             $("#btnaddrow").hide();
 
             $("#btnupdaterow").show();
@@ -1001,6 +976,7 @@
             $('#rowID').val(rowindex);
             Servicetext = data_row[1];
             BindServiceList();
+            $('#ddlServicenname').text(Servicetext)
             $("#txtDepartment").val(data_row[2]);
             $("#txtRemark").val(data_row[3]);
             $("#txtQTY").val(data_row[4]);
@@ -1029,11 +1005,7 @@
                 table1.row(someId).data(newData).draw();
             }
             else {
-                pnotifymsg(
-                    response.Message,
-                    response.MsgType,
-                    response.TitleMsg
-                );
+                showToast(response.message, response.MsgType);
             }
 
             $("#rowID").val("");
@@ -1095,28 +1067,7 @@
 
             var Total = (parseFloat(tbasicbasicamount) + parseFloat(tbasicbasicGSTamount));
             $('#txtTotalAmountBalance').val(Total);
-            //  var BalanceGSTAmount = $('#txtBalanceGSTAmount').val();  
-
-            //var TotalDealBasicAmount = $('#txtTotalDealBasicAmount').val();           
-            //var TBalanceBasicAmount = (parseFloat(txtBalanceBasicAmount) - parseFloat(BasicAmountReceived)).toFixed(2);
-
-            //$('#txtBalanceBasicAmount').val(BalanceBasicAmount);
-
-
-            ////var BalanceBasicAmount = $('#txtBalanceBasicAmount').val();
-            //var BalanceGSTAmount = $('#txtBalanceGSTAmount').val();           
-            //var TotalDealGSTAmount = $('#txtTotalDealGSTAmount').val();
-            //var txtGSTAmountReceived = $('#txtGSTAmountReceived').val();
-            //if (txtGSTAmountReceived == 0) {
-            //    var GST = TotalDealGSTAmount;
-            //}
-            //else {
-            //    var GST = (parseFloat(TotalDealGSTAmount) - parseFloat(BalanceGSTAmount)).toFixed(2);
-            //}
-            //$('#txtBalanceGSTAmount').val(GST);
-            //var Total = (parseFloat(BalanceBasicAmount) + parseFloat(GST)).toFixed(2);
-
-            //$('#txtTotalAmountBalance').val(Total);
+           
         });
 
     }
