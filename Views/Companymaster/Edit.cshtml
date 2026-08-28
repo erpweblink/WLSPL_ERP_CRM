@@ -290,11 +290,34 @@
                         BDE
                     </label>
 
-                    <input asp-for="BDE"
-                           class="form-control"
-                           placeholder="Enter BDE Name" />
+                    <input type="hidden"
+                           id="ExistingBDE"
+                           value="@Model.BDE" />
+
+                    <select asp-for="BDE"
+                            id="BDE"
+                            class="form-select">
+
+                        <option value="">-- Select BDE --</option>
+
+                        @if (ViewBag.BDEList != null)
+                        {
+                            foreach (var item in ViewBag.BDEList)
+                            {
+                                <option value="@item.empcode">
+                                    @item.name
+                                </option>
+                            }
+                        }
+
+                    </select>
+
+                    <span asp-validation-for="BDE"
+                          class="text-danger"></span>
 
                 </div>
+
+
 
 
                 <!-- Area -->
@@ -1317,6 +1340,32 @@
 
         }
 
+
+    });
+
+        $(document).ready(function () {
+
+        var existingBDE = $.trim($("#ExistingBDE").val());
+
+        console.log("Database BDE:", existingBDE);
+
+        if (existingBDE !== "") {
+
+            $("#BDE option").each(function () {
+
+                var optionValue = $.trim($(this).val());
+
+                if (optionValue.toLowerCase() === existingBDE.toLowerCase()) {
+
+                    $("#BDE").val($(this).val());
+
+                    console.log("BDE selected:", $(this).val());
+
+                    return false;
+                }
+
+            });
+        }
 
     });
 

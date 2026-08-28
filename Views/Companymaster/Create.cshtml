@@ -246,21 +246,25 @@
 
 
 
-                <!-- BDE -->
-
                 <div class="col-md-4 mb-3">
-
                     <label class="form-label">
                         BDE
                     </label>
+                    <select asp-for="BDE" class="form-select">
 
+                        <option value="">-- Select BDE --</option>
 
-                    <input asp-for="BDE"
-                           class="form-control"
-                           placeholder="Enter BDE Name" />
+                        @foreach (var employee in Model.SalesPersons)
+                        {
+                            <option value="@employee.empcode">
+                                @employee.name
+                            </option>
+                        }
 
+                    </select>
 
                 </div>
+
 
 
 
@@ -1276,6 +1280,8 @@
 
                     $("#BillingStateCode").val(data.stateCode || "");
 
+
+                     $("#Address").val(data.address || "");
                 }
                 else {
 
@@ -1290,6 +1296,8 @@
                     $("#BillingPincode").val("");
 
                     $("#BillingStateCode").val("");
+
+                      $("#Address").val("");
 
                 }
 

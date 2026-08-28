@@ -6,6 +6,7 @@ using WEBLINK_CRM.repository;
 
 namespace WEBLINK_CRM.Controllers
 {
+    [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
     [Authorize]
     public class CompanymasterController : Controller
     {
@@ -16,6 +17,7 @@ namespace WEBLINK_CRM.Controllers
             _companymaster = CompanymasterRepo;
             _govServices = govServices;
         }
+
         // Company List
         public async Task<IActionResult> Index(Companymaster companymaster)
         {
@@ -27,30 +29,38 @@ namespace WEBLINK_CRM.Controllers
             return View(companyList);
         }
 
-
-
-        // Create Page
         [HttpGet]
-        public IActionResult Create(
-     string? leadCode,
-     string? mobile,
-     string? email,
-     string? ownerName)
+        public async Task<IActionResult> Create(string? leadCode,string? mobile,string? email,string? ownerName)
         {
-            Companymaster model = new Companymaster();
+            var model = new Companymaster();
 
-            // Generate Company Code
             model.CCode = GenerateCompanyCode();
 
-            // Assign values received from URL
+            // Get BDE list
+            var result = await _companymaster.GetBDE("GetBDETME");
+
+            // Inquiry values
             model.LeadCode = leadCode;
             model.Mobile = mobile;
             model.Email = email;
             model.OName = ownerName;
 
+            // Find requested person in BDE list
+            var bde = result.FirstOrDefault(x =>
+                !string.IsNullOrWhiteSpace(x.name) &&
+                !string.IsNullOrWhiteSpace(ownerName) &&
+                x.name.Trim().Equals(
+                    ownerName.Trim(),
+                    StringComparison.OrdinalIgnoreCase));
+
+            // Automatically select matching BDE
+            model.BDE = bde?.name;
+
+            // Send BDE list to View
+            model.SalesPersons = result;
+
             return View(model);
         }
-
 
         private string GenerateCompanyCode()
         {
@@ -63,8 +73,6 @@ namespace WEBLINK_CRM.Controllers
 
             return prefix + number.ToString("00000");
         }
-
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -174,26 +182,48 @@ namespace WEBLINK_CRM.Controllers
             }
         }
 
+        //[HttpGet]
+        //public async Task<ActionResult> Edit(string ID)
+        //{
+        //    try
+        //    {
+        //        var Companymaster = await _companymaster.GetcompanybyId(ID);
+        //        if (Companymaster == null)
+        //        {
+        //            return View("Error", new { message = "company not found" });
+        //        }
+
+        //        return View(Companymaster);
+        //    }
+        //    catch (Exception)
+        //    {
+
+        //        throw;
+        //    }
+        //}
         [HttpGet]
-        public async Task<ActionResult> Edit(string ID)
+        public async Task<IActionResult> Edit(string ID)
         {
             try
             {
-                var Companymaster = await _companymaster.GetcompanybyId(ID);
-                if (Companymaster == null)
+                var companymaster = await _companymaster.GetcompanybyId(ID);
+
+                if (companymaster == null)
                 {
-                    return View("Error", new { message = "company not found" });
+                    return View("Error");
                 }
 
-                return View(Companymaster);
+                var bdeList = await _companymaster.GetBDE("GetBDETME");
+
+                ViewBag.BDEList = bdeList;
+
+                return View(companymaster);
             }
             catch (Exception)
             {
-
                 throw;
             }
         }
-
 
         [HttpPost]
         [ValidateAntiForgeryToken]

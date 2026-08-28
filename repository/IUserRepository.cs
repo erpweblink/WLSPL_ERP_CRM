@@ -16,5 +16,7 @@ namespace WEBLINK_CRM.repository
         bool DeleteUser(int id);
 
         List<SelectListItem> GetSalesTLManagers();
+
+        bool UpdateUserAvatar(int userId, string avatarPath);
     }
 }

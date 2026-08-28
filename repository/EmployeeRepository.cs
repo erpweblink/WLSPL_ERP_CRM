@@ -38,7 +38,8 @@ namespace WEBLINK_CRM.Repositories
                         TL_Manager,
                         UserName,
                         Sales_TL_Manager,
-                        Designation
+                        Designation,
+                        ProfileImagePath
                     FROM employees
                     WHERE UserName = @UserName
                       AND panelpsw = @Password
@@ -114,7 +115,11 @@ namespace WEBLINK_CRM.Repositories
 
                                 Designation = reader["Designation"] == DBNull.Value
                                     ? null
-                                    : reader["Designation"].ToString()
+                                    : reader["Designation"].ToString(),
+
+                                ProfileImagePath= reader["ProfileImagePath"] == DBNull.Value
+                                    ? null
+                                    : reader["ProfileImagePath"].ToString()
                             };
                         }
                     }

@@ -91,5 +91,14 @@ namespace WEBLINK_CRM.Models
         public string ? OwnerName { get; set; }
         public string? BillingAddress { get; set; }
 
+
+        public string ? empcode { get; set; }
+
+        public string ? UserName { get; set; }
+
+        public List<Employee> SalesPersons { get; set; } = new();
+
+
+
     }
 }

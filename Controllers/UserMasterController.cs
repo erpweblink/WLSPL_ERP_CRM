@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WEBLINK_CRM.Models;
 using WEBLINK_CRM.repository;
 
 namespace WEBLINK_CRM.Controllers
 {
+    [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
+    [Authorize]
     public class UserMasterController : Controller
     {
         private readonly IUserRepository _repository;
@@ -18,16 +21,12 @@ namespace WEBLINK_CRM.Controllers
             model.SalesTLList = _repository.GetSalesTLManagers();
         }
 
-        // ================= INDEX =================
-
         public IActionResult Index()
         {
             var users = _repository.GetAllUsers();
 
             return View(users);
         }
-
-        // ================= CREATE GET =================
 
         [HttpGet]
         public IActionResult Create()
@@ -39,8 +38,6 @@ namespace WEBLINK_CRM.Controllers
 
             return View(model);
         }
-
-        // ================= CREATE POST =================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -79,8 +76,6 @@ namespace WEBLINK_CRM.Controllers
             return View(model);
         }
 
-        // ================= EDIT GET =================
-
         [HttpGet]
         public IActionResult Edit(int id)
         {
@@ -93,8 +88,6 @@ namespace WEBLINK_CRM.Controllers
 
             return View(user);
         }
-
-        // ================= EDIT POST =================
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -118,7 +111,6 @@ namespace WEBLINK_CRM.Controllers
 
             return View(model);
         }
-        // ================= DELETE =================
 
         [HttpGet]
         public IActionResult Delete(int id)
@@ -142,5 +134,57 @@ namespace WEBLINK_CRM.Controllers
 
         }
 
+
+        [HttpGet]
+        public IActionResult UserProfile()
+        {
+            int userId = HttpContext.Session.GetInt32("EmployeeId")??0; 
+            var user = _repository.GetUserById(userId);
+
+            if (user == null)
+                return NotFound();
+
+            return View(user);
+        }
+
+        [HttpPost]
+        public IActionResult UpdateAvatar(string avatarUrl, IFormFile avatarFile)
+        {
+            // alter employee table to add profile image path 
+            //Alter table employees ADD ProfileImagePath Nvarchar(MAX) null
+
+            string savedPath = null;
+
+            if (avatarFile != null && avatarFile.Length > 0)
+            {
+                var uploads = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/assets/images/users/uploads");
+                Directory.CreateDirectory(uploads);
+
+                var ext = Path.GetExtension(avatarFile.FileName);
+                var fileName = $"{Guid.NewGuid()}{ext}";
+                var fullPath = Path.Combine(uploads, fileName);
+
+                using (var stream = new FileStream(fullPath, FileMode.Create))
+                    avatarFile.CopyTo(stream);
+
+                savedPath = $"/assets/images/users/uploads/{fileName}";
+            }
+            else if (!string.IsNullOrEmpty(avatarUrl))
+            {
+                savedPath = avatarUrl;
+            }
+
+            if (savedPath != null)
+            {
+                int Id = HttpContext.Session.GetInt32("EmployeeId") ??0;
+                var user = _repository.UpdateUserAvatar(Id, savedPath);
+                if (user)
+                {
+                    HttpContext.Session.SetString("Profile", savedPath);
+                }
+            }
+
+            return RedirectToAction("UserProfile");
+        }
     }
 }

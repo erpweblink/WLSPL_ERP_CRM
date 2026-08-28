@@ -28,6 +28,8 @@ namespace WEBLINK_CRM.repository
 
         Task<List<Company>> SearchCompanyAsync(string Action);
 
+        Task<List<Employee>> GetBDE(string Action);
+
 
     }
 }

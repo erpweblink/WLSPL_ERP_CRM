@@ -50,5 +50,7 @@ namespace WEBLINK_CRM.Models
         public bool isdeleted { get; set; }
 
         public DateTime regdate { get; set; }
+
+        public string? ProfileImagePath { get; set; }
     }
 }
