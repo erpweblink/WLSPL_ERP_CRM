@@ -258,301 +258,279 @@ namespace WEBLINK_CRM.repository
         {
             using (MemoryStream stream = new MemoryStream())
             {
-                // Header panel occupies y = 680 to 815 (135pt tall).
-                // A4 height ≈ 841.89pt, so top margin must push flow content down to exactly y=680.
-                float pageHeight = iTextSharp.text.PageSize.A4.Height;
-                float topMargin = pageHeight - 680f;   // ≈ 161.89f
-                float bottomMargin = 40f;
-
-                Document document = new Document(iTextSharp.text.PageSize.A4, 10f, 10f, topMargin, bottomMargin);
+                Document document = new Document(iTextSharp.text.PageSize.A4, 18f, 18f, 18f, 18f);
                 PdfWriter writer = PdfWriter.GetInstance(document, stream);
                 document.Open();
-                // Removed document.NewPage() and document.SetMargins() — margins are already
-                // set correctly via the Document constructor; calling NewPage() right after
-                // Open() and re-setting margins caused page-1 margin timing issues.
 
-                // ---- Simple 2-color palette ----
-                BaseColor brand = new BaseColor(24, 74, 128);
-                BaseColor lightTint = new BaseColor(240, 244, 249);
-                BaseColor altRow = new BaseColor(248, 249, 251);
-                BaseColor borderGray = new BaseColor(200, 205, 212);
-                BaseColor textDark = new BaseColor(45, 45, 45);
+                BaseColor sectionBlue = new BaseColor(197, 217, 241);
+                BaseColor borderBlack = new BaseColor(0, 0, 0);
+                BaseColor textDark = new BaseColor(20, 20, 20);
 
                 BaseFont bf = BaseFont.CreateFont(@"C:\Windows\Fonts\Calibrib.ttf", "Identity-H", BaseFont.EMBEDDED);
 
-                // ================= TOP BLOCK — one clean colored panel =================
-                PdfContentByte cb = writer.DirectContent;
+                Font titleFont = FontFactory.GetFont("Arial", 16, Font.BOLD, textDark);
+                Font addressFont = FontFactory.GetFont("Arial", 9.5f, Font.BOLD, textDark);
+                Font gstinFont = FontFactory.GetFont("Arial", 12, Font.BOLD, textDark);
+                Font sectionFont = FontFactory.GetFont("Arial", 12, Font.BOLD, textDark);
+                Font labelFont = FontFactory.GetFont("Arial", 10, Font.BOLD, textDark);
+                Font valueFont = FontFactory.GetFont("Arial", 10, Font.NORMAL, textDark);
+                Font tableHeaderFont = FontFactory.GetFont("Arial", 8.5f, Font.BOLD, textDark);
+                Font tableBodyFont = FontFactory.GetFont("Arial", 8.5f, Font.NORMAL, textDark);
+                Font totalLabelFont = FontFactory.GetFont("Arial", 14, Font.BOLD, textDark);
+                Font wordsFont = FontFactory.GetFont("Arial", 9.5f, Font.BOLD, textDark);
+                Font termsFont = FontFactory.GetFont("Arial", 8.5f, Font.NORMAL, textDark);
 
-                cb.SetColorFill(brand);
-                cb.Rectangle(17f, 680f, 560f, 135f);
-                cb.Fill();
+                // ================= TOP: Logo + Company Header =================
+                PdfPTable headerTable = new PdfPTable(2) { TotalWidth = 560f, LockedWidth = true, SpacingAfter = 0f };
+                headerTable.SetWidths(new float[] { 140f, 420f });
 
-                cb.SetColorStroke(BaseColor.WHITE);
-                cb.SetLineWidth(0.75f);
-                cb.MoveTo(17f, 710f);
-                cb.LineTo(577f, 710f);
-                cb.Stroke();
-
-                cb.SetColorStroke(borderGray);
-                cb.SetLineWidth(0.75f);
-                cb.Rectangle(17f, 680f, 560f, 135f);
-                cb.Stroke();
-
-                cb.BeginText();
-                cb.SetColorFill(BaseColor.WHITE);
-                cb.SetFontAndSize(bf, 22);
-                cb.ShowTextAligned(PdfContentByte.ALIGN_LEFT, "WEB LINK SERVICES PVT. LTD.", 175, 792, 0);
-                cb.SetFontAndSize(bf, 10);
-                cb.ShowTextAligned(PdfContentByte.ALIGN_LEFT, "12th Floor, Vintage 21, Above Max Showroom, Near Pantaloons, P.K. Chowk,", 175, 776, 0);
-                cb.ShowTextAligned(PdfContentByte.ALIGN_LEFT, "Pimple Saudagar, Pune, Maharashtra - 411027", 175, 764, 0);
-                cb.ShowTextAligned(PdfContentByte.ALIGN_LEFT, "weblinkservices.net   |   GST: 27AANFP3412E1ZE   |   PAN: AANFP3412E", 175, 748, 0);
-                cb.EndText();
-
-                cb.BeginText();
-                cb.SetFontAndSize(bf, 10);
-                cb.SetColorFill(BaseColor.WHITE);
-                cb.ShowTextAligned(PdfContentByte.ALIGN_LEFT, "info@weblinkservices.net", 25f, 720f, 0);
-                cb.ShowTextAligned(PdfContentByte.ALIGN_RIGHT, "9921641313 / 9921671313 / 9921691313 / 9921711313", 570f, 720f, 0);
-                cb.EndText();
-
-                cb.BeginText();
-                cb.SetFontAndSize(bf, 15);
-                cb.ShowTextAligned(PdfContentByte.ALIGN_CENTER, "P R O F O R M A", 297, 690, 0);
-                cb.EndText();
-
-                // ---- Logo: white rounded box + logo drawn directly via DirectContent (single draw path) ----
-                cb.SetColorFill(BaseColor.WHITE);
-                cb.RoundRectangle(30f, 745f, 110f, 60f, 6f);
-                cb.Fill();
-
+                // Logo cell
+                PdfPCell logoCell = new PdfPCell { BorderColor = borderBlack, BorderWidth = 0.75f, Padding = 10f, VerticalAlignment = Element.ALIGN_MIDDLE, HorizontalAlignment = Element.ALIGN_CENTER };
                 string logoPath = Path.Combine(_env.WebRootPath, "assets", "images", "WLSPL_MAIN_LOGO.png");
-
                 if (File.Exists(logoPath))
                 {
                     iTextSharp.text.Image logo = iTextSharp.text.Image.GetInstance(logoPath);
-                    logo.ScaleToFit(95, 45);
-                    float logoX = 30f + (110f - logo.ScaledWidth) / 2f;
-                    float logoY = 745f + (60f - logo.ScaledHeight) / 2f;
-                    logo.SetAbsolutePosition(logoX, logoY);
-
-                    // FIX: draw straight into DirectContent instead of document.Add(logo).
-                    // document.Add() queues into the flowing-content buffer, which can render
-                    // at a different time/z-order than the DirectContent fills above it —
-                    // that mismatch was causing the logo to appear missing, faint, or duplicated.
-                    cb.AddImage(logo);
+                    logo.ScaleToFit(120, 65);
+                    logo.Alignment = Element.ALIGN_CENTER;
+                    logoCell.AddElement(logo);
                 }
+                headerTable.AddCell(logoCell);
+
+                // Company details cell
+                PdfPCell companyCell = new PdfPCell { BorderColor = borderBlack, BorderWidth = 0.75f, Padding = 8f, VerticalAlignment = Element.ALIGN_MIDDLE };
+                Paragraph companyPara = new Paragraph();
+                companyPara.Add(new Chunk("Web Link Services Pvt. Ltd.\n", titleFont) { });
+                companyPara.Alignment = Element.ALIGN_CENTER;
+                Paragraph addrPara = new Paragraph("12th Floor, Vintage 21 Commercial Complex, Above Max\nShowroom, P.K. Chowk, Pimple Saudagar, Pune, Maharashtra\nMobile :- 8421060192 | info@weblinkservices.net", addressFont)
+                {
+                    Alignment = Element.ALIGN_CENTER
+                };
+                companyCell.AddElement(companyPara);
+                companyCell.AddElement(addrPara);
+                headerTable.AddCell(companyCell);
+
+                document.Add(headerTable);
+
+                // ================= GSTIN Bar =================
+                PdfPTable gstinTable = new PdfPTable(1) { TotalWidth = 560f, LockedWidth = true, SpacingBefore = 0f, SpacingAfter = 0f };
+                gstinTable.AddCell(new PdfPCell(new Phrase("GSTIN : 27AABCW8929J2ZP", gstinFont))
+                {
+                    HorizontalAlignment = Element.ALIGN_CENTER,
+                    BorderColor = borderBlack,
+                    BorderWidth = 0.75f,
+                    PaddingTop = 6f,
+                    PaddingBottom = 6f
+                });
+                document.Add(gstinTable);
+
+                // ================= "Proforma (This is not Tax Invoice)" bar =================
+                document.Add(SectionBar("Proforma", sectionFont, sectionBlue, borderBlack));
 
                 // **Fetching Data via VM_Proforma**
                 VM_Proforma vm = GetProformaData(id);
 
                 if (vm != null && vm.ID != null)
                 {
-                    string CompanyName = vm.CompanyName ?? "N/A";
-                    string ProformaDate = vm.ProformaDate.HasValue ? vm.ProformaDate.Value.ToString("dd-MM-yyyy") : "N/A";
                     string ProformaNo = vm.ProformaNo ?? "N/A";
+                    string ProformaDate = vm.ProformaDate.HasValue ? vm.ProformaDate.Value.ToString("dd/MM/yyyy") : "N/A";
+                    string ReverseCharge = string.IsNullOrWhiteSpace(vm.ReverseCharge) ? "N" : vm.ReverseCharge;
+                    string CompanyState = vm.State ?? "N/A";
+                    string CompanyName = vm.CompanyName ?? "N/A";
                     string Address = vm.Address ?? "N/A";
                     string Gstno = vm.GSTNO ?? "N/A";
+                    string BillState = vm.BillState ?? "N/A";
 
-                    Font boldFont12White = FontFactory.GetFont("Arial", 12, Font.BOLD, BaseColor.WHITE);
-                    Font boldFont10Brand = FontFactory.GetFont("Arial", 10, Font.BOLD, brand);
-                    Font boldFont11 = FontFactory.GetFont("Arial", 11, Font.BOLD, textDark);
-                    Font boldFont10 = FontFactory.GetFont("Arial", 10, Font.BOLD, textDark);
-                    Font Font10 = FontFactory.GetFont("Arial", 10, Font.NORMAL, textDark);
-                    Font Font9 = FontFactory.GetFont("Arial", 9, Font.NORMAL, textDark);
-                    Font italicFont10Gray = FontFactory.GetFont("Arial", 10, Font.ITALIC, new BaseColor(100, 100, 100));
+                    // ---- Proforma No / Date / Reverse Charge / State ----
+                    PdfPTable infoTable = new PdfPTable(2) { TotalWidth = 560f, LockedWidth = true, SpacingBefore = 0f, SpacingAfter = 0f };
+                    infoTable.SetWidths(new float[] { 260f, 300f });
 
-                    // ---- Company / Proforma info table — SpacingBefore removed (real margin handles it now) ----
-                    Paragraph paragraphTable1 = new Paragraph { SpacingBefore = 0f, SpacingAfter = 0f };
+                    infoTable.AddCell(LabelCell("Proforma No :", labelFont, borderBlack));
+                    infoTable.AddCell(ValueCell(ProformaNo, valueFont, borderBlack));
+                    infoTable.AddCell(LabelCell("Proforma Date :", labelFont, borderBlack));
+                    infoTable.AddCell(ValueCell(ProformaDate, valueFont, borderBlack));
+                    infoTable.AddCell(LabelCell("Reverse Charge (Y/N) :", labelFont, borderBlack));
+                    infoTable.AddCell(ValueCell(ReverseCharge, valueFont, borderBlack));
+                    infoTable.AddCell(LabelCell("State :", labelFont, borderBlack));
+                    infoTable.AddCell(ValueCell(CompanyState, valueFont, borderBlack));
 
-                    PdfPTable table = new PdfPTable(4) { TotalWidth = 560f, LockedWidth = true };
-                    table.SetWidths(new float[] { 150, 300, 150, 300 });
+                    document.Add(infoTable);
 
-                    PdfPCell InfoLabelCell(string text) => new PdfPCell(new Phrase(text, boldFont10Brand))
+                    // ================= "Proforma To Party" bar =================
+                    document.Add(SectionBar("Proforma To Party", sectionFont, sectionBlue, borderBlack));
+
+                    // ---- Party details ----
+                    PdfPTable partyTable = new PdfPTable(2) { TotalWidth = 560f, LockedWidth = true, SpacingBefore = 0f, SpacingAfter = 0f };
+                    partyTable.SetWidths(new float[] { 260f, 300f });
+
+                    partyTable.AddCell(LabelCell("Company Name :", labelFont, borderBlack));
+                    partyTable.AddCell(ValueCell(CompanyName, valueFont, borderBlack));
+                    partyTable.AddCell(LabelCell("Address :", labelFont, borderBlack));
+                    partyTable.AddCell(ValueCell(Address, valueFont, borderBlack));
+                    partyTable.AddCell(LabelCell("GSTIN :", labelFont, borderBlack));
+                    partyTable.AddCell(ValueCell(Gstno, valueFont, borderBlack));
+                    partyTable.AddCell(LabelCell("State :", labelFont, borderBlack));
+                    partyTable.AddCell(ValueCell(BillState, valueFont, borderBlack));
+
+                    document.Add(partyTable);
+
+                    // ================= Product Details Table (two-tier header) =================
+                    bool isIGST = !string.Equals((CompanyState ?? "").Trim(), (BillState ?? "").Trim(), StringComparison.OrdinalIgnoreCase);
+
+                    double amountTotal = 0, taxableTotal = 0, cgstTotal = 0, sgstTotal = 0, igstTotal = 0, grandTotal = 0;
+
+                    PdfPTable prodTable;
+                    if (isIGST)
                     {
-                        BackgroundColor = lightTint,
-                        BorderColor = borderGray,
-                        BorderWidth = 0.5f,
-                        PaddingTop = 7f,
-                        PaddingBottom = 7f,
-                        PaddingLeft = 8f,
-                        MinimumHeight = 26f
-                    };
-                    PdfPCell InfoValueCell(string text) => new PdfPCell(new Phrase(text, Font10))
+                        // Sr, Desc, SAC, Qty, Rate, Amount, TaxableVal, IGST%(Rate,Amt), Total = 10 cols
+                        prodTable = new PdfPTable(10) { TotalWidth = 560f, LockedWidth = true, SpacingBefore = 0f, SpacingAfter = 0f };
+                        prodTable.SetWidths(new float[] { 5f, 20f, 8f, 5f, 7f, 7f, 8f, 6f, 7f, 9f });
+                    }
+                    else
                     {
-                        BorderColor = borderGray,
-                        BorderWidth = 0.5f,
-                        PaddingTop = 7f,
-                        PaddingBottom = 7f,
-                        PaddingLeft = 8f,
-                        MinimumHeight = 26f
-                    };
-
-                    table.AddCell(InfoLabelCell("Company Name:"));
-                    table.AddCell(InfoValueCell(CompanyName));
-                    table.AddCell(InfoLabelCell("Proforma No:"));
-                    table.AddCell(InfoValueCell(ProformaNo));
-
-                    table.AddCell(InfoLabelCell("Address:"));
-                    table.AddCell(InfoValueCell(Address));
-                    table.AddCell(InfoLabelCell("Proforma Date:"));
-                    table.AddCell(InfoValueCell(ProformaDate));
-
-                    if (!string.IsNullOrWhiteSpace(Gstno))
-                    {
-                        table.AddCell(InfoLabelCell("GST No:"));
-                        table.AddCell(InfoValueCell(Gstno));
-                        table.AddCell(new PdfPCell(new Phrase("", Font10)) { BorderColor = borderGray, BorderWidth = 0.5f });
-                        table.AddCell(new PdfPCell(new Phrase("", Font10)) { BorderColor = borderGray, BorderWidth = 0.5f });
+                        // Sr, Desc, SAC, Qty, Rate, Amount, TaxableVal, CGST%(Rate,Amt), SGST%(Rate,Amt), Total = 12 cols
+                        prodTable = new PdfPTable(12) { TotalWidth = 560f, LockedWidth = true, SpacingBefore = 0f, SpacingAfter = 0f };
+                        prodTable.SetWidths(new float[] { 5f, 17f, 7f, 4f, 6f, 6f, 7f, 5f, 6f, 5f, 6f, 8f });
                     }
 
-                    paragraphTable1.Add(table);
-                    document.Add(paragraphTable1);
-
-                    // ---- Section title bar ----
-                    table = new PdfPTable(1) { TotalWidth = 560f, LockedWidth = true, SpacingBefore = 0f, SpacingAfter = 0f };
-                    table.SetWidths(new float[] { 560f });
-                    table.AddCell(new PdfPCell(new Phrase("PRODUCT DETAILS", boldFont12White))
+                    PdfPCell HCell(string text, int rowspan = 1, int colspan = 1) => new PdfPCell(new Phrase(text, tableHeaderFont))
                     {
                         HorizontalAlignment = Element.ALIGN_CENTER,
-                        BackgroundColor = brand,
-                        BorderColor = borderGray,
+                        VerticalAlignment = Element.ALIGN_MIDDLE,
+                        BackgroundColor = sectionBlue,
+                        BorderColor = borderBlack,
                         BorderWidth = 0.5f,
-                        PaddingTop = 8f,
-                        PaddingBottom = 8f,
-                        MinimumHeight = 28f
-                    });
-                    document.Add(table);
+                        Rowspan = rowspan,
+                        Colspan = colspan,
+                        PaddingTop = 5f,
+                        PaddingBottom = 5f,
+                        MinimumHeight = 22f
+                    };
 
-                    // ---- Product Details Table ----
-                    double taxableTotal = 0, cgstTotal = 0, sgstTotal = 0, igstTotal = 0, grandTotal = 0;
+                    // Row 1
+                    prodTable.AddCell(HCell("Sr.\nNo.", 2));
+                    prodTable.AddCell(HCell("Description", 2));
+                    prodTable.AddCell(HCell("SAC\nCode", 2));
+                    prodTable.AddCell(HCell("Qty", 2));
+                    prodTable.AddCell(HCell("Rate", 2));
+                    prodTable.AddCell(HCell("Amount", 2));
+                    prodTable.AddCell(HCell("Taxable\nValue", 2));
 
-                    if (vm.objtblProformaDtl != null && vm.objtblProformaDtl.Count > 0)
+                    if (isIGST)
                     {
-                        bool isIGST = !string.Equals(
-                            (vm.State ?? "").Trim(),
-                            (vm.BillState ?? "").Trim(),
-                            StringComparison.OrdinalIgnoreCase);
+                        prodTable.AddCell(HCell("IGST %", 1, 2));
+                    }
+                    else
+                    {
+                        prodTable.AddCell(HCell("CGST %", 1, 2));
+                        prodTable.AddCell(HCell("SGST %", 1, 2));
+                    }
+                    prodTable.AddCell(HCell("Total", 2));
 
-                        Paragraph paragraphTable2 = new Paragraph { SpacingBefore = 0f, SpacingAfter = 0f };
+                    // Row 2 (only the split Rate/Amount sub-columns)
+                    if (isIGST)
+                    {
+                        prodTable.AddCell(HCell("Rate"));
+                        prodTable.AddCell(HCell("Amount"));
+                    }
+                    else
+                    {
+                        prodTable.AddCell(HCell("Rate"));
+                        prodTable.AddCell(HCell("Amount"));
+                        prodTable.AddCell(HCell("Rate"));
+                        prodTable.AddCell(HCell("Amount"));
+                    }
 
-                        PdfPTable prodTable;
-                        if (isIGST)
-                        {
-                            prodTable = new PdfPTable(9);
-                            prodTable.SetWidths(new float[] { 2f, 16f, 5f, 4f, 4f, 5f, 4f, 5f, 6f });
-                        }
-                        else
-                        {
-                            prodTable = new PdfPTable(11);
-                            prodTable.SetWidths(new float[] { 2f, 14f, 5f, 4f, 4f, 5f, 4f, 5f, 4f, 5f, 6f });
-                        }
-                        prodTable.TotalWidth = 560f;
-                        prodTable.LockedWidth = true;
-                        prodTable.SpacingBefore = 0f;
-                        prodTable.SpacingAfter = 0f;
+                    PdfPCell BCell(string text, int align = Element.ALIGN_CENTER) => new PdfPCell(new Phrase(text ?? "", tableBodyFont))
+                    {
+                        HorizontalAlignment = align,
+                        VerticalAlignment = Element.ALIGN_MIDDLE,
+                        BorderColor = borderBlack,
+                        BorderWidth = 0.5f,
+                        PaddingTop = 5f,
+                        PaddingBottom = 5f,
+                        MinimumHeight = 26f
+                    };
 
-                        Font headerFontWhite = FontFactory.GetFont("Arial", 10, Font.BOLD, BaseColor.WHITE);
-
-                        PdfPCell HeaderCell(string text) => new PdfPCell(new Phrase(text, headerFontWhite))
-                        {
-                            HorizontalAlignment = Element.ALIGN_CENTER,
-                            BackgroundColor = brand,
-                            BorderColor = borderGray,
-                            BorderWidth = 0.5f,
-                            PaddingTop = 7f,
-                            PaddingBottom = 9f,
-                            MinimumHeight = 26f
-                        };
-
-                        prodTable.AddCell(HeaderCell("SN."));
-                        prodTable.AddCell(HeaderCell("Description"));
-                        prodTable.AddCell(HeaderCell("Hsn/Sac"));
-                        prodTable.AddCell(HeaderCell("Qty"));
-                        prodTable.AddCell(HeaderCell("Rate"));
-                        prodTable.AddCell(HeaderCell("Taxable Val"));
-
-                        if (isIGST)
-                        {
-                            prodTable.AddCell(HeaderCell("IGST(%)"));
-                            prodTable.AddCell(HeaderCell("IGST Amt"));
-                        }
-                        else
-                        {
-                            prodTable.AddCell(HeaderCell("CGST(%)"));
-                            prodTable.AddCell(HeaderCell("CGST Amt"));
-                            prodTable.AddCell(HeaderCell("SGST(%)"));
-                            prodTable.AddCell(HeaderCell("SGST Amt"));
-                        }
-                        prodTable.AddCell(HeaderCell("Total"));
-
-                        PdfPCell BodyCell(string text, bool shaded) => new PdfPCell(new Phrase(text ?? "", Font9))
-                        {
-                            HorizontalAlignment = Element.ALIGN_CENTER,
-                            BackgroundColor = shaded ? altRow : BaseColor.WHITE,
-                            BorderColor = borderGray,
-                            BorderWidth = 0.5f,
-                            PaddingTop = 7f,
-                            PaddingBottom = 9f,
-                            MinimumHeight = 26f
-                        };
-
-                        int rowid = 1;
+                    int rowid = 1;
+                    if (vm.objtblProformaDtl != null)
+                    {
                         foreach (var d in vm.objtblProformaDtl)
                         {
-                            bool shaded = rowid % 2 == 0;
+                            double amt = ParseD(d.Amount);
                             double taxableVal = ParseD(d.TaxableValue);
                             double lineTotal = ParseD(d.Total);
 
-                            prodTable.AddCell(BodyCell(rowid.ToString(), shaded));
-                            prodTable.AddCell(BodyCell(d.ProductDescription, shaded));
-                            prodTable.AddCell(BodyCell(d.SACCode, shaded));
-                            prodTable.AddCell(BodyCell(d.Qty, shaded));
-                            prodTable.AddCell(BodyCell(d.Rate, shaded));
-                            prodTable.AddCell(BodyCell(taxableVal.ToString("#.00"), shaded));
+                            prodTable.AddCell(BCell(rowid.ToString()));
+                            prodTable.AddCell(BCell(d.ProductDescription, Element.ALIGN_LEFT));
+                            prodTable.AddCell(BCell(d.SACCode));
+                            prodTable.AddCell(BCell(d.Qty));
+                            prodTable.AddCell(BCell(d.Rate));
+                            prodTable.AddCell(BCell(amt.ToString("0.##")));
+                            prodTable.AddCell(BCell(taxableVal.ToString("0.##")));
 
                             if (isIGST)
                             {
-                                prodTable.AddCell(BodyCell(d.IGSTRate, shaded));
-                                prodTable.AddCell(BodyCell(ParseD(d.IGSTAmt).ToString("#.00"), shaded));
+                                prodTable.AddCell(BCell(d.IGSTRate));
+                                prodTable.AddCell(BCell(ParseD(d.IGSTAmt).ToString("0.##")));
                                 igstTotal += ParseD(d.IGSTAmt);
                             }
                             else
                             {
-                                prodTable.AddCell(BodyCell(d.CGSTRate, shaded));
-                                prodTable.AddCell(BodyCell(ParseD(d.CGSTAmt).ToString("#.00"), shaded));
-                                prodTable.AddCell(BodyCell(d.SGSTRate, shaded));
-                                prodTable.AddCell(BodyCell(ParseD(d.SGSTAmt).ToString("#.00"), shaded));
+                                prodTable.AddCell(BCell(d.CGSTRate));
+                                prodTable.AddCell(BCell(ParseD(d.CGSTAmt).ToString("0.##")));
+                                prodTable.AddCell(BCell(d.SGSTRate));
+                                prodTable.AddCell(BCell(ParseD(d.SGSTAmt).ToString("0.##")));
                                 cgstTotal += ParseD(d.CGSTAmt);
                                 sgstTotal += ParseD(d.SGSTAmt);
                             }
 
-                            prodTable.AddCell(BodyCell(lineTotal.ToString("#.00"), shaded));
+                            prodTable.AddCell(BCell(lineTotal.ToString("0.##")));
 
+                            amountTotal += amt;
                             taxableTotal += taxableVal;
                             grandTotal += lineTotal;
                             rowid++;
                         }
-
-                        paragraphTable2.Add(prodTable);
-                        document.Add(paragraphTable2);
-
-                        // ---- Totals ----
-                        AddTotalRow(document, "Sub Total", taxableTotal, boldFont10, Font10, lightTint, false, borderGray);
-
-                        if (isIGST)
-                            AddTotalRow(document, "IGST Amount", igstTotal, boldFont10, Font10, lightTint, false, borderGray);
-                        else
-                        {
-                            AddTotalRow(document, "CGST Amount", cgstTotal, boldFont10, Font10, lightTint, false, borderGray);
-                            AddTotalRow(document, "SGST Amount", sgstTotal, boldFont10, Font10, lightTint, false, borderGray);
-                        }
-
-                        Font grandLabelWhite = FontFactory.GetFont("Arial", 11, Font.BOLD, BaseColor.WHITE);
-                        Font grandValWhite = FontFactory.GetFont("Arial", 11, Font.BOLD, BaseColor.WHITE);
-                        AddTotalRow(document, "Grand Total", grandTotal, grandLabelWhite, grandValWhite, brand, true, borderGray);
                     }
 
-                    // ---- Grand Total in Words ----
+                    // ---- Total row (bold, spans Sr.No + Description) ----
+                    Font totalRowFont = FontFactory.GetFont("Arial", 9.5f, Font.BOLD, textDark);
+                    PdfPCell TCell(string text, int colspan = 1) => new PdfPCell(new Phrase(text, totalRowFont))
+                    {
+                        HorizontalAlignment = Element.ALIGN_CENTER,
+                        VerticalAlignment = Element.ALIGN_MIDDLE,
+                        BackgroundColor = sectionBlue,
+                        BorderColor = borderBlack,
+                        BorderWidth = 0.5f,
+                        Colspan = colspan,
+                        PaddingTop = 6f,
+                        PaddingBottom = 6f,
+                        MinimumHeight = 26f
+                    };
+
+                    prodTable.AddCell(TCell("Total", 3));
+                    prodTable.AddCell(TCell("")); // Qty total left blank (or sum if needed)
+                    prodTable.AddCell(TCell(""));
+                    prodTable.AddCell(TCell(amountTotal.ToString("0.##")));
+                    prodTable.AddCell(TCell(taxableTotal.ToString("0.##")));
+
+                    if (isIGST)
+                    {
+                        prodTable.AddCell(TCell(""));
+                        prodTable.AddCell(TCell(igstTotal.ToString("0.##")));
+                    }
+                    else
+                    {
+                        prodTable.AddCell(TCell(""));
+                        prodTable.AddCell(TCell(cgstTotal.ToString("0.##")));
+                        prodTable.AddCell(TCell(""));
+                        prodTable.AddCell(TCell(sgstTotal.ToString("0.##")));
+                    }
+                    prodTable.AddCell(TCell(grandTotal.ToString("0.##")));
+
+                    document.Add(prodTable);
+
+                    // ================= Amount in Words + Tax Summary =================
                     DataTable Dts = new DataTable();
                     using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
                     {
@@ -564,84 +542,147 @@ namespace WEBLINK_CRM.repository
                             Da.Fill(Dts);
                         }
                     }
-                    if (Dts.Rows.Count > 0)
+                    string AmountInWords = Dts.Rows.Count > 0 ? (Dts.Rows[0]["AmountInWords"]?.ToString() ?? "N/A") : "N/A";
+
+                    PdfPTable summaryTable = new PdfPTable(2) { TotalWidth = 560f, LockedWidth = true, SpacingBefore = 0f, SpacingAfter = 0f };
+                    summaryTable.SetWidths(new float[] { 350f, 210f });
+
+                    // Left column: words (top) + bank details (bottom) stacked as inner table
+                    PdfPCell leftCell = new PdfPCell { BorderColor = borderBlack, BorderWidth = 0.5f, Padding = 0f };
+                    PdfPTable leftInner = new PdfPTable(1) { WidthPercentage = 100 };
+
+                    leftInner.AddCell(new PdfPCell(new Phrase(AmountInWords, wordsFont))
                     {
-                        string AmountInWords = Dts.Rows[0]["AmountInWords"]?.ToString() ?? "N/A";
+                        BackgroundColor = sectionBlue,
+                        Border = Rectangle.NO_BORDER,
+                        PaddingTop = 6f,
+                        PaddingBottom = 6f,
+                        PaddingLeft = 6f,
+                        MinimumHeight = 24f
+                    });
 
-                        table = new PdfPTable(2) { TotalWidth = 560f, LockedWidth = true, SpacingBefore = 0f, SpacingAfter = 0f };
-                        table.SetWidths(new float[] { 140f, 420f });
+                    leftInner.AddCell(new PdfPCell(new Phrase(
+                        "Bank Details\n\nBank A/C :- 916020085136854\n\nBank IFSC :- UTIB0001641\n\nAxis Bank Ltd- Rahatani Branch, Pune",
+                        valueFont))
+                    {
+                        Border = Rectangle.NO_BORDER,
+                        PaddingTop = 10f,
+                        PaddingBottom = 10f,
+                        PaddingLeft = 8f
+                    });
 
-                        table.AddCell(new PdfPCell(new Phrase("Amount In Words (Rs.)", boldFont10))
+                    leftInner.AddCell(new PdfPCell(new Phrase("Remark :", labelFont))
+                    {
+                        Border = Rectangle.NO_BORDER,
+                        PaddingTop = 10f,
+                        PaddingBottom = 10f,
+                        PaddingLeft = 8f
+                    });
+
+                    leftCell.AddElement(leftInner);
+                    summaryTable.AddCell(leftCell);
+
+                    // Right column: tax summary rows
+                    PdfPCell rightCell = new PdfPCell { Border = Rectangle.NO_BORDER, Padding = 0f };
+                    PdfPTable rightInner = new PdfPTable(2) { WidthPercentage = 100 };
+                    rightInner.SetWidths(new float[] { 130f, 80f });
+
+                    void TaxRow(string label, string value, bool shaded = false)
+                    {
+                        rightInner.AddCell(new PdfPCell(new Phrase(label, labelFont))
                         {
-                            BackgroundColor = lightTint,
-                            BorderColor = borderGray,
+                            BorderColor = borderBlack,
                             BorderWidth = 0.5f,
-                            PaddingTop = 7f,
-                            PaddingBottom = 7f,
-                            PaddingLeft = 8f,
-                            HorizontalAlignment = Element.ALIGN_LEFT
+                            BackgroundColor = shaded ? sectionBlue : BaseColor.WHITE,
+                            PaddingTop = 5f,
+                            PaddingBottom = 5f,
+                            PaddingLeft = 6f
                         });
-                        table.AddCell(new PdfPCell(new Phrase(AmountInWords, italicFont10Gray))
+                        rightInner.AddCell(new PdfPCell(new Phrase(value, valueFont))
                         {
-                            BorderColor = borderGray,
+                            BorderColor = borderBlack,
                             BorderWidth = 0.5f,
-                            PaddingTop = 7f,
-                            PaddingBottom = 7f,
-                            PaddingLeft = 8f,
-                            HorizontalAlignment = Element.ALIGN_LEFT
+                            BackgroundColor = shaded ? sectionBlue : BaseColor.WHITE,
+                            HorizontalAlignment = Element.ALIGN_CENTER,
+                            PaddingTop = 5f,
+                            PaddingBottom = 5f
                         });
-
-                        document.Add(table);
                     }
 
-                    // ---- Bank Details ----
-                    PdfPTable bankTable = new PdfPTable(2) { TotalWidth = 560f, LockedWidth = true, SpacingBefore = 0f, SpacingAfter = 0f };
-                    bankTable.SetWidths(new float[] { 310f, 250f });
-
-                    bankTable.AddCell(new PdfPCell(new Phrase(
-                        "Account Name : Web Link Services Pvt. Ltd\n\n" +
-                        "A/c No. : 916020085136854\n\n" +
-                        "IFSC/Neft Code : UTIB0001641\n\n" +
-                        "Bank Name : Axis Bank Ltd - Rahatani Branch, Pune",
-                        Font10))
+                    TaxRow("Total Amount Before Tax", taxableTotal.ToString("0.##"));
+                    if (isIGST)
                     {
-                        BackgroundColor = lightTint,
-                        BorderColor = borderGray,
+                        TaxRow("Add: IGST", igstTotal.ToString("0.##"));
+                    }
+                    else
+                    {
+                        TaxRow("Add: CGST [9%]", cgstTotal.ToString("0.##"));
+                        TaxRow("Add: SGST [9%]", sgstTotal.ToString("0.##"));
+                    }
+                    TaxRow("Total Tax Amount", (isIGST ? igstTotal : cgstTotal + sgstTotal).ToString("0.##"));
+                    TaxRow("Total Amount After Tax", grandTotal.ToString("0.##"));
+                    TaxRow("GST On Reverse Charge", "0.00", true);
+
+                    rightCell.AddElement(rightInner);
+                    summaryTable.AddCell(rightCell);
+
+                    document.Add(summaryTable);
+
+                    // ================= Terms & Conditions + Signature =================
+                    PdfPTable footerTable = new PdfPTable(2) { TotalWidth = 560f, LockedWidth = true, SpacingBefore = 0f, SpacingAfter = 0f };
+                    footerTable.SetWidths(new float[] { 350f, 210f });
+
+                    PdfPCell termsCell = new PdfPCell { Border = Rectangle.NO_BORDER, Padding = 0f };
+                    PdfPTable termsInner = new PdfPTable(1) { WidthPercentage = 100 };
+
+                    termsInner.AddCell(new PdfPCell(new Phrase("Terms & Conditions", labelFont))
+                    {
+                        BackgroundColor = sectionBlue,
+                        BorderColor = borderBlack,
                         BorderWidth = 0.5f,
+                        HorizontalAlignment = Element.ALIGN_CENTER,
+                        PaddingTop = 5f,
+                        PaddingBottom = 5f
+                    });
+
+                    string terms =
+                        "1. Website Data provide by client in soft copy via mail. We will not copy data\n" +
+                        "    from any portal. [NEED UNIQUE DATA]\n" +
+                        "    Send data for website on design@weblinkservices.net\n" +
+                        "2. SEO will take minimum 90 days after hosting of website [UNIQUE DATA\n" +
+                        "    WILL GIVE BEST RESULT]\n" +
+                        "3. Payment will not refund at any circumstances.\n" +
+                        "4. We are not committing any Enquiry or business from given services to you.\n" +
+                        "5. Cheque Bounce Charges 500+GST.\n" +
+                        "6. TAX INVOICE will be generated after full payment of deal.\n" +
+                        "7. We do not provide website source code files.";
+
+                    termsInner.AddCell(new PdfPCell(new Phrase(terms, termsFont))
+                    {
+                        BorderColor = borderBlack,
+                        BorderWidth = 0.5f,
+                        PaddingTop = 8f,
+                        PaddingBottom = 8f,
+                        PaddingLeft = 6f,
+                        PaddingRight = 6f
+                    });
+
+                    termsCell.AddElement(termsInner);
+                    footerTable.AddCell(termsCell);
+
+                    PdfPCell signCell = new PdfPCell(new Phrase(
+                        "For,\n\nWeb Link Services Pvt. Ltd.\n\n\n\nAuthorised Signatory",
+                        labelFont))
+                    {
+                        BorderColor = borderBlack,
+                        BorderWidth = 0.5f,
+                        HorizontalAlignment = Element.ALIGN_CENTER,
+                        VerticalAlignment = Element.ALIGN_TOP,
                         Padding = 10f
-                    });
+                    };
+                    footerTable.AddCell(signCell);
 
-                    bankTable.AddCell(new PdfPCell(new Phrase(
-                        "For,\n\n " +
-                        "                 Web Link Services Pvt. Ltd\n\n\n" +
-                        "                     Authorised Signatory",
-                        boldFont11))
-                    {
-                        BorderColor = borderGray,
-                        BorderWidth = 0.5f,
-                        Padding = 10f,
-                        VerticalAlignment = Element.ALIGN_MIDDLE
-                    });
-
-                    document.Add(bankTable);
-
-                    // ---- Watermark ----
-                    PdfContentByte under = writer.DirectContentUnder;
-                    string watermarkPath = Path.Combine(_env.WebRootPath, "assets", "images", "WLSPL_MAIN_LOGO.png");
-
-                    if (File.Exists(watermarkPath))
-                    {
-                        iTextSharp.text.Image watermark = iTextSharp.text.Image.GetInstance(watermarkPath);
-                        watermark.ScaleToFit(200, 200);
-                        watermark.SetAbsolutePosition(180, 450);
-
-                        PdfGState gState = new PdfGState { FillOpacity = 0.07f };
-
-                        under.SaveState();
-                        under.SetGState(gState);
-                        under.AddImage(watermark);
-                        under.RestoreState();
-                    }
+                    document.Add(footerTable);
                 }
 
                 document.Close();
@@ -651,41 +692,44 @@ namespace WEBLINK_CRM.repository
             }
         }
 
-        // ---- Helper: totals row ----
-        private void AddTotalRow(Document document, string label, double value, Font labelFont, Font valueFont, BaseColor bgColor, bool highlight, BaseColor borderColor)
+        private PdfPTable SectionBar(string text, Font font, BaseColor bg, BaseColor border)
         {
-            var t = new PdfPTable(3) { TotalWidth = 560f, LockedWidth = true, SpacingBefore = 0f, SpacingAfter = 0f };
-            t.SetWidths(new float[] { 380f, 100f, 80f });
-
-            t.AddCell(new PdfPCell(new Phrase("")) { BorderColor = borderColor, BorderWidth = 0.5f, BackgroundColor = highlight ? bgColor : BaseColor.WHITE });
-
-            var lbl = new PdfPCell(new Phrase(label, labelFont))
+            PdfPTable t = new PdfPTable(1) { TotalWidth = 560f, LockedWidth = true, SpacingBefore = 0f, SpacingAfter = 0f };
+            t.AddCell(new PdfPCell(new Phrase(text, font))
             {
-                PaddingRight = 8f,
-                PaddingTop = 7f,
-                PaddingBottom = 7f,
-                HorizontalAlignment = Element.ALIGN_RIGHT,
-                BackgroundColor = bgColor,
-                BorderColor = borderColor,
-                BorderWidth = 0.5f
-            };
-            t.AddCell(lbl);
-
-            var val = new PdfPCell(new Phrase(value.ToString("#.00"), valueFont))
-            {
-                PaddingTop = 7f,
-                PaddingBottom = 7f,
                 HorizontalAlignment = Element.ALIGN_CENTER,
-                BackgroundColor = bgColor,
-                BorderColor = borderColor,
-                BorderWidth = 0.5f
-            };
-            t.AddCell(val);
-
-            document.Add(t);
+                BackgroundColor = bg,
+                BorderColor = border,
+                BorderWidth = 0.75f,
+                PaddingTop = 6f,
+                PaddingBottom = 6f
+            });
+            return t;
         }
 
-        // ---- Helper: parse string amount safely ----
+ 
+        private PdfPCell LabelCell(string text, Font font, BaseColor border) => new PdfPCell(new Phrase(text, font))
+        {
+            HorizontalAlignment = Element.ALIGN_LEFT,
+            BorderColor = border,
+            BorderWidth = 0.5f,
+            PaddingTop = 6f,
+            PaddingBottom = 6f,
+            PaddingLeft = 8f,
+            MinimumHeight = 24f
+        };
+
+      
+        private PdfPCell ValueCell(string text, Font font, BaseColor border) => new PdfPCell(new Phrase(text, font))
+        {
+            HorizontalAlignment = Element.ALIGN_CENTER,
+            BorderColor = border,
+            BorderWidth = 0.5f,
+            PaddingTop = 6f,
+            PaddingBottom = 6f,
+            MinimumHeight = 24f
+        };
+
         private double ParseD(string s) =>
             double.TryParse(s, out double v) ? v : 0;
 

@@ -1,4 +1,6 @@
-﻿var GetProformaForm = function () {
+﻿
+var GetProformaForm = function () {
+
     var ID = window.location.pathname.split('/').pop();
 
     var IsCreate = $("#hdnCreate").val();
@@ -8,74 +10,148 @@
         if (IsCreate == "F") {
 
             window.location.href = "/Login/LogIn";
+
+            return;
         }
     }
-
-
-    var BindStateList = function () {       
-        $.ajax({
-            url: "/Proforma/GetState",
-            data: { "Status": "1" },
-            type: "post",
-            cache: false,
-            success: function (response) {
-                if (response.success == true) {
-
-                    var html = "<option value='' selected='selected'>-- Select State --</option>";
-                    var users = response.data || [];
-                    $.each(users, function (key, data) {
-
-                        html += "<option value='" + data.Name + "'>" +
-                            data.Name +
-                            "</option>";
-                    });
-
-                    $("#ddlBillState").html(html);
-
-
-                }
-                else {
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                //$('#lblCommentsNotification').text("Error encountered while saving the comments.");
-            }
-        });
-    }
-
     var Companytext = "";
-    var BindCompanyList = function () {
+
+    var BindStateList = function () {
 
         $.ajax({
-            url: "/Proforma/GetCompany",
-            data: { Status: "1" },
-            type: "POST",
-            cache: false,
-            success: function (response) {
 
+            url: "/Proforma/GetState",
+
+            data: {
+                Status: "1"
+            },
+
+            type: "POST",
+
+            cache: false,
+
+            success: function (response) {
 
                 if (response.success === true) {
 
-                    var users = response.data || [];
-                    var html = "<option value=''>-- Select Company Name --</option>";
+                    var html =
+                        "<option value=''>" +
+                        "-- Select State --" +
+                        "</option>";
+
+                    var users =
+                        response.data || [];
+
 
                     $.each(users, function (key, data) {
 
-                        html += "<option value='" + data.ID + "'>" +
-                            data.Name + 
+                        html +=
+                            "<option value='" +
+                            (data.Name || "") +
+                            "'>" +
+                            (data.Name || "") +
                             "</option>";
+
                     });
 
-                    $("#ddlCompanyname").html(html);
 
-                    if (Companytext && Companytext.trim() !== "") {
+                    $("#ddlBillState")
+                        .html(html);
 
-                        var company = users.find(function (x) {
-                            return (x.Name || "").toLowerCase().trim() ===
-                                Companytext.toLowerCase().trim();
-                        });
+                }
+                else {
+
+                    showToast(
+                        response.message ||
+                        "State data not found.",
+                        "error"
+                    );
+                }
+            },
+
+            error: function (xhr) {
+
+                console.error(
+                    "Get State Error:",
+                    xhr.responseText
+                );
+
+                showToast(
+                    "Unable to load State list.",
+                    "error"
+                );
+            }
+        });
+    };
+
+    var BindCompanyList = function () {
+
+        $.ajax({
+
+            url: "/Proforma/GetCompany",
+
+            data: {
+                Status: "1"
+            },
+
+            type: "POST",
+
+            cache: false,
+
+            success: function (response) {
+
+                if (response.success === true) {
+
+                    var users =
+                        response.data || [];
+
+                    var html =
+                        "<option value=''>" +
+                        "-- Select Company Name --" +
+                        "</option>";
+
+
+                    $.each(users, function (key, data) {
+
+                        html +=
+                            "<option value='" +
+                            (data.ID || "") +
+                            "'>" +
+                            (data.Name || "") +
+                            "</option>";
+
+                    });
+
+
+                    $("#ddlCompanyname")
+                        .html(html);
+
+
+                    // -----------------------------------------
+                    // SELECT COMPANY DURING EDIT
+                    // -----------------------------------------
+                    if (
+                        Companytext &&
+                        Companytext.trim() !== ""
+                    ) {
+
+                        var company =
+                            users.find(function (x) {
+
+                                return (
+                                    (x.Name || "")
+                                        .toLowerCase()
+                                        .trim()
+                                ) ===
+                                Companytext
+                                    .toLowerCase()
+                                    .trim();
+
+                            });
+
 
                         if (company) {
+
                             $("#ddlCompanyname")
                                 .val(company.ID)
                                 .trigger("change");
@@ -83,72 +159,857 @@
                     }
                 }
                 else {
+
                     showToast(
-                        "Data not found", error
+                        response.message ||
+                        "Company data not found.",
+                        "error"
                     );
                 }
             },
-            error: function (xhr, ajaxOptions, thrownError) {
-                console.log(xhr.responseText);
+
+            error: function (xhr) {
+
+                console.error(
+                    "Get Company Error:",
+                    xhr.responseText
+                );
+
+                showToast(
+                    "Unable to load Company list.",
+                    "error"
+                );
             }
         });
     };
 
+    $("#ddlCompanyname")
+        .off("change")
+        .on("change", function () {
 
-    $('#ddlCompanyname').change(function () {
-        var ID = $('#ddlCompanyname option:selected').val();
+            var companyID =
+                $(this).val();
 
-        $.ajax({
-            url: "/Proforma/GetCompanyByCode",
-            data: { "ID": ID },
-            type: "post",
-            cache: false,
-            success: function (response) {
-                if (response.success == true) {
-                    var result = response.data[0];
-                    if (result != null && result != undefined && result != "") {
+
+            if (!companyID) {
+
+                return;
+            }
+
+
+            $.ajax({
+
+                url: "/Proforma/GetCompanyByCode",
+
+                data: {
+                    ID: companyID
+                },
+
+                type: "POST",
+
+                cache: false,
+
+                success: function (response) {
+
+                    if (response.success === true) {
+
+                        var result =
+                            response.data &&
+                            response.data.length > 0
+                                ? response.data[0]
+                                : null;
+
+
+                        if (!result) {
+
+                            return;
+                        }
+
+
+                        $("#txtAddress")
+                            .val(result.address || "");
+
+
+                        $("#txtGSTNo")
+                            .val(
+                                result.gstno == null
+                                    ? "NA"
+                                    : result.gstno
+                            );
+
+
+                        $("#txtEmailID")
+                            .val(result.email || "");
+
+
                         $("#ddlBillState")
-                            .val(result.State)
-                            .trigger("change");                 
-                        $('#txtAddress').val(result.address);
-                        $('#txtGSTNo').val(result.gstno == null ? "NA" : result.gstno);
-                        $('#txtEmailID').val(result.email);
-                        var gstNo = result.gstno == null ? "NA" : result.gstno;                 
+                            .val(result.State || "")
+                            .trigger("change");
 
-                        // Check first 2 digits of GSTIN
-                        if (gstNo !== "NA" && gstNo.length >= 2) {
+                        var gstNo =
+                            result.gstno == null
+                                ? "NA"
+                                : result.gstno;
 
-                            var stateCode = gstNo.substring(0, 2);
 
+                        if (
+                            gstNo !== "NA" &&
+                            gstNo.length >= 2
+                        ) {
+
+                            var stateCode =
+                                gstNo.substring(0, 2);
+
+
+                            // Maharashtra
                             if (stateCode === "27") {
 
-                                // Maharashtra - CGST + SGST
-                                $("#txtCGST").val("9");
-                                $("#txtSGST").val("9");
-                                $("#txtIGST").val("0");
+                                $("#txtCGST")
+                                    .val("9");
 
-                            } else {
+                                $("#txtSGST")
+                                    .val("9");
 
-                                // Other State - IGST
-                                $("#txtCGST").val("0");
-                                $("#txtSGST").val("0");
-                                $("#txtIGST").val("18");
+                                $("#txtIGST")
+                                    .val("0");
+                            }
+                            else {
+
+                                // Other State
+                                $("#txtCGST")
+                                    .val("0");
+
+                                $("#txtSGST")
+                                    .val("0");
+
+                                $("#txtIGST")
+                                    .val("18");
                             }
                         }
                     }
-                }
-                else {
-                
-                }
-            },
-            error: function (xhr, ajaxOptions, thrownError) {
-                //$('#lblCommentsNotification').text("Error encountered while saving the comments.");
-            }
-        });
-    });
+                    else {
 
+                        showToast(
+                            response.message ||
+                            "Unable to load Company details.",
+                            "error"
+                        );
+                    }
+                },
+
+                error: function (xhr) {
+
+                    console.error(
+                        "Company details error:",
+                        xhr.responseText
+                    );
+                }
+            });
+        });
+
+    function formatDateToDDMMYYYY(dateValue) {
+
+        if (!dateValue) {
+
+            return "";
+        }
+
+
+        var date =
+            new Date(dateValue);
+
+
+        if (isNaN(date.getTime())) {
+
+            return "";
+        }
+
+
+        var day =
+            String(date.getDate())
+                .padStart(2, "0");
+
+        var month =
+            String(date.getMonth() + 1)
+                .padStart(2, "0");
+
+        var year =
+            date.getFullYear();
+
+
+        return (
+            year +
+            "-" +
+            month +
+            "-" +
+            day
+        );
+    }
+
+    function calculateDetailRow(row) {
+
+        var qty =
+            parseFloat(
+                row.find(".qty").val()
+            ) || 0;
+
+
+        var rate =
+            parseFloat(
+                row.find(".rate").val()
+            ) || 0;
+
+
+        var cgstRate =
+            parseFloat(
+                row.find(".cgst-rate").val()
+            ) || 0;
+
+
+        var sgstRate =
+            parseFloat(
+                row.find(".sgst-rate").val()
+            ) || 0;
+
+
+        var igstRate =
+            parseFloat(
+                row.find(".igst-rate").val()
+            ) || 0;
+
+
+        // -----------------------------------------
+        // BASIC AMOUNT
+        // -----------------------------------------
+        var amount =
+            qty * rate;
+
+
+        // -----------------------------------------
+        // GST AMOUNT
+        // -----------------------------------------
+        var cgstAmt =
+            (amount * cgstRate) / 100;
+
+
+        var sgstAmt =
+            (amount * sgstRate) / 100;
+
+
+        var igstAmt =
+            (amount * igstRate) / 100;
+
+
+        // -----------------------------------------
+        // FINAL TOTAL
+        // -----------------------------------------
+        var allTotal =
+            amount +
+            cgstAmt +
+            sgstAmt +
+            igstAmt;
+
+
+        // -----------------------------------------
+        // SET VALUES
+        // -----------------------------------------
+        row.find(".cgst-amt")
+            .val(cgstAmt.toFixed(2));
+
+
+        row.find(".sgst-amt")
+            .val(sgstAmt.toFixed(2));
+
+
+        row.find(".igst-amt")
+            .val(igstAmt.toFixed(2));
+
+
+        row.find(".amount")
+            .val(amount.toFixed(2));
+
+
+        row.find(".all-total")
+            .val(allTotal.toFixed(2));
+    }
+
+
+    function calculateGrandTotals() {
+
+        var basicAmount = 0;
+
+        var gstAmount = 0;
+
+        var finalAmount = 0;
+
+
+        $("#tblDetailsBody .detail-row")
+            .each(function () {
+
+                var row =
+                    $(this);
+
+
+                var amount =
+                    parseFloat(
+                        row.find(".amount").val()
+                    ) || 0;
+
+
+                var cgst =
+                    parseFloat(
+                        row.find(".cgst-amt").val()
+                    ) || 0;
+
+
+                var sgst =
+                    parseFloat(
+                        row.find(".sgst-amt").val()
+                    ) || 0;
+
+
+                var igst =
+                    parseFloat(
+                        row.find(".igst-amt").val()
+                    ) || 0;
+
+
+                var total =
+                    parseFloat(
+                        row.find(".all-total").val()
+                    ) || 0;
+
+
+                basicAmount += amount;
+
+
+                gstAmount +=
+                    cgst +
+                    sgst +
+                    igst;
+
+
+                finalAmount += total;
+
+            });
+
+
+        // -----------------------------------------
+        // SET HEADER TOTALS
+        // -----------------------------------------
+        $("#txtTotalDealBasicAmount")
+            .val(
+                basicAmount.toFixed(2)
+            );
+
+
+        $("#txtTotalDealGSTAmount")
+            .val(
+                gstAmount.toFixed(2)
+            );
+
+
+        if ($("#txtTotalAmountBalance").length) {
+
+            $("#txtTotalAmountBalance")
+                .val(
+                    finalAmount.toFixed(2)
+                );
+        }
+    }
+
+    $("#btnAddRow")
+        .off("click")
+        .on("click", function () {
+
+            var rowCount =
+                $("#tblDetailsBody .detail-row")
+                    .length;
+
+
+            var newRow = `
+
+    < tr class="detail-row" >
+
+                    < !--ACTION -->
+                    <td class="text-center">
+
+                        <button type="button"
+                                class="btn btn-danger btn-sm delete-row"
+                                title="Delete">
+
+                            <i class="fa fa-trash"></i>
+
+                        </button>
+
+                    </td>
+
+
+                    <!--SERVICE NAME-- >
+                    <td>
+
+                        <textarea
+                            class="form-control service-name"></textarea>
+
+                    </td>
+
+
+                    <!--SAC CODE-- >
+                    <td>
+
+                        <input type="text"
+                               class="form-control sac-code"
+                               value="00440013"
+                               maxlength="8"
+                               minlength="6"
+                               inputmode="numeric"
+                               oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,8);" />
+
+                    </td>
+
+
+                    <!--QTY -->
+                    <td>
+
+                        <input type="number"
+                               class="form-control qty"
+                               value="1"
+                               min="1"
+                               step="1" />
+
+                    </td>
+
+
+                    <!--RATE -->
+                    <td>
+
+                        <input type="number"
+                               class="form-control rate"
+                               value="0"
+                               min="0"
+                               step="0.01" />
+
+                    </td>
+
+
+                    <!--CGST RATE-- >
+                    <td>
+
+                        <input type="number"
+                               class="form-control cgst-rate"
+                               value="0"
+                               min="0"
+                               step="0.01" />
+
+                    </td>
+
+
+                    <!--CGST AMOUNT-- >
+                    <td>
+
+                        <input type="text"
+                               class="form-control cgst-amt"
+                               value="0.00"
+                               readonly />
+
+                    </td>
+
+
+                    <!--SGST RATE-- >
+                    <td>
+
+                        <input type="number"
+                               class="form-control sgst-rate"
+                               value="0"
+                               min="0"
+                               step="0.01" />
+
+                    </td>
+
+
+                    <!--SGST AMOUNT-- >
+                    <td>
+
+                        <input type="text"
+                               class="form-control sgst-amt"
+                               value="0.00"
+                               readonly />
+
+                    </td>
+
+
+                    <!--IGST RATE-- >
+                    <td>
+
+                        <input type="number"
+                               class="form-control igst-rate"
+                               value="0"
+                               min="0"
+                               step="0.01" />
+
+                    </td>
+
+
+                    <!--IGST AMOUNT-- >
+                    <td>
+
+                        <input type="text"
+                               class="form-control igst-amt"
+                               value="0.00"
+                               readonly />
+
+                    </td>
+
+
+                    <!--AMOUNT -->
+                    <td>
+
+                        <input type="text"
+                               class="form-control amount"
+                               value="0.00"
+                               readonly />
+
+                    </td>
+
+
+                    <!--ALL TOTAL-- >
+    <td>
+
+        <input type="text"
+            class="form-control all-total"
+            value="0.00"
+            readonly />
+
+    </td>
+
+                </tr >
+    `;
+
+
+            $("#tblDetailsBody")
+                .append(newRow);
+
+
+            reIndexRows();
+
+
+            calculateGrandTotals();
+        });
+
+    $(document)
+        .off("click", ".delete-row")
+        .on("click", ".delete-row", function () {
+
+            var rowCount =
+                $("#tblDetailsBody .detail-row")
+                    .length;
+
+
+            // -----------------------------------------
+            // AT LEAST ONE ROW
+            // -----------------------------------------
+            if (rowCount <= 1) {
+
+                showToast(
+                    "At least one Service is required.",
+                    "error"
+                );
+
+                return;
+            }
+
+
+            $(this)
+                .closest("tr")
+                .remove();
+
+
+            reIndexRows();
+
+
+            calculateGrandTotals();
+        });
+
+    $(document)
+        .off(
+            "input",
+            "#tblDetailsBody .qty, " +
+            "#tblDetailsBody .rate, " +
+            "#tblDetailsBody .cgst-rate, " +
+            "#tblDetailsBody .sgst-rate, " +
+            "#tblDetailsBody .igst-rate"
+        )
+        .on(
+            "input",
+            "#tblDetailsBody .qty, " +
+            "#tblDetailsBody .rate, " +
+            "#tblDetailsBody .cgst-rate, " +
+            "#tblDetailsBody .sgst-rate, " +
+            "#tblDetailsBody .igst-rate",
+
+            function () {
+
+                var row =
+                    $(this).closest("tr");
+
+
+                // -----------------------------------------
+                // CGST ENTERED
+                // -----------------------------------------
+                if (
+                    $(this).hasClass("cgst-rate")
+                ) {
+
+                    var cgstValue =
+                        $(this).val();
+
+
+                    row.find(".sgst-rate")
+                        .val(cgstValue);
+
+
+                    row.find(".igst-rate")
+                        .val("0");
+                }
+
+
+                // -----------------------------------------
+                // SGST ENTERED
+                // -----------------------------------------
+                if (
+                    $(this).hasClass("sgst-rate")
+                ) {
+
+                    var sgstValue =
+                        $(this).val();
+
+
+                    row.find(".cgst-rate")
+                        .val(sgstValue);
+
+
+                    row.find(".igst-rate")
+                        .val("0");
+                }
+
+
+                // -----------------------------------------
+                // IGST ENTERED
+                // -----------------------------------------
+                if (
+                    $(this).hasClass("igst-rate")
+                ) {
+
+                    var igstValue =
+                        parseFloat(
+                            $(this).val()
+                        ) || 0;
+
+
+                    if (igstValue > 0) {
+
+                        row.find(".cgst-rate")
+                            .val("0");
+
+                        row.find(".sgst-rate")
+                            .val("0");
+                    }
+                }
+
+
+                calculateDetailRow(row);
+
+                calculateGrandTotals();
+            }
+        );
+
+
+    function reIndexRows() {
+
+        $("#tblDetailsBody .detail-row")
+            .each(function (index) {
+
+                $(this)
+                    .attr(
+                        "data-index",
+                        index
+                    );
+            });
+    }
+
+
+    $(document)
+        .off("input", ".numeric")
+        .on("input", ".numeric", function () {
+
+            var val =
+                $(this).val();
+
+
+            val =
+                val.replace(
+                    /[^0-9.]/g,
+                    ""
+                );
+
+
+            // Only one decimal
+            var parts =
+                val.split(".");
+
+
+            if (parts.length > 2) {
+
+                val =
+                    parts[0] +
+                    "." +
+                    parts.slice(1).join("");
+            }
+
+
+            $(this)
+                .val(val);
+        });
+
+    function getServiceDescriptionList() {
+
+        var ServiceDescriptionList = [];
+
+
+        $("#tblDetailsBody .detail-row")
+            .each(function () {
+
+                var row =
+                    $(this);
+
+
+                var productDescription =
+                    row.find(".service-name")
+                        .val() || "";
+
+
+                var sacCode =
+                    row.find(".sac-code")
+                        .val() || "";
+
+
+                var qty =
+                    parseFloat(
+                        row.find(".qty").val()
+                    ) || 0;
+
+
+                var rate =
+                    parseFloat(
+                        row.find(".rate").val()
+                    ) || 0;
+
+
+                var cgstRate =
+                    parseFloat(
+                        row.find(".cgst-rate").val()
+                    ) || 0;
+
+
+                var cgstAmt =
+                    parseFloat(
+                        row.find(".cgst-amt").val()
+                    ) || 0;
+
+
+                var sgstRate =
+                    parseFloat(
+                        row.find(".sgst-rate").val()
+                    ) || 0;
+
+
+                var sgstAmt =
+                    parseFloat(
+                        row.find(".sgst-amt").val()
+                    ) || 0;
+
+
+                var igstRate =
+                    parseFloat(
+                        row.find(".igst-rate").val()
+                    ) || 0;
+
+
+                var igstAmt =
+                    parseFloat(
+                        row.find(".igst-amt").val()
+                    ) || 0;
+
+
+                var amount =
+                    parseFloat(
+                        row.find(".amount").val()
+                    ) || 0;
+
+
+                var total =
+                    parseFloat(
+                        row.find(".all-total").val()
+                    ) || 0;
+
+
+                ServiceDescriptionList.push({
+
+                    ID: 0,
+
+                    ProformaID:
+                        parseInt(
+                            $("#ID").val()
+                        ) || 0,
+
+                    ProductDescription:
+                        productDescription,
+
+                    SACCode:
+                        sacCode,
+
+                    Qty:
+                        qty.toString(),
+
+                    Rate:
+                        rate.toString(),
+
+                    Amount:
+                        amount.toString(),
+
+                    TaxableValue:
+                        amount.toString(),
+
+                    CGSTRate:
+                        cgstRate.toString(),
+
+                    CGSTAmt:
+                        cgstAmt.toString(),
+
+                    SGSTRate:
+                        sgstRate.toString(),
+
+                    SGSTAmt:
+                        sgstAmt.toString(),
+
+                    IGSTRate:
+                        igstRate.toString(),
+
+                    IGSTAmt:
+                        igstAmt.toString(),
+
+                    Total:
+                        total.toString()
+                });
+
+            });
+
+
+        return ServiceDescriptionList;
+    }
 
     var formValidator = function () {
+
         $("#btnSubmit")
             .off("click")
             .on("click", function (e) {
@@ -159,35 +1020,63 @@
                 var errors = [];
 
 
-                // Company
+                // -----------------------------------------
+                // COMPANY
+                // -----------------------------------------
                 if (!$("#ddlCompanyname").val()) {
+
                     errors.push(
                         "Please select Company Name."
                     );
+
                     $("#ddlCompanyname")
                         .addClass("is-invalid");
+
                 }
                 else {
+
                     $("#ddlCompanyname")
                         .removeClass("is-invalid");
                 }
-                // Address
-                if (!$("#txtAddress").val().trim()) {
+
+
+                // -----------------------------------------
+                // ADDRESS
+                // -----------------------------------------
+                if (
+                    !$("#txtAddress")
+                        .val()
+                        .trim()
+                ) {
+
                     errors.push(
                         "Address is required."
                     );
+
                     $("#txtAddress")
                         .addClass("is-invalid");
+
                 }
                 else {
+
                     $("#txtAddress")
                         .removeClass("is-invalid");
                 }
-                                // GST
-                if (!$("#txtGSTNo").val().trim()) {
+
+
+                // -----------------------------------------
+                // GST
+                // -----------------------------------------
+                if (
+                    !$("#txtGSTNo")
+                        .val()
+                        .trim()
+                ) {
+
                     errors.push(
                         "GSTIN is required."
                     );
+
                     $("#txtGSTNo")
                         .addClass("is-invalid");
 
@@ -199,7 +1088,9 @@
                 }
 
 
-                // State
+                // -----------------------------------------
+                // STATE
+                // -----------------------------------------
                 if (!$("#ddlBillState").val()) {
 
                     errors.push(
@@ -217,7 +1108,9 @@
                 }
 
 
-                // Proforma Date
+                // -----------------------------------------
+                // PROFORMA DATE
+                // -----------------------------------------
                 if (!$("#txtProformaDate").val()) {
 
                     errors.push(
@@ -235,27 +1128,70 @@
                 }
 
 
-                // Service
-                var table =
-                    $("#tblService").DataTable();
+                // -----------------------------------------
+                // DETAIL ROW
+                // -----------------------------------------
+                var rowCount =
+                    $("#tblDetailsBody .detail-row")
+                        .length;
 
-                if (table.rows().count() === 0) {
+
+                if (rowCount === 0) {
 
                     errors.push(
                         "Please add at least one Service."
                     );
 
-                    $("#tblService")
+                    $("#tbldetails")
                         .addClass("table-invalid");
 
                 }
                 else {
 
-                    $("#tblService")
+                    $("#tbldetails")
                         .removeClass("table-invalid");
                 }
 
 
+                // -----------------------------------------
+                // SERVICE NAME VALIDATION
+                // -----------------------------------------
+                $("#tblDetailsBody .detail-row")
+                    .each(function (index) {
+
+                        var serviceName =
+                            $(this)
+                                .find(".service-name")
+                                .val()
+                                .trim();
+
+
+                        if (!serviceName) {
+
+                            errors.push(
+                                "Service Name is required in row " +
+                                (index + 1) +
+                                "."
+                            );
+
+
+                            $(this)
+                                .find(".service-name")
+                                .addClass("is-invalid");
+                        }
+                        else {
+
+                            $(this)
+                                .find(".service-name")
+                                .removeClass("is-invalid");
+                        }
+
+                    });
+
+
+                // -----------------------------------------
+                // SHOW ERRORS
+                // -----------------------------------------
                 if (errors.length > 0) {
 
                     errors.forEach(function (msg) {
@@ -271,651 +1207,667 @@
                 }
 
 
-                var ServiceDescriptionList = [];
+                // =================================================
+                // GET DETAILS
+                // =================================================
+                var ServiceDescriptionList =
+                    getServiceDescriptionList();
 
-                var table = $("#tblService").DataTable();
 
-                table.rows().every(function () {
-
-                    var data = this.data();
-
-                    ServiceDescriptionList.push({
-
-                        ID: 0,
-
-                        ProformaID:
-                            parseInt($("#ID").val()) || 0,
-
-                        ProductDescription:
-                            data[1] || null,
-
-                        SACCode:
-                            data[2] || null,
-
-                        Qty:
-                            (parseFloat(data[3]) || 0).toString(),
-
-                        Rate:
-                            (parseFloat(data[4]) || 0).toString(),
-
-                        Amount:
-                            (parseFloat(data[11]) || 0).toString(),
-
-                        TaxableValue:
-                            (parseFloat(data[11]) || 0).toString(),
-
-                        CGSTRate:
-                            (parseFloat(data[5]) || 0).toString(),
-
-                        CGSTAmt:
-                            (parseFloat(data[6]) || 0).toString(),
-
-                        SGSTRate:
-                            (parseFloat(data[7]) || 0).toString(),
-
-                        SGSTAmt:
-                            (parseFloat(data[8]) || 0).toString(),
-
-                        IGSTRate:
-                            (parseFloat(data[9]) || 0).toString(),
-
-                        IGSTAmt:
-                            (parseFloat(data[10]) || 0).toString(),
-
-                        Total:
-                            (parseFloat(data[12]) || 0).toString()
-                    });
-
-                });
-
+                // =================================================
+                // MAIN DATA
+                // =================================================
                 var DataList = {
 
-                    ID: parseInt($("#ID").val()) || 0,
-                    ProformaDate: $("#txtProformaDate").val() || null,
-                    ReverseCharge: $("#ddlReverseCharge").val() || "N",
-                    CompanyName: $("#ddlCompanyname option:selected").text() || null,
-                    CompanyCode:   $("#ddlCompanyname").val() || null,
-                    Address: $("#txtAddress").val() || null,
-                    GSTNO:    $("#txtGSTNo").val() || null,
-                    BillState:$("#ddlBillState").val() || null,
-                    State:$("#ddlBillState").val() || null,
-                    TotalAmtBeforeTax:  $("#txtTotalDealBasicAmount").val()  || 0,
-                    TotalAmtAfterTax:   $("#txtTotalDealGSTAmount").val() || 0,  
-                    objtblProformaDtl:ServiceDescriptionList
+                    ID:
+                        parseInt(
+                            $("#ID").val()
+                        ) || 0,
 
+                    ProformaDate:
+                        $("#txtProformaDate").val() ||
+                        null,
+
+                    ReverseCharge:
+                        $("#ddlReverseCharge").val() ||
+                        "N",
+
+                    CompanyName:
+                        $("#ddlCompanyname option:selected")
+                            .text() ||
+                        null,
+
+                    CompanyCode:
+                        $("#ddlCompanyname").val() ||
+                        null,
+
+                    Address:
+                        $("#txtAddress").val() ||
+                        null,
+
+                    GSTNO:
+                        $("#txtGSTNo").val() ||
+                        null,
+
+                    BillState:
+                        $("#ddlBillState").val() ||
+                        null,
+
+                    State:
+                        $("#ddlBillState").val() ||
+                        null,
+
+                    TotalAmtBeforeTax:
+                        $("#txtTotalDealBasicAmount")
+                            .val() ||
+                        "0",
+
+                    TotalAmtAfterTax:
+                        $("#txtTotalDealGSTAmount")
+                            .val() ||
+                        "0",
+
+                    objtblProformaDtl:
+                        ServiceDescriptionList
                 };
 
 
+                // =================================================
+                // CONSOLE
+                // =================================================
                 console.log(
                     "Proforma Data:",
                     DataList
                 );
 
+
                 console.log(
+                    "JSON:",
                     JSON.stringify(DataList)
                 );
-                $("#loader").show();
 
+
+                // =================================================
+                // LOADER
+                // =================================================
+                $("#loader")
+                    .show();
+
+
+                // =================================================
+                // SAVE / UPDATE
+                // =================================================
                 $.ajax({
-                    url: "/Proforma/CreateOrEdit",
-                    type: "POST",
-                    data: JSON.stringify(DataList),
-                    contentType: "application/json; charset=utf-8",
-                    dataType:"json",
-                    cache: false,
 
-                    success: function (response) {
+                    url:
+                        "/Proforma/CreateOrEdit",
 
-                        console.log(
-                            "Response:",
-                            response
-                        );
+                    type:
+                        "POST",
+
+                    data:
+                        JSON.stringify(DataList),
+
+                    contentType:
+                        "application/json; charset=utf-8",
+
+                    dataType:
+                        "json",
+
+                    cache:
+                        false,
 
 
-                        if (
-                            response.success === true
+                    success:
+                        function (response) {
+
+                            console.log(
+                                "Response:",
+                                response
+                            );
+
+
+                            if (
+                                response.success === true
+                            ) {
+
+                                showToast(
+
+                                    response.message ||
+                                    "Proforma saved successfully.",
+
+                                    "success"
+                                );
+
+
+                                setTimeout(
+                                    function () {
+
+                                        window.location.href =
+                                            "/Proforma/Index";
+
+                                    },
+                                    1500
+                                );
+                            }
+                            else {
+
+                                showToast(
+
+                                    response.message ||
+                                    response.Message ||
+                                    "Unable to save Proforma.",
+
+                                    "error"
+                                );
+                            }
+                        },
+
+
+                    error:
+                        function (
+                            xhr,
+                            status,
+                            error
                         ) {
 
-                            showToast(
-                                response.message ||
-                                "Proforma saved successfully.",
-                                "success"
+                            console.error(
+                                "AJAX Error:",
+                                error
                             );
 
 
-                            setTimeout(function () {
+                            console.error(
+                                "Response:",
+                                xhr.responseText
+                            );
 
-                                window.location.href =
-                                    "/Proforma/Index";
-
-                            }, 1500);
-
-                        }
-                        else {
 
                             showToast(
-                                response.message ||
-                                response.Message ||
-                                "Unable to save Proforma.",
+                                "Error saving Proforma. Please try again.",
                                 "error"
                             );
+                        },
 
+
+                    complete:
+                        function () {
+
+                            $("#loader")
+                                .hide();
                         }
-
-                    },
-
-
-                    error: function (
-                        xhr,
-                        status,
-                        error
-                    ) {
-
-                        console.error(
-                            "AJAX Error:",
-                            error
-                        );
-
-                        console.error(
-                            xhr.responseText
-                        );
-
-
-                        showToast(
-                            "Error saving Proforma. Please try again.",
-                            "error"
-                        );
-
-                    },
-
-
-                    complete: function () {
-
-                        $("#loader").hide();
-
-                    }
-
                 });
 
             });
     };
 
     var loadProformaData = function () {
-        if (ID != null && ID != undefined && ID != "") {
-            try {
-                $.ajax({
-                    url: "/Proforma/GetProformaDataById",
-                    data: { "ID": ID },
-                    type: "post",
-                    cache: false,
-                    success: function (response) {
-                        if (response.success == true) {
-                            var result = response.data || [];
-                            if (result != null && result != undefined) {
 
-                                $("#btnSubmit").html("Update");
-                                $("#lblHeader").html("UPDATE Proforma");
+        if (
+            ID == null ||
+            ID == undefined ||
+            ID == ""
+        ) {
 
-                                var hdr = result.proformaHdr || [];
-                                var details = result.proformaDtls;
+            return;
+        }
 
-                                $("#ID").val(hdr.id);
 
-                                Companytext = hdr.companyName;
-                                BindCompanyList(); // assumes this sets ddlCompanyname based on Companytext
-                                $("#ddlCompanyname").val(hdr.companyCode).trigger('change');
+        $.ajax({
 
-                                $("#txtAddress").val(hdr.address);
-                                $("#txtGSTNo").val(hdr.gstno);
-                                $("#ddlBillState").val(hdr.billState).trigger('change');
-                                $("#ddlReverseCharge").val(hdr.reverseCharge).trigger('change');
+            url:
+                "/Proforma/GetProformaDataById",
 
-                                $("#txtProformaDate").val(formatDateToDDMMYYYY(hdr.proformaDate));
+            data: {
+                ID: ID
+            },
 
-                                $("#txtTotalDealBasicAmount").val(hdr.totalAmtBeforeTax);
-                                $("#txtTotalDealGSTAmount").val(hdr.totalAmtAfterTax);
+            type:
+                "POST",
 
-                                var table = $("#tblService").DataTable();
-                                table.clear();
+            cache:
+                false,
 
-                                var action =
-                                    "<button type='button' class='edit_btn btn btn-warning btn-sm' title='Edit'>" +
-                                    "<i class='fa-solid fa-pen-to-square'></i>" +
-                                    "</button> ";
-                                if (details.length > 0) {
-                                    $.each(details, function (i, item) {
-                                        table.row.add([
-                                            action,
-                                            item.productDescription || "",
-                                            item.sacCode || "",
-                                            item.qty || 0,
-                                            item.rate || 0,
-                                            item.cgstRate || 0,
-                                            item.cgstAmt || 0,
-                                            item.sgstRate || 0,
-                                            item.sgstAmt || 0,
-                                            item.igstRate || 0,
-                                            item.igstAmt || 0,
-                                            item.amount || 0,
-                                            item.total || 0
-                                        ]);
-                                    });
-                                    table.draw();
-                                    $("#divtableservice").show();
-                                }
-                            }
-                        }
-                        else {
-                            showToast(response.message || "Unable to load Proforma.", "error");
-                        }
-                    },
-                    error: function (xhr, ajaxOptions, thrownError) {
-                        console.error("Error loading Proforma:", thrownError);
-                        showToast("Error loading Proforma. Please try again.", "error");
+
+            success:
+                function (response) {
+
+                    if (
+                        response.success !== true
+                    ) {
+
+                        showToast(
+                            response.message ||
+                            "Unable to load Proforma.",
+                            "error"
+                        );
+
+                        return;
                     }
-                });
-            }
-            catch (err) {
-                console.log(err);
-            }
-        }
-    }
-    function formatDateToDDMMYYYY(dateValue) {
-        if (!dateValue) return "";
-
-        var date = new Date(dateValue);
-
-        if (isNaN(date.getTime())) return "";
-
-        var day = String(date.getDate()).padStart(2, '0');
-        var month = String(date.getMonth() + 1).padStart(2, '0');
-        var year = date.getFullYear();
-
-        return year + "-" + month + "-" + day ;
-    }
-    function calculateSpareDetails() {
-
-        var qty = parseFloat($('#txtQTY').val()) || 0;
-        var rate = parseFloat($('#txtRate').val()) || 0;
-
-        var cgst = parseFloat($('#txtCGST').val()) || 0;
-        var sgst = parseFloat($('#txtSGST').val()) || 0;
-        var igst = parseFloat($('#txtIGST').val()) || 0;
-
-        // Basic Amount
-        var basicAmount = qty * rate;
-
-        // GST Amounts
-        var cgstAmt = (basicAmount * cgst) / 100;
-        var sgstAmt = (basicAmount * sgst) / 100;
-        var igstAmt = (basicAmount * igst) / 100;
-
-        // Total GST
-        var totalGST = cgstAmt + sgstAmt + igstAmt;
-
-        // Final Total
-        var total = basicAmount + totalGST;
-
-        // Set values
-        $('#txtCGSTAmt').val(cgstAmt.toFixed(2));
-        $('#txtSGSTAmt').val(sgstAmt.toFixed(2));
-        $('#txtIGSTAmt').val(igstAmt.toFixed(2));
-
-        $('#txtTotal').val(basicAmount.toFixed(2));
-        $('#txtAllTotal').val(total.toFixed(2));
-    }
-
-    //input number only
-    $('.numeric').keyup(function () {
-        var val = $(this).val();
-        if (isNaN(val)) {
-            val = val.replace(/[^0-9\.]/g, '');
-            if (val.split('.').length > 2)
-                val = val.replace(/\.+$/, "");
-        }
-        $(this).val(val);
-    });
-
-    $('#tblService').DataTable({
-        paging: false,
-        searching: false,
-        info: false,
-        lengthChange: false
-    });
-
-    $('#txtQTY, #txtRate, #txtCGST, #txtSGST, #txtIGST').on('keyup', function () {
-        if ($(this).attr('id') === 'txtCGST') {
-            $('#txtSGST').val($(this).val());
-            $('#txtIGST').val('0');
-        }
-        if ($(this).attr('id') === 'txtSGST') {
-            $('#txtCGST').val($(this).val());
-            $('#txtIGST').val('0');
-        }
-        if ($(this).attr('id') === 'txtIGST') {
-            if ($(this).val() !== '' && parseFloat($(this).val()) > 0) {
-                $('#txtCGST').val('0');
-                $('#txtSGST').val('0');
-            }
-        }
-        calculateSpareDetails();
-    });
-
-   
-    var Servicetext = "";
-    var AddDeleteEffortsRow = function () {
-
-        $(".add-row1").off("click").on("click", function () {
-
-            var ServiceName = $("#txtServicenname").val();
-
-            var SacCode = $("#txtSacCode").val();
-            var QTY = $("#txtQTY").val();
-            var Rate = $("#txtRate").val();
-
-            var CGST = $("#txtCGST").val();
-            var CGSTAmt = $("#txtCGSTAmt").val();
-
-            var SGST = $("#txtSGST").val();
-            var SGSTAmt = $("#txtSGSTAmt").val();
-
-            var IGST = $("#txtIGST").val();
-            var IGSTAmt = $("#txtIGSTAmt").val();
-
-            var Total = $("#txtTotal").val();
-            var AllTotal = $("#txtAllTotal").val();
 
 
-            // Validation
-            if (
-                !ServiceName ||
-                !QTY ||
-                !Rate) {
-
-                showToast("Please enter all required service details.", "warning");
-                return;
-            }
+                    var result =
+                        response.data || {};
 
 
-            // Show table
-            $("#divtableservice").show();
+                    // =================================================
+                    // HEADER
+                    // =================================================
+                    var hdr =
+                        result.proformaHdr || {};
 
 
-            // DataTable
-            var table = $('#tblService').DataTable();
+                    // =================================================
+                    // DETAILS
+                    // =================================================
+                    var details =
+                        result.proformaDtls || [];
 
 
-            // Action button
-            var action =
-                "<button type='button' class='edit_btn btn btn-warning btn-sm' title='Edit'>" +
-                "<i class='fa-solid fa-pen-to-square'></i>" +
-                "</button> ";
+                    // =================================================
+                    // UPDATE MODE
+                    // =================================================
+                    $("#btnSubmit")
+                        .html("Update");
 
 
-            // Add row
-            table.row.add([
-                action,
-                ServiceName,
-                SacCode || "",
-                QTY || "0",
-                Rate || "0",
-                CGST || "0",
-                CGSTAmt || "0",
-                SGST || "0",
-                SGSTAmt || "0",
-                IGST || "0",
-                IGSTAmt || "0",
-                Total || "0",
-                AllTotal || "0"
-            ]).draw(false);
+                    $("#lblHeader")
+                        .html("UPDATE Proforma");
 
 
-            // Clear fields
-            ClearServiceFields();
+                    $("#ID")
+                        .val(hdr.id || ID);
 
 
-            // Calculate total
-            CalculateServiceTotal();
+                    // =================================================
+                    // COMPANY
+                    // =================================================
+                    Companytext =
+                        hdr.companyName || "";
 
+
+                    // First bind company
+                    BindCompanyList();
+
+
+                    // =================================================
+                    // OTHER HEADER VALUES
+                    // =================================================
+                    $("#txtAddress")
+                        .val(hdr.address || "");
+
+
+                    $("#txtGSTNo")
+                        .val(hdr.gstno || "");
+
+
+                    $("#ddlReverseCharge")
+                        .val(hdr.reverseCharge || "N")
+                        .trigger("change");
+
+
+                    $("#ddlBillState")
+                        .val(hdr.billState || "")
+                        .trigger("change");
+
+
+                    $("#txtProformaDate")
+                        .val(
+                            formatDateToDDMMYYYY(
+                                hdr.proformaDate
+                            )
+                        );
+
+
+                    $("#txtTotalDealBasicAmount")
+                        .val(
+                            parseFloat(
+                                hdr.totalAmtBeforeTax || 0
+                            ).toFixed(2)
+                        );
+
+
+                    $("#txtTotalDealGSTAmount")
+                        .val(
+                            parseFloat(
+                                hdr.totalAmtAfterTax || 0
+                            ).toFixed(2)
+                        );
+
+
+                    // =================================================
+                    // SELECT COMPANY AFTER LIST IS LOADED
+                    // =================================================
+                    setTimeout(function () {
+
+                        if (hdr.companyCode) {
+
+                            $("#ddlCompanyname")
+                                .val(hdr.companyCode)
+                                .trigger("change");
+                        }
+
+                    }, 300);
+
+
+                    // =================================================
+                    // CLEAR DETAIL TABLE
+                    // =================================================
+                    $("#tblDetailsBody")
+                        .empty();
+
+
+                    // =================================================
+                    // LOAD DETAIL ROWS
+                    // =================================================
+                    if (details.length > 0) {
+
+                        $.each(
+                            details,
+                            function (i, item) {
+
+                                addDetailRow(item);
+
+                            }
+                        );
+
+                    }
+                    else {
+
+                        // Add one empty row
+                        addDetailRow(null);
+                    }
+
+
+                    // =================================================
+                    // REINDEX
+                    // =================================================
+                    reIndexRows();
+
+
+                    // =================================================
+                    // CALCULATE TOTAL
+                    // =================================================
+                    $("#tblDetailsBody .detail-row")
+                        .each(function () {
+
+                            calculateDetailRow(
+                                $(this)
+                            );
+
+                        });
+
+
+                    calculateGrandTotals();
+
+                },
+
+
+            error:
+                function (
+                    xhr,
+                    ajaxOptions,
+                    thrownError
+                ) {
+
+                    console.error(
+                        "Error loading Proforma:",
+                        thrownError
+                    );
+
+
+                    console.error(
+                        xhr.responseText
+                    );
+
+
+                    showToast(
+                        "Unable to load Proforma. Please try again.",
+                        "error"
+                    );
+                }
         });
-
-        $('#tblService')
-            .off('click', 'tbody .edit_btn')
-            .on('click', 'tbody .edit_btn', function () {
-
-                var table = $('#tblService').DataTable();
-
-                var row = table.row($(this).closest('tr'));
-
-                var data_row = row.data();
-
-                if (!data_row) {
-                    return;
-                }
-
-
-                // Store DataTable row index
-                $("#rowID").val(row.index());
-
-                $("#txtServicenname").val(data_row[1] || "");
-
-                // Other fields
-                $("#txtSacCode").val(data_row[2] || "00440013");
-                $("#txtQTY").val(data_row[3] || "1");
-                $("#txtRate").val(data_row[4] || "0");
-
-                $("#txtCGST").val(data_row[5] || "0");
-                $("#txtCGSTAmt").val(data_row[6] || "0");
-
-                $("#txtSGST").val(data_row[7] || "0");
-                $("#txtSGSTAmt").val(data_row[8] || "0");
-
-                $("#txtIGST").val(data_row[9] || "0");
-                $("#txtIGSTAmt").val(data_row[10] || "0");
-
-                $("#txtTotal").val(data_row[11] || "0");
-                $("#txtAllTotal").val(data_row[12] || "0");
-
-
-                // Button visibility
-                $("#btnaddrow").hide();
-                $("#btnupdaterow").show();
-
-            });
-
-
-        $(".update-row")
-            .off("click")
-            .on("click", function () {
-
-                var rowID = $("#rowID").val();
-
-                if (rowID === "" || rowID === null) {
-
-                    showToast("Please select a service to update.", "warning");
-                    return;
-                }
-
-
-                var ServiceName = $("#txtServicenname").val();     
-
-                var SacCode = $("#txtSacCode").val();
-                var QTY = $("#txtQTY").val();
-                var Rate = $("#txtRate").val();
-
-                var CGST = $("#txtCGST").val();
-                var CGSTAmt = $("#txtCGSTAmt").val();
-
-                var SGST = $("#txtSGST").val();
-                var SGSTAmt = $("#txtSGSTAmt").val();
-
-                var IGST = $("#txtIGST").val();
-                var IGSTAmt = $("#txtIGSTAmt").val();
-
-                var Total = $("#txtTotal").val();
-                var AllTotal = $("#txtAllTotal").val();
-
-
-                // Validation
-                if (
-                    !ServiceName ||
-                    !QTY ||
-                    !Rate) {
-
-                    showToast("Please enter all required service details.", "warning");
-                    return;
-                }
-
-
-                var action =
-                    "<button type='button' class='edit_btn btn btn-warning btn-sm' title='Edit'>" +
-                    "<i class='fa-solid fa-pen-to-square'></i>" +
-                    "</button> ";
-
-
-                var table = $('#tblService').DataTable();
-
-
-                // Update exact DataTable row
-                table.row(parseInt(rowID)).data([
-                    action,
-                    ServiceName,
-                    SacCode || "",
-                    QTY || "0",
-                    Rate || "0",
-                    CGST || "0",
-                    CGSTAmt || "0",
-                    SGST || "0",
-                    SGSTAmt || "0",
-                    IGST || "0",
-                    IGSTAmt || "0",
-                    Total || "0",
-                    AllTotal || "0"
-                ]).draw(false);
-
-
-                // Clear
-                $("#rowID").val("");
-
-                ClearServiceFields();
-
-
-                // Buttons
-                $("#btnaddrow").show();
-                $("#btnupdaterow").hide();
-
-
-                // Calculate
-                CalculateServiceTotal();
-
-            });
-
-
-        $(".delete-row1")
-            .off("click")
-            .on("click", function () {
-
-                var table = $('#tblService').DataTable();
-
-                var checkedRows =
-                    $('#tblService tbody input[name="record"]:checked');
-
-                if (checkedRows.length === 0) {
-
-                    showToast("Please select a row to delete.", "warning");
-                    return;
-                }
-
-
-                checkedRows.each(function () {
-
-                    table
-                        .row($(this).closest('tr'))
-                        .remove();
-
-                });
-
-
-                table.draw(false);
-
-                CalculateServiceTotal();
-
-
-                if (table.rows().count() === 0) {
-                    $("#divtableservice").hide();
-                }
-
-            });
-
     };
 
-    function ClearServiceFields() {
+    $("#btnAddRow").off("click").on("click", function () {
 
-        $("#txtServicenname").val("");
-        $("#txtSacCode").val("00440013");
+        addDetailRow(null);
 
-        $("#txtRate").val("0");
+    });
+    function addDetailRow(item) {
 
-        $("#txtCGST").val("0");
-        $("#txtCGSTAmt").val("0");
+        item = item || {};
 
-        $("#txtSGST").val("0");
-        $("#txtSGSTAmt").val("0");
+        var serviceName = item.productDescription || "";
+        var sacCode = item.sacCode || "00440013";
+        var qty = item.qty || 1;
+        var rate = item.rate || 0;
 
-        $("#txtIGST").val("0");
-        $("#txtIGSTAmt").val("0");
+        var cgstRate = item.cgstRate || 0;
+        var cgstAmt = item.cgstAmt || 0;
 
-        $("#txtTotal").val("0");
-        $("#txtAllTotal").val("0");
+        var sgstRate = item.sgstRate || 0;
+        var sgstAmt = item.sgstAmt || 0;
 
-        $("#txtQTY").val("1");
+        var igstRate = item.igstRate || 0;
+        var igstAmt = item.igstAmt || 0;
 
-        Servicetext = "";
+        var amount = item.amount || 0;
+        var total = item.total || 0;
+
+
+        var newRow = `
+        <tr class="detail-row">
+
+            <!-- 1. ACTION -->
+            <td class="text-center">
+                <button type="button"
+                        class="btn btn-danger btn-sm delete-row"
+                        title="Delete"
+                        style="width:40px;">
+                    <i class="fa fa-trash"></i>
+                </button>
+            </td>
+
+
+            <!-- 2. SERVICE NAME -->
+            <td>
+                <textarea class="form-control service-name"
+                          rows="1">${escapeHtml(serviceName)}</textarea>
+            </td>
+
+
+            <!-- 3. SAC CODE -->
+            <td>
+                <input type="text"
+                       class="form-control sac-code"
+                       value="${escapeHtml(sacCode)}"
+                       maxlength="8"
+                       minlength="6"
+                       inputmode="numeric"
+                       oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,8);" />
+            </td>
+
+
+            <!-- 4. QTY -->
+            <td>
+                <input type="number"
+                       class="form-control qty"
+                       value="${qty}"
+                       min="1"
+                       step="1" />
+            </td>
+
+
+            <!-- 5. RATE -->
+            <td>
+                <input type="number"
+                       class="form-control rate"
+                       value="${rate}"
+                       min="0"
+                       step="0.01" />
+            </td>
+
+
+            <!-- 6. CGST % -->
+            <td>
+                <input type="number"
+                       class="form-control cgst-rate"
+                       value="${cgstRate}"
+                       min="0"
+                       step="0.01" />
+            </td>
+
+
+            <!-- 7. CGST AMOUNT -->
+            <td>
+                <input type="text"
+                       class="form-control cgst-amt"
+                       value="${parseFloat(cgstAmt || 0).toFixed(2)}"
+                       readonly />
+            </td>
+
+
+            <!-- 8. SGST % -->
+            <td>
+                <input type="number"
+                       class="form-control sgst-rate"
+                       value="${sgstRate}"
+                       min="0"
+                       step="0.01" />
+            </td>
+
+
+            <!-- 9. SGST AMOUNT -->
+            <td>
+                <input type="text"
+                       class="form-control sgst-amt"
+                       value="${parseFloat(sgstAmt || 0).toFixed(2)}"
+                       readonly />
+            </td>
+
+
+            <!-- 10. IGST % -->
+            <td>
+                <input type="number"
+                       class="form-control igst-rate"
+                       value="${igstRate}"
+                       min="0"
+                       step="0.01" />
+            </td>
+
+
+            <!-- 11. IGST AMOUNT -->
+            <td>
+                <input type="text"
+                       class="form-control igst-amt"
+                       value="${parseFloat(igstAmt || 0).toFixed(2)}"
+                       readonly />
+            </td>
+
+
+            <!-- 12. AMOUNT -->
+            <td>
+                <input type="text"
+                       class="form-control amount"
+                       value="${parseFloat(amount || 0).toFixed(2)}"
+                       readonly />
+            </td>
+
+
+            <!-- 13. ALL TOTAL -->
+            <td>
+                <input type="text"
+                       class="form-control all-total"
+                       value="${parseFloat(total || 0).toFixed(2)}"
+                       readonly />
+            </td>
+
+        </tr>
+    `;
+
+
+        // IMPORTANT
+        // Add TR inside existing tbody
+        $("#tblDetailsBody").append(newRow);
+
+
+        // Calculate newly added row
+        var row = $("#tblDetailsBody .detail-row").last();
+
+        calculateDetailRow(row);
+
+        // Recalculate grand totals
+        calculateGrandTotals();
     }
 
-    var CalculateServiceTotal = function () {
+    function escapeHtml(value) {
 
-        var table = $('#tblService').DataTable();
+        if (
+            value === null ||
+            value === undefined
+        ) {
 
-        var basicAmount = 0;
-        var gstAmount = 0;
+            return "";
+        }
 
-        table.rows().every(function () {
 
-            var data = this.data();
+        return String(value)
 
-            var basic = parseFloat(data[11]) || 0;
+            .replace(/&/g, "&amp;")
 
-            var cgstAmt = parseFloat(data[6]) || 0;
-            var sgstAmt = parseFloat(data[8]) || 0;
-            var igstAmt = parseFloat(data[10]) || 0;
+            .replace(/</g, "&lt;")
 
-            basicAmount += basic;
-            gstAmount += cgstAmt + sgstAmt + igstAmt;
-        });
+            .replace(/>/g, "&gt;")
 
-        var totalAmount = basicAmount + gstAmount;
+            .replace(/"/g, "&quot;")
 
-        $("#txtTotalDealBasicAmount").val(basicAmount.toFixed(2));
-        $("#txtTotalDealGSTAmount").val(gstAmount.toFixed(2));
-        $("#txtTotalAmountBalance").val(totalAmount.toFixed(2));
-    };
-    
+            .replace(/'/g, "&#039;");
+    }
 
+    $("#serviceBody").hide();
+
+ 
     return {
-        init: function () {          
-            const today = new Date().toISOString().split('T')[0];
-            $("#txtProformaDate").val(today);
 
-            if (ID != null && ID != undefined && ID != "") {
-                loadProformaData();
-            }
-            formValidator();
-            BindCompanyList();      
-            AddDeleteEffortsRow();
+        init: function () {
+
+            BindCompanyList();
+
             BindStateList();
 
 
+            if (
+                ID != null &&
+                ID != undefined &&
+                ID != "Create"
+            ) {
+
+                loadProformaData();
+            }
+            else {
+                const today =
+                    new Date()
+                        .toISOString()
+                        .split("T")[0];
+
+
+                $("#txtProformaDate")
+                    .val(today);
+                if ($("#tblDetailsBody tr").length === 0) {
+                    addDetailRow(null);
+                }
+            }
+
+
+            formValidator();
+
+            calculateGrandTotals();
         }
     };
+
 }();
+
+
+
+
