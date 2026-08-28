@@ -242,10 +242,9 @@ namespace WEBLINK_CRM.Controllers
 
                 if (result == -1)
                 {
-                    TempData["Save_Record"] = "Company already exists.";
-                    TempData["icon"] = "warning";
-                    TempData["Time"] = "2000";
-
+                    TempData["ToastMessage"] = "Company already exists.";
+                    TempData["ToastType"] = "warning";
+           
                     return RedirectToAction("Index", "Companymaster");
 
                 }
@@ -253,9 +252,8 @@ namespace WEBLINK_CRM.Controllers
 
                 if (result > 0)
                 {
-                    TempData["Save_Record"] = "Company Created successfully.";
-                    TempData["icon"] = "success";
-                    TempData["Time"] = "2000";
+                    TempData["ToastMessage"] = "Company Created successfully.";
+                    TempData["ToastType"] = "success";          
 
                     return RedirectToAction("Index", "Companymaster");
 

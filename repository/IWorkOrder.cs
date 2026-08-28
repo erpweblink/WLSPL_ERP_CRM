@@ -23,7 +23,7 @@ namespace WEBLINK_CRM.repository
 
         Task<List<WorkOrderDetailVM>> GetWorkDetailsById(string ID);
 
-        Task<List<BankDetailVM>> GetBankDetailsById(string ID);
+        Task<List<VM_WorkOrder.BankDetailVM>> GetBankDetailsById(string ID);
         Task<bool> DeleteWorkOrder(int id);
 
         Task<bool> AdminApproveWorkOrder(int ID);
