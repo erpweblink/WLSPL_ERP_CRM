@@ -20,7 +20,8 @@ namespace WEBLINK_CRM.repository
         Task<int> Save(VM_Proforma model);
 
         Task<bool> Delete(int id);
+        byte[] ProformaPdf(int id);
 
-      
+
     }
 }

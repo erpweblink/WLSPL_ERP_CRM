@@ -569,9 +569,17 @@
             type: 'POST',
             data: { ID: id },
             success: function (response) {
-
                 if (response.success) {
-                   
+                    const byteChars = atob(response.fileData);
+                const byteNumbers = new Array(byteChars.length);
+                for (let i = 0; i < byteChars.length; i++) {
+                    byteNumbers[i] = byteChars.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const blob = new Blob([byteArray], { type: 'application/pdf' });
+                const url = window.URL.createObjectURL(blob);              
+                window.open(url);
+                setTimeout(() => window.URL.revokeObjectURL(url), 10000);
                 } else {
                     showToast(response.message || "Failed to View PDF.","error");
                 }
