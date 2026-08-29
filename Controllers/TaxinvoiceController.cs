@@ -1,12 +1,7 @@
-﻿using Dapper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
-using System.Data;
-using WEBLINK_CRM.repository;
+﻿using Microsoft.AspNetCore.Mvc;
 using WLSPL_ERP_CRM.Models;
 using WLSPL_ERP_CRM.repository;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using static WLSPL_ERP_CRM.Models.Taxinvoice;
 
 namespace WLSPL_ERP_CRM.Controllers
 {
@@ -102,23 +97,50 @@ namespace WLSPL_ERP_CRM.Controllers
 
         public async Task<IActionResult> Create()
         {
+            var invoiceMain = await _TaxinvoiceRepo.Getinvoicenoss();
+
+            var companies = await _TaxinvoiceRepo.Getcompany();
+
+            var model = new TaxInvoiceCreateVM
+            {
+                main = invoiceMain ?? new TaxInvoiceCreate(),
+                details = new List<Taxinvoice.InvoiceDetails>(),
+                companies = companies ?? new List<TaxInvoiceCreate>()
+            };
+
+            if (model.main.invoicedate == null)
+            {
+                model.main.invoicedate = DateTime.Today;
+            }
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult SaveInvoice([FromBody] TaxInvoiceCreateVM model)
+        {
+            model.main.sessionname = HttpContext.Session.GetString("EmpCode")?.ToString();
+
+            if (!ModelState.IsValid)
+                return Json(new { success = false, message = "Invalid data." });
+
+            var result = _TaxinvoiceRepo.UpdateSave(model);
+    
+            return Json(new { success = true, invoiceNo = model.main.invoiceno });
+        }
+
+
+
+        //old Page checing method 
+        public async Task<IActionResult> TaxInvoiceCreate()
+        {
             var invoiceMain = await _TaxinvoiceRepo.Getinvoiceno();
 
             var companies = await _TaxinvoiceRepo.Getcompany();
 
-            // DEBUG
-            Console.WriteLine("Company Count = " + companies.Count);
-
-            foreach (var company in companies)
-            {
-                Console.WriteLine("Company Name = " + company.cname);
-            }
-
             var model = new Taxinvoice.TaxInvoiceCreateViewModel
             {
                 Main = invoiceMain ?? new Taxinvoice.InvoiceMain(),
-                Details = new List<Taxinvoice.InvoiceDetails>(),
-                Companies = companies ?? new List<Taxinvoice.InvoiceMain>()
+                Details = new List<Taxinvoice.InvoiceDetails>()
             };
 
             if (model.Main.invoicedate == null)
@@ -148,14 +170,6 @@ namespace WLSPL_ERP_CRM.Controllers
         }
 
 
-
-
-
     }
-
-
-
-
-
 
 }

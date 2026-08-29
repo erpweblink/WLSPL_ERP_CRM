@@ -2,6 +2,9 @@
 {
     public class Taxinvoice
     {
+        // =========================================================
+        // 1.INVOICE Main
+        // =========================================================
         public class InvoiceMain
         {
             // =====================================================
@@ -246,7 +249,7 @@
 
 
         // =========================================================
-        // INVOICE DETAILS
+        // 2.INVOICE DETAILS
         // =========================================================
 
         public class InvoiceDetails
@@ -284,7 +287,7 @@
 
 
         // =========================================================
-        // INVOICE MONTH INFO
+        // 3.INVOICE MONTH INFO
         // =========================================================
 
         public class InvoiceMonthInfo
@@ -302,7 +305,7 @@
 
 
         // =========================================================
-        // INVOICE LIST
+        // 4.INVOICE LIST
         // =========================================================
 
         public class InvoiceList
@@ -334,7 +337,7 @@
 
 
         // =========================================================
-        // INVOICE MONTH SUMMARY
+        // 5.INVOICE MONTH SUMMARY
         // =========================================================
 
         public class InvoiceMonthSummary
@@ -352,7 +355,7 @@
 
 
         // =========================================================
-        // TAX INVOICE INDEX VIEW MODEL
+        // 6.TAX INVOICE INDEX VIEW MODEL
         // =========================================================
 
         public class TaxInvoiceIndexViewModel
@@ -370,7 +373,7 @@
 
 
         // =========================================================
-        // TAX INVOICE PDF VIEW MODEL
+        // 7.TAX INVOICE PDF VIEW MODEL
         // =========================================================
 
         public class TaxInvoicePdfViewModel
@@ -444,7 +447,7 @@
 
 
         // =========================================================
-        // TAX INVOICE CREATE VIEW MODEL
+        // 8.TAX INVOICE CREATE VIEW MODEL
         // =========================================================
 
         public class TaxInvoiceCreateViewModel
@@ -475,6 +478,74 @@
             public decimal GrandTotal { get; set; }
 
             public string? AmountInWords { get; set; }
+        }
+
+
+        public class TaxInvoiceCreate
+        {
+            public int Id { get; set; }
+
+            public string? invoiceno { get; set; }
+            public string? reversecharge { get; set; }
+            public string? InvoiceType { get; set; }
+            public DateTime? invoicedate { get; set; }
+
+            public string? companyName { get; set; }
+            public string? gstIn { get; set; }
+            public string? Address { get; set; }
+            public string? Location { get; set; }
+            public string? PinCode { get; set; }
+            public string? state { get; set; }
+            public string? statecode { get; set; }
+
+            public string? TransMode { get; set; }
+            public string? TransNo { get; set; }
+            public DateTime? TransDate { get; set; }
+            public string? TransAmt { get; set; }
+
+            public decimal? cgst { get; set; }
+
+            public decimal? cgstamt { get; set; }
+
+            public decimal? sgst { get; set; }
+
+            public decimal? sgstamt { get; set; }
+
+            public decimal? igst { get; set; }
+
+            public decimal? igstamt { get; set; }
+
+            public decimal? totalqty { get; set; }
+
+            public decimal? totalrate { get; set; }
+
+            public decimal? taxablevalue { get; set; }
+
+            public decimal? totalamtbeforetax { get; set; }
+
+            public decimal? totalamtaftertax { get; set; }
+
+            public string? total_tax_amount { get; set; }
+
+            public string? amtinwords { get; set; }
+
+            public string? sessionname { get; set; }
+            public DateTime? createddate { get; set; }
+      
+
+        }
+
+      
+        public class TaxInvoiceCreateVM
+        {
+            public TaxInvoiceCreate main { get; set; }
+              = new TaxInvoiceCreate();
+
+            public List<InvoiceDetails> details { get; set; }
+                = new List<InvoiceDetails>();
+
+            public List<TaxInvoiceCreate> companies { get; set; }
+                = new List<TaxInvoiceCreate>();
         }
     }
 }

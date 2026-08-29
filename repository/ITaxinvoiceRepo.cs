@@ -1,4 +1,6 @@
-﻿using WLSPL_ERP_CRM.Models;
+﻿using WEBLINK_CRM.Models;
+using WLSPL_ERP_CRM.Models;
+using static WLSPL_ERP_CRM.Models.Taxinvoice;
 
 namespace WLSPL_ERP_CRM.repository
 {
@@ -13,11 +15,12 @@ namespace WLSPL_ERP_CRM.repository
         Task<Taxinvoice.TaxInvoicePdfViewModel?>GetInvoiceForPdfAsync(int id);
 
         Task<Taxinvoice.InvoiceMain?>Getinvoiceno();
+        Task<Taxinvoice.TaxInvoiceCreate?> Getinvoicenoss();
 
-        Task<List<Taxinvoice.InvoiceMain>>Getcompany();
-        Task<Taxinvoice.InvoiceMain?> Getcompanybycname(string cname);
+        Task<List<TaxInvoiceCreate>>Getcompany();
+        Task<TaxInvoiceCreate> Getcompanybycname(string cname);
 
-
+        Task<bool> UpdateSave(TaxInvoiceCreateVM model);
 
     }
 }

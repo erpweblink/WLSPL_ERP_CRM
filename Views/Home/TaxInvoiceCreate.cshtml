@@ -1,59 +1,53 @@
-﻿@model WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreateVM
+@model WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreateViewModel
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<style type="text/css">
+
+<style>
     .required::after {
         content: " *";
         color: red;
     }
 
     /* ── All form inputs / selects / textareas — light grey like screenshot ── */
-    .form-control {
-        border: 1px solid gray !important;
+    .form-control,
+    .form-control:focus {
+        background-color: #f4f5f6 !important;
+        border: 1px solid #ced4da;
+        color: #444;
+        border-radius: 3px;
     }
 
-        .form-control,
-        .form-control:focus {
-            background-color: #f4f5f6 !important;
-            border: 1px solid #ced4da;
-            color: #444;
-            border-radius: 3px;
-        }
-
-            .form-control[readonly],
-            .form-control:disabled {
-                background-color: #e8eaeb !important;
-                color: #6c757d;
-                cursor: default;
-            }
+    .form-control[readonly],
+    .form-control:disabled {
+        background-color: #e8eaeb !important;
+        color: #6c757d;
+        cursor: default;
+    }
 
     /* Select2 match */
     .select2-container .select2-selection--single {
         background-color: #f4f5f6 !important;
-        border: 1px solid #343434 !important;
+        border: 1px solid #ced4da !important;
         border-radius: 3px !important;
         height: 38px !important;
     }
-
-        .select2-container .select2-selection--single .select2-selection__rendered {
-            line-height: 36px !important;
-            color: #444 !important;
-        }
-
-        .select2-container .select2-selection--single .select2-selection__arrow {
-            height: 36px !important;
-        }
+    .select2-container .select2-selection--single .select2-selection__rendered {
+        line-height: 36px !important;
+        color: #444 !important;
+    }
+    .select2-container .select2-selection--single .select2-selection__arrow {
+        height: 36px !important;
+    }
 
     /* ── Consistent card-body row spacing ── */
     .card-body .row.form-row-item {
         margin-bottom: 16px;
     }
-
-        .card-body .row.form-row-item:last-child {
-            margin-bottom: 0;
-        }
+    .card-body .row.form-row-item:last-child {
+        margin-bottom: 0;
+    }
 
     /* ── Table ── */
     .invoice-table {
@@ -62,81 +56,55 @@
         table-layout: fixed;
     }
 
-        .invoice-table th,
-        .invoice-table td {
-            border: 1px solid #dee2e6;
-            padding: 4px 6px;
-            vertical-align: middle;
-            text-align: center;
-        }
+    .invoice-table th,
+    .invoice-table td {
+        border: 1px solid #dee2e6;
+        padding: 4px 6px;
+        vertical-align: middle;
+        text-align: center;
+    }
 
-        .invoice-table th {
-            background: linear-gradient(314deg, #0b0f14, #1a3e66);
-            color: #fff;
-            font-size: 11px;
-            font-weight: 600;
-            white-space: normal;
-        }
+    .invoice-table th {
+        background: #1a3e66;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 600;
+        white-space: normal;
+    }
 
-        .invoice-table td input,
-        .invoice-table td textarea {
-            width: 100%;
-            font-size: 11px;
-            border: 1px solid gray;
-            border-radius: 3px;
-            padding: 2px 4px;
-            background: #f4f5f6;
-            color: #444;
-        }
+    .invoice-table td input,
+    .invoice-table td textarea {
+        width: 100%;
+        font-size: 11px;
+        border: 1px solid #ced4da;
+        border-radius: 3px;
+        padding: 2px 4px;
+        background: #f4f5f6;
+        color: #444;
+    }
 
-            .invoice-table td input[readonly],
-            .invoice-table td input:disabled {
-                background: #e8eaeb !important;
-                color: #6c757d;
-                cursor: default;
-            }
+    .invoice-table td input[readonly],
+    .invoice-table td input:disabled {
+        background: #e8eaeb !important;
+        color: #6c757d;
+        cursor: default;
+    }
 
-        .invoice-table td textarea {
-            min-height: 38px;
-            resize: vertical;
-        }
+    .invoice-table td textarea {
+        min-height: 38px;
+        resize: vertical;
+    }
 
     /* column widths */
-    .col-sn {
-        width: 42px;
-    }
-
-    .col-desc {
-        width: 175px;
-    }
-
-    .col-sac {
-        width: 75px;
-    }
-
-    .col-qty {
-        width: 60px;
-    }
-
-    .col-rate {
-        width: 80px;
-    }
-
-    .col-taxable {
-        width: 90px;
-    }
-
-    .col-tax {
-        width: 110px;
-    }
-
-    .col-total {
-        width: 95px;
-    }
-
-    .col-action {
-        width: 36px;
-    }
+    .col-sn      { width: 42px; }
+    .col-desc    { width: 175px; }
+    .col-sac     { width: 75px; }
+    .col-qty     { width: 60px; }
+    .col-rate    { width: 80px; }
+    .col-taxable { width: 90px; }
+    .col-tax     { width: 110px; }
+    .col-total   { width: 95px; }
+    .col-action  { width: 36px; }
 
     .tax-pair {
         display: grid;
@@ -165,34 +133,34 @@
         font-weight: 600;
     }
 
-        .summary-right .summary-row input {
-            width: 130px;
-            text-align: right;
-            border: 1px solid #ced4da;
-            border-radius: 3px;
-            background: #e8eaeb !important;
-            color: #444;
-            font-size: 11px;
-            padding: 2px 6px;
-            height: 28px;
-        }
+    .summary-right .summary-row input {
+        width: 130px;
+        text-align: right;
+        border: 1px solid #ced4da;
+        border-radius: 3px;
+        background: #e8eaeb !important;
+        color: #444;
+        font-size: 11px;
+        padding: 2px 6px;
+        height: 28px;
+    }
 
     .words-box {
         padding: 12px;
         min-height: 90px;
     }
 
-        .words-box textarea {
-            width: 100%;
-            min-height: 55px;
-            border: 1px solid #ced4da;
-            border-radius: 3px;
-            font-size: 11px;
-            padding: 4px 6px;
-            resize: vertical;
-            background: #f4f5f6;
-            color: #444;
-        }
+    .words-box textarea {
+        width: 100%;
+        min-height: 55px;
+        border: 1px solid #ced4da;
+        border-radius: 3px;
+        font-size: 11px;
+        padding: 4px 6px;
+        resize: vertical;
+        background: #f4f5f6;
+        color: #444;
+    }
 
     /* ── Bank / Signature ── */
     .bottom-grid {
@@ -204,7 +172,7 @@
         margin: 0;
         font-size: 12px;
         padding: 6px 14px;
-        border-bottom: 1px solid #343434;
+        border-bottom: 1px solid #dee2e6;
     }
 
     .signature-grid {
@@ -262,23 +230,17 @@
 
     /* ── Print ── */
     @@media print {
-        .add-row-btn, .remove-row, .action-btns {
-            display: none !important;
-        }
-
-        @@page {
-            size: A4 landscape;
-            margin: 8mm;
-        }
+        .add-row-btn, .remove-row, .action-btns { display: none !important; }
+        @@page { size: A4 landscape; margin: 8mm; }
     }
 </style>
 
-
 <form id="frmTaxInvoice">
+
     <!-- ══════════════ INVOICE HEADER ══════════════ -->
     <div class="card">
         <div class="card-header d-flex align-items-center justify-content-between"
-             style="background:  linear-gradient(314deg, #0b0f14, #1a3e66);">
+             style="background: linear-gradient(135deg, #0b0f14, #1a3e66);">
             <h5 style="margin:0; color:#fff;">Tax Invoice</h5>
             <button type="button" class="btn btn-primary btn-sm" onclick="window.history.back();">
                 <i class="fa fa-arrow-left"></i> Back
@@ -292,7 +254,7 @@
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label font-weight-bold required">Invoice No</label>
                         <div class="col-md-8">
-                            <input asp-for="main.invoiceno" type="text" class="form-control" id="invoiceNo"
+                            <input asp-for="Main.invoiceno" type="text" class="form-control" id="invoiceNo"
                                    placeholder="Invoice No" readonly />
                         </div>
                     </div>
@@ -301,7 +263,7 @@
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label font-weight-bold required">Invoice Date</label>
                         <div class="col-md-8">
-                            <input asp-for="main.invoicedate" type="date" class="form-control"
+                            <input asp-for="Main.invoicedate" type="date" class="form-control"
                                    id="invoiceDate" />
                             <span class="err-msg" id="err-invoiceDate"></span>
                         </div>
@@ -314,46 +276,34 @@
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label font-weight-bold">Reverse Charge</label>
                         <div class="col-md-8">
-                            <select asp-for="main.reversecharge" class="form-control" id="reverseCharge">
-                                <option value="N">N</option>
-                                <option value="Y">Y</option>
+                            <select asp-for="Main.reversecharge" class="form-control" id="reverseCharge">
+                                <option value="No">No</option>
+                                <option value="Yes">Yes</option>
                             </select>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group row">
-                        <label class="col-md-4 col-form-label font-weight-bold">AgainsBy</label>
+                        <label class="col-md-4 col-form-label font-weight-bold">State</label>
                         <div class="col-md-8">
-                            <input asp-for="main.InvoiceType" type="text" class="form-control" id="InvoiceType" placeholder="Against By" />
+                            <input asp-for="Main.state" type="text" class="form-control" id="state" placeholder="State" />
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- ══════════════ BILL TO ══════════════ -->
-    <div class="card mt-3">
-        <div class="card-header" style="background:  linear-gradient(314deg, #0b0f14, #1a3e66);">
-            <h5 style="margin:0; color:#fff;">Bill To</h5>
-        </div>
-        <div class="card-body">
-
 
             <div class="row form-row-item">
                 <div class="col-md-6">
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label font-weight-bold required">Company Name</label>
                         <div class="col-md-8">
-                            <select asp-for="main.companyName" class="form-control ddlselect"
+                            <select asp-for="Main.companyname" class="form-control ddlselect"
                                     id="companyName">
                                 <option value="">Select Company</option>
-                                @foreach (var company in Model.companies)
+                                @foreach (var company in Model.Companies)
                                 {
-                                    <option value="@company.companyName">
-                                        @company.companyName
-                                    </option>
+                                    <option value="@company.cname">@company.cname</option>
                                 }
                             </select>
                             <span class="err-msg" id="err-companyName"></span>
@@ -362,9 +312,86 @@
                 </div>
                 <div class="col-md-6">
                     <div class="form-group row">
-                        <label class="col-md-4 col-form-label font-weight-bold">Billing GST</label>
+                        <label class="col-md-4 col-form-label font-weight-bold">GSTIN</label>
                         <div class="col-md-8">
-                            <input asp-for="main.gstIn" type="text" class="form-control" id="gstin" placeholder="Billing GST" />
+                            <input asp-for="Main.cgstin" type="text" class="form-control" id="gstin" placeholder="GSTIN" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row form-row-item">
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold">Address</label>
+                        <div class="col-md-8">
+                            <textarea asp-for="Main.address" class="form-control" id="address"
+                                      placeholder="Address" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold">Transaction Mode</label>
+                        <div class="col-md-8">
+                            <select asp-for="Main.TransMode" class="form-control" id="Transaction">
+                                <option value="">Select Transaction Mode</option>
+                                <option value="Cheque">Cheque</option>
+                                <option value="Online/UPI">Online/UPI</option>
+                                <option value="Cash">Cash</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row form-row-item">
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold">Transaction No</label>
+                        <div class="col-md-8">
+                            <input asp-for="Main.TransNo" type="text" class="form-control" id="transNo"
+                                   placeholder="Transaction No" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold">Transaction Date</label>
+                        <div class="col-md-8">
+                            <input asp-for="Main.TransDate" type="date" class="form-control" id="transDate" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ══════════════ BILL TO ══════════════ -->
+    <div class="card mt-3">
+        <div class="card-header" style="background: linear-gradient(135deg, #0b0f14, #1a3e66);">
+            <h5 style="margin:0; color:#fff;">Bill To</h5>
+        </div>
+        <div class="card-body">
+
+            <div class="row form-row-item">
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold required">Billing Company</label>
+                        <div class="col-md-8">
+                            <input asp-for="Main.cname" type="text" class="form-control"
+                                   id="billingCompany" placeholder="Billing Company" />
+                            <span class="err-msg" id="err-billingCompany"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold">Billing GSTIN</label>
+                        <div class="col-md-8">
+                            <input asp-for="Main.BillingGST" type="text" class="form-control" id="billingGST"
+                                   placeholder="Billing GSTIN" />
                         </div>
                     </div>
                 </div>
@@ -375,39 +402,38 @@
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label font-weight-bold">Billing Address</label>
                         <div class="col-md-8">
-                            <textarea asp-for="main.Address" class="form-control" id="address" rows="2" placeholder="Billing Address"></textarea>
+                            <textarea asp-for="Main.BillingAddress" class="form-control" id="billingAddress"
+                                      placeholder="Billing Address" rows="2"></textarea>
                         </div>
                     </div>
                 </div>
-
                 <div class="col-md-6">
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label font-weight-bold">Billing Location</label>
                         <div class="col-md-8">
-                            <input asp-for="main.Location" type="text" class="form-control" id="Location"
+                            <input asp-for="Main.BillingLocation" type="text" class="form-control" id="billingLocation"
                                    placeholder="Billing Location" />
                         </div>
                     </div>
                 </div>
-
             </div>
 
             <div class="row form-row-item">
                 <div class="col-md-6">
                     <div class="form-group row">
-                        <label class="col-md-4 col-form-label font-weight-bold">Pincode</label>
+                        <label class="col-md-4 col-form-label font-weight-bold">Billing State</label>
                         <div class="col-md-8">
-                            <input asp-for="main.PinCode" type="text" class="form-control" id="billingPincode"
-                                   placeholder="Pincode" />
+                            <input asp-for="Main.BillingState" type="text" class="form-control" id="billingState"
+                                   placeholder="Billing State" />
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group row">
-                        <label class="col-md-4 col-form-label font-weight-bold">Billing State</label>
+                        <label class="col-md-4 col-form-label font-weight-bold">Pincode</label>
                         <div class="col-md-8">
-                            <input asp-for="main.state" type="text" class="form-control" id="billingState"
-                                   placeholder="Billing State" />
+                            <input asp-for="Main.BillingPincode" type="text" class="form-control" id="billingPincode"
+                                   placeholder="Pincode" />
                         </div>
                     </div>
                 </div>
@@ -418,64 +444,19 @@
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label font-weight-bold">Billing State Code</label>
                         <div class="col-md-8">
-                            <input asp-for="main.statecode" type="text" class="form-control" id="billingStateCode"
+                            <input asp-for="Main.BillingStatecode" type="text" class="form-control" id="billingStateCode"
                                    placeholder="State Code" />
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row form-row-item">
-                <div class="col-md-6">
-                    <div class="form-group row">
-                        <label class="col-md-4 col-form-label font-weight-bold">Transaction Mode</label>
-                        <div class="col-md-8">
-                            <select asp-for="main.TransMode" class="form-control" id="Transaction">
-                                <option value="">Select Transaction Mode</option>
-                                <option value="Cheque">Cheque</option>
-                                <option value="Online/UPI">Online/UPI</option>
-                                <option value="Cash">Cash</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-group row">
-                        <label class="col-md-4 col-form-label font-weight-bold">Transaction No</label>
-                        <div class="col-md-8">
-                            <input asp-for="main.TransNo" type="text" class="form-control" id="transNo"
-                                   placeholder="Transaction No" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row form-row-item">
-                <div class="col-md-6">
-                    <div class="form-group row">
-                        <label class="col-md-4 col-form-label font-weight-bold">Transaction Date</label>
-                        <div class="col-md-8">
-                            <input asp-for="main.TransDate" type="date" class="form-control" id="transDate" />
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-group row">
-                        <label class="col-md-4 col-form-label font-weight-bold">Trasnaction Amount</label>
-                        <div class="col-md-8">
-                            <input asp-for="main.TransAmt" type="text" class="form-control" id="TransAmt"
-                                   placeholder="Trasnaction Amount" />
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
     <!-- ══════════════ ITEM DETAILS ══════════════ -->
     <div class="card mt-3">
-        <div class="card-header" style="background:  linear-gradient(314deg, #0b0f14, #1a3e66);">
+        <div class="card-header" style="background: linear-gradient(135deg, #0b0f14, #1a3e66);">
             <h5 style="margin:0; color:#fff;">Item Details</h5>
         </div>
         <div class="card-body p-0">
@@ -523,7 +504,7 @@
 
     <!-- ══════════════ SUMMARY ══════════════ -->
     <div class="card mt-3">
-        <div class="card-header" style="background:  linear-gradient(314deg, #0b0f14, #1a3e66);">
+        <div class="card-header" style="background: linear-gradient(135deg, #0b0f14, #1a3e66);">
             <h5 style="margin:0; color:#fff;">Summary</h5>
         </div>
         <div class="card-body p-0">
@@ -535,8 +516,8 @@
                     </div>
                     <div class="words-box">
                         <label class="font-weight-bold mb-1" style="font-size:12px;">Total Amount (in words)</label>
-                        <textarea id="amountInWords" asp-for="main.amtinwords" style="color: red;font-size: large;font-weight: 600;"
-                                  placeholder="Amount in words" readonly="readonly"></textarea>
+                        <textarea id="amountInWords" asp-for="Main.amtinwords"
+                                  placeholder="Amount in words"></textarea>
                         <span class="err-msg" id="err-amountInWords"></span>
                     </div>
                 </div>
@@ -562,9 +543,9 @@
         <div class="card-body p-0">
             <div class="bottom-grid">
 
-                <div style="border-right:1px solid #343434;">
-                    <div style="padding:10px 12px; font-size:12px; font-weight:700; border-bottom:1px solid #343434;
-                                background:  linear-gradient(314deg, #0b0f14, #1a3e66); color:#fff;">
+                <div style="border-right:1px solid #dee2e6;">
+                    <div style="padding:10px 12px; font-size:12px; font-weight:700; border-bottom:1px solid #dee2e6;
+                                background: linear-gradient(135deg, #0b0f14, #1a3e66); color:#fff;">
                         Bank Details
                     </div>
                     <div class="bank-info">
@@ -577,7 +558,7 @@
                 </div>
 
                 <div class="signature-grid">
-                    <div class="seal-box" style="border-right:1px solid #343434;">
+                    <div class="seal-box" style="border-right:1px solid #dee2e6;">
                         <div class="seal">
                             <div class="seal-inner">COMPANY<br />SEAL</div>
                         </div>
@@ -610,7 +591,7 @@
 
 </form>
 
-<script type="text/javascript">
+<script>
     let rowCounter = 0;
 
     $(document).ready(function () {
@@ -631,14 +612,17 @@
             data: { cname: cname },
             beforeSend: function () { $('#companyName').prop('disabled', true); },
             success: function (data) {
-                debugger;
                 if (!data) { alert("Company details not found."); clearCompanyDetails(); return; }
-                $('#gstin').val(data.gstIn || '');
+                $('#state').val(data.state || '');
+                $('#gstin').val(data.gstno || data.cgstin || '');
                 $('#address').val(data.address || '');
-                $('#Location').val(data.location ||  '');
-                $('#billingState').val(data.state || '');
-                $('#billingPincode').val(data.pinCode || '');
-                $('#billingStateCode').val(data.statecode  || '');
+                $('#billingCompany').val(data.cname || data.companyname || '');
+                $('#billingGST').val(data.gstno || data.cgstin || '');
+                $('#billingAddress').val(data.billingAddress || data.address || '');
+                $('#billingLocation').val(data.billingLocation || data.area || '');
+                $('#billingState').val(data.billingState || data.state || '');
+                $('#billingPincode').val(data.billingPincode || data.shipping_pincode || '');
+                $('#billingStateCode').val(data.billingStatecode || data.shipping_statecode || '');
             },
             error: function () { alert("Error while loading company details."); },
             complete: function () { $('#companyName').prop('disabled', false); }
@@ -646,7 +630,8 @@
     }
 
     function clearCompanyDetails() {
-        ['#gstin','#address','#Location','#billingState',
+        ['#state','#gstin','#address','#billingCompany','#billingGST',
+         '#billingAddress','#billingLocation','#billingState',
          '#billingPincode','#billingStateCode'].forEach(id => $(id).val(''));
     }
 
@@ -663,32 +648,26 @@
             <td><input type="text" value="${rowCounter}" readonly class="serial-number" /></td>
             <td><textarea class="description" placeholder="Description"></textarea></td>
             <td><input type="text" class="sac-code" placeholder="SAC Code" /></td>
-            <td><input type="number" class="qty" min="0"  value="1" oninput="calculateRow(this); updateAmountInWords();"
-                  onblur="updateAmountInWords();" /></td>
-            <td><input type="number" class="rate" min="0" value="0" oninput="calculateRow(this); updateAmountInWords();"
-                  onblur="updateAmountInWords();"/></td>
+            <td><input type="number" class="qty" min="0" step="0.01" value="1" oninput="calculateRow(this)" /></td>
+            <td><input type="number" class="rate" min="0" step="0.01" value="0" oninput="calculateRow(this)" /></td>
             <td><input type="number" class="taxable-value" value="0" readonly /></td>
             <td><div class="tax-pair">
-                <input type="number" class="cgst-rate" min="0" value="0" placeholder="%" oninput="taxChanged(this,'CGST'); updateAmountInWords();"
-                   onblur="updateAmountInWords();"/>
+                <input type="number" class="cgst-rate" min="0" step="0.01" value="0" placeholder="%" oninput="taxChanged(this,'CGST')" />
                 <input type="number" class="cgst-amount" value="0" readonly />
             </div></td>
             <td><div class="tax-pair">
-                <input type="number" class="sgst-rate" min="0" value="0" placeholder="%" oninput="taxChanged(this,'SGST'); updateAmountInWords();"
-                  onblur="updateAmountInWords();" />
+                <input type="number" class="sgst-rate" min="0" step="0.01" value="0" placeholder="%" oninput="taxChanged(this,'SGST')" />
                 <input type="number" class="sgst-amount" value="0" readonly />
             </div></td>
             <td><div class="tax-pair">
-                <input type="number" class="igst-rate" min="0" value="0" placeholder="%" oninput="taxChanged(this,'IGST'); updateAmountInWords();"
-                  onblur="updateAmountInWords();" />
+                <input type="number" class="igst-rate" min="0" step="0.01" value="0" placeholder="%" oninput="taxChanged(this,'IGST')" />
                 <input type="number" class="igst-amount" value="0" readonly />
             </div></td>
             <td><input type="number" class="row-total" value="0" readonly /></td>
-            <td><button type="button" class="btn btn-danger btn-sm remove-row" onclick="removeRow(this);" style="padding:1px 6px;">×</button></td>`;
+            <td><button type="button" class="btn btn-danger btn-sm remove-row" onclick="removeRow(this)" style="padding:1px 6px;">×</button></td>`;
         document.getElementById('invoiceItems').appendChild(row);
         refreshSerialNumbers();
         calculateAll();
-        updateAmountInWords();
         $('#err-items').text('');
     }
 
@@ -754,7 +733,7 @@
             grand        += parseFloat(row.querySelector('.row-total').value)||0;
         });
         const totalTax = totalCGST + totalSGST + totalIGST;
-        $('#totalQty').val(totalQty);
+        $('#totalQty').val(totalQty.toFixed(2));
         $('#totalTaxable').val(totalTaxable.toFixed(2));
         $('#totalCGST').val(totalCGST.toFixed(2));
         $('#totalSGST').val(totalSGST.toFixed(2));
@@ -766,8 +745,6 @@
         $('#summaryIGST').val(totalIGST.toFixed(2));
         $('#summaryTax').val(totalTax.toFixed(2));
         $('#summaryGrandTotal').val(grand.toFixed(2));
-
-        updateAmountInWords();
     }
 
     function validateInvoice() {
@@ -778,6 +755,7 @@
         const requiredFields = [
             { id: 'invoiceDate',    errId: 'err-invoiceDate',    label: 'Invoice Date' },
             { id: 'companyName',    errId: 'err-companyName',    label: 'Company Name' },
+            { id: 'billingCompany', errId: 'err-billingCompany', label: 'Billing Company' },
             { id: 'amountInWords',  errId: 'err-amountInWords',  label: 'Amount in Words' },
         ];
 
@@ -824,45 +802,78 @@
         calculateAll();
         if (!validateInvoice()) return;
 
+        // ── Build InvoiceMain ─────────────────────────────────────
+        //
+        //  FIELD MAP  (JS key → C# property → source element)
+        //  ─────────────────────────────────────────────────────
+        //  invoiceno        → InvoiceMain.invoiceno        → #invoiceNo      (readonly, auto-generated)
+        //  invoicedate      → InvoiceMain.invoicedate       → #invoiceDate
+        //  reversecharge    → InvoiceMain.reversecharge     → #reverseCharge
+        //  state            → InvoiceMain.state             → #state          (company state, auto-filled)
+        //  companyname      → InvoiceMain.companyname       → #companyName    (selected company from dropdown)
+        //  cgstin           → InvoiceMain.cgstin            → #gstin          (company GSTIN, auto-filled)
+        //  address          → InvoiceMain.address           → #address        (company address, auto-filled)
+        //  TransMode        → InvoiceMain.TransMode         → #Transaction
+        //  TransNo          → InvoiceMain.TransNo           → #transNo
+        //  TransDate        → InvoiceMain.TransDate         → #transDate
+        //  cname            → InvoiceMain.cname             → #billingCompany (billing company name)
+        //  BillingGST       → InvoiceMain.BillingGST        → #billingGST
+        //  BillingAddress   → InvoiceMain.BillingAddress    → #billingAddress
+        //  BillingLocation  → InvoiceMain.BillingLocation   → #billingLocation
+        //  BillingState     → InvoiceMain.BillingState      → #billingState
+        //  BillingPincode   → InvoiceMain.BillingPincode    → #billingPincode
+        //  BillingStatecode → InvoiceMain.BillingStatecode  → #billingStateCode
+        //  cgstamt          → InvoiceMain.cgstamt           → #summaryCGST
+        //  sgstamt          → InvoiceMain.sgstamt           → #summarySGST
+        //  igstamt          → InvoiceMain.igstamt           → #summaryIGST
+        //  totalqty         → InvoiceMain.totalqty          → #totalQty
+        //  taxablevalue     → InvoiceMain.taxablevalue       → #totalTaxable
+        //  totalamtbeforetax→ InvoiceMain.totalamtbeforetax → #summaryBeforeTax
+        //  total_tax_amount → InvoiceMain.total_tax_amount  → #summaryTax
+        //  totalamtaftertax → InvoiceMain.totalamtaftertax  → #summaryGrandTotal
+        //  amtinwords       → InvoiceMain.amtinwords        → #amountInWords
+
         const main = {
 
             // ── Invoice Header ──────────────────────────────────
             invoiceno:          $('#invoiceNo').val()            || null,
             invoicedate:        $('#invoiceDate').val()          || null,
             reversecharge:      $('#reverseCharge').val()        || null,
-            InvoiceType:        $('#InvoiceType').val()          || null,
-
-            // ── Bill To ─────────────────────────────────────────
-
-            companyName:       $('#companyName').val()          || null,
-            gstIn:             $('#gstin').val()                || null,
-            Address:           $('#address').val()              || null,
-            Location:          $('#Location').val()             || null,
-            PinCode:           $('#billingPincode').val()       || null,
-            state:             $('#billingState').val()                || null,
-            statecode:         $('#billingStateCode').val()     || null,
+            state:              $('#state').val()                || null,
+            companyname:        $('#companyName').val()          || null,
+            cgstin:             $('#gstin').val()                || null,
+            address:            $('#address').val()              || null,
 
             // ── Transaction ─────────────────────────────────────
             TransMode:          $('#Transaction').val()          || null,
             TransNo:            $('#transNo').val()              || null,
             TransDate:          $('#transDate').val()            || null,
-            TransAmt:           $('#TransAmt').val()             || null,
 
-            // ── Amount ──────────────────────────────────
-            amtinwords:         $('#amountInWords').val()        || null,
-            cgst:               $('#summaryCGST').val() == null  || $('#summaryCGST').val() == '0.00' ? 0 : 9,
-            cgstamt:            $('#summaryCGST').val() == null  || $('#summaryCGST').val() == '0.00' ? 0 : $('#summaryCGST').val(),
-            sgst:               $('#summarySGST').val() == null  || $('#summarySGST').val() == '0.00' ? 0 : 9,
-            sgstamt:            $('#summarySGST').val() == null  || $('#summarySGST').val() == '0.00' ? 0 : $('#summarySGST').val(),
-            igst:               $('#summaryIGST').val() == null  || $('#summaryIGST').val() == '0.00' ? 0 : 18,
-            igstamt:            $('#summaryIGST').val() == null  || $('#summaryIGST').val() == '0.00' ? 0 : $('#summaryIGST').val(),
-            totalqty:           $('#totalQty').val() == null     || $('#totalQty').val() == '0.00' ? 0 : $('#totalQty').val(),
-            totalrate:          $('#summaryBeforeTax').val() == null || $('#summaryBeforeTax').val() == '0.00' ? 0 : $('#summaryBeforeTax').val(),
-            taxablevalue:       $('#summaryBeforeTax').val() == null || $('#summaryBeforeTax').val() == '0.00' ? 0 : $('#summaryBeforeTax').val(),
-            totalamtbeforetax:  $('#summaryBeforeTax').val() == null || $('#summaryBeforeTax').val() == '0.00' ? 0 : $('#summaryBeforeTax').val(),
-            totalamtaftertax:   $('#summaryGrandTotal').val() == null || $('#summaryGrandTotal').val() == '0.00' ? 0 : $('#summaryGrandTotal').val(),
-            total_tax_amount:   $('#summaryTax').val() == null   || $('#summaryTax').val() == '0.00' ? 0 : $('#summaryTax').val(),
-            amtinwords:         $('#amountInWords').val()        || null
+            // ── Bill To ─────────────────────────────────────────
+            // cname = billing company (InvoiceMain.cname)
+            // This is DIFFERENT from companyname above — do NOT use the same key
+            cname:              $('#billingCompany').val()       || null,
+            BillingGST:         $('#billingGST').val()           || null,
+            BillingAddress:     $('#billingAddress').val()       || null,
+            BillingLocation:    $('#billingLocation').val()      || null,
+            BillingState:       $('#billingState').val()         || null,
+            BillingPincode:     $('#billingPincode').val()       || null,
+            BillingStatecode:   $('#billingStateCode').val()     || null,
+
+            // ── GST Amounts ─────────────────────────────────────
+            cgstamt:            parseFloat($('#summaryCGST').val())       || 0,
+            sgstamt:            parseFloat($('#summarySGST').val())       || 0,
+            igstamt:            parseFloat($('#summaryIGST').val())       || 0,
+
+            // ── Invoice Totals ───────────────────────────────────
+            totalqty:           parseFloat($('#totalQty').val())          || 0,
+            taxablevalue:       parseFloat($('#totalTaxable').val())      || 0,
+            totalamtbeforetax:  parseFloat($('#summaryBeforeTax').val())  || 0,
+            total_tax_amount:   $('#summaryTax').val()                    || '0',
+            totalamtaftertax:   parseFloat($('#summaryGrandTotal').val()) || 0,
+
+            // ── Amount in Words ──────────────────────────────────
+            amtinwords:         $('#amountInWords').val()                 || null
         };
 
         // ── Build InvoiceDetails rows ─────────────────────────
@@ -886,6 +897,8 @@
 
         // ── POST ──────────────────────────────────────────────
         const payload = { Main: main, Details: details };
+
+        console.log('Payload being sent:', JSON.stringify(payload, null, 2)); // debug — remove after testing
 
         const $saveBtn = $('button[onclick="saveInvoice()"]');
         $saveBtn.prop('disabled', true).text('Saving...');
@@ -914,6 +927,7 @@
                     if (err.message) msg = err.message;
                 } catch (e) { /* ignore */ }
                 alert(msg);
+                console.error('Save error:', xhr.responseText);
             },
             complete: function () {
                 $saveBtn.prop('disabled', false).text('Save');
@@ -924,10 +938,11 @@
     function clearInvoice() {
         if (!confirm('Are you sure you want to clear the invoice?')) return;
         $('#companyName').val('').trigger('change');
-        $('#reverseCharge').val('N');
+        $('#reverseCharge').val('No');
         $('#Transaction').val('');
-        ['#gstin','#address','#Location','#billingState',
-         '#billingPincode','#billingStateCode','#transNo','#transDate','#TransAmt','#amountInWords']
+        ['#state','#gstin','#address','#billingCompany','#billingGST',
+         '#billingAddress','#billingLocation','#billingState',
+         '#billingPincode','#billingStateCode','#transNo','#transDate','#amountInWords']
             .forEach(id => $(id).val(''));
         document.getElementById('invoiceItems').innerHTML = '';
         rowCounter = 0;
@@ -936,109 +951,4 @@
         document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
         document.querySelectorAll('.err-msg').forEach(el => el.textContent = '');
     }
-</script>
-
-<script type="text/javascript">
-    // ============================================================
-    // NUMBER TO WORDS - INDIAN CURRENCY FORMAT
-    // ============================================================
-    function numberToWordsIndian(amount) {
-
-        amount = parseFloat(amount) || 0;
-
-        if (amount === 0) {
-            return "Zero Rupees Only";
-        }
-
-        // Round to 2 decimal places
-        amount = Math.round(amount * 100) / 100;
-
-        const ones = [
-            "", "One", "Two", "Three", "Four", "Five",
-            "Six", "Seven", "Eight", "Nine", "Ten",
-            "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen",
-            "Sixteen", "Seventeen", "Eighteen", "Nineteen"
-        ];
-
-        const tens = [
-            "", "", "Twenty", "Thirty", "Forty",
-            "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
-        ];
-
-        function convertBelowThousand(num) {
-
-            let result = "";
-
-            if (num >= 100) {
-                result += ones[Math.floor(num / 100)] + " Hundred ";
-                num %= 100;
-            }
-
-            if (num >= 20) {
-                result += tens[Math.floor(num / 10)] + " ";
-                num %= 10;
-            }
-
-            if (num > 0) {
-                result += ones[num] + " ";
-            }
-
-            return result.trim();
-        }
-
-        function convertIndian(num) {
-
-            if (num < 1000) {
-                return convertBelowThousand(num);
-            }
-
-            if (num < 100000) {
-                return convertIndian(Math.floor(num / 1000)) +
-                    " Thousand " +
-                    convertBelowThousand(num % 1000);
-            }
-
-            if (num < 10000000) {
-                return convertIndian(Math.floor(num / 100000)) +
-                    " Lakh " +
-                    convertBelowThousand(num % 100000);
-            }
-
-            return convertIndian(Math.floor(num / 10000000)) +
-                " Crore " +
-                convertIndian(num % 10000000);
-        }
-
-        const rupees = Math.floor(amount);
-        const paise = Math.round((amount - rupees) * 100);
-
-        let words = convertIndian(rupees);
-
-        words = words.replace(/\s+/g, " ").trim();
-
-        let result = words + " Rupees";
-
-        if (paise > 0) {
-            result += " and " + convertIndian(paise) + " Paise";
-        }
-
-        result += " Only";
-
-        return result;
-    }
-
-
-    // ============================================================
-    // UPDATE AMOUNT IN WORDS
-    // ============================================================
-    function updateAmountInWords() {
-        const grandTotal =
-            parseFloat($('#summaryGrandTotal').val()) || 0;
-
-        const amountWords = numberToWordsIndian(grandTotal);
-
-        $('#amountInWords').val(amountWords);
-    }
-
-
 </script>
