@@ -1,9 +1,13 @@
-﻿@model WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoicePdfViewModel
+﻿@model WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreateVM
 
 @{
     Layout = null;
 
-    var main = Model.Main;
+    // =========================================================
+    // MAIN INVOICE DTO — DO NOT CHANGE DTO
+    // =========================================================
+
+    var main = Model.main ?? new WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreate();
 
     // =========================================================
     // INVOICE DETAILS
@@ -16,78 +20,122 @@
         : "";
 
     var reverseCharge = main.reversecharge ?? "";
+    var invoiceType = main.InvoiceType ?? "";
     var state = main.state ?? "";
+    var stateCode = main.statecode ?? "";
 
     // =========================================================
-    // CUSTOMER DETAILS
+    // COMPANY / SELLER DETAILS
     // =========================================================
 
-    var customerName = main.companyname ?? "";
+    var companyName = main.companyName ?? "";
+    var companyGstin = main.gstIn ?? "";
+    var companyAddress = main.Address ?? "";
+    var companyLocation = main.Location ?? "";
+    var companyPinCode = main.PinCode ?? "";
+
+    // =========================================================
+    // CUSTOMER / BILLING DETAILS
+    // =========================================================
+
+    var customerName = main.companyName ?? "";
 
     var customerAddress =
         main.BillingAddress
-        ?? main.address
+        ?? main.Address
+        ?? "";
+
+    var customerLocation =
+        main.BillingLocation
+        ?? main.Location
         ?? "";
 
     var customerGstin =
         main.BillingGST
-        ?? main.cgstin
+        ?? main.gstIn
         ?? "";
 
-    /*
-       Do NOT use main.BillingState here if your InvoiceMain
-       model does not contain BillingState.
+    var customerPinCode =
+        main.BillingPincode
+        ?? main.PinCode
+        ?? "";
 
-       Using billstate prevents:
-       "InvoiceMain does not contain BillingState"
-    */
-    var customerState = main.billstate ?? "";
-
-    // =========================================================
-    // COMPANY DETAILS
-    // =========================================================
-
-    var companyName = Model.CompanyName ?? "";
-    var companyAddress = Model.CompanyAddress ?? "";
-    var companyPhone = Model.CompanyPhone ?? "";
-    var companyEmail = Model.CompanyEmail ?? "";
-    var companyGstin = Model.CompanyGSTIN ?? "";
+    var customerState =
+        main.BillingStatecode
+        ?? main.state
+        ?? "";
 
     // =========================================================
-    // BANK DETAILS
+    // TRANSACTION DETAILS
     // =========================================================
 
-    var bankName = Model.BankName ?? "";
-    var accountNo = Model.AccountNo ?? "";
-    var ifsc = Model.IFSC ?? "";
-    var branch = Model.Branch ?? "";
+    var transMode = main.TransMode ?? "";
+    var transNo = main.TransNo ?? "";
+
+    var transDate = main.TransDate.HasValue
+        ? main.TransDate.Value.ToString("dd/MM/yyyy")
+        : "";
+
+    var transAmount = main.TransAmt ?? "";
+
+    // =========================================================
+    // GST DETAILS
+    // =========================================================
+
+    var cgstRate = main.cgst ?? 0;
+    var cgstAmount = main.cgstamt ?? 0;
+
+    var sgstRate = main.sgst ?? 0;
+    var sgstAmount = main.sgstamt ?? 0;
+
+    var igstRate = main.igst ?? 0;
+    var igstAmount = main.igstamt ?? 0;
+
+    var reverseChargeGst = main.gstonreversecharge ?? "";
 
     // =========================================================
     // TOTALS
     // =========================================================
 
-    var totalQuantity = Model.TotalQuantity;
-    var totalAmount = Model.TotalAmount;
-    var totalTaxableValue = Model.TotalTaxableValue;
+    var totalQuantity = main.totalqty ?? 0;
+    var totalRate = main.totalrate ?? 0;
+    var totalTaxableValue = main.taxablevalue ?? 0;
 
-    var totalCgst = Model.TotalCGST;
-    var totalSgst = Model.TotalSGST;
-    var totalIgst = Model.TotalIGST;
+    var totalAmountBeforeTax = main.totalamtbeforetax ?? 0;
+    var totalAmountAfterTax = main.totalamtaftertax ?? 0;
 
-    var totalTax = Model.TotalTaxAmount;
-    var grandTotal = Model.GrandTotal;
-    var roundOff = Model.RoundOff;
+    decimal totalTaxAmount = 0;
 
-    var amountInWords = Model.AmountInWords ?? "";
+    if (decimal.TryParse(main.total_tax_amount, out var parsedTax))
+    {
+        totalTaxAmount = parsedTax;
+    }
+    else
+    {
+        totalTaxAmount = cgstAmount + sgstAmount + igstAmount;
+    }
+
+    var grandTotal = main.totalamtaftertax ?? 0;
+
+    var amountInWords = main.amtinwords ?? "";
+
+    // =========================================================
+    // REMARK
+    // =========================================================
 
     var remark =
-        Model.Remark
+        main.Remarks
+        ?? main.Remarkss
         ?? "Thank you for your business.";
 
+    // =========================================================
+    // DETAILS COUNT
+    // =========================================================
+
     var detailsCount =
-        Model.Details == null
+        Model.details == null
             ? 0
-            : Model.Details.Count;
+            : Model.details.Count;
 }
 
 <!DOCTYPE html>
@@ -105,14 +153,15 @@
         Tax Invoice - @invoiceNo
     </title>
 
-
     <style>
 
         /* =========================================================
                    RESET
                 ========================================================= */
 
-        * {
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
         }
 
@@ -133,35 +182,15 @@
 
 
         /* =========================================================
-                   PAGE
-                ========================================================= */
-
-        .page-container {
-            width: 210mm;
-            min-height: 297mm;
-            margin: 20px auto;
-            background: #ffffff;
-            box-shadow: 0 12px 35px rgba(15, 23, 42, 0.14);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .invoice {
-            width: 100%;
-            min-height: 297mm;
-            padding: 9mm;
-        }
-
-
-        /* =========================================================
                    TOOLBAR
                 ========================================================= */
 
         .toolbar {
             width: 210mm;
-            margin: 15px auto 0;
+            margin: 15px auto 10px;
             display: flex;
             justify-content: flex-end;
+            align-items: center;
             gap: 8px;
         }
 
@@ -173,7 +202,7 @@
                 font-size: 12px;
                 font-weight: 700;
                 cursor: pointer;
-                transition: .2s;
+                transition: all .2s ease;
             }
 
         .btn-back {
@@ -185,13 +214,36 @@
             }
 
         .btn-print {
-            background: linear-gradient( 135deg, #2563eb, #1d4ed8 );
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             box-shadow: 0 4px 10px rgba(37, 99, 235, .25);
         }
 
             .btn-print:hover {
+                background: linear-gradient(135deg, #1d4ed8, #1e40af);
                 transform: translateY(-1px);
             }
+
+
+        /* =========================================================
+                   A4 PAGE
+                ========================================================= */
+
+        .page-container {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 0 auto 25px;
+            background: #ffffff;
+            box-shadow: 0 12px 35px rgba(15, 23, 42, .14);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .invoice {
+            width: 100%;
+            min-height: 297mm;
+            padding: 9mm;
+            background: #ffffff;
+        }
 
 
         /* =========================================================
@@ -200,16 +252,11 @@
 
         .company-header {
             display: grid;
-            grid-template-columns: 155px 1fr;
+            grid-template-columns: 155px minmax(0, 1fr);
             min-height: 92px;
             border: 1px solid #172033;
             background: #ffffff;
         }
-
-
-        /* =========================================================
-                   LOGO
-                ========================================================= */
 
         .company-logo {
             display: flex;
@@ -217,7 +264,7 @@
             justify-content: center;
             padding: 10px;
             border-right: 1px solid #172033;
-            background: linear-gradient( 145deg, #ffffff, #f8fafc );
+            background: linear-gradient(145deg, #ffffff, #f8fafc);
         }
 
         .logo-wrapper {
@@ -238,10 +285,18 @@
             object-fit: contain;
         }
 
-
-        /* =========================================================
-                   COMPANY INFORMATION
-                ========================================================= */
+        .company-logo-placeholder {
+            width: 125px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #64748b;
+            font-size: 8px;
+            font-weight: 700;
+            border: 1px dashed #cbd5e1;
+        }
 
         .company-details {
             display: flex;
@@ -250,6 +305,7 @@
             justify-content: center;
             text-align: center;
             padding: 8px 20px;
+            min-width: 0;
         }
 
         .company-name {
@@ -265,17 +321,17 @@
             font-size: 10px;
             line-height: 1.45;
             color: #475569;
+            word-break: break-word;
         }
 
-        .company-contact {
-            margin-top: 5px;
-            font-size: 10px;
-            color: #334155;
-            font-weight: 600;
+        .company-location {
+            margin-top: 3px;
+            font-size: 9px;
+            color: #475569;
         }
 
         .company-gstin {
-            margin-top: 4px;
+            margin-top: 5px;
             font-size: 10px;
             font-weight: 800;
             color: #1d4ed8;
@@ -312,7 +368,7 @@
 
 
         /* =========================================================
-                   INVOICE META
+                   META TABLE
                 ========================================================= */
 
         .meta-table {
@@ -389,6 +445,32 @@
 
 
         /* =========================================================
+                   TRANSACTION
+                ========================================================= */
+
+        .transaction-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            .transaction-table td {
+                border: 1px solid #334155;
+                padding: 6px 8px;
+            }
+
+        .transaction-label {
+            background: #f8fafc;
+            color: #334155;
+            font-weight: 700;
+        }
+
+        .transaction-value {
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+
+        /* =========================================================
                    ITEMS
                 ========================================================= */
 
@@ -425,6 +507,14 @@
                 overflow-wrap: anywhere;
             }
 
+            .items-table tbody tr:nth-child(even):not(.total-row) td {
+                background: #f8fafc;
+            }
+
+            .items-table tbody tr:hover:not(.total-row) td {
+                background: #eff6ff;
+            }
+
             .items-table .center {
                 text-align: center;
             }
@@ -446,6 +536,19 @@
             color: #0f172a;
             font-weight: 800;
             font-size: 9.5px;
+        }
+
+
+        /* =========================================================
+                   EMPTY DETAILS
+                ========================================================= */
+
+        .empty-row {
+            text-align: center;
+            padding: 15px !important;
+            color: #64748b !important;
+            font-style: italic;
+            background: #ffffff !important;
         }
 
 
@@ -563,7 +666,7 @@
 
 
         /* =========================================================
-                   BANK
+                   BANK DETAILS
                 ========================================================= */
 
         .bank-details {
@@ -593,6 +696,11 @@
             .bank-content strong {
                 color: #0f172a;
             }
+
+        .not-available {
+            color: #94a3b8;
+            font-style: italic;
+        }
 
 
         /* =========================================================
@@ -670,7 +778,7 @@
 
 
         /* =========================================================
-                   FOOTER NOTE
+                   BOTTOM NOTE
                 ========================================================= */
 
         .bottom-note {
@@ -756,9 +864,8 @@
                 line-height: 1.3;
             }
 
-            .company-contact {
-                font-size: 8px;
-                margin-top: 3px;
+            .company-location {
+                font-size: 7px;
             }
 
             .company-gstin {
@@ -791,6 +898,12 @@
                 font-size: 9px;
                 line-height: 1.3;
             }
+            /* TRANSACTION */
+
+            .transaction-table td {
+                padding: 6px;
+                font-size: 9px;
+            }
             /* ITEMS */
 
             .items-scroll {
@@ -817,9 +930,7 @@
                     padding: 6px 3px;
                     height: 28px;
                 }
-            /* =====================================================
-                       TOTAL / SUMMARY MOBILE FIX
-                    ===================================================== */
+            /* SUMMARY */
 
             .summary-grid {
                 display: grid;
@@ -946,8 +1057,8 @@
                 font-size: 7px;
             }
 
-            .company-contact {
-                font-size: 7px;
+            .company-location {
+                font-size: 6.5px;
             }
 
             .company-gstin {
@@ -964,6 +1075,11 @@
                 padding: 5px;
             }
 
+            .transaction-table td {
+                font-size: 8px;
+                padding: 5px;
+            }
+
             .amount-summary td {
                 padding: 6px;
                 font-size: 8px;
@@ -976,7 +1092,7 @@
 
 
         /* =========================================================
-                   PRINT - ONE A4 PAGE
+                   PRINT / A4
                 ========================================================= */
 
         @@media print {
@@ -994,12 +1110,10 @@
             body {
                 font-size: 9px !important;
             }
-            /* HIDE TOOLBAR */
 
             .toolbar {
                 display: none !important;
             }
-            /* A4 CONTAINER */
 
             .page-container {
                 width: 210mm !important;
@@ -1012,7 +1126,6 @@
                 border-radius: 0 !important;
                 overflow: hidden !important;
             }
-            /* PRINTABLE INVOICE */
 
             .invoice {
                 width: 210mm !important;
@@ -1021,9 +1134,7 @@
                 padding: 6mm !important;
                 overflow: hidden !important;
             }
-            /* =====================================================
-                       HEADER
-                    ===================================================== */
+            /* HEADER */
 
             .company-header {
                 min-height: 78px !important;
@@ -1057,35 +1168,28 @@
                 line-height: 1.25 !important;
             }
 
-            .company-contact {
-                font-size: 8px !important;
-                margin-top: 3px !important;
+            .company-location {
+                font-size: 7px !important;
             }
 
             .company-gstin {
                 font-size: 8px !important;
                 margin-top: 2px !important;
             }
-            /* =====================================================
-                       TITLE
-                    ===================================================== */
+            /* TITLE */
 
             .invoice-title {
                 padding: 6px !important;
                 font-size: 14px !important;
             }
-            /* =====================================================
-                       META
-                    ===================================================== */
+            /* META */
 
             .meta-table td {
                 height: 22px !important;
                 padding: 4px 7px !important;
                 font-size: 8px !important;
             }
-            /* =====================================================
-                       CUSTOMER
-                    ===================================================== */
+            /* CUSTOMER */
 
             .section-title {
                 margin-top: 6px !important;
@@ -1098,9 +1202,13 @@
                 font-size: 8px !important;
                 line-height: 1.2 !important;
             }
-            /* =====================================================
-                       ITEMS
-                    ===================================================== */
+            /* TRANSACTION */
+
+            .transaction-table td {
+                padding: 4px 7px !important;
+                font-size: 8px !important;
+            }
+            /* ITEMS */
 
             .items-scroll {
                 width: 100% !important;
@@ -1142,9 +1250,7 @@
                 font-size: 8px !important;
                 padding: 4px 3px !important;
             }
-            /* =====================================================
-                       SUMMARY
-                    ===================================================== */
+            /* SUMMARY */
 
             .summary-grid {
                 grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
@@ -1176,9 +1282,7 @@
             .grand-total-row td {
                 font-size: 9px !important;
             }
-            /* =====================================================
-                       REMARK
-                    ===================================================== */
+            /* REMARK */
 
             .remark-box {
                 min-height: 35px !important;
@@ -1191,9 +1295,7 @@
             .remark-title {
                 margin-bottom: 3px !important;
             }
-            /* =====================================================
-                       FOOTER
-                    ===================================================== */
+            /* FOOTER */
 
             .footer-grid {
                 grid-template-columns: minmax(0, 1fr) 110px minmax(0, 1fr) !important;
@@ -1246,17 +1348,13 @@
             .authorized {
                 font-size: 7px !important;
             }
-            /* =====================================================
-                       BOTTOM NOTE
-                    ===================================================== */
+            /* FOOT NOTE */
 
             .bottom-note {
                 margin-top: 4px !important;
                 font-size: 6.5px !important;
             }
-            /* =====================================================
-                       PREVENT PAGE BREAKS
-                    ===================================================== */
+            /* PREVENT BREAKS */
 
             .invoice,
             .page-container,
@@ -1267,20 +1365,21 @@
                 page-break-before: auto !important;
                 page-break-after: auto !important;
             }
-            /* =====================================================
-                       A4
-                    ===================================================== */
+        }
 
-            @@page {
-                size: A4 portrait;
-                margin: 0 !important;
-            }
+
+        /* =========================================================
+                   A4 PAGE SETTINGS
+                ========================================================= */
+
+        @@page {
+            size: A4 portrait;
+            margin: 0;
         }
 
     </style>
 
 </head>
-
 
 <body>
 
@@ -1325,17 +1424,11 @@
 
             <div class="company-header">
 
-
-                <!-- LOGO -->
-
                 <div class="company-logo">
 
                     <div class="logo-wrapper">
 
-                        <img src="@Url.Content(
-                                                         Model.CompanyLogo
-                                                         ?? "~/assets/images/logo-dark.png"
-                                                     )"
+                        <img src="@Url.Content("~/assets/images/logo-dark.png")"
                              alt="@companyName"
                              onerror="this.style.display='none';" />
 
@@ -1343,8 +1436,6 @@
 
                 </div>
 
-
-                <!-- COMPANY DETAILS -->
 
                 <div class="company-details">
 
@@ -1362,23 +1453,33 @@
                     </div>
 
 
-                    <div class="company-contact">
+                    @if (!string.IsNullOrWhiteSpace(companyLocation))
+                    {
+                        <div class="company-location">
 
-                        Mobile:
-                        @companyPhone
+                            @companyLocation
 
-                        &nbsp;&nbsp; | &nbsp;&nbsp;
+                            @if (!string.IsNullOrWhiteSpace(companyPinCode))
+                            {
+                                <text> - @companyPinCode</text>
+                            }
 
-                        Email:
-                        @companyEmail
-
-                    </div>
+                        </div>
+                    }
 
 
                     <div class="company-gstin">
 
                         GSTIN :
                         @companyGstin
+
+                        @if (!string.IsNullOrWhiteSpace(stateCode))
+                        {
+                            <text>
+                                &nbsp;&nbsp; | &nbsp;&nbsp;
+                                State Code : @stateCode
+                            </text>
+                        }
 
                     </div>
 
@@ -1407,15 +1508,11 @@
                 <tr>
 
                     <td class="meta-label">
-
                         Invoice No.
-
                     </td>
 
                     <td class="meta-value">
-
                         @invoiceNo
-
                     </td>
 
                 </tr>
@@ -1424,15 +1521,11 @@
                 <tr>
 
                     <td class="meta-label">
-
                         Invoice Date
-
                     </td>
 
                     <td class="meta-value">
-
                         @invoiceDate
-
                     </td>
 
                 </tr>
@@ -1441,15 +1534,11 @@
                 <tr>
 
                     <td class="meta-label">
-
-                        Reverse Charge (Y/N)
-
+                        Invoice Type
                     </td>
 
                     <td class="meta-value">
-
-                        @reverseCharge
-
+                        @invoiceType
                     </td>
 
                 </tr>
@@ -1458,14 +1547,32 @@
                 <tr>
 
                     <td class="meta-label">
+                        Reverse Charge (Y/N)
+                    </td>
 
+                    <td class="meta-value">
+                        @reverseCharge
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="meta-label">
                         State
-
                     </td>
 
                     <td class="meta-value">
 
                         @state
+
+                        @if (!string.IsNullOrWhiteSpace(stateCode))
+                        {
+                            <text>
+                                &nbsp;&nbsp; (Code: @stateCode)
+                            </text>
+                        }
 
                     </td>
 
@@ -1490,15 +1597,11 @@
                 <tr>
 
                     <td class="customer-label">
-
                         Company Name
-
                     </td>
 
                     <td class="customer-value">
-
                         @customerName
-
                     </td>
 
                 </tr>
@@ -1507,15 +1610,11 @@
                 <tr>
 
                     <td class="customer-label">
-
                         Address
-
                     </td>
 
                     <td class="customer-value">
-
                         @customerAddress
-
                     </td>
 
                 </tr>
@@ -1524,15 +1623,11 @@
                 <tr>
 
                     <td class="customer-label">
-
-                        GSTIN
-
+                        Location
                     </td>
 
                     <td class="customer-value">
-
-                        @customerGstin
-
+                        @customerLocation
                     </td>
 
                 </tr>
@@ -1541,9 +1636,33 @@
                 <tr>
 
                     <td class="customer-label">
+                        GSTIN
+                    </td>
 
-                        State
+                    <td class="customer-value">
+                        @customerGstin
+                    </td>
 
+                </tr>
+
+
+                <tr>
+
+                    <td class="customer-label">
+                        Pincode
+                    </td>
+
+                    <td class="customer-value">
+                        @customerPinCode
+                    </td>
+
+                </tr>
+
+
+                <tr>
+
+                    <td class="customer-label">
+                        State / State Code
                     </td>
 
                     <td class="customer-value">
@@ -1558,6 +1677,70 @@
 
 
             <!-- =================================================
+                 TRANSACTION DETAILS
+            ================================================== -->
+            @if (!string.IsNullOrWhiteSpace(transMode)
+                        || !string.IsNullOrWhiteSpace(transNo)
+                        || !string.IsNullOrWhiteSpace(transDate)
+                        || !string.IsNullOrWhiteSpace(transAmount))
+            {
+
+                <div class="section-title">
+
+                    Transaction Details
+
+                </div>
+
+
+                <table class="transaction-table">
+
+                    <tr>
+
+                        <td class="transaction-label">
+                            Transport Mode
+                        </td>
+
+                        <td class="transaction-value">
+                            @transMode
+                        </td>
+
+                        <td class="transaction-label">
+                            Transaction No.
+                        </td>
+
+                        <td class="transaction-value">
+                            @transNo
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td class="transaction-label">
+                            Transaction Date
+                        </td>
+
+                        <td class="transaction-value">
+                            @transDate
+                        </td>
+
+                        <td class="transaction-label">
+                            Transaction Amount
+                        </td>
+
+                        <td class="transaction-value">
+                            @transAmount
+                        </td>
+
+                    </tr>
+
+                </table>
+
+            }
+
+
+            <!-- =================================================
                  ITEMS
             ================================================== -->
 
@@ -1568,27 +1751,16 @@
                     <colgroup>
 
                         <col style="width:5%;" />
-
                         <col style="width:19%;" />
-
                         <col style="width:8%;" />
-
                         <col style="width:5%;" />
-
                         <col style="width:8%;" />
-
                         <col style="width:9%;" />
-
                         <col style="width:10%;" />
-
                         <col style="width:6%;" />
-
                         <col style="width:9%;" />
-
                         <col style="width:6%;" />
-
                         <col style="width:9%;" />
-
                         <col style="width:10%;" />
 
                     </colgroup>
@@ -1599,78 +1771,43 @@
                         <tr>
 
                             <th rowspan="2">
-
-                                Sr.<br />
-
-                                No.
-
+                                Sr.<br />No.
                             </th>
 
-
                             <th rowspan="2">
-
                                 Description
-
                             </th>
 
-
                             <th rowspan="2">
-
-                                SAC<br />
-
-                                Code
-
+                                SAC<br />Code
                             </th>
 
-
                             <th rowspan="2">
-
                                 Qty
-
                             </th>
 
-
                             <th rowspan="2">
-
                                 Rate
-
                             </th>
 
-
                             <th rowspan="2">
-
                                 Amount
-
                             </th>
-
 
                             <th rowspan="2">
-
-                                Taxable<br />
-
-                                Value
-
+                                Taxable<br />Value
                             </th>
 
-
                             <th colspan="2">
-
                                 CGST
-
                             </th>
-
 
                             <th colspan="2">
-
                                 SGST
-
                             </th>
 
-
                             <th rowspan="2">
-
                                 Total
-
                             </th>
 
                         </tr>
@@ -1679,27 +1816,19 @@
                         <tr>
 
                             <th>
-
                                 Rate
-
                             </th>
 
                             <th>
-
                                 Amount
-
                             </th>
 
                             <th>
-
                                 Rate
-
                             </th>
 
                             <th>
-
                                 Amount
-
                             </th>
 
                         </tr>
@@ -1714,32 +1843,26 @@
                         }
 
 
-                        @if (Model.Details != null)
+                        @if (Model.details != null && Model.details.Count > 0)
                         {
 
-                            foreach (var item in Model.Details)
+                            foreach (var item in Model.details)
                             {
 
                                 <tr>
 
                                     <td class="center">
-
                                         @srNo
-
                                     </td>
 
 
                                     <td class="description">
-
                                         @item.productdescription
-
                                     </td>
 
 
                                     <td class="center">
-
                                         @item.saccode
-
                                     </td>
 
 
@@ -1825,8 +1948,25 @@
 
                                                 </tr>
 
+
                                                 srNo++;
                             }
+
+                        }
+                        else
+                        {
+
+                            <tr>
+
+                                <td colspan="12"
+                                    class="empty-row">
+
+                                    No invoice details available.
+
+                                </td>
+
+                            </tr>
+
                         }
 
 
@@ -1851,12 +1991,16 @@
                             </td>
 
 
-                            <td></td>
+                            <td class="right">
+
+                                ₹@totalRate.ToString("N2")
+
+                            </td>
 
 
                             <td class="right">
 
-                                ₹@totalAmount.ToString("N2")
+                                ₹@totalAmountBeforeTax.ToString("N2")
 
                             </td>
 
@@ -1868,22 +2012,30 @@
                             </td>
 
 
-                            <td></td>
+                            <td class="center">
 
-
-                            <td class="right">
-
-                                ₹@totalCgst.ToString("N2")
+                                @(cgstRate.ToString("0.##"))%
 
                             </td>
 
 
-                            <td></td>
+                            <td class="right">
+
+                                ₹@cgstAmount.ToString("N2")
+
+                            </td>
+
+
+                            <td class="center">
+
+                                @(sgstRate.ToString("0.##"))%
+
+                            </td>
 
 
                             <td class="right">
 
-                                ₹@totalSgst.ToString("N2")
+                                ₹@sgstAmount.ToString("N2")
 
                             </td>
 
@@ -1936,38 +2088,31 @@
 
                     <table class="amount-summary">
 
+
                         <tr>
 
                             <td>
-
                                 Total Amount Before Tax
-
                             </td>
 
                             <td>
-
-                                ₹@totalAmount.ToString("N2")
-
+                                ₹@totalAmountBeforeTax.ToString("N2")
                             </td>
 
                         </tr>
 
 
-                        @if (totalCgst > 0)
+                        @if (cgstAmount > 0)
                         {
 
                             <tr>
 
                                 <td>
-
-                                    Add: CGST
-
+                                    Add: CGST (@cgstRate.ToString("0.##")%)
                                 </td>
 
                                 <td>
-
-                                    ₹@totalCgst.ToString("N2")
-
+                                    ₹@cgstAmount.ToString("N2")
                                 </td>
 
                             </tr>
@@ -1975,21 +2120,17 @@
                         }
 
 
-                        @if (totalSgst > 0)
+                        @if (sgstAmount > 0)
                         {
 
                             <tr>
 
                                 <td>
-
-                                    Add: SGST
-
+                                    Add: SGST (@sgstRate.ToString("0.##")%)
                                 </td>
 
                                 <td>
-
-                                    ₹@totalSgst.ToString("N2")
-
+                                    ₹@sgstAmount.ToString("N2")
                                 </td>
 
                             </tr>
@@ -1997,21 +2138,17 @@
                         }
 
 
-                        @if (totalIgst > 0)
+                        @if (igstAmount > 0)
                         {
 
                             <tr>
 
                                 <td>
-
-                                    Add: IGST
-
+                                    Add: IGST (@igstRate.ToString("0.##")%)
                                 </td>
 
                                 <td>
-
-                                    ₹@totalIgst.ToString("N2")
-
+                                    ₹@igstAmount.ToString("N2")
                                 </td>
 
                             </tr>
@@ -2022,15 +2159,11 @@
                         <tr>
 
                             <td>
-
                                 Total Tax Amount
-
                             </td>
 
                             <td>
-
-                                ₹@totalTax.ToString("N2")
-
+                                ₹@totalTaxAmount.ToString("N2")
                             </td>
 
                         </tr>
@@ -2039,15 +2172,11 @@
                         <tr class="grand-total-row">
 
                             <td>
-
                                 Total Amount After Tax
-
                             </td>
 
                             <td>
-
-                                ₹@grandTotal.ToString("N2")
-
+                                ₹@totalAmountAfterTax.ToString("N2")
                             </td>
 
                         </tr>
@@ -2056,18 +2185,15 @@
                         <tr class="round-row">
 
                             <td>
-
                                 Round Off
-
                             </td>
 
                             <td>
-
-                                ₹@roundOff.ToString("N2")
-
+                                ₹0.00
                             </td>
 
                         </tr>
+
 
                     </table>
 
@@ -2077,22 +2203,130 @@
 
 
             <!-- =================================================
+                 GST / E-INVOICE STATUS
+            ================================================== -->
+            @if (!string.IsNullOrWhiteSpace(main.AckNo)
+                        || main.AckDt.HasValue
+                        || !string.IsNullOrWhiteSpace(main.Irn)
+                        || !string.IsNullOrWhiteSpace(main.Status)
+                        || !string.IsNullOrWhiteSpace(main.e_invoice_status))
+            {
+
+                <div class="section-title">
+
+                    E-Invoice Details
+
+                </div>
+
+
+                <table class="customer-table">
+
+                    @if (!string.IsNullOrWhiteSpace(main.AckNo))
+                    {
+
+                        <tr>
+
+                            <td class="customer-label">
+                                Acknowledgement No.
+                            </td>
+
+                            <td class="customer-value">
+                                @main.AckNo
+                            </td>
+
+                        </tr>
+
+                    }
+
+
+                    @if (main.AckDt.HasValue)
+                    {
+
+                        <tr>
+
+                            <td class="customer-label">
+                                Acknowledgement Date
+                            </td>
+
+                            <td class="customer-value">
+                                @main.AckDt.Value.ToString("dd/MM/yyyy HH:mm")
+                            </td>
+
+                        </tr>
+
+                    }
+
+
+                    @if (!string.IsNullOrWhiteSpace(main.Irn))
+                    {
+
+                        <tr>
+
+                            <td class="customer-label">
+                                IRN
+                            </td>
+
+                            <td class="customer-value">
+                                @main.Irn
+                            </td>
+
+                        </tr>
+
+                    }
+
+
+                    @if (!string.IsNullOrWhiteSpace(main.Status))
+                    {
+
+                        <tr>
+
+                            <td class="customer-label">
+                                Status
+                            </td>
+
+                            <td class="customer-value">
+                                @main.Status
+                            </td>
+
+                        </tr>
+
+                    }
+
+
+                    @if (!string.IsNullOrWhiteSpace(main.e_invoice_status))
+                    {
+
+                        <tr>
+
+                            <td class="customer-label">
+                                E-Invoice Status
+                            </td>
+
+                            <td class="customer-value">
+                                @main.e_invoice_status
+                            </td>
+
+                        </tr>
+
+                    }
+
+                </table>
+
+            }
+
+
+            <!-- =================================================
                  REMARK
             ================================================== -->
 
             <div class="remark-box">
 
                 <div class="remark-title">
-
                     Remark :
-
                 </div>
 
-
                 <div>
-
                     @remark
-
                 </div>
 
             </div>
@@ -2110,63 +2344,14 @@
                 <div class="bank-details">
 
                     <div class="footer-title">
-
                         Bank Details
-
                     </div>
 
 
                     <div class="bank-content">
 
-                        <div>
-
-                            <strong>
-
-                                Bank A/C :
-
-                            </strong>
-
-                            @accountNo
-
-                        </div>
-
-
-                        <div>
-
-                            <strong>
-
-                                Bank IFSC :
-
-                            </strong>
-
-                            @ifsc
-
-                        </div>
-
-
-                        <div>
-
-                            <strong>
-
-                                Bank Name :
-
-                            </strong>
-
-                            @bankName
-
-                        </div>
-
-
-                        <div>
-
-                            <strong>
-
-                                Branch :
-
-                            </strong>
-
-                            @branch
-
+                        <div class="not-available">
+                            Bank details not available in the current DTO.
                         </div>
 
                     </div>
@@ -2181,18 +2366,14 @@
                     <div class="seal">
 
                         WEB LINK<br />
-
                         SERVICES<br />
-
                         PVT. LTD.
 
                     </div>
 
 
                     <div class="seal-text">
-
                         Common Seal
-
                     </div>
 
                 </div>
@@ -2239,7 +2420,6 @@
                 This is a computer generated tax invoice.
 
             </div>
-
 
         </div>
 

@@ -1,31 +1,24 @@
-﻿@model IEnumerable<WLSPL_ERP_CRM.Models.Taxinvoice.InvoiceList>
+﻿@model IEnumerable<WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreate>
 
 @{
     ViewData["Title"] = "Tax Invoice List";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     var invoiceList = Model?.ToList()
-        ?? new List<WLSPL_ERP_CRM.Models.Taxinvoice.InvoiceList>();
+        ?? new List<WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreate>();
 
     var today = DateTime.Now;
-
-
 
     var currentFinancialYear =
         today.Month >= 4
             ? $"{today.Year}-{(today.Year + 1).ToString().Substring(2)}"
             : $"{today.Year - 1}-{today.Year.ToString().Substring(2)}";
 
-
     var currentMonth = today.ToString("MM");
-
-
 
     var selectedFinancialYear =
         ViewBag.SelectedFinancialYear?.ToString()
         ?? currentFinancialYear;
-
-  
 
     var selectedMonthNumber =
         ViewBag.SelectedMonth != null
@@ -37,55 +30,40 @@
             ? "all"
             : selectedMonthNumber.ToString("00");
 
-
     var financialYearSummary =
         ViewBag.FinancialYearSummary
-        as List<WLSPL_ERP_CRM.Models.Taxinvoice.InvoiceMonthSummary>
-        ?? new List<WLSPL_ERP_CRM.Models.Taxinvoice.InvoiceMonthSummary>();
-
-
+        as List<WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreate>
+        ?? new List<WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreate>();
 
     var financialYearTotal =
-        financialYearSummary.Sum(x => x.GrandTotal);
-
+        financialYearSummary.Sum(x => x.GrandTotal ?? 0m);
 
     var financialYearTaxTotal =
-        financialYearSummary.Sum(x => x.TotalTaxAmount);
-
-
+        financialYearSummary.Sum(x => x.TotalTaxAmount ?? 0m);
 
     var financialYearInvoiceCount =
-        financialYearSummary.Sum(x => x.TotalInvoice);
-
- 
+        financialYearSummary.Sum(x => x.TotalInvoice ?? 0);
 
     var selectedMonthSummary =
         selectedMonthNumber == 0
             ? null
             : financialYearSummary
-                .FirstOrDefault(x => x.Mon == selectedMonthNumber);
-
-
+                .FirstOrDefault(x => x.mon == selectedMonthNumber);
 
     var selectedMonthGrandTotal =
         selectedMonthNumber == 0
             ? financialYearTotal
-            : selectedMonthSummary?.GrandTotal ?? 0;
-
-
+            : selectedMonthSummary?.GrandTotal ?? 0m;
 
     var selectedMonthTaxTotal =
         selectedMonthNumber == 0
             ? financialYearTaxTotal
-            : selectedMonthSummary?.TotalTaxAmount ?? 0;
-
-
+            : selectedMonthSummary?.TotalTaxAmount ?? 0m;
 
     var selectedMonthInvoiceCount =
         selectedMonthNumber == 0
             ? financialYearInvoiceCount
             : selectedMonthSummary?.TotalInvoice ?? 0;
-
 
     var selectedMonthName =
         selectedMonthNumber == 0
@@ -97,7 +75,6 @@
 }
 
 <style>
-
 
     .invoice-page {
         width: 100%;
@@ -112,9 +89,6 @@
         box-shadow: 0 2px 14px rgba(16, 24, 40, .06);
         overflow: hidden;
     }
-
-
-
 
     .invoice-header {
         padding: 16px 20px;
@@ -133,9 +107,6 @@
             color: #0d6efd;
             margin-right: 7px;
         }
-
-
-
 
     .filter-section {
         padding: 16px 18px;
@@ -165,9 +136,6 @@
             border-color: #0d6efd;
             box-shadow: 0 0 0 .15rem rgba(13,110,253,.10);
         }
-
-
-
 
     .search-wrapper {
         display: flex;
@@ -199,11 +167,6 @@
             box-shadow: 0 0 0 .15rem rgba(13,110,253,.10);
         }
 
-
-    /* =========================================================
-           CLEAR
-        ========================================================= */
-
     .clear-filter-btn {
         height: 38px;
         border-radius: 7px;
@@ -211,11 +174,6 @@
         padding: 0 13px;
         width: 100%;
     }
-
-
-    /* =========================================================
-           CURRENT FILTER
-        ========================================================= */
 
     .current-filter-info {
         display: inline-flex;
@@ -231,11 +189,6 @@
         font-weight: 600;
         white-space: nowrap;
     }
-
-
-    /* =========================================================
-           SUMMARY
-        ========================================================= */
 
     .summary-section {
         padding: 16px 18px 5px;
@@ -286,11 +239,6 @@
     .summary-invoice {
         border-left: 4px solid #6f42c1;
     }
-
-
-    /* =========================================================
-           FY SUMMARY
-        ========================================================= */
 
     .fy-summary-section {
         margin: 16px 18px 20px;
@@ -372,11 +320,6 @@
         margin-top: 3px;
     }
 
-
-    /* =========================================================
-           RECORD INFORMATION
-        ========================================================= */
-
     .record-section {
         padding: 0 18px 10px;
     }
@@ -385,11 +328,6 @@
         font-size: 12px;
         color: #667085;
     }
-
-
-    /* =========================================================
-           TABLE
-        ========================================================= */
 
     .table-container {
         width: 100%;
@@ -431,11 +369,6 @@
         #invoiceTable tbody tr:hover td {
             background: #f7fbff;
         }
-
-
-        /* =========================================================
-           COLUMN WIDTH
-        ========================================================= */
 
         #invoiceTable th:nth-child(1),
         #invoiceTable td:nth-child(1) {
@@ -492,11 +425,6 @@
             width: 6%;
         }
 
-
-    /* =========================================================
-           TABLE CONTENT
-        ========================================================= */
-
     .row-number {
         color: #667085;
         font-weight: 600;
@@ -549,11 +477,6 @@
         overflow-wrap: anywhere;
         word-break: break-word;
     }
-
-
-    /* =========================================================
-           STATUS
-        ========================================================= */
 
     .status-column {
         text-align: center;
@@ -609,11 +532,6 @@
             background: #d99b00;
         }
 
-
-    /* =========================================================
-           ACTION
-        ========================================================= */
-
     .action-column {
         text-align: center;
     }
@@ -662,11 +580,6 @@
             color: #fff;
         }
 
-
-    /* =========================================================
-           EMPTY
-        ========================================================= */
-
     .no-record {
         text-align: center;
         padding: 45px !important;
@@ -689,11 +602,6 @@
         color: #98a2b3;
         margin-top: 3px;
     }
-
-
-    /* =========================================================
-           PAGINATION
-        ========================================================= */
 
     .pagination-wrapper {
         padding: 18px;
@@ -719,12 +627,6 @@
             color: #fff;
         }
 
-
-    /* =========================================================
-           TABLET
-           768px - 991px
-        ========================================================= */
-
     @@media (max-width: 991.98px) {
 
         .fy-month-wrapper {
@@ -734,9 +636,6 @@
         .table-container {
             padding: 0 10px;
         }
-        /*
-               Convert table rows to cards
-            */
 
         #invoiceTable,
         #invoiceTable tbody,
@@ -846,12 +745,6 @@
             margin-right: 5px;
         }
     }
-
-
-    /* =========================================================
-           MOBILE
-           <= 767px
-        ========================================================= */
 
     @@media (max-width: 767.98px) {
 
@@ -973,12 +866,6 @@
         }
     }
 
-
-    /* =========================================================
-           SMALL MOBILE
-           <= 575px
-        ========================================================= */
-
     @@media (max-width: 575.98px) {
 
         .current-filter-info {
@@ -1033,11 +920,6 @@
         }
     }
 
-
-    /* =========================================================
-           EMPTY ROW RESPONSIVE
-        ========================================================= */
-
     #dynamicEmptyRow td,
     #initialEmptyRow td {
         text-align: center !important;
@@ -1067,25 +949,18 @@
 
 </style>
 
-
 <div class="invoice-page">
 
     <div class="invoice-card">
 
-        <!-- =====================================================
-             HEADER
-        ====================================================== -->
-
+        <!-- HEADER -->
         <div class="invoice-header">
 
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
 
                 <h3 class="page-title">
-
                     <i class="fa fa-file-invoice"></i>
-
                     Tax Invoice List
-
                 </h3>
 
             </div>
@@ -1093,16 +968,12 @@
         </div>
 
 
-        <!-- =====================================================
-             FILTERS
-        ====================================================== -->
-
+        <!-- FILTERS -->
         <div class="filter-section">
 
             <div class="row align-items-end">
 
                 <!-- SEARCH -->
-
                 <div class="col-lg-4 col-md-6 mb-2">
 
                     <label class="filter-label">
@@ -1112,9 +983,7 @@
                     <div class="search-wrapper">
 
                         <span class="search-icon">
-
                             <i class="fa fa-search text-muted"></i>
-
                         </span>
 
                         <input type="text"
@@ -1128,7 +997,6 @@
 
 
                 <!-- FINANCIAL YEAR -->
-
                 <div class="col-lg-2 col-md-3 mb-2">
 
                     <label class="filter-label">
@@ -1138,37 +1006,14 @@
                     <select id="financialYearFilter"
                             class="form-select filter-control">
 
-                        <option value="2021-22">
-                            FY 2021-22
-                        </option>
-
-                        <option value="2022-23">
-                            FY 2022-23
-                        </option>
-
-                        <option value="2023-24">
-                            FY 2023-24
-                        </option>
-
-                        <option value="2024-25">
-                            FY 2024-25
-                        </option>
-
-                        <option value="2025-26">
-                            FY 2025-26
-                        </option>
-
-                        <option value="2026-27">
-                            FY 2026-27
-                        </option>
-
-                        <option value="2027-28">
-                            FY 2027-28
-                        </option>
-
-                        <option value="2028-29">
-                            FY 2028-29
-                        </option>
+                        <option value="2021-22">FY 2021-22</option>
+                        <option value="2022-23">FY 2022-23</option>
+                        <option value="2023-24">FY 2023-24</option>
+                        <option value="2024-25">FY 2024-25</option>
+                        <option value="2025-26">FY 2025-26</option>
+                        <option value="2026-27">FY 2026-27</option>
+                        <option value="2027-28">FY 2027-28</option>
+                        <option value="2028-29">FY 2028-29</option>
 
                     </select>
 
@@ -1176,7 +1021,6 @@
 
 
                 <!-- MONTH -->
-
                 <div class="col-lg-2 col-md-3 mb-2">
 
                     <label class="filter-label">
@@ -1186,9 +1030,7 @@
                     <select id="monthFilter"
                             class="form-select filter-control">
 
-                        <option value="all">
-                            All Months
-                        </option>
+                        <option value="all">All Months</option>
 
                         <option value="04">April</option>
                         <option value="05">May</option>
@@ -1209,7 +1051,6 @@
 
 
                 <!-- CLEAR -->
-
                 <div class="col-lg-1 col-md-3 mb-2">
 
                     <button type="button"
@@ -1217,7 +1058,6 @@
                             class="btn btn-outline-secondary clear-filter-btn">
 
                         <i class="fa fa-rotate-left"></i>
-
                         Clear
 
                     </button>
@@ -1226,7 +1066,6 @@
 
 
                 <!-- CURRENT FILTER -->
-
                 <div class="col-lg-3 col-md-9 mb-2 d-flex justify-content-lg-end align-items-center">
 
                     <span class="current-filter-info">
@@ -1246,16 +1085,12 @@
         </div>
 
 
-        <!-- =====================================================
-             SUMMARY CARDS
-        ====================================================== -->
-
+        <!-- SUMMARY -->
         <div class="summary-section">
 
             <div class="row">
 
                 <!-- FY TOTAL -->
-
                 <div class="col-lg-3 col-md-6 mb-2">
 
                     <div class="summary-card summary-fy">
@@ -1275,9 +1110,7 @@
                         </div>
 
                         <div class="summary-subtitle">
-
                             FY @selectedFinancialYear
-
                         </div>
 
                     </div>
@@ -1286,7 +1119,6 @@
 
 
                 <!-- FILTERED TOTAL -->
-
                 <div class="col-lg-3 col-md-6 mb-2">
 
                     <div class="summary-card summary-filtered">
@@ -1318,7 +1150,6 @@
 
 
                 <!-- TAX -->
-
                 <div class="col-lg-3 col-md-6 mb-2">
 
                     <div class="summary-card summary-tax">
@@ -1347,7 +1178,6 @@
 
 
                 <!-- COUNT -->
-
                 <div class="col-lg-3 col-md-6 mb-2">
 
                     <div class="summary-card summary-invoice">
@@ -1376,10 +1206,7 @@
         </div>
 
 
-        <!-- =====================================================
-             FY SUMMARY
-        ====================================================== -->
-
+        <!-- FY SUMMARY -->
         <div class="fy-summary-section">
 
             <div class="fy-summary-header">
@@ -1421,10 +1248,10 @@
                 {
                     var monthData =
                     financialYearSummary
-                    .FirstOrDefault(x => x.Mon == monthNumber);
+                    .FirstOrDefault(x => x.mon == monthNumber);
 
                     var monthTotal =
-                    monthData?.GrandTotal ?? 0;
+                    monthData?.GrandTotal ?? 0m;
 
                     var monthInvoiceCount =
                     monthData?.TotalInvoice ?? 0;
@@ -1461,9 +1288,7 @@
                     </div>
 
                     <div class="fy-month-count">
-
                         @monthInvoiceCount invoice(s)
-
                     </div>
 
                 </div>
@@ -1474,10 +1299,7 @@
         </div>
 
 
-        <!-- =====================================================
-             RECORD INFORMATION
-        ====================================================== -->
-
+        <!-- RECORD INFORMATION -->
         <div class="record-section">
 
             <div class="row">
@@ -1515,10 +1337,7 @@
         </div>
 
 
-        <!-- =====================================================
-             TABLE
-        ====================================================== -->
-
+        <!-- TABLE -->
         <div class="table-container">
 
             <table class="table table-bordered table-hover"
@@ -1528,49 +1347,27 @@
 
                     <tr>
 
-                        <th class="text-center">
-                            #
-                        </th>
+                        <th class="text-center">#</th>
 
-                        <th>
-                            Invoice Date
-                        </th>
+                        <th>Invoice Date</th>
 
-                        <th>
-                            Invoice No.
-                        </th>
+                        <th>Invoice No.</th>
 
-                        <th>
-                            Company Name
-                        </th>
+                        <th>Company Name</th>
 
-                        <th>
-                            GSTIN
-                        </th>
+                        <th>GSTIN</th>
 
-                        <th class="text-end">
-                            Taxable Value
-                        </th>
+                        <th class="text-end">Taxable Value</th>
 
-                        <th class="text-end">
-                            Tax Amount
-                        </th>
+                        <th class="text-end">Tax Amount</th>
 
-                        <th class="text-end">
-                            Grand Total
-                        </th>
+                        <th class="text-end">Grand Total</th>
 
-                        <th>
-                            Salesperson
-                        </th>
+                        <th>Salesperson</th>
 
-                        <th class="text-center">
-                            Status
-                        </th>
+                        <th class="text-center">Status</th>
 
-                        <th class="text-center">
-                            Action
-                        </th>
+                        <th class="text-center">Action</th>
 
                     </tr>
 
@@ -1598,15 +1395,21 @@
                                 : $"{invoiceDate.Year - 1}-{invoiceDate.Year.ToString().Substring(2)}";
                             }
 
+                            decimal parsedTaxAmount = 0m;
+
+                            decimal.TryParse(
+                            item.total_tax_amount,
+                            out parsedTaxAmount
+                            );
+
                             <tr class="invoice-row"
                                 data-month="@(item.invoicedate?.ToString("MM") ?? "")"
                                 data-financial-year="@fy"
-                                data-taxable="@item.totalamtbeforetax"
-                                data-tax="@item.total_tax_amount"
-                                data-grandtotal="@item.totalamtaftertax">
+                                data-taxable="@(item.totalamtbeforetax ?? 0m)"
+                                data-tax="@parsedTaxAmount"
+                                data-grandtotal="@(item.totalamtaftertax ?? 0m)">
 
                                 <!-- NUMBER -->
-
                                 <td class="row-number"
                                     data-label="Invoice #">
 
@@ -1616,7 +1419,6 @@
 
 
                                 <!-- DATE -->
-
                                 <td data-label="Invoice Date">
 
                                     @if (item.invoicedate.HasValue)
@@ -1628,73 +1430,62 @@
                                         <span>-</span>
                                     }
 
-                                </td>
+                        </td>
 
 
-                                <!-- INVOICE NO -->
+                        <!-- INVOICE NO -->
+                        <td data-label="Invoice No.">
 
-                                <td data-label="Invoice No.">
-
-                                    <span class="invoice-no">
-
-                                        @(item.invoiceno ?? "-")
-
-                                    </span>
-
-                                </td>
-
-
-                                <!-- COMPANY -->
-
-                                <td data-label="Company Name">
-
-                                    <span class="company-name">
-
-                                        @(item.companyname ?? "-")
-
-                                    </span>
-
-                                </td>
-
-
-                                <!-- GSTIN -->
-
-                                <td data-label="GSTIN">
-
-                                    <span class="gstin">
-
-                                        @(item.cgstin ?? "-")
-
-                                    </span>
-
-                                </td>
-
-
-                                <!-- TAXABLE -->
-
-                                <td class="text-end"
-                                    data-label="Taxable Value">
-
-                                    <span class="amount">
-
-                                        @item.totalamtbeforetax.ToString(
-                                        "C2",
-                                                                System.Globalization.CultureInfo.GetCultureInfo("en-IN")
-                                                                )
-
+                            <span class="invoice-no">
+                                @(item.invoiceno ?? "-")
                             </span>
 
                         </td>
 
 
-                        <!-- TAX -->
+                        <!-- COMPANY -->
+                        <td data-label="Company Name">
 
+                            <span class="company-name">
+                                @(item.companyName ?? "-")
+                            </span>
+
+                        </td>
+
+
+                        <!-- GSTIN -->
+                        <td data-label="GSTIN">
+
+                            <span class="gstin">
+                                @(item.gstIn ?? "-")
+                            </span>
+
+                        </td>
+
+
+                        <!-- TAXABLE -->
                         <td class="text-end"
-                            data-label="Tax Amount">
+                            data-label="Taxable Value">
 
-                            <span class="tax-amount">
+                            <span class="amount">
 
-                                @item.total_tax_amount.ToString(
+                                @((item.totalamtbeforetax ?? 0m).ToString(
+                                                                "C2",
+                                                                System.Globalization.CultureInfo.GetCultureInfo("en-IN")
+                                                                ))
+
+                            </span>
+
+                                </td>
+
+
+                                <!-- TAX -->
+                                <td class="text-end"
+                                    data-label="Tax Amount">
+
+                                    <span class="tax-amount">
+
+                                        @parsedTaxAmount.ToString(
                                                                 "C2",
                                                                 System.Globalization.CultureInfo.GetCultureInfo("en-IN")
                                                                 )
@@ -1705,41 +1496,36 @@
 
 
                         <!-- GRAND TOTAL -->
-
                         <td class="text-end"
                             data-label="Grand Total">
 
                             <span class="grand-total">
 
-                                @item.totalamtaftertax.ToString(
+                                @((item.totalamtaftertax ?? 0m).ToString(
                                                                 "C2",
                                                                 System.Globalization.CultureInfo.GetCultureInfo("en-IN")
-                                                                )
+                                                                ))
 
                             </span>
 
-                        </td>
+                                </td>
 
 
-                        <!-- SALESPERSON -->
+                                <!-- SALESPERSON -->
+                                <td data-label="Salesperson">
 
-                        <td data-label="Salesperson">
+                                    <span class="salesperson">
+                                        @(item.NAME ?? "-")
+                                    </span>
 
-                            <span class="salesperson">
-
-                                @(item.NAME ?? "-")
-
-                            </span>
-
-                        </td>
+                                </td>
 
 
-                        <!-- STATUS -->
+                                <!-- STATUS -->
+                                <td class="status-column"
+                                    data-label="Status">
 
-                        <td class="status-column"
-                            data-label="Status">
-
-                            @if (item.isapprove == true)
+                            @if (item.IsApprove == true)
                                     {
                                         <span class="status-badge status-approved">
 
@@ -1749,7 +1535,7 @@
 
                                         </span>
                                     }
-                                    else if (item.isreject == true)
+                                    else if (item.IsReject == true)
                                     {
                                         <span class="status-badge status-rejected">
 
@@ -1774,14 +1560,13 @@
 
 
                                 <!-- ACTION -->
-
                                 <td class="action-column"
                                     data-label="Action">
 
                                     <a href="@Url.Action(
-                                                                                                                      "GetPdf",
+                                                                               "GetPdf",
                                                                                "Taxinvoice",
-                                                                               new { id = item.id })"
+                                                                               new { id = item.Id })"
                                class="invoice-action-btn invoice-pdf-btn"
                                title="Download PDF">
 
@@ -1789,10 +1574,11 @@
 
                                     </a>
 
+
                                     <a href="@Url.Action(
-                                                                       "CreateOrEdit",
+                                                                       "Edit",
                                                                        "Taxinvoice",
-                                                                       new { id = item.id })"
+                                                                       new { id = item.Id })"
                                class="invoice-action-btn invoice-edit-btn"
                                title="Edit Invoice">
 
@@ -1801,16 +1587,16 @@
                                     </a>
 
                                     <a href="@Url.Action(
-                                                                       "Delete",
-                                                                       "Taxinvoice",
-                                                                       new { id = item.id })"
+                                           "Deleteinvoice",
+                                           "Taxinvoice",
+                                           new { id = item.Id })"
                                class="invoice-action-btn invoice-delete-btn"
                                title="Delete Invoice"
-                               onclick="return confirm('Are you sure you want to delete this invoice?');">
+                               onclick="return deleteInvoice(event, this);">
 
                                         <i class="fa fa-trash"></i>
-
                                     </a>
+
 
                                 </td>
 
@@ -1848,10 +1634,7 @@
         </div>
 
 
-        <!-- =====================================================
-             PAGINATION
-        ====================================================== -->
-
+        <!-- PAGINATION -->
         <div class="row align-items-center pagination-wrapper">
 
             <div class="col-md-5">
@@ -1860,21 +1643,15 @@
 
                     Showing
 
-                    <strong id="showingFrom">
-                        0
-                    </strong>
+                    <strong id="showingFrom">0</strong>
 
                     to
 
-                    <strong id="showingTo">
-                        0
-                    </strong>
+                    <strong id="showingTo">0</strong>
 
                     of
 
-                    <strong id="showingTotal">
-                        0
-                    </strong>
+                    <strong id="showingTotal">0</strong>
 
                     records
 
@@ -1904,10 +1681,6 @@
 
 <script>
 
-    /* =========================================================
-       VARIABLES
-    ========================================================= */
-
     const rowsPerPage = 20;
 
     let currentPage = 1;
@@ -1932,10 +1705,6 @@
         filteredRows = [...allRows];
 
 
-        // ============================================
-        // FINANCIAL YEAR
-        // ============================================
-
         const financialYearFilter =
             document.getElementById(
                 "financialYearFilter"
@@ -1945,10 +1714,6 @@
             "@selectedFinancialYear";
 
 
-        // ============================================
-        // MONTH
-        // ============================================
-
         const monthFilter =
             document.getElementById(
                 "monthFilter"
@@ -1957,10 +1722,6 @@
         monthFilter.value =
             "@selectedMonth";
 
-
-        // ============================================
-        // INITIAL UI
-        // ============================================
 
         updateFilterText();
 
@@ -2015,7 +1776,7 @@
 
 
     /* =========================================================
-       SELECT MONTH FROM FY CARD
+       SELECT MONTH
     ========================================================= */
 
     function selectMonth(month) {
@@ -2057,10 +1818,6 @@
             new URLSearchParams();
 
 
-        // ============================================
-        // FINANCIAL YEAR
-        // ============================================
-
         if (financialYear) {
 
             params.append(
@@ -2070,12 +1827,6 @@
 
         }
 
-
-        // ============================================
-        // MONTH
-        //
-        // all => 0
-        // ============================================
 
         if (
             month === "all" ||
@@ -2097,10 +1848,6 @@
 
         }
 
-
-        // ============================================
-        // REDIRECT
-        // ============================================
 
         window.location.href =
             url + "?" + params.toString();
@@ -2139,7 +1886,7 @@
 
 
     /* =========================================================
-       APPLY SEARCH / CLIENT FILTER
+       APPLY FILTERS
     ========================================================= */
 
     function applyFilters() {
@@ -2160,9 +1907,7 @@
 
         const selectedFinancialYear =
             document
-                .getElementById(
-                    "financialYearFilter"
-                )
+                .getElementById("financialYearFilter")
                 .value;
 
 
@@ -2173,18 +1918,10 @@
                     row.innerText.toLowerCase();
 
 
-                // ========================================
-                // SEARCH
-                // ========================================
-
                 const matchesSearch =
                     searchValue === "" ||
                     rowText.includes(searchValue);
 
-
-                // ========================================
-                // MONTH
-                // ========================================
 
                 const rowMonth =
                     row.getAttribute(
@@ -2197,10 +1934,6 @@
                     selectedMonth === "0" ||
                     rowMonth === selectedMonth;
 
-
-                // ========================================
-                // FY
-                // ========================================
 
                 const rowFY =
                     row.getAttribute(
@@ -2252,10 +1985,6 @@
         let filteredTaxTotal = 0;
 
 
-        // ============================================
-        // CALCULATE FROM CURRENT ROWS
-        // ============================================
-
         filteredRows.forEach(function (row) {
 
             filteredGrandTotal +=
@@ -2289,10 +2018,10 @@
                 .value;
 
 
-        // ============================================
-        // NO SEARCH
-        // USE SERVER SUMMARY
-        // ============================================
+        /*
+         * When there is no search text,
+         * use the server calculated summary.
+         */
 
         if (
             searchValue === "" &&
@@ -2314,9 +2043,9 @@
         }
 
 
-        // ============================================
-        // ALL MONTHS
-        // ============================================
+        /*
+         * All months
+         */
 
         if (
             searchValue === "" &&
@@ -2337,10 +2066,6 @@
 
         }
 
-
-        // ============================================
-        // UPDATE UI
-        // ============================================
 
         document.getElementById(
             "fyGrandTotal"
@@ -2428,11 +2153,6 @@
         };
 
 
-        // ============================================
-        // IMPORTANT
-        // Prevent undefined
-        // ============================================
-
         let monthText = "All Months";
 
 
@@ -2494,10 +2214,6 @@
         removeDynamicEmptyRow();
 
 
-        // ============================================
-        // HIDE ALL
-        // ============================================
-
         allRows.forEach(function (row) {
 
             row.style.display = "none";
@@ -2505,21 +2221,15 @@
         });
 
 
-        // ============================================
-        // NO RECORDS
-        // ============================================
-
         if (filteredRows.length === 0) {
 
             showEmptyRow();
-
 
             updateShowingInfo(
                 0,
                 0,
                 0
             );
-
 
             createPagination();
 
@@ -2529,10 +2239,6 @@
 
         }
 
-
-        // ============================================
-        // TOTAL PAGES
-        // ============================================
 
         const totalPages =
             Math.ceil(
@@ -2548,10 +2254,6 @@
 
         }
 
-
-        // ============================================
-        // PAGE
-        // ============================================
 
         const startIndex =
             (currentPage - 1) *
@@ -2572,20 +2274,12 @@
             );
 
 
-        // ============================================
-        // SHOW PAGE
-        // ============================================
-
         pageRows.forEach(function (row) {
 
             row.style.display = "";
 
         });
 
-
-        // ============================================
-        // ROW NUMBERS
-        // ============================================
 
         pageRows.forEach(function (row, index) {
 
@@ -2620,7 +2314,7 @@
 
 
     /* =========================================================
-       SHOWING INFORMATION
+       SHOWING INFO
     ========================================================= */
 
     function updateShowingInfo(
@@ -2675,9 +2369,9 @@
         }
 
 
-        // ============================================
-        // PREVIOUS
-        // ============================================
+        /*
+         * PREVIOUS
+         */
 
         const previous =
             document.createElement("li");
@@ -2709,6 +2403,11 @@
 
                 renderTable();
 
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
+
             }
 
         };
@@ -2717,9 +2416,9 @@
         pagination.appendChild(previous);
 
 
-        // ============================================
-        // PAGE NUMBERS
-        // ============================================
+        /*
+         * PAGE NUMBERS
+         */
 
         const maxVisiblePages = 5;
 
@@ -2756,9 +2455,9 @@
         }
 
 
-        // ============================================
-        // FIRST
-        // ============================================
+        /*
+         * FIRST
+         */
 
         if (startPage > 1) {
 
@@ -2779,9 +2478,9 @@
         }
 
 
-        // ============================================
-        // PAGES
-        // ============================================
+        /*
+         * PAGES
+         */
 
         for (
             let i = startPage;
@@ -2797,9 +2496,9 @@
         }
 
 
-        // ============================================
-        // LAST
-        // ============================================
+        /*
+         * LAST
+         */
 
         if (endPage < totalPages) {
 
@@ -2823,9 +2522,9 @@
         }
 
 
-        // ============================================
-        // NEXT
-        // ============================================
+        /*
+         * NEXT
+         */
 
         const next =
             document.createElement("li");
@@ -2859,6 +2558,11 @@
                 currentPage++;
 
                 renderTable();
+
+                window.scrollTo({
+                    top: 0,
+                    behavior: "smooth"
+                });
 
             }
 
@@ -2906,6 +2610,11 @@
                 pageNumber;
 
             renderTable();
+
+            window.scrollTo({
+                top: 0,
+                behavior: "smooth"
+            });
 
         };
 
@@ -3006,3 +2715,50 @@
     }
 
 </script>
+<link rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<script>
+    function deleteInvoice(event, element) {
+
+        event.preventDefault();
+
+        if (!confirm('Are you sure you want to delete this invoice?')) {
+            return false;
+        }
+
+        var url = element.href;
+
+        $.ajax({
+            url: url,
+            type: 'GET',
+            success: function (response) {
+
+                if (response.success) {
+
+                    toastr.success(response.message);
+
+                    // Remove deleted row
+                    $(element).closest('tr').fadeOut(500, function () {
+                        $(this).remove();
+                    });
+
+                } else {
+
+                    toastr.error(response.message);
+
+                }
+            },
+            error: function () {
+
+                toastr.error('Something went wrong while deleting the invoice.');
+
+            }
+        });
+
+        return false;
+    }
+</script>
+

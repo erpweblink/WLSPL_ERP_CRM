@@ -93,6 +93,8 @@ namespace WLSPL_ERP_CRM.Controllers
                 return NotFound("Invoice not found.");
 
             return View(invoice);
+
+
         }
 
         public async Task<IActionResult> Create()
@@ -123,32 +125,9 @@ namespace WLSPL_ERP_CRM.Controllers
             if (!ModelState.IsValid)
                 return Json(new { success = false, message = "Invalid data." });
 
-            var result = _TaxinvoiceRepo.UpdateSave(model);
-    
+              var result = _TaxinvoiceRepo.UpdateSave(model, Action : "insert");
+
             return Json(new { success = true, invoiceNo = model.main.invoiceno });
-        }
-
-
-
-        //old Page checing method 
-        public async Task<IActionResult> TaxInvoiceCreate()
-        {
-            var invoiceMain = await _TaxinvoiceRepo.Getinvoiceno();
-
-            var companies = await _TaxinvoiceRepo.Getcompany();
-
-            var model = new Taxinvoice.TaxInvoiceCreateViewModel
-            {
-                Main = invoiceMain ?? new Taxinvoice.InvoiceMain(),
-                Details = new List<Taxinvoice.InvoiceDetails>()
-            };
-
-            if (model.Main.invoicedate == null)
-            {
-                model.Main.invoicedate = DateTime.Today;
-            }
-
-            return View(model);
         }
 
         [HttpGet]
@@ -168,6 +147,69 @@ namespace WLSPL_ERP_CRM.Controllers
 
             return Json(result);
         }
+
+
+        [HttpGet]
+        public async Task<IActionResult> Deleteinvoice(int id)
+        {
+            var result = await _TaxinvoiceRepo.Deletereords(id);
+
+            if (result)
+            {
+                return Json(new
+                {
+                    success = true,
+                    message = "Invoice deleted successfully."
+                });
+            }
+
+            return Json(new
+            {
+                success = false,
+                message = "Invoice not found or could not be deleted."
+            });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var result = await _TaxinvoiceRepo.Getinvoicebyid(id);
+
+            if (result == null || result.main == null)
+            {
+                return NotFound();
+            }
+
+            var companies = await _TaxinvoiceRepo.Getcompany();
+
+            var vm = new Taxinvoice.TaxInvoiceCreateVM
+            {
+                main = result.main,
+                details = result.details ?? new List<Taxinvoice.InvoiceDetails>(),
+                companies = companies ?? new List<Taxinvoice.TaxInvoiceCreate>()
+            };
+
+            return View(vm);
+        }
+
+
+
+        [HttpPost]
+        public IActionResult UpdateInvoice([FromBody] TaxInvoiceCreateVM model)
+        {
+            model.main.sessionname = HttpContext.Session.GetString("EmpCode")?.ToString();
+
+            if (!ModelState.IsValid)
+                return Json(new { success = false, message = "Invalid data." });
+
+            var result = _TaxinvoiceRepo.UpdateSave(model, Action: "updateOldData");
+
+            return Json(new { success = true, invoiceNo = model.main.invoiceno });
+        }
+
+
+
+
 
 
     }
