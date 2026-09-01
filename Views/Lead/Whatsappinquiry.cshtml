@@ -685,7 +685,7 @@
         });
     });
 
-    function updateSalesPerson(select) {
+ @*    function updateSalesPerson(select) {
         const inquiryId = select.getAttribute("data-inquiry-id");
         const salesEmpCode = select.value;
 
@@ -717,5 +717,163 @@
                  showToast( "Something went wrong while assigning the sales person.","error");
             }
         });
+    } *@
+
+        function updateSalesPerson(select) {
+
+        const inquiryId = select.getAttribute("data-inquiry-id");
+        const salesEmpCode = select.value;
+
+        if (!inquiryId) {
+            showToast(
+                "Inquiry ID not found.",
+                "error"
+            );
+            return;
+        }
+
+        if (!salesEmpCode) {
+            return;
+        }
+
+        // ==========================================
+        // CONFIRMATION POPUP
+        // ==========================================
+
+        const toast = document.createElement("div");
+
+        toast.innerHTML = `
+            <div style="margin-bottom:10px; font-weight:600;">
+                Are you sure you want to assign this sales person?
+            </div>
+
+            <div style="display:flex; gap:8px; justify-content:flex-end;">
+
+                <button type="button"
+                        class="confirmAssign"
+                        style="
+                            background:#28a745;
+                            color:white;
+                            border:none;
+                            padding:6px 14px;
+                            border-radius:4px;
+                            cursor:pointer;">
+                    Yes
+                </button>
+
+                <button type="button"
+                        class="cancelAssign"
+                        style="
+                            background:#dc3545;
+                            color:white;
+                            border:none;
+                            padding:6px 14px;
+                            border-radius:4px;
+                            cursor:pointer;">
+                    No
+                </button>
+
+            </div>
+        `;
+
+        toast.style.cssText = `
+            position:fixed;
+            top:20px;
+            right:20px;
+            background:#fff;
+            color:#333;
+            padding:15px;
+            border-radius:6px;
+            box-shadow:0 4px 15px rgba(0,0,0,.25);
+            z-index:99999;
+            min-width:300px;
+        `;
+
+        document.body.appendChild(toast);
+
+
+        // ==========================================
+        // YES - ASSIGN
+        // ==========================================
+
+        toast.querySelector(".confirmAssign").onclick = function () {
+
+            toast.remove();
+
+            $.ajax({
+
+                url: '@Url.Action("AssignSalesPerson", "Lead")',
+
+                type: 'POST',
+
+                data: {
+                    inquiryId: inquiryId,
+                    salesEmpCode: salesEmpCode,
+                    Action: "AssignToWebsite"
+                },
+
+                success: function (response) {
+
+                    if (response.success) {
+
+                        showToast(
+                            "Sales person assigned successfully.",
+                            "success"
+                        );
+
+                    } else {
+
+                        showToast(
+                            response.message ||
+                            "Unable to assign sales person.",
+                            "error"
+                        );
+
+                        clearSalesPerson(select);
+                    }
+                },
+
+                error: function () {
+
+                    showToast(
+                        "Something went wrong while assigning the sales person.",
+                        "error"
+                    );
+
+                    clearSalesPerson(select);
+                }
+            });
+        };
+
+
+        // ==========================================
+        // NO - CLEAR SELECTED VALUE
+        // ==========================================
+
+        toast.querySelector(".cancelAssign").onclick = function () {
+
+            toast.remove();
+
+            clearSalesPerson(select);
+        };
     }
+
+
+    // ==========================================
+    // CLEAR SELECT2 SALESPERSON
+    // ==========================================
+
+    function clearSalesPerson(select) {
+
+        // IMPORTANT:
+        // Select2 needs jQuery to update its visible UI.
+
+        $(select).val(null);
+
+        // Update Select2 display WITHOUT triggering
+        // the normal onchange="updateSalesPerson(this)"
+        $(select).trigger("change.select2");
+    }
+
+
 </script>

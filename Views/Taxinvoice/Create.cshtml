@@ -622,6 +622,7 @@
         });
         setTodayDate();
         addInvoiceRow();
+       applyGSTBasedOnCompany();
     });
 
     function getCompanyDetails(cname) {
@@ -639,6 +640,7 @@
                 $('#billingState').val(data.state || '');
                 $('#billingPincode').val(data.pinCode || '');
                 $('#billingStateCode').val(data.statecode  || '');
+                applyGSTBasedOnCompany();
             },
             error: function () { alert("Error while loading company details."); },
             complete: function () { $('#companyName').prop('disabled', false); }
@@ -662,7 +664,7 @@
         row.innerHTML = `
             <td><input type="text" value="${rowCounter}" readonly class="serial-number" /></td>
             <td><textarea class="description" placeholder="Description"></textarea></td>
-            <td><input type="text" class="sac-code" placeholder="SAC Code" /></td>
+            <td><input type="text" class="sac-code" placeholder="SAC Code"  value="998314"/></td>
             <td><input type="number" class="qty" min="0"  value="1" oninput="calculateRow(this); updateAmountInWords();"
                   onblur="updateAmountInWords();" /></td>
             <td><input type="number" class="rate" min="0" value="0" oninput="calculateRow(this); updateAmountInWords();"
@@ -686,6 +688,7 @@
             <td><input type="number" class="row-total" value="0" readonly /></td>
             <td><button type="button" class="btn btn-danger btn-sm remove-row" onclick="removeRow(this);" style="padding:1px 6px;">×</button></td>`;
         document.getElementById('invoiceItems').appendChild(row);
+          applyGSTBasedOnCompany();
         refreshSerialNumbers();
         calculateAll();
         updateAmountInWords();
@@ -1039,6 +1042,61 @@
 
         $('#amountInWords').val(amountWords);
     }
+        function applyGSTBasedOnCompany() {
+
+        var gstin = $('#gstin').val() || '';
+        gstin = gstin.trim();
+
+        if (gstin.length < 2) {
+            return;
+        }
+
+        // First 2 digits of GSTIN = State Code
+        var customerStateCode = gstin.substring(0, 2);
+
+        // Your company state code
+        // Maharashtra = 27
+        var companyStateCode = '27';
+
+        $('.invoice-item-row').each(function () {
+
+            var row = this;
+
+            var cgstRate = row.querySelector('.cgst-rate');
+            var sgstRate = row.querySelector('.sgst-rate');
+            var igstRate = row.querySelector('.igst-rate');
+
+            if (customerStateCode === companyStateCode) {
+
+                // Same state
+                cgstRate.value = '9';
+                sgstRate.value = '9';
+                igstRate.value = '0';
+
+                cgstRate.disabled = false;
+                sgstRate.disabled = false;
+                igstRate.disabled = true;
+
+            } else {
+
+                // Other state
+                cgstRate.value = '0';
+                sgstRate.value = '0';
+                igstRate.value = '18';
+
+                cgstRate.disabled = true;
+                sgstRate.disabled = true;
+                igstRate.disabled = false;
+            }
+
+            calculateRow(cgstRate);
+        });
+
+        calculateAll();
+        updateAmountInWords();
+    }
+
+
 
 
 </script>
