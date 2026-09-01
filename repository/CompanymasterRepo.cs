@@ -133,184 +133,6 @@ namespace WEBLINK_CRM.repository
             }
         }
 
-        public async Task<List<dynamic>> GetcompanyNameDashboard(string Name, string UserName, string role)
-        {
-            using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
-            {
-                await connection.OpenAsync();
-                var parameters = new DynamicParameters();
-                parameters.Add("@CompanyName", Name);
-                parameters.Add("@CreatedBy", UserName);
-                parameters.Add("@OwnerName", role);
-                parameters.Add("@Action", "GetComapnyNameDashboard");
-                var result = await connection.QueryAsync<dynamic>(
-                    "SP_companymaster",
-                    parameters,
-                    commandType: CommandType.StoredProcedure);
-                return result.ToList();
-            }
-        }
-
-        public async Task<dynamic> GetcompanybyIdDashboard(string Id)
-        {
-            try
-            {
-                using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
-                await connection.OpenAsync();
-
-                var parameters = new DynamicParameters();
-                parameters.Add("@id", Id);
-                parameters.Add("@Action", "Getcomapnybyid"); // Corrected spelling
-
-                var data = await connection.QueryFirstOrDefaultAsync<dynamic>(
-                    "SP_companymaster",
-                    parameters,
-                    commandType: CommandType.StoredProcedure);
-
-                if (data == null)
-                    return new Company();
-
-                var company = new Company
-                {
-                    Id = data.Id?.ToString(),
-                    CompanyName = data.CompanyName,
-                    CompanyCode = data.CompanyCode,
-                    Registerfor = data.Registerfor,
-                    supplytype = data.supplytype,
-                    OwnerName = data.OwnerName,
-                    GSTNo = data.GSTNo,
-                    BillAddress = data.BillAddress,
-                    ShippAddress = data.ShippAddress,
-                    BillLocation = data.BillLocation,
-                    ShippLocation = data.ShippLocation,
-                    BillingPincode = data.BillingPincode,
-                    ShippingPincode = data.ShippingPincode,
-                    BillStateCode = data.BillStateCode,
-                    ShippStateCode = data.ShippStateCode,
-                    BillingAddress = data.BillingAddress,
-                    ShippingAddress = data.ShippingAddress,
-                    IsDeleted = data.IsDeleted,
-                    CreatedBy = data.CreatedBy,
-                    CreatedOn = data.CreatedOn,
-                    UpdatedBy = data.UpdatedBy,
-                    UpdatedOn = data.UpdatedOn,
-                    DeletedOn = data.DeletedOn,
-                    DeletedBy = data.DeletedBy,
-                    AreaNAme = data.AreaNAme, // spelling in DB?
-                    vendorCode = data.vendorCode
-                };
-
-                void AddContact(string? name, string? mobile, string? email, string? designation)
-                {
-                    if (!string.IsNullOrWhiteSpace(name) ||
-                        !string.IsNullOrWhiteSpace(mobile) ||
-                        !string.IsNullOrWhiteSpace(email) ||
-                        !string.IsNullOrWhiteSpace(designation))
-                    {
-                        company.Contacts.Add(new Company.ContactModel
-                        {
-                            Name = name,
-                            MobileNo = mobile,
-                            EmailID = email,
-                            Designation = designation
-                        });
-                    }
-                }
-
-                AddContact(data.Name1, data.MobileNo1, data.EmailID1, data.Designation1);
-                AddContact(data.Name2, data.MobileNo2, data.EmailID2, data.Designation2);
-                AddContact(data.Name3, data.MobileNo3, data.EmailID3, data.Designation3);
-                AddContact(data.Name4, data.MobileNo4, data.EmailID4, data.Designation4);
-                AddContact(data.Name5, data.MobileNo5, data.EmailID5, data.Designation5);
-
-                return company;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        public async Task<dynamic> GetcompanybyCCodeFromMainSearch(string CCode)
-        {
-            try
-            {
-                using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
-                await connection.OpenAsync();
-
-                var parameters = new DynamicParameters();
-                parameters.Add("@CompanyCode", CCode);
-                parameters.Add("@Action", "GetcomapnybyCCode"); // Corrected spelling
-
-                var data = await connection.QueryFirstOrDefaultAsync<dynamic>(
-                    "SP_companymaster",
-                    parameters,
-                    commandType: CommandType.StoredProcedure);
-
-                if (data == null)
-                    return new Company();
-
-                var company = new Company
-                {
-                    Id = data.Id?.ToString(),
-                    CompanyName = data.CompanyName,
-                    CompanyCode = data.CompanyCode,
-                    Registerfor = data.Registerfor,
-                    supplytype = data.supplytype,
-                    OwnerName = data.OwnerName,
-                    GSTNo = data.GSTNo,
-                    BillAddress = data.BillAddress,
-                    ShippAddress = data.ShippAddress,
-                    BillLocation = data.BillLocation,
-                    ShippLocation = data.ShippLocation,
-                    BillingPincode = data.BillingPincode,
-                    ShippingPincode = data.ShippingPincode,
-                    BillStateCode = data.BillStateCode,
-                    ShippStateCode = data.ShippStateCode,
-                    BillingAddress = data.BillingAddress,
-                    ShippingAddress = data.ShippingAddress,
-                    IsDeleted = data.IsDeleted,
-                    CreatedBy = data.CreatedBy,
-                    CreatedOn = data.CreatedOn,
-                    UpdatedBy = data.UpdatedBy,
-                    UpdatedOn = data.UpdatedOn,
-                    DeletedOn = data.DeletedOn,
-                    DeletedBy = data.DeletedBy,
-                    AreaNAme = data.AreaNAme, // spelling in DB?
-                    vendorCode = data.vendorCode
-                };
-
-                void AddContact(string? name, string? mobile, string? email, string? designation)
-                {
-                    if (!string.IsNullOrWhiteSpace(name) ||
-                        !string.IsNullOrWhiteSpace(mobile) ||
-                        !string.IsNullOrWhiteSpace(email) ||
-                        !string.IsNullOrWhiteSpace(designation))
-                    {
-                        company.Contacts.Add(new Company.ContactModel
-                        {
-                            Name = name,
-                            MobileNo = mobile,
-                            EmailID = email,
-                            Designation = designation
-                        });
-                    }
-                }
-
-                AddContact(data.Name1, data.MobileNo1, data.EmailID1, data.Designation1);
-                AddContact(data.Name2, data.MobileNo2, data.EmailID2, data.Designation2);
-                AddContact(data.Name3, data.MobileNo3, data.EmailID3, data.Designation3);
-                AddContact(data.Name4, data.MobileNo4, data.EmailID4, data.Designation4);
-                AddContact(data.Name5, data.MobileNo5, data.EmailID5, data.Designation5);
-
-                return company;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
         public async Task<string> Getcompcode(string Action)
         {
             try
@@ -401,6 +223,49 @@ namespace WEBLINK_CRM.repository
             }
         }
 
+        public async Task<List<Companymaster>> GetFilteredcompanyList(Companymaster model)
+        {
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
+            {
+                await connection.OpenAsync();
+                string query = @"WITH Employee AS( 
+                                    SELECT id, ccode, cname, oname, email, mobile,
+                                         visitingcard, TRIM(type) AS typess, sessionname
+                                       FROM Company   
+                                       WHERE (
+                                            @EmpCode = '' OR @EmpCode IS NULL OR BDE = @EmpCode
+                                       )
+                                       AND (
+                                           @SearchIP = '' OR @SearchIP IS NULL 
+					                            OR ccode LIKE '%' + @SearchIP + '%'
+					                            OR cname LIKE '%' + @SearchIP + '%'
+					                            OR email LIKE '%' + @SearchIP + '%'
+					                            OR mobile LIKE '%' + @SearchIP + '%'
+					                            OR gstno LIKE '%' + @SearchIP + '%'
+                                       )
+                                       AND (
+                                          @Status = '' OR @Status IS NULL 
+					                            OR type = @Status 
+                                        )
+                            ),NUMBERED AS(
+                                       SELECT *,ROW_NUMBER() OVER (ORDER BY ccode ASC) AS Rn
+                                       FROM Employee 
+                                    )
+                            SELECT Top 1500 * FROM NUMBERED 
+                            ORDER BY id DESC";
+                var parameters = new DynamicParameters();
+                parameters.Add("@EmpCode", model.SessionName);
+                parameters.Add("@SearchIP", model.CName);
+                parameters.Add("@Status", model.typess);
+                var result = await connection.QueryAsync<Companymaster>(
+                    query,
+                    parameters);
+                return result.ToList();
+            }
+
+          
+        }
+
         public async Task<int> SubmitDetails(Companymaster Model, string Action)
         {
             try
@@ -489,6 +354,283 @@ namespace WEBLINK_CRM.repository
 
                 return result.ToList();
             }
+        }
+
+        public async Task<List<dynamic>> GetHirechyEmployees(string code)
+        {
+            using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
+            {
+                await connection.OpenAsync();
+                string query = @"WITH employee_hierarchy AS
+                        (
+                            SELECT
+                                e.empcode,
+                                e.name,
+                                e.TL_Manager,
+                                0 AS level,
+                                CAST('|' + e.empcode + '|' AS VARCHAR(MAX)) AS path
+                            FROM employees e
+                            WHERE e.status = 1
+                              AND e.isdeleted = 0
+                              AND e.empcode = @Empcode
+
+                            UNION ALL
+
+                            SELECT
+                                e.empcode,
+                                e.name,
+                                e.TL_Manager,
+                                eh.level + 1,
+                                CAST(eh.path + e.empcode + '|' AS VARCHAR(MAX))
+                            FROM employees e
+                            INNER JOIN employee_hierarchy eh
+                                ON e.TL_Manager = eh.empcode
+                            WHERE e.status = 1
+                              AND e.isdeleted = 0
+
+                              AND eh.path NOT LIKE '%|' + e.empcode + '|%'
+                        )
+
+                        SELECT
+                            empcode as UserCode,
+                            name as FullName,
+                            TL_Manager,
+                            level,
+                            path
+                        FROM employee_hierarchy
+                        ORDER BY level, empcode
+                        OPTION (MAXRECURSION 1000);";
+                var parameters = new DynamicParameters();
+                parameters.Add("@Empcode", code);
+                var result = await connection.QueryAsync<dynamic>(
+                    query,
+                    parameters);
+                return result.ToList();
+            }
+        }
+
+
+        public async Task<dynamic> GetCommentHistoryById(int Id)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
+                {
+                    await connection.OpenAsync();
+                    string query = @"SELECT A.id,A.[ccode],A.[cname],A.[oname],A.[email],A.[mobile],A.[visitingcard],A.[type]
+                        ,A.[BDE],A.[address],format(A.[visitdate],'dd-MMM-yyyy') as visitdate,A.[website],format(A.[regdate]
+                        ,'dd-MMM-yyyy hh:mm tt') as [regdate],A.[sessionname],B.name,B.email as Empemail 
+                        FROM [Company] A 
+                        LEFT JOIN employees B on A.sessionname=B.empcode where A.id= @CommentId";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@CommentId", Id);
+                    var companydetails = await connection.QueryAsync(query, parameters);
+
+                    return companydetails.ToList();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<dynamic>> GetCommentHistoryList(string Ccode)
+        {
+            try
+            {
+                string sql = @"SELECT [commentdatetime],[typeoftbl],[message],[name] 
+                            FROM (SELECT format(A.[commentdatetime],'dd-MMM-yyyy hh:mm tt') as [commentdatetime],
+                            A.[typeoftbl],A.[message],B.[name] FROM [CommentHistory] A 
+                            left join [employees] B ON A.[sessionname]=B.[empcode] 
+                            where A.ccode= @Ccode 
+
+                            UNION 
+
+                            SELECT format(A.[updateddatetime],'dd-MMM-yyyy hh:mm tt') as [commentdatetime]
+                            ,A.[typeoftbl],A.[message],B.[name] FROM [CompanyHistory] A 
+                            left join [employees] B ON A.[sessionname]=B.[empcode]
+                            where A.ccode= @Ccode 
+
+                            UNION 
+
+                            SELECT format(A.[setdatetime],'dd-MMM-yyyy hh:mm tt') as [commentdatetime],
+                            A.[typeoftbl],A.[remark] as message,B.[name] FROM [RemainderData] A 
+                            left join [employees] B ON A.[sessionname]=B.[empcode]
+                            where A.ccode= @Ccode) AS T order by convert(datetime, [commentdatetime]) desc";
+
+                using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
+                {
+                    await connection.OpenAsync();
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@Ccode", Ccode);
+                    var result = await connection.QueryAsync<dynamic>(sql, parameters);
+                    return result.ToList();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<dynamic> GetActiveEmployeeList()
+        {
+            try
+            {
+                using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
+                {
+                    await connection.OpenAsync();
+                    string query = @"SELECT empcode as UserCode, name as FullName FROM [dbo].[employees] 
+                                     WHERE status = '1' AND isdeleted = '0'";
+                    var companydetails = await connection.QueryAsync(query);
+
+                    return companydetails.ToList();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<int> UpdateCompanyCreatedByName(string newName, string CompCode, string SessionName)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+                await connection.OpenAsync();
+
+                bool flag = await SetCompanyHistory(newName, CompCode, SessionName);
+                const string sql = @"UPDATE Company SET sessionname = @newName, BDE=@newName WHERE id = @CompCode";
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@newName", newName);
+                parameters.Add("@CompCode", CompCode);
+
+                int rowsAffected = await connection.ExecuteAsync(sql, parameters);
+                return rowsAffected;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> SetCompanyHistory(string newName, string Id, string CurrentSessionName)
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+            await connection.OpenAsync();
+
+            const string sql = @"SELECT c.ccode, c.sessionname, e1.name AS oldSessionName, c.BDE, e2.name AS oldBDEName
+                         FROM Company c
+                         LEFT JOIN employees e1 ON c.sessionname = e1.empcode
+                         LEFT JOIN employees e2 ON c.BDE = e2.empcode
+                         WHERE c.id = @Id;
+
+                         SELECT name AS NewSalesPName
+                         FROM employees
+                         WHERE empcode = @empcode;";
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@Id", Id);
+            parameters.Add("@empcode", newName);
+
+            using var multi = await connection.QueryMultipleAsync(sql, parameters);
+
+            var companyDetails = await multi.ReadFirstOrDefaultAsync<dynamic>();
+            var employeeDetails = await multi.ReadFirstOrDefaultAsync<dynamic>();
+
+            if (companyDetails == null || employeeDetails == null)
+                return false;
+
+            string ccode = companyDetails.ccode?.ToString() ?? "";
+            string oldSessionName = companyDetails.oldSessionName?.ToString() ?? "";
+            string oldBDEName = companyDetails.oldBDEName?.ToString() ?? "";
+            string newSalesPersonName = employeeDetails.NewSalesPName?.ToString() ?? "";
+
+            string updateHistoryMsg = $"Sales Person and BDE/TME Person has been changed from {oldSessionName} / {oldBDEName} to {newSalesPersonName}";
+
+            var historyParameters = new DynamicParameters();
+            historyParameters.Add("@Action", "Insert");
+            historyParameters.Add("@sessionname", CurrentSessionName);
+            historyParameters.Add("@ccode", ccode);
+            historyParameters.Add("@message", updateHistoryMsg);
+
+            await connection.ExecuteAsync("SP_CompanyHistory", historyParameters, commandType: CommandType.StoredProcedure);
+
+            return true;
+        }
+
+        public async Task<int> UpdateOldCommentHistory(int id)
+        {
+            try
+            {
+                using var connection = new SqlConnection(
+                   _configuration.GetConnectionString("Conn_Stringg"));
+                await connection.OpenAsync();
+
+                const string sql = @"UPDATE [dbo].[CommentHistory] SET UpdateStatus=@UpdateStatus WHERE id = @ID";
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@UpdateStatus", "Closed");
+                parameters.Add("@ID", id);
+
+                int rowsAffected = await connection.ExecuteAsync(sql, parameters);
+                return rowsAffected;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<int> FromListSubmitCommentHistory(CallandMeeting model)
+        {
+            try
+            {
+                using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+                await connection.OpenAsync();
+
+                var commentParameters = new DynamicParameters();
+
+                commentParameters.Add("@sessionname", model.CreatedBy);
+                commentParameters.Add("@ccode", model.Ccode);
+                commentParameters.Add("@commentdatetime", DateTime.Now);
+                commentParameters.Add("@message", string.IsNullOrEmpty(model.FeedBack) ? model.FeedBack : model.FeedBack.Replace("\n", "<br />"));
+                commentParameters.Add("@UpdateStatus", model.CallUpdateStatus);
+                commentParameters.Add("@Typeofclient", model.TypeofClient);
+                commentParameters.Add("@Dealdetails", model.DealDetails);
+                commentParameters.Add("@followupdate", model.FollowDate);
+                commentParameters.Add("@meetingwithmanager", model.MeetingwithManager);
+                commentParameters.Add("@meetingtime", model.MeetingTime);
+                commentParameters.Add("@clientmail", model.ClientMail);
+                commentParameters.Add("@frommail", model.FromMail);
+                commentParameters.Add("@adminmail", _configuration["MailSettings:AdminMail"]);
+                commentParameters.Add("@Updatefor", model.UpdateFor);
+                commentParameters.Add("@Type", model.Type);
+
+                const string commentSql = @"
+                    INSERT INTO [CommentHistory]
+                    (
+                        sessionname, ccode, commentdatetime, message, UpdateStatus, Typeofclient,
+                        Dealdetails,followupdate,meetingwithmanager, meetingtime, clientmail, frommail, adminmail, Updatefor, Type
+                    )
+                    VALUES
+                    (
+                        @sessionname, @ccode, @commentdatetime, @message, @UpdateStatus, @Typeofclient, @Dealdetails,
+                        @followupdate, @meetingwithmanager,@meetingtime, @clientmail, @frommail,  @adminmail, @Updatefor, @Type
+                    );";
+                await connection.ExecuteAsync(commentSql, commentParameters);
+
+                return 1;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
         }
     }
 }

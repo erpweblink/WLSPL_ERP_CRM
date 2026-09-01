@@ -192,8 +192,6 @@ namespace WLSPL_ERP_CRM.Controllers
             return View(vm);
         }
 
-
-
         [HttpPost]
         public IActionResult UpdateInvoice([FromBody] TaxInvoiceCreateVM model)
         {
@@ -206,11 +204,6 @@ namespace WLSPL_ERP_CRM.Controllers
 
             return Json(new { success = true, invoiceNo = model.main.invoiceno });
         }
-
-
-
-
-
 
     }
 

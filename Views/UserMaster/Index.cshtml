@@ -291,93 +291,42 @@
 </div>
 
 <script type="text/javascript">
-    const rowsPerPage = 10;
+     const rowsPerPage = 10;
     let currentPage = 1;
-    const tableRows =
-    document.querySelectorAll("#userTable tbody tr");
-    function displayTable(page){
-    let start =
-    (page-1)*rowsPerPage;
-    let end =
-    start + rowsPerPage;
-    tableRows.forEach((row,index)=>{
-    row.style.display =
-    (index>=start && index<end)
-    ?""
-    :"none";
-    });
-    createPagination();
-    }
-    function createPagination(){
-    let pages =
-    Math.ceil(tableRows.length / rowsPerPage);
-    let pagination =
-    document.getElementById("pagination");
-    pagination.innerHTML="";
+    const tableRows = document.querySelectorAll("#userTable tbody tr");
 
-
-    for(let i=1;i<=pages;i++){
-
-
-    let li=document.createElement("li");
-
-    li.className =
-    "page-item "+(i==currentPage?"active":"");
-
-
-    li.innerHTML =
-    `
-    <a class="page-link" href="#">
-    ${i}
-    </a>
-    `;
-
-
-    li.onclick=function(){
-
-    currentPage=i;
-
-    displayTable(i);
-
-    };
-
-
-    pagination.appendChild(li);
-
-
+    function displayTable(page) {
+        let start = (page - 1) * rowsPerPage;
+        let end = start + rowsPerPage;
+        tableRows.forEach((row, index) => {
+            row.style.display = (index >= start && index < end) ? "" : "none";
+        });
+        createPagination();
     }
 
-
+    function createPagination() {
+        let pages = Math.ceil(tableRows.length / rowsPerPage);
+        let pagination = document.getElementById("pagination");
+        pagination.innerHTML = "";
+        for (let i = 1; i <= pages; i++) {
+            let li = document.createElement("li");
+            li.className = "page-item " + (i == currentPage ? "active" : "");
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            li.onclick = function() {
+                currentPage = i;
+                displayTable(i);
+            };
+            pagination.appendChild(li);
+        }
     }
 
-
-
-
-    document.getElementById("searchInput")
-    .addEventListener("keyup",function(){
-
-
-    let value=this.value.toLowerCase();
-
-
-    tableRows.forEach(row=>{
-
-
-    row.style.display =
-    row.innerText.toLowerCase()
-    .includes(value)
-    ?""
-    :"none";
-
-
+    document.getElementById("searchInput").addEventListener("keyup", function() {
+        let value = this.value.toLowerCase();
+        tableRows.forEach(row => {
+            row.style.display = row.innerText.toLowerCase().includes(value) ? "" : "none";
+        });
     });
-
-
-    });
-
-
 
     displayTable(1);
-
 
 </script>

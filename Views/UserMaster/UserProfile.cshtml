@@ -128,7 +128,7 @@
 
         .pg-right-head h2 {
             font-size: 24px;
-            font-weight:700;
+            font-weight: 700;
             color: #1a1a2e;
             margin: 0;
         }
@@ -668,7 +668,7 @@
             {
                 <img src="@currentAvatar" id="pgAvImg"
                      style="width:110px;height:110px;border-radius:50%;object-fit:cover;
-                        box-shadow:0 8px 24px rgba(42,82,152,.25);display:block;" />
+                            box-shadow:0 8px 24px rgba(42,82,152,.25);display:block;" />
             }
             else
             {
@@ -697,7 +697,7 @@
             </button>
         </div>
 
-        <form asp-action="Profile" method="post" onsubmit="return validateForm()" id="profileForm">
+        <form asp-action="UserProfile" asp-controller="UserMaster" method="post" id="profileForm">
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="id" />
 
@@ -786,8 +786,8 @@
             </div>
 
             <div class="pg-form-footer" id="formFooter">
-                <button type="button" class="btn-discard" onclick="cancelEdit()">Discard</button>
-                <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save changes</button>
+                <button type="button" class="btn-discard" onclick="confirmDiscard()">Discard</button>
+                <button type="button" class="btn-save" onclick="confirmSave()"><i class="fas fa-save"></i> Save changes</button>
             </div>
 
         </form>
@@ -885,10 +885,12 @@
         document.getElementById('avModalOverlay').classList.add('open');
         document.body.style.overflow = 'hidden';
     }
+
     function closeAvatarModal() {
         document.getElementById('avModalOverlay').classList.remove('open');
         document.body.style.overflow = '';
     }
+
     function overlayClose(e) {
         if (e.target === document.getElementById('avModalOverlay')) closeAvatarModal();
     }
@@ -911,16 +913,18 @@
     }
 
     /* ── Upload preview ── */
-    function previewUpload(input) {
+       function previewUpload(input) {
         var file = input.files[0];
         if (!file) return;
         if (file.size > 2 * 1024 * 1024) {
-            alert('File too large. Max 2MB.'); input.value=''; return;
+            showToast('File too large. Maximum size is 2MB.', 'error');
+            input.value = '';
+            return;
         }
         uploadedFile = file;
         selectedPresetUrl = null;
         var reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             document.getElementById('uploadPreviewImg').src = e.target.result;
             document.getElementById('uploadPreview').style.display = 'block';
             document.getElementById('uploadZone').style.borderColor = '#2a5298';
@@ -929,22 +933,26 @@
     }
 
     /* ── Apply ── */
-    function applyAvatar() {
-        if (activeTab === 'preset' && selectedPresetUrl) {
-            updateAvatarUI(selectedPresetUrl);
-            document.getElementById('hiddenAvatarUrl').value = selectedPresetUrl;
-            document.getElementById('avatarForm').submit();
-            closeAvatarModal();
-        } else if (activeTab === 'upload' && uploadedFile) {
-            var dt = new DataTransfer();
-            dt.items.add(uploadedFile);
-            document.getElementById('hiddenAvatarFile').files = dt.files;
-            updateAvatarUIFromFile(uploadedFile);
-            document.getElementById('avatarForm').submit();
-            closeAvatarModal();
-        } else {
-            alert('Please select or upload a photo first.');
+       function applyAvatar() {
+        if ((activeTab === 'preset' && !selectedPresetUrl) &&
+            (activeTab === 'upload' && !uploadedFile)) {
+            showToast('Please select or upload a photo first.', 'warning');
+            return;
         }
+        closeAvatarModal();
+        showConfirmToast('Update your profile photo?', function () {
+            if (activeTab === 'preset' && selectedPresetUrl) {
+                updateAvatarUI(selectedPresetUrl);
+                document.getElementById('hiddenAvatarUrl').value = selectedPresetUrl;
+                document.getElementById('avatarForm').submit();
+            } else if (activeTab === 'upload' && uploadedFile) {
+                var dt = new DataTransfer();
+                dt.items.add(uploadedFile);
+                document.getElementById('hiddenAvatarFile').files = dt.files;
+                updateAvatarUIFromFile(uploadedFile);
+                document.getElementById('avatarForm').submit();
+            }
+        }, null);
     }
 
     /* ── Update avatar in sidebar immediately ── */
@@ -1033,15 +1041,15 @@
         }
     }
 
-    function validateForm() {
+       function validateForm() {
         var valid = true;
         var rules = [
-            { id:'name',     errId:'err-name',     rowId:'row-name',     msg:'Full name is required.',       minLen:2, minMsg:'At least 2 characters.' },
+            { id:'name',     errId:'err-name',     rowId:'row-name',     msg:'Full name is required.',      minLen:2, minMsg:'At least 2 characters.' },
             { id:'email',    errId:'err-email',    rowId:'row-email',    msg:'Email is required.' },
             { id:'emailPsw', errId:'err-emailpsw', rowId:'row-emailpsw', msg:'Email password is required.' },
             { id:'mobile',   errId:'err-mobile',   rowId:'row-mobile',   msg:'Mobile is required.' },
-            { id:'UserName', errId:'err-username', rowId:'row-username', msg:'Username is required.',         minLen:3, minMsg:'At least 3 characters.' },
-            { id:'panelPsw', errId:'err-panelpsw', rowId:'row-panelpsw', msg:'Panel password is required.',  minLen:4, minMsg:'At least 4 characters.' },
+            { id:'UserName', errId:'err-username', rowId:'row-username', msg:'Username is required.',        minLen:3, minMsg:'At least 3 characters.' },
+            { id:'panelPsw', errId:'err-panelpsw', rowId:'row-panelpsw', msg:'Panel password is required.', minLen:4, minMsg:'At least 4 characters.' },
         ];
         rules.forEach(function(r) {
             var inp = document.getElementById(r.id);
@@ -1051,19 +1059,32 @@
             var val = inp.value.trim();
             inp.classList.remove('input-err');
             if (row) row.classList.remove('input-err');
-            if (err) { err.textContent=''; err.style.display='none'; }
+            if (err) { err.textContent = ''; err.style.display = 'none'; }
             if (!val) {
                 inp.classList.add('input-err');
                 if (row) row.classList.add('input-err');
-                if (err) { err.textContent=r.msg; err.style.display='block'; }
+                if (err) { err.textContent = r.msg; err.style.display = 'block'; }
                 valid = false;
             } else if (r.minLen && val.length < r.minLen) {
                 inp.classList.add('input-err');
                 if (row) row.classList.add('input-err');
-                if (err) { err.textContent=r.minMsg; err.style.display='block'; }
+                if (err) { err.textContent = r.minMsg; err.style.display = 'block'; }
                 valid = false;
             }
         });
         return valid;
+    }
+
+    function confirmSave() {
+        if (!validateForm()) return;   // show inline errors, stop here
+        showConfirmToast('Save profile changes?', function () {
+            document.getElementById('profileForm').submit();
+        }, null);
+    }
+
+    function confirmDiscard() {
+        showConfirmToast('Discard all unsaved changes?', function () {
+            cancelEdit();
+        }, null);
     }
 </script>

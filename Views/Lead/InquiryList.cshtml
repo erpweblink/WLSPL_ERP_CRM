@@ -6,7 +6,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<style>
+<style type="text/css">
     .table tbody td {
         font-size: 13px;
         vertical-align: middle;
@@ -425,654 +425,152 @@
 
 </div>
 
-<script>
-        const rowsPerPage = 20;
+<script type="text/javascript">
+          const rowsPerPage = 20;
+    let currentPage = 1;
+    let allRows = [];
+    let filteredRows = [];
 
-        let currentPage = 1;
+    document.addEventListener("DOMContentLoaded", function () {
+        allRows = Array.from(document.querySelectorAll("#tableBody .inquiry-row"));
+        filteredRows = [...allRows];
+        document.getElementById("totalRecords").textContent = allRows.length;
+        document.getElementById("statusMessage").innerHTML = `
+            <i class="fa fa-circle-check status-icon"></i>
+            Loaded ${allRows.length} database records.
+        `;
+        renderTable();
+    });
 
-        let allRows = [];
+    document.getElementById("searchInput").addEventListener("input", function () {
+        const searchValue = this.value.toLowerCase().trim();
+        filteredRows = allRows.filter(function (row) {
+            return row.innerText.toLowerCase().includes(searchValue);
+        });
+        currentPage = 1;
+        document.getElementById("totalRecords").textContent = filteredRows.length;
+        renderTable();
+    });
 
-        let filteredRows = [];
+    function renderTable() {
+        allRows.forEach(function (row) { row.style.display = "none"; });
 
-
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            function () {
-
-                allRows =
-                    Array.from(
-                        document.querySelectorAll(
-                            "#tableBody .inquiry-row"
-                        )
-                    );
-
-
-                filteredRows =
-                    [...allRows];
-
-
-                document.getElementById(
-                    "totalRecords"
-                ).textContent =
-                    allRows.length;
-
-
-                document.getElementById(
-                    "statusMessage"
-                ).innerHTML = `
-
-                    <i class="fa fa-circle-check status-icon"></i>
-
-                    Loaded ${allRows.length} database records.
-
-                `;
-
-
-                renderTable();
-
-            }
-        );
-
-
-        document
-            .getElementById("searchInput")
-            .addEventListener(
-                "input",
-                function () {
-
-                    const searchValue =
-                        this.value
-                            .toLowerCase()
-                            .trim();
-
-
-                    filteredRows =
-                        allRows.filter(
-                            function (row) {
-
-                                return row.innerText
-                                    .toLowerCase()
-                                    .includes(
-                                        searchValue
-                                    );
-
-                            }
-                        );
-
-
-                    currentPage = 1;
-
-
-                    document.getElementById(
-                        "totalRecords"
-                    ).textContent =
-                        filteredRows.length;
-
-
-                    renderTable();
-
-                }
-            );
-
-
-        function renderTable() {
-
-            allRows.forEach(
-                function (row) {
-
-                    row.style.display =
-                        "none";
-
-                }
-            );
-
-
-            if (filteredRows.length === 0) {
-
-                showEmptyResult();
-
-                createPagination();
-
-                return;
-
-            }
-
-
-            const startIndex =
-                (currentPage - 1) *
-                rowsPerPage;
-
-
-            const endIndex =
-                startIndex +
-                rowsPerPage;
-
-
-            const pageRows =
-                filteredRows.slice(
-                    startIndex,
-                    endIndex
-                );
-
-
-            pageRows.forEach(
-                function (row) {
-
-                    row.style.display =
-                        "";
-
-                }
-            );
-
-
+        if (filteredRows.length === 0) {
+            showEmptyResult();
             createPagination();
-
+            return;
         }
 
-        function showEmptyResult() {
+        const startIndex = (currentPage - 1) * rowsPerPage;
+        const pageRows = filteredRows.slice(startIndex, startIndex + rowsPerPage);
+        pageRows.forEach(function (row) { row.style.display = ""; });
+        createPagination();
+    }
 
-            allRows.forEach(
-                function (row) {
+    function showEmptyResult() {
+        allRows.forEach(function (row) { row.style.display = "none"; });
 
-                    row.style.display =
-                        "none";
-
-                }
-            );
-
-
-            let emptyRow =
-                document.getElementById(
-                    "dynamicEmptyRow"
-                );
-
-
-            if (!emptyRow) {
-
-                emptyRow =
-                    document.createElement(
-                        "tr"
-                    );
-
-                emptyRow.id =
-                    "dynamicEmptyRow";
-
-
-                emptyRow.innerHTML = `
-
-                    <td colspan="10"
-                        class="empty-row">
-
-                        <i class="fa fa-search"></i>
-
-                        No matching records found.
-
-                    </td>
-
-                `;
-
-
-                document
-                    .getElementById("tableBody")
-                    .appendChild(emptyRow);
-
-            }
-
-            emptyRow.style.display = "";
-
-        }
-
-
-        // =====================================================
-        // PAGINATION
-        // =====================================================
-
-        function createPagination() {
-
-            const pagination =
-                document.getElementById(
-                    "pagination"
-                );
-
-
-            pagination.innerHTML = "";
-
-
-            const totalPages =
-                Math.ceil(
-                    filteredRows.length /
-                    rowsPerPage
-                );
-
-
-            if (totalPages <= 1) {
-
-                return;
-
-            }
-
-
-            // =================================================
-            // PREVIOUS
-            // =================================================
-
-            const previous =
-                document.createElement(
-                    "li"
-                );
-
-
-            previous.className =
-                "page-item " +
-                (
-                    currentPage === 1
-                        ? "disabled"
-                        : ""
-                );
-
-
-            previous.innerHTML = `
-
-                <a class="page-link"
-                   href="javascript:void(0);">
-
-                    Previous
-
-                </a>
-
+        let emptyRow = document.getElementById("dynamicEmptyRow");
+        if (!emptyRow) {
+            emptyRow = document.createElement("tr");
+            emptyRow.id = "dynamicEmptyRow";
+            emptyRow.innerHTML = `
+                <td colspan="10" class="empty-row">
+                    <i class="fa fa-search"></i>
+                    No matching records found.
+                </td>
             `;
+            document.getElementById("tableBody").appendChild(emptyRow);
+        }
+        emptyRow.style.display = "";
+    }
 
+    function createPagination() {
+        const pagination = document.getElementById("pagination");
+        pagination.innerHTML = "";
 
-            previous.onclick =
-                function () {
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+        if (totalPages <= 1) return;
 
-                    if (
-                        currentPage > 1
-                    ) {
+        const previous = document.createElement("li");
+        previous.className = "page-item " + (currentPage === 1 ? "disabled" : "");
+        previous.innerHTML = `<a class="page-link" href="javascript:void(0);">Previous</a>`;
+        previous.onclick = function () {
+            if (currentPage > 1) { currentPage--; removeEmptyRow(); renderTable(); }
+        };
+        pagination.appendChild(previous);
 
-                        currentPage--;
-
-                        removeEmptyRow();
-
-                        renderTable();
-
-                    }
-
-                };
-
-
-            pagination.appendChild(
-                previous
-            );
-
-
-            // =================================================
-            // PAGE NUMBERS
-            // =================================================
-
-            for (
-                let i = 1;
-                i <= totalPages;
-                i++
-            ) {
-
-                const li =
-                    document.createElement(
-                        "li"
-                    );
-
-
-                li.className =
-                    "page-item " +
-                    (
-                        i === currentPage
-                            ? "active"
-                            : ""
-                    );
-
-
-                li.innerHTML = `
-
-                    <a class="page-link"
-                       href="javascript:void(0);">
-
-                        ${i}
-
-                    </a>
-
-                `;
-
-
-                li.onclick =
-                    function () {
-
-                        currentPage = i;
-
-                        removeEmptyRow();
-
-                        renderTable();
-
-                    };
-
-
-                pagination.appendChild(
-                    li
-                );
-
-            }
-
-
-            // =================================================
-            // NEXT
-            // =================================================
-
-            const next =
-                document.createElement(
-                    "li"
-                );
-
-
-            next.className =
-                "page-item " +
-                (
-                    currentPage === totalPages
-                        ? "disabled"
-                        : ""
-                );
-
-
-            next.innerHTML = `
-
-                <a class="page-link"
-                   href="javascript:void(0);">
-
-                    Next
-
-                </a>
-
-            `;
-
-
-            next.onclick =
-                function () {
-
-                    if (
-                        currentPage <
-                        totalPages
-                    ) {
-
-                        currentPage++;
-
-                        removeEmptyRow();
-
-                        renderTable();
-
-                    }
-
-                };
-
-
-            pagination.appendChild(
-                next
-            );
-
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement("li");
+            li.className = "page-item " + (i === currentPage ? "active" : "");
+            li.innerHTML = `<a class="page-link" href="javascript:void(0);">${i}</a>`;
+            li.onclick = function () { currentPage = i; removeEmptyRow(); renderTable(); };
+            pagination.appendChild(li);
         }
 
+        const next = document.createElement("li");
+        next.className = "page-item " + (currentPage === totalPages ? "disabled" : "");
+        next.innerHTML = `<a class="page-link" href="javascript:void(0);">Next</a>`;
+        next.onclick = function () {
+            if (currentPage < totalPages) { currentPage++; removeEmptyRow(); renderTable(); }
+        };
+        pagination.appendChild(next);
+    }
 
-        function removeEmptyRow() {
+    function removeEmptyRow() {
+        const emptyRow = document.getElementById("dynamicEmptyRow");
+        if (emptyRow) emptyRow.remove();
+    }
 
-            const emptyRow =
-                document.getElementById(
-                    "dynamicEmptyRow"
-                );
+    function addLead(id) {
+        if (!id) { showToast("Inquiry ID not found.", "error"); return; }
+        window.location.href = `/Lead/CreateOrEdit?inquiryId=${encodeURIComponent(id)}`;
+    }
 
-
-            if (emptyRow) {
-
-                emptyRow.remove();
-
-            }
-
-        }
-
-
-
-        function addLead(id) {
-
-            if (!id) {
-
-                      showToast( "Inquiry ID not found.","error");
-                return;
-            }
-            window.location.href =
-                `/Lead/CreateOrEdit?inquiryId=${encodeURIComponent(id)}`;
-        }
-
-
-      $(document).ready(function () {
-
+    $(document).ready(function () {
         $('.sales-person-select').select2({
             placeholder: "Select Sales Person",
             allowClear: true,
             width: '220px'
         });
-
     });
 
-
- @*    function updateSalesPerson(select) {
-
+    function updateSalesPerson(select) {
         const inquiryId = select.getAttribute("data-inquiry-id");
         const salesEmpCode = select.value;
 
-        if (!inquiryId) {
+        if (!inquiryId) { showToast("Inquiry ID not found.", "error"); return; }
+        if (!salesEmpCode) return;
 
-           showToast(
-                    "Inquiry ID not found.",
-                    "error"
-                );
-            return;
-        }
-
-        if (!salesEmpCode) {
-            return;
-        }
-
-        $.ajax({
-            url: '@Url.Action("AssignSalesPerson", "Lead")',
-            type: 'POST',
-            data: {
-                inquiryId: inquiryId,
-                salesEmpCode: salesEmpCode,
-                Action: "AssignToWebsite"
-            },
-
-            success: function (response) {
-                if (response.success) {
-                      showToast(
-                        "Sales person assigned successfully.",
-                        "success"
-                    );
-
-                } else {
-                      showToast(
-                        response.message || "Unable to assign sales person.",
-                        "error"
-                    );
-
-                }
-            },
-
-            error: function (xhr) {
-
-                  showToast(
-                       "Something went wrong while assigning the sales person.",
-                        "error"
-                    );
-            }
-        });
-    } *@
-           function updateSalesPerson(select) {
-
-        const inquiryId = select.getAttribute("data-inquiry-id");
-        const salesEmpCode = select.value;
-
-        if (!inquiryId) {
-            showToast(
-                "Inquiry ID not found.",
-                "error"
-            );
-            return;
-        }
-
-        if (!salesEmpCode) {
-            return;
-        }
-
-        // Confirmation popup
-        const toast = document.createElement("div");
-
-        toast.innerHTML = `
-            <div style="margin-bottom:10px; font-weight:600;">
-                Are you sure you want to assign this sales person?
-            </div>
-
-            <div style="display:flex; gap:8px; justify-content:flex-end;">
-
-                <button type="button"
-                        id="confirmAssign"
-                        style="
-                            background:#28a745;
-                            color:white;
-                            border:none;
-                            padding:6px 14px;
-                            border-radius:4px;
-                            cursor:pointer;">
-                    Yes
-                </button>
-
-                <button type="button"
-                        id="cancelAssign"
-                        style="
-                            background:#dc3545;
-                            color:white;
-                            border:none;
-                            padding:6px 14px;
-                            border-radius:4px;
-                            cursor:pointer;">
-                    No
-                </button>
-
-            </div>
-        `;
-
-        toast.style.cssText = `
-            position:fixed;
-            top:20px;
-            right:20px;
-            background:#fff;
-            color:#333;
-            padding:15px;
-            border-radius:6px;
-            box-shadow:0 4px 15px rgba(0,0,0,.25);
-            z-index:99999;
-            min-width:300px;
-        `;
-
-        document.body.appendChild(toast);
-
-
-        // ==========================================
-        // YES - ASSIGN
-        // ==========================================
-
-        toast.querySelector("#confirmAssign").onclick = function () {
-
-            toast.remove();
-
-            $.ajax({
-                url: '@Url.Action("AssignSalesPerson", "Lead")',
-                type: 'POST',
-
-                data: {
-                    inquiryId: inquiryId,
-                    salesEmpCode: salesEmpCode,
-                    Action: "AssignToWebsite"
-                },
-
-                success: function (response) {
-
-                    if (response.success) {
-
-                        showToast(
-                            "Sales person assigned successfully.",
-                            "success"
-                        );
-
-                    } else {
-
-                        showToast(
-                            response.message ||
-                            "Unable to assign sales person.",
-                            "error"
-                        );
-
-                        // Clear selected value only
+        showConfirmToast(
+            "Are you sure you want to assign this sales person?",
+            function () {
+                $.ajax({
+                    url: '@Url.Action("AssignSalesPerson", "Lead")',
+                    type: 'POST',
+                    data: { inquiryId: inquiryId, salesEmpCode: salesEmpCode, Action: "AssignToWebsite" },
+                    success: function (response) {
+                        if (response.success) {
+                            showToast("Sales person assigned successfully.", "success");
+                        } else {
+                            showToast(response.message || "Unable to assign sales person.", "error");
+                            clearSalesPerson(select);
+                        }
+                    },
+                    error: function () {
+                        showToast("Something went wrong while assigning the sales person.", "error");
                         clearSalesPerson(select);
                     }
-                },
-
-                error: function () {
-
-                    showToast(
-                        "Something went wrong while assigning the sales person.",
-                        "error"
-                    );
-
-                    // Clear selected value only
-                    clearSalesPerson(select);
-                }
-            });
-        };
-
-
-        // ==========================================
-        // NO - CLEAR SELECTED VALUE ONLY
-        // ==========================================
-
-        toast.querySelector("#cancelAssign").onclick = function () {
-
-            toast.remove();
-
-            // Clear only this dropdown
-            clearSalesPerson(select);
-        };
+                });
+            },
+            function () { clearSalesPerson(select); }
+        );
     }
-
-
-    // ==========================================
-    // CLEAR SELECTED SALESPERSON
-    // ==========================================
 
     function clearSalesPerson(select) {
-
         select.value = "";
-
-        // Make sure the browser removes the selected state
-        Array.from(select.options).forEach(function (option) {
-            option.selected = false;
-        });
-
-        // Select the first option: "Select Sales Person"
-        if (select.options.length > 0) {
-            select.options[0].selected = true;
-        }
-
-        // Trigger change if required
-        select.dispatchEvent(new Event("change", {
-            bubbles: true
-        }));
+        Array.from(select.options).forEach(function (option) { option.selected = false; });
+        if (select.options.length > 0) select.options[0].selected = true;
+        select.dispatchEvent(new Event("change", { bubbles: true }));
     }
-
 </script>

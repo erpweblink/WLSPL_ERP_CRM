@@ -1,81 +1,46 @@
 ﻿@model IEnumerable<WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreate>
-
 @{
     ViewData["Title"] = "Tax Invoice List";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
-    var invoiceList = Model?.ToList()
-        ?? new List<WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreate>();
-
+    var invoiceList = Model?.ToList() ?? new List<WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreate>();
     var today = DateTime.Now;
 
-    var currentFinancialYear =
-        today.Month >= 4
-            ? $"{today.Year}-{(today.Year + 1).ToString().Substring(2)}"
-            : $"{today.Year - 1}-{today.Year.ToString().Substring(2)}";
+    var currentFinancialYear = today.Month >= 4
+        ? $"{today.Year}-{(today.Year + 1).ToString().Substring(2)}"
+        : $"{today.Year - 1}-{today.Year.ToString().Substring(2)}";
 
     var currentMonth = today.ToString("MM");
 
-    var selectedFinancialYear =
-        ViewBag.SelectedFinancialYear?.ToString()
-        ?? currentFinancialYear;
+    var selectedFinancialYear = ViewBag.SelectedFinancialYear?.ToString() ?? currentFinancialYear;
 
-    var selectedMonthNumber =
-        ViewBag.SelectedMonth != null
-            ? Convert.ToInt32(ViewBag.SelectedMonth)
-            : Convert.ToInt32(currentMonth);
+    var selectedMonthNumber = ViewBag.SelectedMonth != null
+        ? Convert.ToInt32(ViewBag.SelectedMonth)
+        : Convert.ToInt32(currentMonth);
 
-    var selectedMonth =
-        selectedMonthNumber == 0
-            ? "all"
-            : selectedMonthNumber.ToString("00");
+    var selectedMonth = selectedMonthNumber == 0 ? "all" : selectedMonthNumber.ToString("00");
 
-    var financialYearSummary =
-        ViewBag.FinancialYearSummary
-        as List<WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreate>
+    var financialYearSummary = ViewBag.FinancialYearSummary as List<WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreate>
         ?? new List<WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreate>();
 
-    var financialYearTotal =
-        financialYearSummary.Sum(x => x.GrandTotal ?? 0m);
+    var financialYearTotal = financialYearSummary.Sum(x => x.GrandTotal ?? 0m);
+    var financialYearTaxTotal = financialYearSummary.Sum(x => x.TotalTaxAmount ?? 0m);
+    var financialYearInvoiceCount = financialYearSummary.Sum(x => x.TotalInvoice ?? 0);
 
-    var financialYearTaxTotal =
-        financialYearSummary.Sum(x => x.TotalTaxAmount ?? 0m);
+    var selectedMonthSummary = selectedMonthNumber == 0
+        ? null
+        : financialYearSummary.FirstOrDefault(x => x.mon == selectedMonthNumber);
 
-    var financialYearInvoiceCount =
-        financialYearSummary.Sum(x => x.TotalInvoice ?? 0);
+    var selectedMonthGrandTotal = selectedMonthNumber == 0 ? financialYearTotal : selectedMonthSummary?.GrandTotal ?? 0m;
+    var selectedMonthTaxTotal = selectedMonthNumber == 0 ? financialYearTaxTotal : selectedMonthSummary?.TotalTaxAmount ?? 0m;
+    var selectedMonthInvoiceCount = selectedMonthNumber == 0 ? financialYearInvoiceCount : selectedMonthSummary?.TotalInvoice ?? 0;
 
-    var selectedMonthSummary =
-        selectedMonthNumber == 0
-            ? null
-            : financialYearSummary
-                .FirstOrDefault(x => x.mon == selectedMonthNumber);
-
-    var selectedMonthGrandTotal =
-        selectedMonthNumber == 0
-            ? financialYearTotal
-            : selectedMonthSummary?.GrandTotal ?? 0m;
-
-    var selectedMonthTaxTotal =
-        selectedMonthNumber == 0
-            ? financialYearTaxTotal
-            : selectedMonthSummary?.TotalTaxAmount ?? 0m;
-
-    var selectedMonthInvoiceCount =
-        selectedMonthNumber == 0
-            ? financialYearInvoiceCount
-            : selectedMonthSummary?.TotalInvoice ?? 0;
-
-    var selectedMonthName =
-        selectedMonthNumber == 0
-            ? "All Months"
-            : System.Globalization.CultureInfo
-                .GetCultureInfo("en-IN")
-                .DateTimeFormat
-                .GetMonthName(selectedMonthNumber);
+    var selectedMonthName = selectedMonthNumber == 0
+        ? "All Months"
+        : System.Globalization.CultureInfo.GetCultureInfo("en-IN").DateTimeFormat.GetMonthName(selectedMonthNumber);
 }
 
 <style>
-
     .invoice-page {
         width: 100%;
         padding: 0;
@@ -370,58 +335,47 @@
             background: #f7fbff;
         }
 
-        #invoiceTable th:nth-child(1),
-        #invoiceTable td:nth-child(1) {
+        #invoiceTable th:nth-child(1), #invoiceTable td:nth-child(1) {
             width: 4%;
         }
 
-        #invoiceTable th:nth-child(2),
-        #invoiceTable td:nth-child(2) {
+        #invoiceTable th:nth-child(2), #invoiceTable td:nth-child(2) {
             width: 9%;
         }
 
-        #invoiceTable th:nth-child(3),
-        #invoiceTable td:nth-child(3) {
+        #invoiceTable th:nth-child(3), #invoiceTable td:nth-child(3) {
             width: 9%;
         }
 
-        #invoiceTable th:nth-child(4),
-        #invoiceTable td:nth-child(4) {
+        #invoiceTable th:nth-child(4), #invoiceTable td:nth-child(4) {
             width: 16%;
         }
 
-        #invoiceTable th:nth-child(5),
-        #invoiceTable td:nth-child(5) {
+        #invoiceTable th:nth-child(5), #invoiceTable td:nth-child(5) {
             width: 10%;
         }
 
-        #invoiceTable th:nth-child(6),
-        #invoiceTable td:nth-child(6) {
+        #invoiceTable th:nth-child(6), #invoiceTable td:nth-child(6) {
             width: 10%;
         }
 
-        #invoiceTable th:nth-child(7),
-        #invoiceTable td:nth-child(7) {
+        #invoiceTable th:nth-child(7), #invoiceTable td:nth-child(7) {
             width: 9%;
         }
 
-        #invoiceTable th:nth-child(8),
-        #invoiceTable td:nth-child(8) {
+        #invoiceTable th:nth-child(8), #invoiceTable td:nth-child(8) {
             width: 10%;
         }
 
-        #invoiceTable th:nth-child(9),
-        #invoiceTable td:nth-child(9) {
+        #invoiceTable th:nth-child(9), #invoiceTable td:nth-child(9) {
             width: 9%;
         }
 
-        #invoiceTable th:nth-child(10),
-        #invoiceTable td:nth-child(10) {
+        #invoiceTable th:nth-child(10), #invoiceTable td:nth-child(10) {
             width: 8%;
         }
 
-        #invoiceTable th:nth-child(11),
-        #invoiceTable td:nth-child(11) {
+        #invoiceTable th:nth-child(11), #invoiceTable td:nth-child(11) {
             width: 6%;
         }
 
@@ -628,7 +582,6 @@
         }
 
     @@media (max-width: 991.98px) {
-
         .fy-month-wrapper {
             grid-template-columns: repeat(4, minmax(0, 1fr));
         }
@@ -637,10 +590,7 @@
             padding: 0 10px;
         }
 
-        #invoiceTable,
-        #invoiceTable tbody,
-        #invoiceTable tr,
-        #invoiceTable td {
+        #invoiceTable, #invoiceTable tbody, #invoiceTable tr, #invoiceTable td {
             display: block;
             width: 100% !important;
         }
@@ -703,10 +653,7 @@
                             content: "Invoice #";
                         }
 
-                    #invoiceTable tbody td .invoice-no,
-                    #invoiceTable tbody td .company-name,
-                    #invoiceTable tbody td .gstin,
-                    #invoiceTable tbody td .salesperson {
+                    #invoiceTable tbody td .invoice-no, #invoiceTable tbody td .company-name, #invoiceTable tbody td .gstin, #invoiceTable tbody td .salesperson {
                         width: 100%;
                     }
 
@@ -747,7 +694,6 @@
     }
 
     @@media (max-width: 767.98px) {
-
         .invoice-header {
             padding: 14px;
         }
@@ -867,7 +813,6 @@
     }
 
     @@media (max-width: 575.98px) {
-
         .current-filter-info {
             width: 100%;
             font-size: 10px;
@@ -892,9 +837,7 @@
                 font-size: 9px;
             }
 
-        .invoice-no,
-        .company-name,
-        .salesperson {
+        .invoice-no, .company-name, .salesperson {
             font-size: 10px;
         }
 
@@ -902,9 +845,7 @@
             font-size: 9px;
         }
 
-        .amount,
-        .tax-amount,
-        .grand-total {
+        .amount, .tax-amount, .grand-total {
             font-size: 10px;
         }
 
@@ -920,92 +861,53 @@
         }
     }
 
-    #dynamicEmptyRow td,
-    #initialEmptyRow td {
+    #dynamicEmptyRow td, #initialEmptyRow td {
         text-align: center !important;
     }
 
     @@media (max-width: 991.98px) {
-
-        #dynamicEmptyRow,
-        #initialEmptyRow {
+        #dynamicEmptyRow, #initialEmptyRow {
             display: block !important;
             width: 100% !important;
         }
 
-            #dynamicEmptyRow td,
-            #initialEmptyRow td {
+            #dynamicEmptyRow td, #initialEmptyRow td {
                 display: block !important;
                 width: 100% !important;
                 padding: 40px 10px !important;
             }
 
-                #dynamicEmptyRow td::before,
-                #initialEmptyRow td::before {
+                #dynamicEmptyRow td::before, #initialEmptyRow td::before {
                     display: none !important;
                     content: none !important;
                 }
     }
-
 </style>
 
 <div class="invoice-page">
-
     <div class="invoice-card">
-
-        <!-- HEADER -->
         <div class="invoice-header">
-
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-
                 <h3 class="page-title">
                     <i class="fa fa-file-invoice"></i>
                     Tax Invoice List
                 </h3>
-
             </div>
-
         </div>
 
-
-        <!-- FILTERS -->
         <div class="filter-section">
-
             <div class="row align-items-end">
-
-                <!-- SEARCH -->
                 <div class="col-lg-4 col-md-6 mb-2">
-
-                    <label class="filter-label">
-                        Search
-                    </label>
-
+                    <label class="filter-label">Search</label>
                     <div class="search-wrapper">
-
-                        <span class="search-icon">
-                            <i class="fa fa-search text-muted"></i>
-                        </span>
-
-                        <input type="text"
-                               id="searchInput"
-                               class="form-control search-box"
-                               placeholder="Search invoice, company, GSTIN, salesperson..." />
-
+                        <span class="search-icon"><i class="fa fa-search text-muted"></i></span>
+                        <input type="text" id="searchInput" class="form-control search-box" placeholder="Search invoice, company, GSTIN, salesperson..." />
                     </div>
-
                 </div>
 
-
-                <!-- FINANCIAL YEAR -->
                 <div class="col-lg-2 col-md-3 mb-2">
-
-                    <label class="filter-label">
-                        Financial Year
-                    </label>
-
-                    <select id="financialYearFilter"
-                            class="form-select filter-control">
-
+                    <label class="filter-label">Financial Year</label>
+                    <select id="financialYearFilter" class="form-select filter-control">
                         <option value="2021-22">FY 2021-22</option>
                         <option value="2022-23">FY 2022-23</option>
                         <option value="2023-24">FY 2023-24</option>
@@ -1014,24 +916,13 @@
                         <option value="2026-27">FY 2026-27</option>
                         <option value="2027-28">FY 2027-28</option>
                         <option value="2028-29">FY 2028-29</option>
-
                     </select>
-
                 </div>
 
-
-                <!-- MONTH -->
                 <div class="col-lg-2 col-md-3 mb-2">
-
-                    <label class="filter-label">
-                        Invoice Month
-                    </label>
-
-                    <select id="monthFilter"
-                            class="form-select filter-control">
-
+                    <label class="filter-label">Invoice Month</label>
+                    <select id="monthFilter" class="form-select filter-control">
                         <option value="all">All Months</option>
-
                         <option value="04">April</option>
                         <option value="05">May</option>
                         <option value="06">June</option>
@@ -1044,363 +935,145 @@
                         <option value="01">January</option>
                         <option value="02">February</option>
                         <option value="03">March</option>
-
                     </select>
-
                 </div>
 
-
-                <!-- CLEAR -->
                 <div class="col-lg-1 col-md-3 mb-2">
-
-                    <button type="button"
-                            id="clearFilter"
-                            class="btn btn-outline-secondary clear-filter-btn">
-
-                        <i class="fa fa-rotate-left"></i>
-                        Clear
-
+                    <button type="button" id="clearFilter" class="btn btn-outline-secondary clear-filter-btn">
+                        <i class="fa fa-rotate-left"></i> Clear
                     </button>
-
                 </div>
 
-
-                <!-- CURRENT FILTER -->
                 <div class="col-lg-3 col-md-9 mb-2 d-flex justify-content-lg-end align-items-center">
-
                     <span class="current-filter-info">
-
                         <i class="fa fa-calendar-check"></i>
-
-                        <span id="currentFilterText">
-                            @selectedMonthName | FY @selectedFinancialYear
-                        </span>
-
+                        <span id="currentFilterText">@selectedMonthName | FY @selectedFinancialYear</span>
                     </span>
-
                 </div>
-
             </div>
-
         </div>
 
-
-        <!-- SUMMARY -->
         <div class="summary-section">
-
             <div class="row">
-
-                <!-- FY TOTAL -->
                 <div class="col-lg-3 col-md-6 mb-2">
-
                     <div class="summary-card summary-fy">
-
-                        <div class="summary-title">
-                            Financial Year Total
+                        <div class="summary-title">Financial Year Total</div>
+                        <div class="summary-value" id="fyGrandTotal">
+                            @financialYearTotal.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-IN"))
                         </div>
-
-                        <div class="summary-value"
-                             id="fyGrandTotal">
-
-                            @financialYearTotal.ToString(
-                            "C2",
-                                                        System.Globalization.CultureInfo.GetCultureInfo("en-IN")
-                                                        )
-
-                        </div>
-
-                        <div class="summary-subtitle">
-                            FY @selectedFinancialYear
-                        </div>
-
+                        <div class="summary-subtitle">FY @selectedFinancialYear</div>
                     </div>
-
                 </div>
 
-
-                <!-- FILTERED TOTAL -->
                 <div class="col-lg-3 col-md-6 mb-2">
-
                     <div class="summary-card summary-filtered">
-
-                        <div class="summary-title">
-                            Filtered Grand Total
+                        <div class="summary-title">Filtered Grand Total</div>
+                        <div class="summary-value" id="filteredGrandTotal">
+                            @selectedMonthGrandTotal.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-IN"))
                         </div>
-
-                        <div class="summary-value"
-                             id="filteredGrandTotal">
-
-                            @selectedMonthGrandTotal.ToString(
-                                                        "C2",
-                                                        System.Globalization.CultureInfo.GetCultureInfo("en-IN")
-                                                        )
-
-                        </div>
-
-                        <div class="summary-subtitle"
-                             id="filteredSubtitle">
-
-                            @selectedMonthName
-
-                        </div>
-
+                        <div class="summary-subtitle" id="filteredSubtitle">@selectedMonthName</div>
                     </div>
-
                 </div>
 
-
-                <!-- TAX -->
                 <div class="col-lg-3 col-md-6 mb-2">
-
                     <div class="summary-card summary-tax">
-
-                        <div class="summary-title">
-                            Tax Amount
+                        <div class="summary-title">Tax Amount</div>
+                        <div class="summary-value" id="filteredTaxTotal">
+                            @selectedMonthTaxTotal.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-IN"))
                         </div>
-
-                        <div class="summary-value"
-                             id="filteredTaxTotal">
-
-                            @selectedMonthTaxTotal.ToString(
-                                                        "C2",
-                                                        System.Globalization.CultureInfo.GetCultureInfo("en-IN")
-                                                        )
-
-                        </div>
-
-                        <div class="summary-subtitle">
-                            Selected period
-                        </div>
-
+                        <div class="summary-subtitle">Selected period</div>
                     </div>
-
                 </div>
 
-
-                <!-- COUNT -->
                 <div class="col-lg-3 col-md-6 mb-2">
-
                     <div class="summary-card summary-invoice">
-
-                        <div class="summary-title">
-                            Invoice Count
-                        </div>
-
-                        <div class="summary-value"
-                             id="fyInvoiceCount">
-
-                            @financialYearInvoiceCount
-
-                        </div>
-
-                        <div class="summary-subtitle">
-                            Selected Financial Year
-                        </div>
-
+                        <div class="summary-title">Invoice Count</div>
+                        <div class="summary-value" id="fyInvoiceCount">@financialYearInvoiceCount</div>
+                        <div class="summary-subtitle">Selected Financial Year</div>
                     </div>
-
                 </div>
-
             </div>
-
         </div>
 
-
-        <!-- FY SUMMARY -->
         <div class="fy-summary-section">
-
             <div class="fy-summary-header">
-
                 <div class="d-flex justify-content-between align-items-center">
-
                     <h6 class="fy-summary-title">
-
                         <i class="fa fa-chart-column"></i>
-
                         Financial Year Summary
-
-                        <span class="text-primary">
-                            FY @selectedFinancialYear
-                        </span>
-
+                        <span class="text-primary">FY @selectedFinancialYear</span>
                     </h6>
-
-                    <small class="text-muted">
-                        April - March
-                    </small>
-
+                    <small class="text-muted">April - March</small>
                 </div>
-
             </div>
-
 
             <div class="fy-month-wrapper">
-
                 @{
-                    int[] fyMonths =
-                    {
-                                4, 5, 6, 7, 8, 9,
-                                10, 11, 12, 1, 2, 3
-                                };
+                    int[] fyMonths = { 4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3 };
                 }
-
                 @foreach (var monthNumber in fyMonths)
                 {
-                    var monthData =
-                    financialYearSummary
-                    .FirstOrDefault(x => x.mon == monthNumber);
+                    var monthData = financialYearSummary.FirstOrDefault(x => x.mon == monthNumber);
+                    var monthTotal = monthData?.GrandTotal ?? 0m;
+                    var monthInvoiceCount = monthData?.TotalInvoice ?? 0;
+                    var monthName = System.Globalization.CultureInfo.GetCultureInfo("en-IN").DateTimeFormat.GetMonthName(monthNumber);
+                    var monthValue = monthNumber.ToString("00");
+                    var activeClass = selectedMonth == monthValue ? "active" : "";
 
-                    var monthTotal =
-                    monthData?.GrandTotal ?? 0m;
-
-                    var monthInvoiceCount =
-                    monthData?.TotalInvoice ?? 0;
-
-                    var monthName =
-                    System.Globalization.CultureInfo
-                    .GetCultureInfo("en-IN")
-                    .DateTimeFormat
-                    .GetMonthName(monthNumber);
-
-                    var monthValue =
-                    monthNumber.ToString("00");
-
-                    var activeClass =
-                    selectedMonth == monthValue
-                    ? "active"
-                    : "";
-
-                    <div class="fy-month-card @activeClass"
-                         data-month-card="@monthValue"
-                         onclick="selectMonth('@monthValue')">
-
-                        <div class="fy-month-name">
-                            @monthName
-                        </div>
-
-                        <div class="fy-month-value">
-
-                            @monthTotal.ToString(
-                            "C2",
-                                                System.Globalization.CultureInfo.GetCultureInfo("en-IN")
-                                                )
-
+                    <div class="fy-month-card @activeClass" data-month-card="@monthValue" onclick="selectMonth('@monthValue')">
+                        <div class="fy-month-name">@monthName</div>
+                        <div class="fy-month-value">@monthTotal.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-IN"))</div>
+                        <div class="fy-month-count">@monthInvoiceCount invoice(s)</div>
                     </div>
-
-                    <div class="fy-month-count">
-                        @monthInvoiceCount invoice(s)
-                    </div>
-
-                </div>
-                                }
-
+                }
             </div>
-
         </div>
 
-
-        <!-- RECORD INFORMATION -->
         <div class="record-section">
-
             <div class="row">
-
                 <div class="col-md-6">
-
-                    <span class="record-info">
-
-                        Total Records :
-
-                        <strong id="totalRecords">
-                            @invoiceList.Count
-                        </strong>
-
-                    </span>
-
+                    <span class="record-info">Total Records : <strong id="totalRecords">@invoiceList.Count</strong></span>
                 </div>
-
                 <div class="col-md-6 text-md-end">
-
-                    <span class="record-info">
-
-                        Filtered Records :
-
-                        <strong id="filteredRecords">
-                            @invoiceList.Count
-                        </strong>
-
-                    </span>
-
+                    <span class="record-info">Filtered Records : <strong id="filteredRecords">@invoiceList.Count</strong></span>
                 </div>
-
             </div>
-
         </div>
 
-
-        <!-- TABLE -->
         <div class="table-container">
-
-            <table class="table table-bordered table-hover"
-                   id="invoiceTable">
-
+            <table class="table table-bordered table-hover" id="invoiceTable">
                 <thead>
-
                     <tr>
-
                         <th class="text-center">#</th>
-
                         <th>Invoice Date</th>
-
                         <th>Invoice No.</th>
-
                         <th>Company Name</th>
-
                         <th>GSTIN</th>
-
                         <th class="text-end">Taxable Value</th>
-
                         <th class="text-end">Tax Amount</th>
-
                         <th class="text-end">Grand Total</th>
-
                         <th>Salesperson</th>
-
                         <th class="text-center">Status</th>
-
                         <th class="text-center">Action</th>
-
                     </tr>
-
                 </thead>
-
-
                 <tbody id="invoiceTableBody">
-
                     @if (invoiceList.Any())
                     {
                         int count = 1;
-
                         foreach (var item in invoiceList)
                         {
                             var fy = "";
-
                             if (item.invoicedate.HasValue)
                             {
-                                var invoiceDate =
-                                item.invoicedate.Value;
-
-                                fy =
-                                invoiceDate.Month >= 4
+                                var invoiceDate = item.invoicedate.Value;
+                                fy = invoiceDate.Month >= 4
                                 ? $"{invoiceDate.Year}-{(invoiceDate.Year + 1).ToString().Substring(2)}"
                                 : $"{invoiceDate.Year - 1}-{invoiceDate.Year.ToString().Substring(2)}";
                             }
 
                             decimal parsedTaxAmount = 0m;
-
-                            decimal.TryParse(
-                            item.total_tax_amount,
-                            out parsedTaxAmount
-                            );
+                            decimal.TryParse(item.total_tax_amount, out parsedTaxAmount);
 
                             <tr class="invoice-row"
                                 data-month="@(item.invoicedate?.ToString("MM") ?? "")"
@@ -1409,1356 +1082,406 @@
                                 data-tax="@parsedTaxAmount"
                                 data-grandtotal="@(item.totalamtaftertax ?? 0m)">
 
-                                <!-- NUMBER -->
-                                <td class="row-number"
-                                    data-label="Invoice #">
+                                <td class="row-number" data-label="Invoice #">@count</td>
 
-                                    @count
-
-                                </td>
-
-
-                                <!-- DATE -->
                                 <td data-label="Invoice Date">
-
-                                    @if (item.invoicedate.HasValue)
-                                    {
-                                        @item.invoicedate.Value.ToString("dd-MMM-yyyy")
-                                    }
-                                    else
-                                    {
-                                        <span>-</span>
-                                    }
-
-                        </td>
-
-
-                        <!-- INVOICE NO -->
-                        <td data-label="Invoice No.">
-
-                            <span class="invoice-no">
-                                @(item.invoiceno ?? "-")
-                            </span>
-
-                        </td>
-
-
-                        <!-- COMPANY -->
-                        <td data-label="Company Name">
-
-                            <span class="company-name">
-                                @(item.companyName ?? "-")
-                            </span>
-
-                        </td>
-
-
-                        <!-- GSTIN -->
-                        <td data-label="GSTIN">
-
-                            <span class="gstin">
-                                @(item.gstIn ?? "-")
-                            </span>
-
-                        </td>
-
-
-                        <!-- TAXABLE -->
-                        <td class="text-end"
-                            data-label="Taxable Value">
-
-                            <span class="amount">
-
-                                @((item.totalamtbeforetax ?? 0m).ToString(
-                                                                "C2",
-                                                                System.Globalization.CultureInfo.GetCultureInfo("en-IN")
-                                                                ))
-
-                            </span>
-
+                                    @(item.invoicedate.HasValue? item.invoicedate.Value.ToString("dd-MMM-yyyy") : "-")
                                 </td>
 
+                                <td data-label="Invoice No."><span class="invoice-no">@(item.invoiceno ?? "-")</span></td>
 
-                                <!-- TAX -->
-                                <td class="text-end"
-                                    data-label="Tax Amount">
+                                <td data-label="Company Name"><span class="company-name">@(item.companyName ?? "-")</span></td>
 
-                                    <span class="tax-amount">
+                                <td data-label="GSTIN"><span class="gstin">@(item.gstIn ?? "-")</span></td>
 
-                                        @parsedTaxAmount.ToString(
-                                                                "C2",
-                                                                System.Globalization.CultureInfo.GetCultureInfo("en-IN")
-                                                                )
-
-                            </span>
-
-                        </td>
-
-
-                        <!-- GRAND TOTAL -->
-                        <td class="text-end"
-                            data-label="Grand Total">
-
-                            <span class="grand-total">
-
-                                @((item.totalamtaftertax ?? 0m).ToString(
-                                                                "C2",
-                                                                System.Globalization.CultureInfo.GetCultureInfo("en-IN")
-                                                                ))
-
-                            </span>
-
+                                <td class="text-end" data-label="Taxable Value">
+                                    <span class="amount">@((item.totalamtbeforetax ?? 0m).ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-IN")))</span>
                                 </td>
 
-
-                                <!-- SALESPERSON -->
-                                <td data-label="Salesperson">
-
-                                    <span class="salesperson">
-                                        @(item.NAME ?? "-")
-                                    </span>
-
+                                <td class="text-end" data-label="Tax Amount">
+                                    <span class="tax-amount">@parsedTaxAmount.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-IN"))</span>
                                 </td>
 
+                                <td class="text-end" data-label="Grand Total">
+                                    <span class="grand-total">@((item.totalamtaftertax ?? 0m).ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-IN")))</span>
+                                </td>
 
-                                <!-- STATUS -->
-                                <td class="status-column"
-                                    data-label="Status">
+                                <td data-label="Salesperson"><span class="salesperson">@(item.NAME ?? "-")</span></td>
 
-                            @if (item.IsApprove == true)
+                                <td class="status-column" data-label="Status">
+                                    @if (item.IsApprove == true)
                                     {
-                                        <span class="status-badge status-approved">
-
-                                            <span class="status-dot"></span>
-
-                                            Approved
-
-                                        </span>
+                                        <span class="status-badge status-approved"><span class="status-dot"></span>Approved</span>
                                     }
                                     else if (item.IsReject == true)
                                     {
-                                        <span class="status-badge status-rejected">
-
-                                            <span class="status-dot"></span>
-
-                                            Rejected
-
-                                        </span>
+                                        <span class="status-badge status-rejected"><span class="status-dot"></span>Rejected</span>
                                     }
                                     else
                                     {
-                                        <span class="status-badge status-pending">
-
-                                            <span class="status-dot"></span>
-
-                                            Pending
-
-                                        </span>
+                                        <span class="status-badge status-pending"><span class="status-dot"></span>Pending</span>
                                     }
-
                                 </td>
 
-
-                                <!-- ACTION -->
-                                <td class="action-column"
-                                    data-label="Action">
-
-                                    <a href="@Url.Action(
-                                                                               "GetPdf",
-                                                                               "Taxinvoice",
-                                                                               new { id = item.Id })"
-                               class="invoice-action-btn invoice-pdf-btn"
-                               title="Download PDF">
-
+                                <td class="action-column" data-label="Action">
+                                    <a href="@Url.Action("GetPdf", "Taxinvoice", new { id = item.Id })" class="invoice-action-btn invoice-pdf-btn" title="Download PDF">
                                         <i class="fa fa-file-pdf"></i>
-
                                     </a>
-
-
-                                    <a href="@Url.Action(
-                                                                       "Edit",
-                                                                       "Taxinvoice",
-                                                                       new { id = item.Id })"
-                               class="invoice-action-btn invoice-edit-btn"
-                               title="Edit Invoice">
-
+                                    <a href="@Url.Action("Edit", "Taxinvoice", new { id = item.Id })" class="invoice-action-btn invoice-edit-btn" title="Edit Invoice">
                                         <i class="fa fa-edit"></i>
-
                                     </a>
-
-                                    <a href="@Url.Action(
-                                           "Deleteinvoice",
-                                           "Taxinvoice",
-                                           new { id = item.Id })"
-                               class="invoice-action-btn invoice-delete-btn"
-                               title="Delete Invoice"
-                               onclick="return deleteInvoice(event, this);">
-
+                                    <a href="@Url.Action("Deleteinvoice", "Taxinvoice", new { id = item.Id })" class="invoice-action-btn invoice-delete-btn" title="Delete Invoice" onclick="return deleteInvoice(event, this);">
                                         <i class="fa fa-trash"></i>
                                     </a>
-
-
                                 </td>
-
                             </tr>
-
-                                        count++;
+                            count++;
                         }
                     }
                     else
                     {
                         <tr id="initialEmptyRow">
-
-                            <td colspan="11"
-                                class="no-record">
-
+                            <td colspan="11" class="no-record">
                                 <i class="fa fa-file-invoice fa-2x"></i>
-
-                                <div class="no-record-title">
-                                    No invoices found.
-                                </div>
-
-                                <div class="no-record-text">
-                                    There are no tax invoices available.
-                                </div>
-
+                                <div class="no-record-title">No invoices found.</div>
+                                <div class="no-record-text">There are no tax invoices available.</div>
                             </td>
-
                         </tr>
                     }
-
                 </tbody>
-
             </table>
-
         </div>
 
-
-        <!-- PAGINATION -->
         <div class="row align-items-center pagination-wrapper">
-
             <div class="col-md-5">
-
                 <span class="showing-info">
-
-                    Showing
-
-                    <strong id="showingFrom">0</strong>
-
-                    to
-
-                    <strong id="showingTo">0</strong>
-
-                    of
-
-                    <strong id="showingTotal">0</strong>
-
-                    records
-
+                    Showing <strong id="showingFrom">0</strong> to <strong id="showingTo">0</strong> of <strong id="showingTotal">0</strong> records
                 </span>
-
             </div>
-
-
             <div class="col-md-7">
-
-                <nav>
-
-                    <ul class="pagination justify-content-md-end justify-content-center"
-                        id="pagination">
-                    </ul>
-
-                </nav>
-
+                <nav><ul class="pagination justify-content-md-end justify-content-center" id="pagination"></ul></nav>
             </div>
-
         </div>
-
     </div>
-
 </div>
 
-
 <script>
-
     const rowsPerPage = 20;
-
     let currentPage = 1;
-
     let allRows = [];
-
     let filteredRows = [];
 
-
-    /* =========================================================
-       DOCUMENT READY
-    ========================================================= */
-
     document.addEventListener("DOMContentLoaded", function () {
-
-        allRows = Array.from(
-            document.querySelectorAll(
-                "#invoiceTableBody .invoice-row"
-            )
-        );
-
+        allRows = Array.from(document.querySelectorAll("#invoiceTableBody .invoice-row"));
         filteredRows = [...allRows];
 
-
-        const financialYearFilter =
-            document.getElementById(
-                "financialYearFilter"
-            );
-
-        financialYearFilter.value =
-            "@selectedFinancialYear";
-
-
-        const monthFilter =
-            document.getElementById(
-                "monthFilter"
-            );
-
-        monthFilter.value =
-            "@selectedMonth";
-
+        document.getElementById("financialYearFilter").value = "@selectedFinancialYear";
+        document.getElementById("monthFilter").value = "@selectedMonth";
 
         updateFilterText();
-
         applyFilters();
-
     });
 
+    document.getElementById("searchInput").addEventListener("input", function () {
+        currentPage = 1;
+        applyFilters();
+    });
 
-    /* =========================================================
-       SEARCH
-    ========================================================= */
+    document.getElementById("financialYearFilter").addEventListener("change", function () {
+        currentPage = 1;
+        loadServerData();
+    });
 
-    document
-        .getElementById("searchInput")
-        .addEventListener("input", function () {
-
-            currentPage = 1;
-
-            applyFilters();
-
-        });
-
-
-    /* =========================================================
-       FINANCIAL YEAR
-    ========================================================= */
-
-    document
-        .getElementById("financialYearFilter")
-        .addEventListener("change", function () {
-
-            currentPage = 1;
-
-            loadServerData();
-
-        });
-
-
-    /* =========================================================
-       MONTH
-    ========================================================= */
-
-    document
-        .getElementById("monthFilter")
-        .addEventListener("change", function () {
-
-            currentPage = 1;
-
-            loadServerData();
-
-        });
-
-
-    /* =========================================================
-       SELECT MONTH
-    ========================================================= */
+    document.getElementById("monthFilter").addEventListener("change", function () {
+        currentPage = 1;
+        loadServerData();
+    });
 
     function selectMonth(month) {
-
-        const monthFilter =
-            document.getElementById(
-                "monthFilter"
-            );
-
-        monthFilter.value = month;
-
+        document.getElementById("monthFilter").value = month;
         currentPage = 1;
-
         loadServerData();
-
     }
-
-
-    /* =========================================================
-       LOAD SERVER DATA
-    ========================================================= */
 
     function loadServerData() {
-
-        const financialYear =
-            document.getElementById(
-                "financialYearFilter"
-            ).value;
-
-        const month =
-            document.getElementById(
-                "monthFilter"
-            ).value;
-
-        let url =
-            '@Url.Action("Index", "Taxinvoice")';
-
-        const params =
-            new URLSearchParams();
-
+        const financialYear = document.getElementById("financialYearFilter").value;
+        const month = document.getElementById("monthFilter").value;
+        let url = '@Url.Action("Index", "Taxinvoice")';
+        const params = new URLSearchParams();
 
         if (financialYear) {
-
-            params.append(
-                "financialYear",
-                financialYear
-            );
-
+            params.append("financialYear", financialYear);
         }
 
-
-        if (
-            month === "all" ||
-            month === "0"
-        ) {
-
-            params.append(
-                "month",
-                "0"
-            );
-
-        }
-        else if (month) {
-
-            params.append(
-                "month",
-                month
-            );
-
+        if (month === "all" || month === "0") {
+            params.append("month", "0");
+        } else if (month) {
+            params.append("month", month);
         }
 
-
-        window.location.href =
-            url + "?" + params.toString();
-
+        window.location.href = url + "?" + params.toString();
     }
 
-
-    /* =========================================================
-       CLEAR FILTER
-    ========================================================= */
-
-    document
-        .getElementById("clearFilter")
-        .addEventListener("click", function () {
-
-            document.getElementById(
-                "searchInput"
-            ).value = "";
-
-
-            document.getElementById(
-                "financialYearFilter"
-            ).value =
-                "@currentFinancialYear";
-
-
-            document.getElementById(
-                "monthFilter"
-            ).value =
-                "@currentMonth";
-
-
-            loadServerData();
-
-        });
-
-
-    /* =========================================================
-       APPLY FILTERS
-    ========================================================= */
+    document.getElementById("clearFilter").addEventListener("click", function () {
+        document.getElementById("searchInput").value = "";
+        document.getElementById("financialYearFilter").value = "@currentFinancialYear";
+        document.getElementById("monthFilter").value = "@currentMonth";
+        toastr.info("Filters have been reset.");
+        loadServerData();
+    });
 
     function applyFilters() {
+        const searchValue = document.getElementById("searchInput").value.toLowerCase().trim();
+        const selectedMonth = document.getElementById("monthFilter").value;
+        const selectedFinancialYear = document.getElementById("financialYearFilter").value;
 
-        const searchValue =
-            document
-                .getElementById("searchInput")
-                .value
-                .toLowerCase()
-                .trim();
+        filteredRows = allRows.filter(function (row) {
+            const rowText = row.innerText.toLowerCase();
+            const matchesSearch = searchValue === "" || rowText.includes(searchValue);
 
+            const rowMonth = row.getAttribute("data-month");
+            const matchesMonth = selectedMonth === "all" || selectedMonth === "0" || rowMonth === selectedMonth;
 
-        const selectedMonth =
-            document
-                .getElementById("monthFilter")
-                .value;
+            const rowFY = row.getAttribute("data-financial-year");
+            const matchesFY = selectedFinancialYear === "all" || rowFY === selectedFinancialYear;
 
-
-        const selectedFinancialYear =
-            document
-                .getElementById("financialYearFilter")
-                .value;
-
-
-        filteredRows =
-            allRows.filter(function (row) {
-
-                const rowText =
-                    row.innerText.toLowerCase();
-
-
-                const matchesSearch =
-                    searchValue === "" ||
-                    rowText.includes(searchValue);
-
-
-                const rowMonth =
-                    row.getAttribute(
-                        "data-month"
-                    );
-
-
-                const matchesMonth =
-                    selectedMonth === "all" ||
-                    selectedMonth === "0" ||
-                    rowMonth === selectedMonth;
-
-
-                const rowFY =
-                    row.getAttribute(
-                        "data-financial-year"
-                    );
-
-
-                const matchesFY =
-                    selectedFinancialYear === "all" ||
-                    rowFY === selectedFinancialYear;
-
-
-                return (
-                    matchesSearch &&
-                    matchesMonth &&
-                    matchesFY
-                );
-
-            });
-
+            return matchesSearch && matchesMonth && matchesFY;
+        });
 
         updateSummary();
-
         updateFilterText();
-
         renderTable();
-
     }
-
-
-    /* =========================================================
-       SUMMARY
-    ========================================================= */
 
     function updateSummary() {
-
-        const fyGrandTotal =
-            @financialYearTotal.ToString(
-                System.Globalization.CultureInfo.InvariantCulture
-                        );
-
-
-        const fyInvoiceCount =
-            @financialYearInvoiceCount;
-
+        const fyGrandTotal = @financialYearTotal.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        const fyInvoiceCount = @financialYearInvoiceCount;
 
         let filteredGrandTotal = 0;
-
         let filteredTaxTotal = 0;
 
-
         filteredRows.forEach(function (row) {
-
-            filteredGrandTotal +=
-                parseFloat(
-                    row.getAttribute(
-                        "data-grandtotal"
-                    )
-                ) || 0;
-
-
-            filteredTaxTotal +=
-                parseFloat(
-                    row.getAttribute(
-                        "data-tax"
-                    )
-                ) || 0;
-
+            filteredGrandTotal += parseFloat(row.getAttribute("data-grandtotal")) || 0;
+            filteredTaxTotal += parseFloat(row.getAttribute("data-tax")) || 0;
         });
 
+        const searchValue = document.getElementById("searchInput").value.trim();
+        const selectedMonth = document.getElementById("monthFilter").value;
 
-        const searchValue =
-            document
-                .getElementById("searchInput")
-                .value
-                .trim();
-
-
-        const selectedMonth =
-            document
-                .getElementById("monthFilter")
-                .value;
-
-
-        /*
-         * When there is no search text,
-         * use the server calculated summary.
-         */
-
-        if (
-            searchValue === "" &&
-            selectedMonth !== "all" &&
-            selectedMonth !== "0"
-        ) {
-
-            filteredGrandTotal =
-                @selectedMonthGrandTotal.ToString(
-                                        System.Globalization.CultureInfo.InvariantCulture
-                                );
-
-
-            filteredTaxTotal =
-                @selectedMonthTaxTotal.ToString(
-                                        System.Globalization.CultureInfo.InvariantCulture
-                                );
-
+        if (searchValue === "" && selectedMonth !== "all" && selectedMonth !== "0") {
+            filteredGrandTotal = @selectedMonthGrandTotal.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            filteredTaxTotal = @selectedMonthTaxTotal.ToString(System.Globalization.CultureInfo.InvariantCulture);
         }
 
-
-        /*
-         * All months
-         */
-
-        if (
-            searchValue === "" &&
-            (
-                selectedMonth === "all" ||
-                selectedMonth === "0"
-            )
-        ) {
-
-            filteredGrandTotal =
-                fyGrandTotal;
-
-
-            filteredTaxTotal =
-                @financialYearTaxTotal.ToString(
-                                        System.Globalization.CultureInfo.InvariantCulture
-                                );
-
+        if (searchValue === "" && (selectedMonth === "all" || selectedMonth === "0")) {
+            filteredGrandTotal = fyGrandTotal;
+            filteredTaxTotal = @financialYearTaxTotal.ToString(System.Globalization.CultureInfo.InvariantCulture);
         }
 
-
-        document.getElementById(
-            "fyGrandTotal"
-        ).innerText =
-            formatCurrency(
-                fyGrandTotal
-            );
-
-
-        document.getElementById(
-            "filteredGrandTotal"
-        ).innerText =
-            formatCurrency(
-                filteredGrandTotal
-            );
-
-
-        document.getElementById(
-            "filteredTaxTotal"
-        ).innerText =
-            formatCurrency(
-                filteredTaxTotal
-            );
-
-
-        document.getElementById(
-            "fyInvoiceCount"
-        ).innerText =
-            fyInvoiceCount;
-
+        document.getElementById("fyGrandTotal").innerText = formatCurrency(fyGrandTotal);
+        document.getElementById("filteredGrandTotal").innerText = formatCurrency(filteredGrandTotal);
+        document.getElementById("filteredTaxTotal").innerText = formatCurrency(filteredTaxTotal);
+        document.getElementById("fyInvoiceCount").innerText = fyInvoiceCount;
     }
-
-
-    /* =========================================================
-       CURRENCY
-    ========================================================= */
 
     function formatCurrency(value) {
-
-        return "₹ " +
-            Number(value || 0).toLocaleString(
-                "en-IN",
-                {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                }
-            );
-
+        return "₹ " + Number(value || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
-
-
-    /* =========================================================
-       FILTER TEXT
-    ========================================================= */
 
     function updateFilterText() {
-
-        const fy =
-            document.getElementById(
-                "financialYearFilter"
-            ).value;
-
-
-        const month =
-            document.getElementById(
-                "monthFilter"
-            ).value;
-
+        const fy = document.getElementById("financialYearFilter").value;
+        const month = document.getElementById("monthFilter").value;
 
         const monthNames = {
-
-            "01": "January",
-            "02": "February",
-            "03": "March",
-            "04": "April",
-            "05": "May",
-            "06": "June",
-            "07": "July",
-            "08": "August",
-            "09": "September",
-            "10": "October",
-            "11": "November",
-            "12": "December"
-
+            "01": "January", "02": "February", "03": "March", "04": "April",
+            "05": "May", "06": "June", "07": "July", "08": "August",
+            "09": "September", "10": "October", "11": "November", "12": "December"
         };
-
 
         let monthText = "All Months";
-
-
-        if (
-            month &&
-            month !== "all" &&
-            month !== "0" &&
-            monthNames[month]
-        ) {
-
-            monthText =
-                monthNames[month];
-
+        if (month && month !== "all" && month !== "0" && monthNames[month]) {
+            monthText = monthNames[month];
         }
 
-
-        document.getElementById(
-            "currentFilterText"
-        ).innerText =
-            monthText +
-            " | FY " +
-            fy;
-
-
-        document.getElementById(
-            "filteredSubtitle"
-        ).innerText =
-            monthText;
-
+        document.getElementById("currentFilterText").innerText = monthText + " | FY " + fy;
+        document.getElementById("filteredSubtitle").innerText = monthText;
     }
-
-
-    /* =========================================================
-       RECORD COUNT
-    ========================================================= */
 
     function updateTotalRecords() {
-
-        document.getElementById(
-            "totalRecords"
-        ).innerText =
-            allRows.length;
-
-
-        document.getElementById(
-            "filteredRecords"
-        ).innerText =
-            filteredRows.length;
-
+        document.getElementById("totalRecords").innerText = allRows.length;
+        document.getElementById("filteredRecords").innerText = filteredRows.length;
     }
-
-
-    /* =========================================================
-       RENDER TABLE
-    ========================================================= */
 
     function renderTable() {
-
         removeDynamicEmptyRow();
-
-
-        allRows.forEach(function (row) {
-
-            row.style.display = "none";
-
-        });
-
+        allRows.forEach(function (row) { row.style.display = "none"; });
 
         if (filteredRows.length === 0) {
-
             showEmptyRow();
-
-            updateShowingInfo(
-                0,
-                0,
-                0
-            );
-
+            updateShowingInfo(0, 0, 0);
             createPagination();
-
             updateTotalRecords();
-
             return;
-
         }
 
-
-        const totalPages =
-            Math.ceil(
-                filteredRows.length /
-                rowsPerPage
-            );
-
-
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
         if (currentPage > totalPages) {
-
-            currentPage =
-                totalPages;
-
+            currentPage = totalPages;
         }
 
+        const startIndex = (currentPage - 1) * rowsPerPage;
+        const endIndex = Math.min(startIndex + rowsPerPage, filteredRows.length);
+        const pageRows = filteredRows.slice(startIndex, endIndex);
 
-        const startIndex =
-            (currentPage - 1) *
-            rowsPerPage;
-
-
-        const endIndex =
-            Math.min(
-                startIndex + rowsPerPage,
-                filteredRows.length
-            );
-
-
-        const pageRows =
-            filteredRows.slice(
-                startIndex,
-                endIndex
-            );
-
-
-        pageRows.forEach(function (row) {
-
-            row.style.display = "";
-
-        });
-
-
+        pageRows.forEach(function (row) { row.style.display = ""; });
         pageRows.forEach(function (row, index) {
-
-            const numberCell =
-                row.querySelector(
-                    ".row-number"
-                );
-
-
+            const numberCell = row.querySelector(".row-number");
             if (numberCell) {
-
-                numberCell.innerText =
-                    startIndex + index + 1;
-
+                numberCell.innerText = startIndex + index + 1;
             }
-
         });
 
-
-        updateShowingInfo(
-            startIndex + 1,
-            endIndex,
-            filteredRows.length
-        );
-
-
+        updateShowingInfo(startIndex + 1, endIndex, filteredRows.length);
         createPagination();
-
         updateTotalRecords();
-
     }
 
-
-    /* =========================================================
-       SHOWING INFO
-    ========================================================= */
-
-    function updateShowingInfo(
-        from,
-        to,
-        total
-    ) {
-
-        document.getElementById(
-            "showingFrom"
-        ).innerText = from;
-
-
-        document.getElementById(
-            "showingTo"
-        ).innerText = to;
-
-
-        document.getElementById(
-            "showingTotal"
-        ).innerText = total;
-
+    function updateShowingInfo(from, to, total) {
+        document.getElementById("showingFrom").innerText = from;
+        document.getElementById("showingTo").innerText = to;
+        document.getElementById("showingTotal").innerText = total;
     }
-
-
-    /* =========================================================
-       PAGINATION
-    ========================================================= */
 
     function createPagination() {
-
-        const pagination =
-            document.getElementById(
-                "pagination"
-            );
-
-
+        const pagination = document.getElementById("pagination");
         pagination.innerHTML = "";
 
-
-        const totalPages =
-            Math.ceil(
-                filteredRows.length /
-                rowsPerPage
-            );
-
-
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
         if (totalPages <= 1) {
-
             return;
-
         }
 
-
-        /*
-         * PREVIOUS
-         */
-
-        const previous =
-            document.createElement("li");
-
-
-        previous.className =
-            "page-item " +
-            (
-                currentPage === 1
-                    ? "disabled"
-                    : ""
-            );
-
-
-        previous.innerHTML = `
-            <a class="page-link"
-               href="javascript:void(0)">
-                <i class="fa fa-chevron-left"></i>
-                Previous
-            </a>
-        `;
-
-
+        const previous = document.createElement("li");
+        previous.className = "page-item " + (currentPage === 1 ? "disabled" : "");
+        previous.innerHTML = `<a class="page-link" href="javascript:void(0)"><i class="fa fa-chevron-left"></i> Previous</a>`;
         previous.onclick = function () {
-
             if (currentPage > 1) {
-
                 currentPage--;
-
                 renderTable();
-
-                window.scrollTo({
-                    top: 0,
-                    behavior: "smooth"
-                });
-
+                window.scrollTo({ top: 0, behavior: "smooth" });
             }
-
         };
-
-
         pagination.appendChild(previous);
 
-
-        /*
-         * PAGE NUMBERS
-         */
-
         const maxVisiblePages = 5;
-
-
-        let startPage =
-            Math.max(
-                1,
-                currentPage - 2
-            );
-
-
-        let endPage =
-            Math.min(
-                totalPages,
-                startPage +
-                maxVisiblePages -
-                1
-            );
-
-
-        if (
-            endPage - startPage + 1 <
-            maxVisiblePages
-        ) {
-
-            startPage =
-                Math.max(
-                    1,
-                    endPage -
-                    maxVisiblePages +
-                    1
-                );
-
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
-
-
-        /*
-         * FIRST
-         */
 
         if (startPage > 1) {
-
-            addPageButton(
-                1,
-                pagination
-            );
-
-
+            addPageButton(1, pagination);
             if (startPage > 2) {
-
-                addDots(
-                    pagination
-                );
-
+                addDots(pagination);
             }
-
         }
 
-
-        /*
-         * PAGES
-         */
-
-        for (
-            let i = startPage;
-            i <= endPage;
-            i++
-        ) {
-
-            addPageButton(
-                i,
-                pagination
-            );
-
+        for (let i = startPage; i <= endPage; i++) {
+            addPageButton(i, pagination);
         }
-
-
-        /*
-         * LAST
-         */
 
         if (endPage < totalPages) {
-
-            if (
-                endPage <
-                totalPages - 1
-            ) {
-
-                addDots(
-                    pagination
-                );
-
+            if (endPage < totalPages - 1) {
+                addDots(pagination);
             }
-
-
-            addPageButton(
-                totalPages,
-                pagination
-            );
-
+            addPageButton(totalPages, pagination);
         }
 
-
-        /*
-         * NEXT
-         */
-
-        const next =
-            document.createElement("li");
-
-
-        next.className =
-            "page-item " +
-            (
-                currentPage === totalPages
-                    ? "disabled"
-                    : ""
-            );
-
-
-        next.innerHTML = `
-            <a class="page-link"
-               href="javascript:void(0)">
-                Next
-                <i class="fa fa-chevron-right"></i>
-            </a>
-        `;
-
-
+        const next = document.createElement("li");
+        next.className = "page-item " + (currentPage === totalPages ? "disabled" : "");
+        next.innerHTML = `<a class="page-link" href="javascript:void(0)">Next <i class="fa fa-chevron-right"></i></a>`;
         next.onclick = function () {
-
-            if (
-                currentPage <
-                totalPages
-            ) {
-
+            if (currentPage < totalPages) {
                 currentPage++;
-
                 renderTable();
-
-                window.scrollTo({
-                    top: 0,
-                    behavior: "smooth"
-                });
-
+                window.scrollTo({ top: 0, behavior: "smooth" });
             }
-
         };
-
-
         pagination.appendChild(next);
-
     }
 
-
-    /* =========================================================
-       PAGE BUTTON
-    ========================================================= */
-
-    function addPageButton(
-        pageNumber,
-        pagination
-    ) {
-
-        const li =
-            document.createElement("li");
-
-
-        li.className =
-            "page-item " +
-            (
-                pageNumber === currentPage
-                    ? "active"
-                    : ""
-            );
-
-
-        li.innerHTML = `
-            <a class="page-link"
-               href="javascript:void(0)">
-                ${pageNumber}
-            </a>
-        `;
-
-
+    function addPageButton(pageNumber, pagination) {
+        const li = document.createElement("li");
+        li.className = "page-item " + (pageNumber === currentPage ? "active" : "");
+        li.innerHTML = `<a class="page-link" href="javascript:void(0)">${pageNumber}</a>`;
         li.onclick = function () {
-
-            currentPage =
-                pageNumber;
-
+            currentPage = pageNumber;
             renderTable();
-
-            window.scrollTo({
-                top: 0,
-                behavior: "smooth"
-            });
-
+            window.scrollTo({ top: 0, behavior: "smooth" });
         };
-
-
         pagination.appendChild(li);
-
     }
-
-
-    /* =========================================================
-       DOTS
-    ========================================================= */
 
     function addDots(pagination) {
-
-        const li =
-            document.createElement("li");
-
-
-        li.className =
-            "page-item disabled";
-
-
-        li.innerHTML = `
-            <span class="page-link">
-                ...
-            </span>
-        `;
-
-
+        const li = document.createElement("li");
+        li.className = "page-item disabled";
+        li.innerHTML = `<span class="page-link">...</span>`;
         pagination.appendChild(li);
-
     }
-
-
-    /* =========================================================
-       EMPTY ROW
-    ========================================================= */
 
     function showEmptyRow() {
-
-        const tbody =
-            document.getElementById(
-                "invoiceTableBody"
-            );
-
-
-        const emptyRow =
-            document.createElement("tr");
-
-
-        emptyRow.id =
-            "dynamicEmptyRow";
-
-
+        const tbody = document.getElementById("invoiceTableBody");
+        const emptyRow = document.createElement("tr");
+        emptyRow.id = "dynamicEmptyRow";
         emptyRow.innerHTML = `
-            <td colspan="11"
-                class="no-record">
-
+            <td colspan="11" class="no-record">
                 <i class="fa fa-search fa-2x"></i>
-
-                <div class="no-record-title">
-                    No matching invoices found.
-                </div>
-
-                <div class="no-record-text">
-                    Try changing the financial year,
-                    month or search criteria.
-                </div>
-
-            </td>
-        `;
-
-
+                <div class="no-record-title">No matching invoices found.</div>
+                <div class="no-record-text">Try changing the financial year, month or search criteria.</div>
+            </td>`;
         tbody.appendChild(emptyRow);
-
     }
-
-
-    /* =========================================================
-       REMOVE EMPTY ROW
-    ========================================================= */
 
     function removeDynamicEmptyRow() {
-
-        const emptyRow =
-            document.getElementById(
-                "dynamicEmptyRow"
-            );
-
-
+        const emptyRow = document.getElementById("dynamicEmptyRow");
         if (emptyRow) {
-
             emptyRow.remove();
-
         }
-
     }
 
-</script>
-<link rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
-<script>
     function deleteInvoice(event, element) {
-
         event.preventDefault();
-
-        if (!confirm('Are you sure you want to delete this invoice?')) {
-            return false;
-        }
 
         var url = element.href;
 
-        $.ajax({
-            url: url,
-            type: 'GET',
-            success: function (response) {
-
-                if (response.success) {
-
-                    toastr.success(response.message);
-
-                    // Remove deleted row
-                    $(element).closest('tr').fadeOut(500, function () {
-                        $(this).remove();
-                    });
-
-                } else {
-
-                    toastr.error(response.message);
-
-                }
+        showConfirmToast(
+            "Are you sure you want to delete this invoice?",
+            function () {
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function (response) {
+                        if (response.success) {
+                            showToast("Invoice deleted successfully..", "success");
+                            $(element).closest('tr').fadeOut(500, function () {
+                                $(this).remove();
+                            });
+                        } else {
+                            showToast(response.message, "error");
+                        }
+                    },
+                    error: function () {
+                        showToast("Something went wrong while deleting the invoice.", "error");
+                    }
+                });
             },
-            error: function () {
-
-                toastr.error('Something went wrong while deleting the invoice.');
-
+            function () {
+                showToast("Delete cancelled.", "warning");
             }
-        });
+        );
 
         return false;
     }
 </script>
-

@@ -933,1704 +933,561 @@
 
     let rowCounter = 0;
 
-
-    // =========================================================
-    // SERVER VALUES
-    // =========================================================
-
     const isEdit = @(isEdit ? "true" : "false");
-
-    const invoiceId = @(isEdit? Model.main.Id : 0);
-
-
-    // =========================================================
-    // IMPORTANT:
-    // SERIALIZE ONLY Model.details
-    // =========================================================
+    const invoiceId = @(isEdit ? Model.main.Id : 0);
 
     const existingDetails =
-        @Html.Raw(
-            System.Text.Json.JsonSerializer.Serialize(
-                    invoiceDetails
-            )
-                );
-
+        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(invoiceDetails));
 
     const existingCompany =
-        @Html.Raw(
-                        System.Text.Json.JsonSerializer.Serialize(
-                                Model?.main?.companyName ?? ""
-                        )
-                );
+        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model?.main?.companyName ?? ""));
 
-
+ 
     // =========================================================
     // DOCUMENT READY
     // =========================================================
 
     $(document).ready(function () {
-        // Select2
         $('#companyName').select2({
             placeholder: 'Select Company',
             allowClear: true,
             width: '100%'
         });
 
-        // FORCE CALL
         loadExistingInvoice();
     });
-
-
-
 
     // =========================================================
     // LOAD EXISTING INVOICE
     // =========================================================
 
     function loadExistingInvoice() {
-
-        debugger;
-
-        console.log("========== LOAD EXISTING INVOICE ==========");
-        console.log("existingDetails:", existingDetails);
-        console.log("Is Array:", Array.isArray(existingDetails));
-
         const tbody = document.getElementById('invoiceItems');
-
-        if (!tbody) {
-            console.error("invoiceItems tbody not found.");
-            return;
-        }
+        if (!tbody) return;
 
         tbody.innerHTML = '';
         rowCounter = 0;
 
         if (!existingDetails || !Array.isArray(existingDetails) || existingDetails.length === 0) {
-
-            console.log("No existing details found.");
-
             addInvoiceRow();
             calculateAll();
-
             return;
         }
 
-        existingDetails.forEach(function (item, index) {
-
-            console.log("========== ITEM " + index + " ==========");
-            console.log(item);
-
+        existingDetails.forEach(function (item) {
             const row = addInvoiceRow();
+            if (!row) return;
 
-            if (!row) {
-                console.error("addInvoiceRow() did not return row.");
-                return;
-            }
+            row.dataset.detailId = item.id ?? item.Id ?? 0;
 
-            // ==========================================
-            // DETAIL ID
-            // ==========================================
-
-            row.dataset.detailId =
-                item.id ??
-                item.Id ??
-                0;
-
-
-            // ==========================================
-            // DESCRIPTION
-            // ==========================================
-
-            row.querySelector('.description').value =
-                item.productdescription ??
-                item.ProductDescription ??
-                '';
-
-
-            // ==========================================
-            // SAC CODE
-            // ==========================================
-
-            row.querySelector('.sac-code').value =
-                item.saccode ??
-                item.SacCode ??
-                '';
-
-
-            // ==========================================
-            // QTY
-            // ==========================================
-
-            row.querySelector('.qty').value =
-                item.qty ??
-                item.Qty ??
-                0;
-
-
-            // ==========================================
-            // RATE
-            // ==========================================
-
-            row.querySelector('.rate').value =
-                item.rate ??
-                item.Rate ??
-                0;
-
-
-            // ==========================================
-            // TAXABLE VALUE
-            // ==========================================
+            row.querySelector('.description').value = item.productdescription ?? item.ProductDescription ?? '';
+            row.querySelector('.sac-code').value = item.saccode ?? item.SacCode ?? '';
+            row.querySelector('.qty').value = item.qty ?? item.Qty ?? 0;
+            row.querySelector('.rate').value = item.rate ?? item.Rate ?? 0;
 
             row.querySelector('.taxable-value').value =
-                Number(
-                    item.taxablevalue ??
-                    item.TaxableValue ??
-                    item.amount ??
-                    item.Amount ??
-                    0
-                ).toFixed(2);
+                Number(item.taxablevalue ?? item.TaxableValue ?? item.amount ?? item.Amount ?? 0).toFixed(2);
 
+            row.querySelector('.cgst-rate').value = item.cgstrate ?? item.CgstRate ?? 0;
+            row.querySelector('.cgst-amount').value = Number(item.cgstamt ?? item.CgstAmt ?? 0).toFixed(2);
 
-            // ==========================================
-            // CGST RATE
-            // ==========================================
+            row.querySelector('.sgst-rate').value = item.sgstrate ?? item.SgstRate ?? 0;
+            row.querySelector('.sgst-amount').value = Number(item.sgstamt ?? item.SgstAmt ?? 0).toFixed(2);
 
-            row.querySelector('.cgst-rate').value =
-                item.cgstrate ??
-                item.CgstRate ??
-                0;
+            row.querySelector('.igst-rate').value = item.igstrate ?? item.IgstRate ?? 0;
+            row.querySelector('.igst-amount').value = Number(item.igstamt ?? item.IgstAmt ?? 0).toFixed(2);
 
-
-            // ==========================================
-            // CGST AMOUNT
-            // ==========================================
-
-            row.querySelector('.cgst-amount').value =
-                Number(
-                    item.cgstamt ??
-                    item.CgstAmt ??
-                    0
-                ).toFixed(2);
-
-
-            // ==========================================
-            // SGST RATE
-            // ==========================================
-
-            row.querySelector('.sgst-rate').value =
-                item.sgstrate ??
-                item.SgstRate ??
-                0;
-
-
-            // ==========================================
-            // SGST AMOUNT
-            // ==========================================
-
-            row.querySelector('.sgst-amount').value =
-                Number(
-                    item.sgstamt ??
-                    item.SgstAmt ??
-                    0
-                ).toFixed(2);
-
-
-            // ==========================================
-            // IGST RATE
-            // ==========================================
-
-            row.querySelector('.igst-rate').value =
-                item.igstrate ??
-                item.IgstRate ??
-                0;
-
-
-            // ==========================================
-            // IGST AMOUNT
-            // ==========================================
-
-            row.querySelector('.igst-amount').value =
-                Number(
-                    item.igstamt ??
-                    item.IgstAmt ??
-                    0
-                ).toFixed(2);
-
-
-            // ==========================================
-            // TOTAL
-            // ==========================================
-
-            row.querySelector('.row-total').value =
-                Number(
-                    item.total ??
-                    item.Total ??
-                    0
-                ).toFixed(2);
-
-
-            // ==========================================
-            // APPLY TAX STATE
-            // ==========================================
+            row.querySelector('.row-total').value = Number(item.total ?? item.Total ?? 0).toFixed(2);
 
             applyTaxState(row);
-
-
-            console.log("BOUND ROW:", {
-                id: row.dataset.detailId,
-                description: row.querySelector('.description').value,
-                sac: row.querySelector('.sac-code').value,
-                qty: row.querySelector('.qty').value,
-                rate: row.querySelector('.rate').value,
-                taxable: row.querySelector('.taxable-value').value,
-                cgstRate: row.querySelector('.cgst-rate').value,
-                cgstAmount: row.querySelector('.cgst-amount').value,
-                sgstRate: row.querySelector('.sgst-rate').value,
-                sgstAmount: row.querySelector('.sgst-amount').value,
-                igstRate: row.querySelector('.igst-rate').value,
-                igstAmount: row.querySelector('.igst-amount').value,
-                total: row.querySelector('.row-total').value
-            });
-
         });
 
         refreshSerialNumbers();
-
         calculateAll();
-
-        console.log(
-            "Total rows:",
-            document.querySelectorAll('.invoice-item-row').length
-        );
     }
-
 
     // =========================================================
     // COMPANY DETAILS
     // =========================================================
 
     function getCompanyDetails(cname) {
-
         $.ajax({
-
-            url:
-                '@Url.Action("Getcomapnybycname", "Taxinvoice")',
-
+            url: '@Url.Action("Getcomapnybycname", "Taxinvoice")',
             type: 'GET',
-
-            data: {
-                cname: cname
-            },
-
+            data: { cname: cname },
             success: function (data) {
-
-                if (!data) {
-                    return;
-                }
-
+                if (!data) return;
                 $('#gstin').val(data.gstIn || '');
-
                 $('#address').val(data.address || '');
-
                 $('#Location').val(data.location || '');
-
                 $('#billingState').val(data.state || '');
-
                 $('#billingPincode').val(data.pinCode || '');
-
                 $('#billingStateCode').val(data.statecode || '');
-
             },
-
             error: function () {
-
-                console.log(
-                    'Error while loading company details.'
-                );
-
+                showToast("Error while loading company details.", "error");
             }
-
         });
-
     }
-
 
     // =========================================================
     // TODAY
     // =========================================================
 
     function setTodayDate() {
-
         const d = new Date();
-
-        const date =
-            d.getFullYear() +
-            '-' +
-            String(d.getMonth() + 1).padStart(2, '0') +
-            '-' +
-            String(d.getDate()).padStart(2, '0');
-
+        const date = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
         $('#invoiceDate').val(date);
-
     }
-
 
     // =========================================================
     // ADD ROW
     // =========================================================
 
     function addInvoiceRow() {
-
         rowCounter++;
 
-
-        const row =
-            document.createElement('tr');
-
-
-        row.className =
-            'invoice-item-row';
-
-
+        const row = document.createElement('tr');
+        row.className = 'invoice-item-row';
         row.dataset.detailId = 0;
 
-
         row.innerHTML = `
-
+            <td><input type="text" value="${rowCounter}" readonly class="serial-number" /></td>
+            <td><textarea class="description" placeholder="Description"></textarea></td>
+            <td><input type="text" class="sac-code" placeholder="SAC Code" /></td>
+            <td><input type="number" class="qty" min="0" value="1" oninput="calculateRow(this)" /></td>
+            <td><input type="number" class="rate" min="0" value="0" oninput="calculateRow(this)" /></td>
+            <td><input type="number" class="taxable-value" value="0" readonly /></td>
             <td>
-
-                <input type="text"
-                       value="${rowCounter}"
-                       readonly
-                       class="serial-number" />
-
-            </td>
-
-
-            <td>
-
-                <textarea
-                    class="description"
-                    placeholder="Description"></textarea>
-
-            </td>
-
-
-            <td>
-
-                <input type="text"
-                       class="sac-code"
-                       placeholder="SAC Code" />
-
-            </td>
-
-
-            <td>
-
-                <input type="number"
-                       class="qty"
-                       min="0"
-                       value="1"
-                       oninput="calculateRow(this)" />
-
-            </td>
-
-
-            <td>
-
-                <input type="number"
-                       class="rate"
-                       min="0"
-                       value="0"
-                       oninput="calculateRow(this)" />
-
-            </td>
-
-
-            <td>
-
-                <input type="number"
-                       class="taxable-value"
-                       value="0"
-                       readonly />
-
-            </td>
-
-
-            <td>
-
                 <div class="tax-pair">
-
-                    <input type="number"
-                           class="cgst-rate"
-                           min="0"
-                           value="0"
-                           placeholder="%"
-                           oninput="taxChanged(this,'CGST')" />
-
-                    <input type="number"
-                           class="cgst-amount"
-                           value="0"
-                           readonly />
-
+                    <input type="number" class="cgst-rate" min="0" value="0" placeholder="%" oninput="taxChanged(this,'CGST')" />
+                    <input type="number" class="cgst-amount" value="0" readonly />
                 </div>
-
             </td>
-
-
             <td>
-
                 <div class="tax-pair">
-
-                    <input type="number"
-                           class="sgst-rate"
-                           min="0"
-                           value="0"
-                           placeholder="%"
-                           oninput="taxChanged(this,'SGST')" />
-
-                    <input type="number"
-                           class="sgst-amount"
-                           value="0"
-                           readonly />
-
+                    <input type="number" class="sgst-rate" min="0" value="0" placeholder="%" oninput="taxChanged(this,'SGST')" />
+                    <input type="number" class="sgst-amount" value="0" readonly />
                 </div>
-
             </td>
-
-
             <td>
-
                 <div class="tax-pair">
-
-                    <input type="number"
-                           class="igst-rate"
-                           min="0"
-                           value="0"
-                           placeholder="%"
-                           oninput="taxChanged(this,'IGST')" />
-
-                    <input type="number"
-                           class="igst-amount"
-                           value="0"
-                           readonly />
-
+                    <input type="number" class="igst-rate" min="0" value="0" placeholder="%" oninput="taxChanged(this,'IGST')" />
+                    <input type="number" class="igst-amount" value="0" readonly />
                 </div>
-
             </td>
-
-
-            <td>
-
-                <input type="number"
-                       class="row-total"
-                       value="0"
-                       readonly />
-
-            </td>
-
-
-            <td>
-
-                <button type="button"
-                        class="btn btn-danger btn-sm remove-row"
-                        onclick="removeRow(this)"
-                        style="padding:1px 6px;">
-
-                    ×
-
-                </button>
-
-            </td>
-
+            <td><input type="number" class="row-total" value="0" readonly /></td>
+            <td><button type="button" class="btn btn-danger btn-sm remove-row" onclick="removeRow(this)" style="padding:1px 6px;">×</button></td>
         `;
 
-
-        document
-            .getElementById('invoiceItems')
-            .appendChild(row);
-
-
+        document.getElementById('invoiceItems').appendChild(row);
         refreshSerialNumbers();
-
-
         return row;
-
     }
-
 
     // =========================================================
     // REMOVE ROW
     // =========================================================
 
     function removeRow(btn) {
-
-        const rows =
-            document.querySelectorAll(
-                '.invoice-item-row'
-            );
-
-
+        const rows = document.querySelectorAll('.invoice-item-row');
         if (rows.length <= 1) {
-
-            alert(
-                'At least one item row is required.'
-            );
-
+            showToast("At least one item row is required.", "warning");
             return;
-
         }
 
-
-        btn.closest('tr').remove();
-
-
-        refreshSerialNumbers();
-
-        calculateAll();
-
+        showConfirmToast("Remove this item row?", function () {
+            btn.closest('tr').remove();
+            refreshSerialNumbers();
+            calculateAll();
+        });
     }
-
 
     // =========================================================
     // SERIAL NUMBERS
     // =========================================================
 
     function refreshSerialNumbers() {
-
-        document
-            .querySelectorAll('.invoice-item-row')
-            .forEach(function (row, index) {
-
-                row.querySelector(
-                    '.serial-number'
-                ).value = index + 1;
-
-            });
-
+        document.querySelectorAll('.invoice-item-row').forEach(function (row, index) {
+            row.querySelector('.serial-number').value = index + 1;
+        });
     }
-
 
     // =========================================================
     // TAX STATE
     // =========================================================
 
     function applyTaxState(row) {
+        const cgstInput = row.querySelector('.cgst-rate');
+        const sgstInput = row.querySelector('.sgst-rate');
+        const igstInput = row.querySelector('.igst-rate');
 
-        const cgstInput =
-            row.querySelector('.cgst-rate');
-
-        const sgstInput =
-            row.querySelector('.sgst-rate');
-
-        const igstInput =
-            row.querySelector('.igst-rate');
-
-
-        const cgst =
-            parseFloat(cgstInput.value) || 0;
-
-        const sgst =
-            parseFloat(sgstInput.value) || 0;
-
-        const igst =
-            parseFloat(igstInput.value) || 0;
-
+        const cgst = parseFloat(cgstInput.value) || 0;
+        const sgst = parseFloat(sgstInput.value) || 0;
+        const igst = parseFloat(igstInput.value) || 0;
 
         if (igst > 0) {
-
             cgstInput.disabled = true;
-
             sgstInput.disabled = true;
-
             igstInput.disabled = false;
-
-        }
-
-        else if (
-            cgst > 0 ||
-            sgst > 0
-        ) {
-
+        } else if (cgst > 0 || sgst > 0) {
             igstInput.disabled = true;
-
             cgstInput.disabled = false;
-
             sgstInput.disabled = false;
-
-        }
-
-        else {
-
+        } else {
             cgstInput.disabled = false;
-
             sgstInput.disabled = false;
-
             igstInput.disabled = false;
-
         }
-
     }
-
 
     // =========================================================
     // TAX CHANGE
     // =========================================================
 
     function taxChanged(input, taxType) {
+        const row = input.closest('tr');
+        const cgst = row.querySelector('.cgst-rate');
+        const sgst = row.querySelector('.sgst-rate');
+        const igst = row.querySelector('.igst-rate');
 
-        const row =
-            input.closest('tr');
-
-
-        const cgst =
-            row.querySelector('.cgst-rate');
-
-        const sgst =
-            row.querySelector('.sgst-rate');
-
-        const igst =
-            row.querySelector('.igst-rate');
-
-
-        let value =
-            parseFloat(input.value) || 0;
-
-
+        let value = parseFloat(input.value) || 0;
         if (value < 0) {
-
             input.value = 0;
-
             value = 0;
-
         }
 
-
-        if (
-            taxType === 'CGST' ||
-            taxType === 'SGST'
-        ) {
-
+        if (taxType === 'CGST' || taxType === 'SGST') {
             if (value > 0) {
-
                 igst.value = 0;
-
                 igst.disabled = true;
-
-            }
-
-            else if (
-                (parseFloat(cgst.value) || 0) === 0 &&
-                (parseFloat(sgst.value) || 0) === 0
-            ) {
-
+            } else if ((parseFloat(cgst.value) || 0) === 0 && (parseFloat(sgst.value) || 0) === 0) {
                 igst.disabled = false;
-
             }
-
         }
-
 
         if (taxType === 'IGST') {
-
             if (value > 0) {
-
                 cgst.value = 0;
-
                 sgst.value = 0;
-
                 cgst.disabled = true;
-
                 sgst.disabled = true;
-
-            }
-
-            else {
-
+            } else {
                 cgst.disabled = false;
-
                 sgst.disabled = false;
-
             }
-
         }
 
-
         calculateRow(input);
-
     }
-
 
     // =========================================================
     // CALCULATE ROW
     // =========================================================
 
     function calculateRow(el) {
+        const row = el.closest('tr');
+        if (!row) return;
 
-        const row =
-            el.closest('tr');
+        const qty = parseFloat(row.querySelector('.qty').value) || 0;
+        const rate = parseFloat(row.querySelector('.rate').value) || 0;
+        const taxable = qty * rate;
 
+        row.querySelector('.taxable-value').value = taxable.toFixed(2);
 
-        if (!row) {
-            return;
-        }
+        const cgstRate = parseFloat(row.querySelector('.cgst-rate').value) || 0;
+        const sgstRate = parseFloat(row.querySelector('.sgst-rate').value) || 0;
+        const igstRate = parseFloat(row.querySelector('.igst-rate').value) || 0;
 
+        const cgst = taxable * cgstRate / 100;
+        const sgst = taxable * sgstRate / 100;
+        const igst = taxable * igstRate / 100;
 
-        const qty =
-            parseFloat(
-                row.querySelector('.qty').value
-            ) || 0;
-
-
-        const rate =
-            parseFloat(
-                row.querySelector('.rate').value
-            ) || 0;
-
-
-        const taxable =
-            qty * rate;
-
-
-        row.querySelector(
-            '.taxable-value'
-        ).value =
-            taxable.toFixed(2);
-
-
-        const cgstRate =
-            parseFloat(
-                row.querySelector('.cgst-rate').value
-            ) || 0;
-
-
-        const sgstRate =
-            parseFloat(
-                row.querySelector('.sgst-rate').value
-            ) || 0;
-
-
-        const igstRate =
-            parseFloat(
-                row.querySelector('.igst-rate').value
-            ) || 0;
-
-
-        const cgst =
-            taxable * cgstRate / 100;
-
-
-        const sgst =
-            taxable * sgstRate / 100;
-
-
-        const igst =
-            taxable * igstRate / 100;
-
-
-        row.querySelector(
-            '.cgst-amount'
-        ).value =
-            cgst.toFixed(2);
-
-
-        row.querySelector(
-            '.sgst-amount'
-        ).value =
-            sgst.toFixed(2);
-
-
-        row.querySelector(
-            '.igst-amount'
-        ).value =
-            igst.toFixed(2);
-
-
-        row.querySelector(
-            '.row-total'
-        ).value =
-            (
-                taxable +
-                cgst +
-                sgst +
-                igst
-            ).toFixed(2);
-
+        row.querySelector('.cgst-amount').value = cgst.toFixed(2);
+        row.querySelector('.sgst-amount').value = sgst.toFixed(2);
+        row.querySelector('.igst-amount').value = igst.toFixed(2);
+        row.querySelector('.row-total').value = (taxable + cgst + sgst + igst).toFixed(2);
 
         calculateAll();
-
     }
-
 
     // =========================================================
     // CALCULATE ALL
     // =========================================================
 
     function calculateAll() {
+        let totalQty = 0, totalTaxable = 0, totalCGST = 0, totalSGST = 0, totalIGST = 0, grand = 0;
 
-        let totalQty = 0;
+        document.querySelectorAll('.invoice-item-row').forEach(function (row) {
+            totalQty += parseFloat(row.querySelector('.qty').value) || 0;
+            totalTaxable += parseFloat(row.querySelector('.taxable-value').value) || 0;
+            totalCGST += parseFloat(row.querySelector('.cgst-amount').value) || 0;
+            totalSGST += parseFloat(row.querySelector('.sgst-amount').value) || 0;
+            totalIGST += parseFloat(row.querySelector('.igst-amount').value) || 0;
+            grand += parseFloat(row.querySelector('.row-total').value) || 0;
+        });
 
-        let totalTaxable = 0;
+        const totalTax = totalCGST + totalSGST + totalIGST;
 
-        let totalCGST = 0;
+        $('#totalQty').val(totalQty);
+        $('#totalTaxable').val(totalTaxable.toFixed(2));
+        $('#totalCGST').val(totalCGST.toFixed(2));
+        $('#totalSGST').val(totalSGST.toFixed(2));
+        $('#totalIGST').val(totalIGST.toFixed(2));
+        $('#grandTotalTable').val(grand.toFixed(2));
 
-        let totalSGST = 0;
-
-        let totalIGST = 0;
-
-        let grand = 0;
-
-
-        document
-            .querySelectorAll('.invoice-item-row')
-            .forEach(function (row) {
-
-                totalQty +=
-                    parseFloat(
-                        row.querySelector('.qty').value
-                    ) || 0;
-
-
-                totalTaxable +=
-                    parseFloat(
-                        row.querySelector('.taxable-value').value
-                    ) || 0;
-
-
-                totalCGST +=
-                    parseFloat(
-                        row.querySelector('.cgst-amount').value
-                    ) || 0;
-
-
-                totalSGST +=
-                    parseFloat(
-                        row.querySelector('.sgst-amount').value
-                    ) || 0;
-
-
-                totalIGST +=
-                    parseFloat(
-                        row.querySelector('.igst-amount').value
-                    ) || 0;
-
-
-                grand +=
-                    parseFloat(
-                        row.querySelector('.row-total').value
-                    ) || 0;
-
-            });
-
-
-        const totalTax =
-            totalCGST +
-            totalSGST +
-            totalIGST;
-
-
-        $('#totalQty')
-            .val(totalQty);
-
-
-        $('#totalTaxable')
-            .val(totalTaxable.toFixed(2));
-
-
-        $('#totalCGST')
-            .val(totalCGST.toFixed(2));
-
-
-        $('#totalSGST')
-            .val(totalSGST.toFixed(2));
-
-
-        $('#totalIGST')
-            .val(totalIGST.toFixed(2));
-
-
-        $('#grandTotalTable')
-            .val(grand.toFixed(2));
-
-
-        $('#summaryBeforeTax')
-            .val(totalTaxable.toFixed(2));
-
-
-        $('#summaryCGST')
-            .val(totalCGST.toFixed(2));
-
-
-        $('#summarySGST')
-            .val(totalSGST.toFixed(2));
-
-
-        $('#summaryIGST')
-            .val(totalIGST.toFixed(2));
-
-
-        $('#summaryTax')
-            .val(totalTax.toFixed(2));
-
-
-        $('#summaryGrandTotal')
-            .val(grand.toFixed(2));
-
+        $('#summaryBeforeTax').val(totalTaxable.toFixed(2));
+        $('#summaryCGST').val(totalCGST.toFixed(2));
+        $('#summarySGST').val(totalSGST.toFixed(2));
+        $('#summaryIGST').val(totalIGST.toFixed(2));
+        $('#summaryTax').val(totalTax.toFixed(2));
+        $('#summaryGrandTotal').val(grand.toFixed(2));
 
         updateAmountInWords();
-
     }
-
 
     // =========================================================
     // NUMBER TO WORDS
     // =========================================================
 
     function numberToWordsIndian(amount) {
+        amount = parseFloat(amount) || 0;
+        if (amount === 0) return "Zero Rupees Only";
 
-        amount =
-            parseFloat(amount) || 0;
+        amount = Math.round(amount * 100) / 100;
 
-
-        if (amount === 0) {
-
-            return "Zero Rupees Only";
-
-        }
-
-
-        amount =
-            Math.round(amount * 100) / 100;
-
-
-        const ones = [
-
-            "", "One", "Two", "Three", "Four",
-            "Five", "Six", "Seven", "Eight", "Nine",
-            "Ten", "Eleven", "Twelve", "Thirteen",
-            "Fourteen", "Fifteen", "Sixteen",
-            "Seventeen", "Eighteen", "Nineteen"
-
-        ];
-
-
-        const tens = [
-
-            "", "",
-            "Twenty",
-            "Thirty",
-            "Forty",
-            "Fifty",
-            "Sixty",
-            "Seventy",
-            "Eighty",
-            "Ninety"
-
-        ];
-
+        const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+            "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+        const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
 
         function convertBelowThousand(num) {
-
             let result = "";
-
-
             if (num >= 100) {
-
-                result +=
-                    ones[Math.floor(num / 100)] +
-                    " Hundred ";
-
+                result += ones[Math.floor(num / 100)] + " Hundred ";
                 num %= 100;
-
             }
-
-
             if (num >= 20) {
-
-                result +=
-                    tens[Math.floor(num / 10)] +
-                    " ";
-
+                result += tens[Math.floor(num / 10)] + " ";
                 num %= 10;
-
             }
-
-
-            if (num > 0) {
-
-                result +=
-                    ones[num] +
-                    " ";
-
-            }
-
-
+            if (num > 0) result += ones[num] + " ";
             return result.trim();
-
         }
-
 
         function convertIndian(num) {
-
-            if (num < 1000) {
-
-                return convertBelowThousand(num);
-
-            }
-
-
-            if (num < 100000) {
-
-                return convertIndian(
-                    Math.floor(num / 1000)
-                ) +
-                " Thousand " +
-                convertBelowThousand(
-                    num % 1000
-                );
-
-            }
-
-
-            if (num < 10000000) {
-
-                return convertIndian(
-                    Math.floor(num / 100000)
-                ) +
-                " Lakh " +
-                convertIndian(
-                    num % 100000
-                );
-
-            }
-
-
-            return convertIndian(
-                Math.floor(num / 10000000)
-            ) +
-            " Crore " +
-            convertIndian(
-                num % 10000000
-            );
-
+            if (num < 1000) return convertBelowThousand(num);
+            if (num < 100000) return convertIndian(Math.floor(num / 1000)) + " Thousand " + convertBelowThousand(num % 1000);
+            if (num < 10000000) return convertIndian(Math.floor(num / 100000)) + " Lakh " + convertIndian(num % 100000);
+            return convertIndian(Math.floor(num / 10000000)) + " Crore " + convertIndian(num % 10000000);
         }
 
+        const rupees = Math.floor(amount);
+        const paise = Math.round((amount - rupees) * 100);
 
-        const rupees =
-            Math.floor(amount);
+        let words = convertIndian(rupees).replace(/\s+/g, " ").trim();
+        let result = words + " Rupees";
 
-
-        const paise =
-            Math.round(
-                (amount - rupees) * 100
-            );
-
-
-        let words =
-            convertIndian(rupees);
-
-
-        words =
-            words
-                .replace(/\s+/g, " ")
-                .trim();
-
-
-        let result =
-            words + " Rupees";
-
-
-        if (paise > 0) {
-
-            result +=
-                " and " +
-                convertIndian(paise) +
-                " Paise";
-
-        }
-
-
+        if (paise > 0) result += " and " + convertIndian(paise) + " Paise";
         result += " Only";
 
-
         return result;
-
     }
-
 
     // =========================================================
     // AMOUNT WORDS
     // =========================================================
 
     function updateAmountInWords() {
-
-        const grandTotal =
-            parseFloat(
-                $('#summaryGrandTotal').val()
-            ) || 0;
-
-
-        $('#amountInWords')
-            .val(
-                numberToWordsIndian(grandTotal)
-            );
-
+        const grandTotal = parseFloat($('#summaryGrandTotal').val()) || 0;
+        $('#amountInWords').val(numberToWordsIndian(grandTotal));
     }
-
 
     // =========================================================
     // VALIDATION
     // =========================================================
 
     function validateInvoice() {
-
         let valid = true;
 
-
-        $('.field-error')
-            .removeClass('field-error');
-
-
-        $('.err-msg')
-            .text('');
-
+        $('.field-error').removeClass('field-error');
+        $('.err-msg').text('');
 
         if (!$('#invoiceDate').val()) {
-
-            $('#invoiceDate')
-                .addClass('field-error');
-
-
-            $('#err-invoiceDate')
-                .text(
-                    'Invoice Date is required.'
-                );
-
-
+            $('#invoiceDate').addClass('field-error');
+            $('#err-invoiceDate').text('Invoice Date is required.');
             valid = false;
-
         }
-
 
         if (!$('#companyName').val()) {
-
-            $('#companyName')
-                .addClass('field-error');
-
-
-            $('#err-companyName')
-                .text(
-                    'Company Name is required.'
-                );
-
-
+            $('#companyName').addClass('field-error');
+            $('#err-companyName').text('Company Name is required.');
             valid = false;
-
         }
 
-
-        const rows =
-            document.querySelectorAll(
-                '.invoice-item-row'
-            );
-
-
+        const rows = document.querySelectorAll('.invoice-item-row');
         if (rows.length === 0) {
-
-            $('#err-items')
-                .text(
-                    'At least one invoice item is required.'
-                );
-
-
+            $('#err-items').text('At least one invoice item is required.');
             valid = false;
-
         }
-
 
         rows.forEach(function (row) {
-
-            const description =
-                row.querySelector('.description');
-
-
-            const qty =
-                row.querySelector('.qty');
-
-
-            const rate =
-                row.querySelector('.rate');
-
+            const description = row.querySelector('.description');
+            const qty = row.querySelector('.qty');
+            const rate = row.querySelector('.rate');
 
             if (!description.value.trim()) {
-
-                description.classList.add(
-                    'field-error'
-                );
-
+                description.classList.add('field-error');
                 valid = false;
-
             }
-
-
-            if (
-                (parseFloat(qty.value) || 0) <= 0
-            ) {
-
-                qty.classList.add(
-                    'field-error'
-                );
-
+            if ((parseFloat(qty.value) || 0) <= 0) {
+                qty.classList.add('field-error');
                 valid = false;
-
             }
-
-
-            if (
-                (parseFloat(rate.value) || 0) <= 0
-            ) {
-
-                rate.classList.add(
-                    'field-error'
-                );
-
+            if ((parseFloat(rate.value) || 0) <= 0) {
+                rate.classList.add('field-error');
                 valid = false;
-
             }
-
         });
 
-
         if (!valid) {
-
-            const firstError =
-                document.querySelector(
-                    '.field-error'
-                );
-
-
+            const firstError = document.querySelector('.field-error');
             if (firstError) {
-
-                firstError.scrollIntoView({
-
-                    behavior: 'smooth',
-
-                    block: 'center'
-
-                });
-
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-
+            showToast("Please fix the highlighted errors before saving.", "error");
         }
 
-
         return valid;
-
     }
-
 
     // =========================================================
     // SAVE / UPDATE
     // =========================================================
 
     function saveInvoice() {
-
         calculateAll();
 
+        if (!validateInvoice()) return;
 
-        if (!validateInvoice()) {
+        const main = {
+            Id: invoiceId,
+            invoiceno: $('#invoiceNo').val() || null,
+            invoicedate: $('#invoiceDate').val() || null,
+            reversecharge: $('#reverseCharge').val() || null,
+            InvoiceType: $('#InvoiceType').val() || null,
+            companyName: $('#companyName').val() || null,
+            gstIn: $('#gstin').val() || null,
+            Address: $('#address').val() || null,
+            Location: $('#Location').val() || null,
+            PinCode: $('#billingPincode').val() || null,
+            state: $('#billingState').val() || null,
+            statecode: $('#billingStateCode').val() || null,
+            TransMode: $('#Transaction').val() || null,
+            TransNo: $('#transNo').val() || null,
+            TransDate: $('#transDate').val() || null,
+            TransAmt: $('#TransAmt').val() || null,
 
-            return;
+            cgst: parseFloat($('.cgst-rate').first().val()) || 0,
+            sgst: parseFloat($('.sgst-rate').first().val()) || 0,
+            igst: parseFloat($('.igst-rate').first().val()) || 0,
 
-        }
+            cgstamt: parseFloat($('#summaryCGST').val()) || 0,
+            sgstamt: parseFloat($('#summarySGST').val()) || 0,
+            igstamt: parseFloat($('#summaryIGST').val()) || 0,
 
+            totalqty: parseFloat($('#totalQty').val()) || 0,
+            totalrate: parseFloat($('#summaryBeforeTax').val()) || 0,
+            taxablevalue: parseFloat($('#summaryBeforeTax').val()) || 0,
+            totalamtbeforetax: parseFloat($('#summaryBeforeTax').val()) || 0,
+            totalamtaftertax: parseFloat($('#summaryGrandTotal').val()) || 0,
+            total_tax_amount: String(parseFloat($('#summaryTax').val()) || 0),
 
-           const main = {
-
-        Id: invoiceId,
-
-        invoiceno:
-            $('#invoiceNo').val() || null,
-
-        invoicedate:
-            $('#invoiceDate').val() || null,
-
-        reversecharge:
-            $('#reverseCharge').val() || null,
-
-        InvoiceType:
-            $('#InvoiceType').val() || null,
-
-        companyName:
-            $('#companyName').val() || null,
-
-        gstIn:
-            $('#gstin').val() || null,
-
-        Address:
-            $('#address').val() || null,
-
-        Location:
-            $('#Location').val() || null,
-
-        PinCode:
-            $('#billingPincode').val() || null,
-
-        state:
-            $('#billingState').val() || null,
-
-        statecode:
-            $('#billingStateCode').val() || null,
-
-        TransMode:
-            $('#Transaction').val() || null,
-
-        TransNo:
-            $('#transNo').val() || null,
-
-        TransDate:
-            $('#transDate').val() || null,
-
-        TransAmt:
-            $('#TransAmt').val() || null,
-
-
-        // =====================================================
-        // GST RATE / PERCENTAGE
-        // =====================================================
-    cgst: parseFloat($('.cgst-rate').first().val()) || 0,
-    sgst: parseFloat($('.sgst-rate').first().val()) || 0,
-    igst: parseFloat($('.igst-rate').first().val()) || 0,
-
-
-
-
-
-        // =====================================================
-        // GST AMOUNT
-        // =====================================================
-
-        cgstamt:
-            parseFloat(
-                $('#summaryCGST').val()
-            ) || 0,
-
-        sgstamt:
-            parseFloat(
-                $('#summarySGST').val()
-            ) || 0,
-
-        igstamt:
-            parseFloat(
-                $('#summaryIGST').val()
-            ) || 0,
-
-
-        // =====================================================
-        // TOTALS
-        // =====================================================
-
-        totalqty:
-            parseFloat(
-                $('#totalQty').val()
-            ) || 0,
-
-        totalrate:
-            parseFloat(
-                $('#summaryBeforeTax').val()
-            ) || 0,
-
-        taxablevalue:
-            parseFloat(
-                $('#summaryBeforeTax').val()
-            ) || 0,
-
-        totalamtbeforetax:
-            parseFloat(
-                $('#summaryBeforeTax').val()
-            ) || 0,
-
-        totalamtaftertax:
-            parseFloat(
-                $('#summaryGrandTotal').val()
-            ) || 0,
-
-        total_tax_amount:
-            String(
-                parseFloat(
-                    $('#summaryTax').val()
-                ) || 0
-            ),
-
-        amtinwords:
-            $('#amountInWords').val() || null
-
-    };
-
-
+            amtinwords: $('#amountInWords').val() || null
+        };
 
         const details = [];
 
-
-        document
-            .querySelectorAll('.invoice-item-row')
-            .forEach(function (row) {
-
-                details.push({
-
-                    id:
-                        parseInt(
-                            row.dataset.detailId || 0
-                        ),
-
-                    invoiceid:
-                        invoiceId,
-
-                    productdescription:
-                        row.querySelector(
-                            '.description'
-                        ).value.trim() || null,
-
-                    saccode:
-                        row.querySelector(
-                            '.sac-code'
-                        ).value.trim() || null,
-
-                    qty:
-                        parseFloat(
-                            row.querySelector('.qty').value
-                        ) || 0,
-
-                    rate:
-                        parseFloat(
-                            row.querySelector('.rate').value
-                        ) || 0,
-
-                    amount:
-                        parseFloat(
-                            row.querySelector('.taxable-value').value
-                        ) || 0,
-
-                    taxablevalue:
-                        parseFloat(
-                            row.querySelector('.taxable-value').value
-                        ) || 0,
-
-                    cgstrate:
-                        parseFloat(
-                            row.querySelector('.cgst-rate').value
-                        ) || 0,
-
-                    cgstamt:
-                        parseFloat(
-                            row.querySelector('.cgst-amount').value
-                        ) || 0,
-
-                    sgstrate:
-                        parseFloat(
-                            row.querySelector('.sgst-rate').value
-                        ) || 0,
-
-                    sgstamt:
-                        parseFloat(
-                            row.querySelector('.sgst-amount').value
-                        ) || 0,
-
-                    igstrate:
-                        parseFloat(
-                            row.querySelector('.igst-rate').value
-                        ) || 0,
-
-                    igstamt:
-                        parseFloat(
-                            row.querySelector('.igst-amount').value
-                        ) || 0,
-
-                    total:
-                        parseFloat(
-                            row.querySelector('.row-total').value
-                        ) || 0
-
-                });
-
+        document.querySelectorAll('.invoice-item-row').forEach(function (row) {
+            details.push({
+                id: parseInt(row.dataset.detailId || 0),
+                invoiceid: invoiceId,
+                productdescription: row.querySelector('.description').value.trim() || null,
+                saccode: row.querySelector('.sac-code').value.trim() || null,
+                qty: parseFloat(row.querySelector('.qty').value) || 0,
+                rate: parseFloat(row.querySelector('.rate').value) || 0,
+                amount: parseFloat(row.querySelector('.taxable-value').value) || 0,
+                taxablevalue: parseFloat(row.querySelector('.taxable-value').value) || 0,
+                cgstrate: parseFloat(row.querySelector('.cgst-rate').value) || 0,
+                cgstamt: parseFloat(row.querySelector('.cgst-amount').value) || 0,
+                sgstrate: parseFloat(row.querySelector('.sgst-rate').value) || 0,
+                sgstamt: parseFloat(row.querySelector('.sgst-amount').value) || 0,
+                igstrate: parseFloat(row.querySelector('.igst-rate').value) || 0,
+                igstamt: parseFloat(row.querySelector('.igst-amount').value) || 0,
+                total: parseFloat(row.querySelector('.row-total').value) || 0
             });
-
-
-        const payload = {
-
-            Main: main,
-
-            Details: details
-
-        };
-
-
-
-        const url = isEdit
-
-            ? '@Url.Action("UpdateInvoice", "Taxinvoice")'
-
-            : '@Url.Action("SaveInvoice", "Taxinvoice")';
-
-
-        const $btn =
-            $('#saveBtn');
-
-
-        $btn
-            .prop('disabled', true)
-            .text(
-                isEdit
-                    ? 'Updating...'
-                    : 'Saving...'
-            );
-
-
-        $.ajax({
-
-            url: url,
-
-            type: 'POST',
-
-            contentType:
-                'application/json; charset=utf-8',
-
-            data:
-                JSON.stringify(payload),
-
-            success: function (response) {
-
-                if (
-                    response &&
-                    response.success
-                ) {
-
-                    alert(
-                        isEdit
-                            ? 'Invoice updated successfully.'
-                            : 'Invoice saved successfully.'
-                    );
-
-
-                    window.location.href =
-                        '@Url.Action("Index", "Taxinvoice")';
-
-                }
-
-                else {
-
-                    alert(
-                        response?.message ||
-                        'Operation failed.'
-                    );
-
-                }
-
-            },
-
-            error: function (xhr) {
-
-                console.log(
-                    xhr.responseText
-                );
-
-
-                alert(
-                    'Error while processing invoice.'
-                );
-
-            },
-
-            complete: function () {
-
-                $btn
-                    .prop('disabled', false)
-                    .text(
-                        isEdit
-                            ? 'Update'
-                            : 'Save'
-                    );
-
-            }
-
         });
 
-    }
+        const payload = { Main: main, Details: details };
 
+        const url = isEdit
+            ? '@Url.Action("UpdateInvoice", "Taxinvoice")'
+            : '@Url.Action("SaveInvoice", "Taxinvoice")';
+
+        const $btn = $('#saveBtn');
+        $btn.prop('disabled', true).text(isEdit ? 'Updating...' : 'Saving...');
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(payload),
+            success: function (response) {
+                if (response && response.success) {
+                    showToast(isEdit ? 'Invoice updated successfully.' : 'Invoice saved successfully.', 'success');
+                    setTimeout(function () {
+                        window.location.href = '@Url.Action("Index", "Taxinvoice")';
+                    }, 1200);
+                } else {
+                    showToast(response?.message || 'Operation failed.', 'error');
+                }
+            },
+            error: function () {
+                showToast('Error while processing invoice.', 'error');
+            },
+            complete: function () {
+                $btn.prop('disabled', false).text(isEdit ? 'Update' : 'Save');
+            }
+        });
+    }
 
     // =========================================================
     // CLEAR
     // =========================================================
 
     function clearInvoice() {
+        showConfirmToast("Are you sure you want to clear the invoice?", function () {
+            $('#companyName').val('').trigger('change');
+            $('#reverseCharge').val('N');
+            $('#Transaction').val('');
 
-        if (
-            !confirm(
-                'Are you sure you want to clear the invoice?'
-            )
-        ) {
+            [
+                '#gstin', '#address', '#Location', '#billingState', '#billingPincode',
+                '#billingStateCode', '#transNo', '#transDate', '#TransAmt', '#amountInWords'
+            ].forEach(function (id) {
+                $(id).val('');
+            });
 
-            return;
+            $('#invoiceItems').empty();
+            rowCounter = 0;
+            addInvoiceRow();
+            setTodayDate();
 
-        }
+            $('.field-error').removeClass('field-error');
+            $('.err-msg').text('');
 
-
-        $('#companyName')
-            .val('')
-            .trigger('change');
-
-
-        $('#reverseCharge')
-            .val('N');
-
-
-        $('#Transaction')
-            .val('');
-
-
-        [
-
-            '#gstin',
-            '#address',
-            '#Location',
-            '#billingState',
-            '#billingPincode',
-            '#billingStateCode',
-            '#transNo',
-            '#transDate',
-            '#TransAmt',
-            '#amountInWords'
-
-        ].forEach(function (id) {
-
-            $(id).val('');
-
+            calculateAll();
+            showToast("Invoice cleared.", "info");
         });
-
-
-        $('#invoiceItems')
-            .empty();
-
-
-        rowCounter = 0;
-
-
-        addInvoiceRow();
-
-
-        setTodayDate();
-
-
-        $('.field-error')
-            .removeClass('field-error');
-
-
-        $('.err-msg')
-            .text('');
-
-
-        calculateAll();
-
     }
 
 </script>

@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
 using WEBLINK_CRM.Models;
 using WLSPL_ERP_CRM.Models;
@@ -50,6 +51,7 @@ namespace WLSPL_ERP_CRM.repository
             );
 
             return companies.ToList();
+
         }
 
         public async Task<TaxInvoiceCreate> Getcompanybycname(string cname)

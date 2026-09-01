@@ -18,5 +18,7 @@ namespace WEBLINK_CRM.repository
         List<SelectListItem> GetSalesTLManagers();
 
         bool UpdateUserAvatar(int userId, string avatarPath);
+
+        bool UpdateUserProfile(RegisterUserr model);
     }
 }

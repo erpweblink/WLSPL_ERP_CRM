@@ -288,19 +288,19 @@ namespace WEBLINK_CRM.repository
 
 
             string query = @"
-        UPDATE employees SET
+                UPDATE employees SET
 
-            name = @name,
-            email = @email,
-            mobile = @mobile,
-            role = @role,
-            status = @status,
-            TL_Manager = @TL_Manager,
-            UserName = @UserName,
-            Sales_TL_Manager = @Sales_TL_Manager,
-            Designation = @Designation
+                    name = @name,
+                    email = @email,
+                    mobile = @mobile,
+                    role = @role,
+                    status = @status,
+                    TL_Manager = @TL_Manager,
+                    UserName = @UserName,
+                    Sales_TL_Manager = @Sales_TL_Manager,
+                    Designation = @Designation
 
-        WHERE id = @id";
+                WHERE id = @id";
 
 
             SqlCommand cmd = new SqlCommand(query, con);
@@ -425,6 +425,42 @@ namespace WEBLINK_CRM.repository
             cmd.Parameters.AddWithValue("@avatarPath", avatarPath ?? (object)DBNull.Value);
             cmd.Parameters.AddWithValue("@userId", userId);
             con.Open();
+            return cmd.ExecuteNonQuery() > 0;
+        }
+
+        // ================= UPDATE USER =================
+
+        public bool UpdateUserProfile(RegisterUserr model)
+        {
+            using SqlConnection con = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg"));
+
+
+            string query = @"
+                UPDATE employees SET
+                    name = @name,
+                    email = @email,
+                    emailpsw = @emailpsw,
+                    mobile = @mobile,
+                    UserName = @UserName,
+                    panelpsw = @panelpsw
+
+                WHERE id = @id";
+
+
+            SqlCommand cmd = new SqlCommand(query, con);
+
+            cmd.Parameters.AddWithValue("@id", model.id);
+            cmd.Parameters.AddWithValue("@name",model.name ?? "");
+            cmd.Parameters.AddWithValue("@email",model.email ?? "");
+            cmd.Parameters.AddWithValue("@emailpsw",model.emailpsw ?? "");       
+            cmd.Parameters.AddWithValue("@mobile",model.mobile ?? "");
+            cmd.Parameters.AddWithValue("@UserName", model.UserName ?? "");
+            cmd.Parameters.AddWithValue("@panelpsw", model.panelpsw ?? "");
+
+            con.Open();
+
+
             return cmd.ExecuteNonQuery() > 0;
         }
 

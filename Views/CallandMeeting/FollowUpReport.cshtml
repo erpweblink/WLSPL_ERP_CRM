@@ -749,18 +749,28 @@
         </button>
     </div>
     <div class="card-body">
-        <div class="filter-card" id="filterCard">
+        <div class="filter-card filter-collapsed" id="filterCard">
             <div class="row g-3">
+
+                <!-- Type of Update -->
                 <div class="col-xl-3 col-lg-3 col-md-6">
-                    <label class="modern-label"><i class="bi bi-arrow-repeat"></i> Type of Update</label>
+                    <label class="modern-label">
+                        <i class="fa-solid fa-arrows-rotate"></i> Type of Update
+                    </label>
+
                     <select id="ddlfollowup" class="form-control modern-control">
                         <option value="">Select Type of Update</option>
                         <option value="Call">Call</option>
                         <option value="Meeting">Meeting</option>
                     </select>
                 </div>
+
+                <!-- Status of Update -->
                 <div class="col-xl-3 col-lg-3 col-md-6">
-                    <label class="modern-label"><i class="bi bi-check2-circle"></i> Status of Update</label>
+                    <label class="modern-label">
+                        <i class="fa-solid fa-circle-check"></i> Status of Update
+                    </label>
+
                     <select id="ddlfollowupStatus" class="form-control modern-control" disabled>
                         <option value="">Select Status of Update</option>
                         <option value="Not interested">Not interested</option>
@@ -770,26 +780,43 @@
                         <option value="Closed">Closed</option>
                     </select>
                 </div>
+
+                <!-- Sales Manager -->
                 <div class="col-xl-3 col-lg-3 col-md-6">
-                    <label class="modern-label"><i class="bi bi-person-badge"></i> Sales Manager</label>
+                    <label class="modern-label">
+                        <i class="fa-solid fa-user-tie"></i> Sales Manager
+                    </label>
+
                     <select id="ddlTeamuser" class="form-control">
                         <option value="">Select Sales Manager</option>
+
                         @if (ViewBag.SalesManagers != null)
                         {
                             string currentEmpCode = Context.Session.GetString("EmpCode");
+
                             foreach (var mgr in (IEnumerable<dynamic>)ViewBag.SalesManagers)
                             {
                                 string userCode = mgr.UserCode;
-                                <option value="@userCode" selected="@(userCode == currentEmpCode ? "selected" : null)">@mgr.FullName</option>
+
+                                <option value="@userCode"
+                                        selected="@(userCode == currentEmpCode ? "selected" : null)">
+                                    @mgr.FullName
+                                </option>
                             }
                         }
                     </select>
                 </div>
+
+                <!-- Meeting With Manager -->
                 <div class="col-xl-3 col-lg-3 col-md-6">
-                    <label class="modern-label"><i class="bi bi-people"></i> Meeting With Manager</label>
+                    <label class="modern-label">
+                        <i class="fa-solid fa-users"></i> Meeting With Manager
+                    </label>
+
                     <select id="ddlmeetingwith" class="form-control">
                         <option value="">Select Manager</option>
                         <option value="1">Individual</option>
+
                         @if (ViewBag.MeetingWithManagers != null)
                         {
                             foreach (var mgr in (IEnumerable<dynamic>)ViewBag.MeetingWithManagers)
@@ -799,44 +826,101 @@
                         }
                     </select>
                 </div>
+
             </div>
+            <br />
             <div class="row g-3">
+
+                <!-- From Date -->
                 <div class="col-xl-3 col-lg-3 col-md-6">
-                    <label class="modern-label"><i class="bi bi-calendar3"></i> From Date</label>
-                    <input type="date" id="txtfromdate" class="form-control modern-control" />
+                    <label class="modern-label">
+                        <i class="fa-solid fa-calendar-days"></i> From Date
+                    </label>
+
+                    <input type="date"
+                           id="txtfromdate"
+                           class="form-control modern-control" />
                 </div>
+
+                <!-- To Date -->
                 <div class="col-xl-3 col-lg-3 col-md-6">
-                    <label class="modern-label"><i class="bi bi-calendar3"></i> To Date</label>
-                    <input type="date" id="txttodate" class="form-control modern-control" />
+                    <label class="modern-label">
+                        <i class="fa-solid fa-calendar-days"></i> To Date
+                    </label>
+
+                    <input type="date"
+                           id="txttodate"
+                           class="form-control modern-control" />
                 </div>
+
+                <!-- Follow-Up Date -->
                 <div class="col-xl-3 col-lg-3 col-md-6">
-                    <label class="modern-label"><i class="bi bi-calendar-check"></i> Follow-Up Date</label>
-                    <input type="date" id="txtfollowupdate" class="form-control modern-control" />
+                    <label class="modern-label">
+                        <i class="fa-solid fa-calendar-check"></i> Follow-Up Date
+                    </label>
+
+                    <input type="date"
+                           id="txtfollowupdate"
+                           class="form-control modern-control" />
                 </div>
+
+                <!-- Area -->
                 <div class="col-xl-3 col-lg-3 col-md-6">
-                    <label class="modern-label"><i class="bi bi-geo-alt"></i> Area</label>
-                    <input type="text" id="txtarea" class="form-control modern-control" placeholder="Enter area" />
+                    <label class="modern-label">
+                        <i class="fa-solid fa-location-dot"></i> Area
+                    </label>
+
+                    <input type="text"
+                           id="txtarea"
+                           class="form-control modern-control"
+                           placeholder="Enter area" />
                 </div>
+
             </div>
+            <br />
             <div class="filter-footer">
+
+                <!-- Search -->
                 <div class="search-wrapper">
-                    <i class="bi bi-search"></i>
-                    <input type="text" id="searchInput" class="search-input" placeholder="Search company name..." />
+                    <i class="fa-solid fa-magnifying-glass"></i>
+
+                    <input type="text"
+                           id="searchInput"
+                           class="search-input"
+                           placeholder="Search company name..." />
                 </div>
+
+                <!-- Actions -->
                 <div class="filter-actions">
-                    <button type="button" id="btnSearchData" class="btn btn-search">
+
+                    <button type="button"
+                            id="btnSearchData"
+                            class="btn btn-search"
+                            title="Search">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
-                    <button type="button" id="btnresetfilter" class="btn btn-reset">
+
+                    <button type="button"
+                            id="btnresetfilter"
+                            class="btn btn-reset"
+                            title="Reset Filters">
                         <i class="fa-solid fa-arrow-rotate-left"></i>
                     </button>
+
                 </div>
+
+                <!-- Record Count -->
                 <div class="record-info">
-                    <span>Total Records</span>
+                    <span>
+                        <i class="fa-solid fa-list-ol"></i> Total Records
+                    </span>
+
                     <strong id="totalRecords">@Model.Count()</strong>
                 </div>
+
             </div>
         </div>
+
 
         <div class="table-responsive">
             <table class="table table-bordered table-hover" id="companyTable">
@@ -1112,10 +1196,6 @@
     }
 
     $(document).ready(function () {
-
-        // collapsed by default
-        $("#filterCard").addClass("filter-collapsed");
-
         $("#btnToggleFilter").on("click", function () {
             $("#filterCard").toggleClass("filter-collapsed");
             if ($("#filterCard").hasClass("filter-collapsed")) {

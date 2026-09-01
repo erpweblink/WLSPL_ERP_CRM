@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using WEBLINK_CRM.Models;
 using WEBLINK_CRM.repository;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WEBLINK_CRM.Controllers
 {
@@ -66,7 +67,7 @@ namespace WEBLINK_CRM.Controllers
             {
                 TempData["ToastMessage"] = "User saved successfully.";
                 TempData["ToastType"] = "success";
-            
+
                 return RedirectToAction("Index");
             }
 
@@ -101,7 +102,7 @@ namespace WEBLINK_CRM.Controllers
                 {
                     TempData["ToastMessage"] = "User updated successfully.";
                     TempData["ToastType"] = "success";
-                    
+
                     return RedirectToAction("Index");
                 }
             }
@@ -121,7 +122,7 @@ namespace WEBLINK_CRM.Controllers
             {
                 TempData["ToastMessage"] = "User deleted successfully.";
                 TempData["ToastType"] = "success";
-              
+
             }
             else
             {
@@ -138,13 +139,32 @@ namespace WEBLINK_CRM.Controllers
         [HttpGet]
         public IActionResult UserProfile()
         {
-            int userId = HttpContext.Session.GetInt32("EmployeeId")??0; 
+            int userId = HttpContext.Session.GetInt32("EmployeeId") ?? 0;
             var user = _repository.GetUserById(userId);
 
             if (user == null)
                 return NotFound();
 
             return View(user);
+        }
+
+        [HttpPost]
+        public IActionResult UserProfile(RegisterUserr model)
+        {
+            var user = _repository.UpdateUserProfile(model);
+
+            if (user)
+            {
+                TempData["ToastMessage"] = "Profile updated successfully.";
+                TempData["ToastType"] = "success";
+
+                return RedirectToAction("UserProfile");
+            }
+
+            TempData["ToastMessage"] = "Unable to updated Profile.";
+            TempData["ToastType"] = "error";
+
+            return RedirectToAction("UserProfile");
         }
 
         [HttpPost]
@@ -176,13 +196,16 @@ namespace WEBLINK_CRM.Controllers
 
             if (savedPath != null)
             {
-                int Id = HttpContext.Session.GetInt32("EmployeeId") ??0;
+                int Id = HttpContext.Session.GetInt32("EmployeeId") ?? 0;
                 var user = _repository.UpdateUserAvatar(Id, savedPath);
                 if (user)
                 {
                     HttpContext.Session.SetString("Profile", savedPath);
                 }
             }
+
+            TempData["ToastMessage"] = "Profile picture updated successfully.";
+            TempData["ToastType"] = "success";
 
             return RedirectToAction("UserProfile");
         }
