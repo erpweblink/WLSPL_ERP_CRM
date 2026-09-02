@@ -8,18 +8,18 @@ using WEBLINK_CRM.repository;
 namespace WEBLINK_CRM.Controllers
 {
     [Authorize]
-    public class ProformaController : Controller
+    public class QuotationController : Controller
     {
-        private readonly IProforma objProforma;
-        public ProformaController(IProforma proforma)
+        private readonly IQuotation objQuotation;
+        public QuotationController(IQuotation Quotation)
         {
-            objProforma = proforma;
+            objQuotation = Quotation;
         }
         [HttpGet]
         public async Task<IActionResult> Index()
         {
             string pageSize = "10";
-            var list = await objProforma.GetProformaList(pageSize);
+            var list = await objQuotation.GetList(pageSize);
             return View(list);
 
         }
@@ -29,7 +29,7 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-                var list = await objProforma.GetDetailsById(ID);
+                var list = await objQuotation.GetDetailsById(ID);
 
                 return Json(new { Success = true, Data = list });
             }
@@ -49,25 +49,25 @@ namespace WEBLINK_CRM.Controllers
                     return Json(new
                     {
                         success = false,
-                        message = "Invalid Proforma ID."
+                        message = "Invalid Quotation ID."
                     });
                 }
 
-                var result = await objProforma.Delete(ID);
+                var result = await objQuotation.Delete(ID);
 
                 if (result)
                 {
                     return Json(new
                     {
                         success = true,
-                        message = "Proforma deleted successfully."
+                        message = "Quotation deleted successfully."
                     });
                 }
 
                 return Json(new
                 {
                     success = false,
-                    message = "Proforma could not be deleted."
+                    message = "Quotation could not be deleted."
                 });
             }
             catch (Exception ex)
@@ -87,11 +87,10 @@ namespace WEBLINK_CRM.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateOrEdit([FromBody] VM_Proforma DataList)
+        public async Task<IActionResult> CreateOrEdit([FromBody] VM_Quotation DataList)
         {
             try
             {
-
                 if (DataList == null)
                 {
                     return Json(new
@@ -101,13 +100,13 @@ namespace WEBLINK_CRM.Controllers
                     });
                 }
                 DataList.CreatedBy = HttpContext.Session.GetString("EmployeeId");
-                int ID = await objProforma.Save(DataList);
+                int ID = await objQuotation.Save(DataList);
 
                 return Json(new
                 {
                     success = true,
                     ID = ID,
-                    Message = "Proforma saved successfully."
+                    Message = "Quotation saved successfully."
                 });
 
 
@@ -131,7 +130,7 @@ namespace WEBLINK_CRM.Controllers
                     var loginId = HttpContext.Session.GetString("EmployeeId");
                     if (loginId != null)
                     {
-                        var list = await objProforma.GetCompanyList(Status);
+                        var list = await objQuotation.GetCompanyList(Status);
                         if (list != null)
                         {
                             return Json(new { Success = true, Data = list });
@@ -166,7 +165,7 @@ namespace WEBLINK_CRM.Controllers
                     var loginId = HttpContext.Session.GetString("EmployeeId");
                     if (loginId != null)
                     {
-                        var list = await objProforma.GetCompanyByCode(ID);
+                        var list = await objQuotation.GetCompanyByCode(ID);
                         if (list != null)
                         {
                             return Json(new { Success = true, Data = list });
@@ -192,7 +191,7 @@ namespace WEBLINK_CRM.Controllers
             }
         }
 
-        public async Task<IActionResult> GetProformaDataById(string ID)
+        public async Task<IActionResult> GetQuotationDataById(string ID)
         {
             try
             {
@@ -209,21 +208,21 @@ namespace WEBLINK_CRM.Controllers
                 }
 
                 // IMPORTANT: await async methods
-                var list = await objProforma.GetProformaById(ID);
-                var Dtlslist = await objProforma.GetDetailsById(ID);
+                var list = await objQuotation.GetById(ID);
+                var Dtlslist = await objQuotation.GetDetailsById(ID);
 
                 if (list == null)
                 {
                     return Json(new
                     {
                         Success = false,
-                        Message = "Work Order not found"
+                        Message = "Proforma not found"
                     });
                 }
                 var result = new
                 {
-                    proformaHdr = list,
-                    proformaDtls = Dtlslist
+                    QuotationHdr = list,
+                    QuotationDtls = Dtlslist
                 };
 
                 return Json(new
@@ -251,7 +250,7 @@ namespace WEBLINK_CRM.Controllers
                     var loginId = HttpContext.Session.GetString("EmployeeId");
                     if (loginId != null)
                     {
-                        var list = await objProforma.GetStateList(Status);
+                        var list = await objQuotation.GetStateList(Status);
                         if (list != null)
                         {
                             return Json(new { Success = true, Data = list });
@@ -281,10 +280,10 @@ namespace WEBLINK_CRM.Controllers
         public async Task<IActionResult> ViewPDF(string ID)
         {
             var decryptedId = int.Parse(ID);
-            byte[] pdfBytes = objProforma.ProformaPdf(decryptedId);
+            byte[] pdfBytes = objQuotation.QuotationPdf(decryptedId);
             if (pdfBytes == null || pdfBytes.Length == 0)
             {
-                return Json(new { success = false, message = "No data found for this Proforma." });
+                return Json(new { success = false, message = "No data found for this Quotation." });
             }
 
             string base64Pdf = Convert.ToBase64String(pdfBytes);
@@ -292,79 +291,9 @@ namespace WEBLINK_CRM.Controllers
             return Json(new
             {
                 success = true,
-                fileName = $"Proforma_{decryptedId}.pdf",
+                fileName = $"Quotation_{decryptedId}.pdf",
                 fileData = base64Pdf
             });
-        }
-
-        public async Task<IActionResult> GetQuotationNo(string Companyname)
-        {
-            try
-            {
-                if (HttpContext.Session.GetString("EmployeeId") != null)
-                {
-                    var loginId = HttpContext.Session.GetString("EmployeeId");
-                    if (loginId != null)
-                    {
-                        var list = await objProforma.GetQuotationNoList(Companyname);
-                        if (list != null)
-                        {
-                            return Json(new { Success = true, Data = list });
-                        }
-                        else
-                        {
-                            return Json(new { success = false, message = "Data Not Found.......!" });
-                        }
-                    }
-                    else
-                    {
-                        return RedirectToAction("Login", "Login");
-                    }
-                }
-                else
-                {
-                    return RedirectToAction("Login", "Login");
-                }
-            }
-            catch (Exception e)
-            {
-                return Json(new { success = false, message = e.Message });
-            }
-        }
-
-        public async Task<IActionResult> GetDetailsByQuotationNo(string AgainstNo)
-        {
-            try
-            {
-                if (HttpContext.Session.GetString("EmployeeId") != null)
-                {
-                    var loginId = HttpContext.Session.GetString("EmployeeId");
-                    if (loginId != null)
-                    {
-                        var list = await objProforma.GetDetailsByQuotationNo(AgainstNo);
-                        if (list != null)
-                        {
-                            return Json(new { Success = true, Data = list });
-                        }
-                        else
-                        {
-                            return Json(new { success = false, message = "Data Not Found.......!" });
-                        }
-                    }
-                    else
-                    {
-                        return RedirectToAction("Login", "Login");
-                    }
-                }
-                else
-                {
-                    return RedirectToAction("Login", "Login");
-                }
-            }
-            catch (Exception e)
-            {
-                return Json(new { success = false, message = e.Message });
-            }
         }
 
     }

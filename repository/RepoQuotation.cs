@@ -6,16 +6,16 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Net;
 using WEBLINK_CRM.Models;
-using static WEBLINK_CRM.Models.VM_Proforma;
+using static WEBLINK_CRM.Models.VM_Quotation;
 
 namespace WEBLINK_CRM.repository
 {
-    public class RepoProforma : IProforma
+    public class RepoQuotation : IQuotation
     {
         private readonly IConfiguration _configuration;
         private readonly IWebHostEnvironment _env;
 
-        public RepoProforma(IConfiguration configuration, IWebHostEnvironment env)
+        public RepoQuotation(IConfiguration configuration, IWebHostEnvironment env)
         {
             _configuration = configuration;
             _env = env;
@@ -34,7 +34,7 @@ namespace WEBLINK_CRM.repository
                 parameters.Add("@Status", Status);
 
                 var result = await connection.QueryAsync<object>(
-                    "SP_Proforma",
+                    "SP_Quotation",
                     parameters,
                     commandType: CommandType.StoredProcedure
                 );
@@ -56,7 +56,7 @@ namespace WEBLINK_CRM.repository
                 parameters.Add("@Code", Code);
 
                 var result = await connection.QueryAsync<object>(
-                    "SP_Proforma",
+                    "SP_Quotation",
                     parameters,
                     commandType: CommandType.StoredProcedure
                 );
@@ -65,28 +65,7 @@ namespace WEBLINK_CRM.repository
             }
         }
 
-        public async Task<List<object>> GetDetailsByQuotationNo(string Code)
-        {
-            using (var connection = new SqlConnection(
-                 _configuration.GetConnectionString("Conn_Stringg")))
-            {
-                await connection.OpenAsync();
-
-                var parameters = new DynamicParameters();
-
-                parameters.Add("@Action", "GetDetailsByQuotationNo");
-                parameters.Add("@QuotationNo", Code);
-
-                var result = await connection.QueryAsync<object>(
-                    "SP_Proforma",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
-
-                return result.ToList();
-            }
-        }
-        public async Task<int> Save(VM_Proforma model)
+        public async Task<int> Save(VM_Quotation model)
         {
             try
             {
@@ -98,7 +77,7 @@ namespace WEBLINK_CRM.repository
                     var parameters = new DynamicParameters();
 
                     parameters.Add("@ID", model.ID);                
-                    parameters.Add("@ProformaDate", model.ProformaDate);
+                    parameters.Add("@QuotationDate", model.QuotationDate);
                     parameters.Add("@ReverseCharge", model.ReverseCharge);
                     parameters.Add("@State", model.State);
                     parameters.Add("@CompanyName", model.CompanyName);
@@ -109,8 +88,6 @@ namespace WEBLINK_CRM.repository
                     parameters.Add("@TotalAmtBeforeTax", model.TotalAmtBeforeTax);
                     parameters.Add("@TotalAmtAfterTax", model.TotalAmtAfterTax);
                     parameters.Add("@CreatedBy", model.CreatedBy);
-                    parameters.Add("@AgainstBy", model.AgainstBy);
-                    parameters.Add("@AgainstNo", model.AgainstNo);
 
                     DataTable dtDetails = new DataTable();
                     dtDetails.Columns.Add("ProductDescription", typeof(string));
@@ -127,9 +104,9 @@ namespace WEBLINK_CRM.repository
                     dtDetails.Columns.Add("IGSTAmt", typeof(decimal));
                     dtDetails.Columns.Add("Total", typeof(decimal));
 
-                    if (model.objtblProformaDtl != null)
+                    if (model.objtblQuotationDtl != null)
                     {
-                        foreach (var item in model.objtblProformaDtl)
+                        foreach (var item in model.objtblQuotationDtl)
                         {
                             dtDetails.Rows.Add(
         item.ProductDescription,
@@ -150,12 +127,12 @@ namespace WEBLINK_CRM.repository
                     }
 
                     parameters.Add(
-                        "@ProformaDetails",
-                        dtDetails.AsTableValuedParameter("WLSPL.ProformaDetailType")
+                        "@QuotationDetails",
+                        dtDetails.AsTableValuedParameter("WLSPL.QuotationDetailType")
                     );
 
                     var result = await con.QuerySingleAsync<int>(
-                        "[WLSPL].[SP_SaveProforma]",
+                        "[WLSPL].[SP_SaveQuotation]",
                         parameters,
                         commandType: CommandType.StoredProcedure
                     );
@@ -170,7 +147,7 @@ namespace WEBLINK_CRM.repository
 
         }
 
-        public async Task<List<VM_Proforma>> GetProformaList(string size)
+        public async Task<List<VM_Quotation>> GetList(string size)
         {
             using (var connection = new SqlConnection(
               _configuration.GetConnectionString("Conn_Stringg")))
@@ -179,20 +156,20 @@ namespace WEBLINK_CRM.repository
 
                 var parameters = new DynamicParameters();
 
-                parameters.Add("@Action", "GetProformaList");
+                parameters.Add("@Action", "GetList");
                 parameters.Add("@PageSize", size);
 
-                var result = await connection.QueryAsync<VM_Proforma>(
-     "SP_Proforma",
+                var result = await connection.QueryAsync<VM_Quotation>(
+     "SP_Quotation",
      parameters,
      commandType: CommandType.StoredProcedure
  );
 
-                return result.Cast<VM_Proforma>().ToList();
+                return result.Cast<VM_Quotation>().ToList();
             }
         }
 
-        public async Task<VM_Proforma> GetProformaById(string ID)
+        public async Task<VM_Quotation> GetById(string ID)
         {
             using (var connection = new SqlConnection(
                 _configuration.GetConnectionString("Conn_Stringg")))
@@ -201,11 +178,11 @@ namespace WEBLINK_CRM.repository
 
                 var parameters = new DynamicParameters();
 
-                parameters.Add("@Action", "GetProformaDataById");
+                parameters.Add("@Action", "GetById");
                 parameters.Add("@ID", ID);
 
-                var result = await connection.QueryFirstOrDefaultAsync<VM_Proforma>(
-               "SP_Proforma",
+                var result = await connection.QueryFirstOrDefaultAsync<VM_Quotation>(
+               "SP_Quotation",
                parameters,
                commandType: CommandType.StoredProcedure
            );
@@ -213,7 +190,7 @@ namespace WEBLINK_CRM.repository
                 return result;
             }
         }
-        public async Task<List<ProformaDetailVM>> GetDetailsById(string ID)
+        public async Task<List<QuotationDetailVM>> GetDetailsById(string ID)
         {
             using (var connection = new SqlConnection(
                 _configuration.GetConnectionString("Conn_Stringg")))
@@ -225,13 +202,13 @@ namespace WEBLINK_CRM.repository
                 parameters.Add("@Action", "GetDetailsById");
                 parameters.Add("@ID", ID);
 
-                var result = await connection.QueryAsync<ProformaDetailVM>(
-                    "SP_Proforma",
+                var result = await connection.QueryAsync<QuotationDetailVM>(
+                    "SP_Quotation",
                     parameters,
                     commandType: CommandType.StoredProcedure
                 );
 
-                return result.Cast<ProformaDetailVM>().ToList();
+                return result.Cast<QuotationDetailVM>().ToList();
             }
         }
 
@@ -239,7 +216,7 @@ namespace WEBLINK_CRM.repository
         {
             using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
             {
-                using (SqlCommand cmd = new SqlCommand("SP_Proforma", con))
+                using (SqlCommand cmd = new SqlCommand("SP_Quotation", con))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
 
@@ -252,28 +229,6 @@ namespace WEBLINK_CRM.repository
 
                     return result > 0;
                 }
-            }
-        }
-
-        public async Task<List<object>> GetQuotationNoList(string CompanyCode)
-        {
-            using (var connection = new SqlConnection(
-              _configuration.GetConnectionString("Conn_Stringg")))
-            {
-                await connection.OpenAsync();
-
-                var parameters = new DynamicParameters();
-
-                parameters.Add("@Action", "GetQuotationNoList");
-                parameters.Add("@CompanyCode", CompanyCode);
-
-                var result = await connection.QueryAsync<object>(
-                    "SP_Proforma",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
-
-                return result.Cast<object>().ToList();
             }
         }
 
@@ -290,7 +245,7 @@ namespace WEBLINK_CRM.repository
                 parameters.Add("@Status", Status);
 
                 var result = await connection.QueryAsync<object>(
-                    "SP_Proforma",
+                    "SP_Quotation",
                     parameters,
                     commandType: CommandType.StoredProcedure
                 );
@@ -299,7 +254,7 @@ namespace WEBLINK_CRM.repository
             }
         }
 
-        public byte[] ProformaPdf(int id)
+        public byte[] QuotationPdf(int id)
         {
             using (MemoryStream stream = new MemoryStream())
             {
@@ -356,18 +311,13 @@ namespace WEBLINK_CRM.repository
                 cb.BeginText();
                 cb.SetFontAndSize(bf, 10);
                 cb.SetColorFill(BaseColor.WHITE);
-<<<<<<< Updated upstream
-                cb.ShowTextAligned(PdfContentByte.ALIGN_LEFT, "info@weblinkservices.net", 25f, 720f, 0);
-                cb.ShowTextAligned(PdfContentByte.ALIGN_RIGHT, "9921641313 / 9921671313 / 9921691313 / 9921711313", 570f, 720f, 0);
-=======
                 cb.ShowTextAligned(PdfContentByte.ALIGN_LEFT, "Email ID : info@weblinkservices.net", 25f, 720f, 0);
                 cb.ShowTextAligned(PdfContentByte.ALIGN_RIGHT, "Phone No. : 8421060192", 570f, 720f, 0);
->>>>>>> Stashed changes
                 cb.EndText();
 
                 cb.BeginText();
                 cb.SetFontAndSize(bf, 15);
-                cb.ShowTextAligned(PdfContentByte.ALIGN_CENTER, "P R O F O R M A", 297, 690, 0);
+                cb.ShowTextAligned(PdfContentByte.ALIGN_CENTER, "Q U O T A T I O N", 297, 690, 0);
                 cb.EndText();
 
                 // ---- Logo: white rounded box + logo drawn directly via DirectContent (single draw path) ----
@@ -392,14 +342,14 @@ namespace WEBLINK_CRM.repository
                     cb.AddImage(logo);
                 }
 
-                // **Fetching Data via VM_Proforma**
-                VM_Proforma vm = GetProformaData(id);
+                // **Fetching Data via VM_Quotation**
+                VM_Quotation vm = GetQuotationData(id);
 
                 if (vm != null && vm.ID != null)
                 {
                     string CompanyName = vm.CompanyName ?? "N/A";
-                    string ProformaDate = vm.ProformaDate.HasValue ? vm.ProformaDate.Value.ToString("dd-MM-yyyy") : "N/A";
-                    string ProformaNo = vm.ProformaNo ?? "N/A";
+                    string QuotationDate = vm.QuotationDate.HasValue ? vm.QuotationDate.Value.ToString("dd-MM-yyyy") : "N/A";
+                    string QuotationNo = vm.QuotationNo ?? "N/A";
                     string Address = vm.Address ?? "N/A";
                     string Gstno = vm.GSTNO ?? "N/A";
 
@@ -411,7 +361,7 @@ namespace WEBLINK_CRM.repository
                     Font Font9 = FontFactory.GetFont("Arial", 9, Font.NORMAL, textDark);
                     Font italicFont10Gray = FontFactory.GetFont("Arial", 10, Font.ITALIC, new BaseColor(100, 100, 100));
 
-                    // ---- Company / Proforma info table — SpacingBefore removed (real margin handles it now) ----
+                    // ---- Company / Quotation info table — SpacingBefore removed (real margin handles it now) ----
                     Paragraph paragraphTable1 = new Paragraph { SpacingBefore = 0f, SpacingAfter = 0f };
 
                     PdfPTable table = new PdfPTable(4) { TotalWidth = 560f, LockedWidth = true };
@@ -439,13 +389,13 @@ namespace WEBLINK_CRM.repository
 
                     table.AddCell(InfoLabelCell("Company Name:"));
                     table.AddCell(InfoValueCell(CompanyName));
-                    table.AddCell(InfoLabelCell("Proforma No:"));
-                    table.AddCell(InfoValueCell(ProformaNo));
+                    table.AddCell(InfoLabelCell("Quotation No:"));
+                    table.AddCell(InfoValueCell(QuotationNo));
 
                     table.AddCell(InfoLabelCell("Address:"));
                     table.AddCell(InfoValueCell(Address));
-                    table.AddCell(InfoLabelCell("Proforma Date:"));
-                    table.AddCell(InfoValueCell(ProformaDate));
+                    table.AddCell(InfoLabelCell("Quotation Date:"));
+                    table.AddCell(InfoValueCell(QuotationDate));
 
                     if (!string.IsNullOrWhiteSpace(Gstno))
                     {
@@ -476,7 +426,7 @@ namespace WEBLINK_CRM.repository
                     // ---- Product Details Table ----
                     double taxableTotal = 0, cgstTotal = 0, sgstTotal = 0, igstTotal = 0, grandTotal = 0;
 
-                    if (vm.objtblProformaDtl != null && vm.objtblProformaDtl.Count > 0)
+                    if (vm.objtblQuotationDtl != null && vm.objtblQuotationDtl.Count > 0)
                     {
                         bool isIGST = !string.Equals(
                             (vm.State ?? "").Trim(),
@@ -547,7 +497,7 @@ namespace WEBLINK_CRM.repository
                         };
 
                         int rowid = 1;
-                        foreach (var d in vm.objtblProformaDtl)
+                        foreach (var d in vm.objtblQuotationDtl)
                         {
                             bool shaded = rowid % 2 == 0;
                             double taxableVal = ParseD(d.TaxableValue);
@@ -739,22 +689,22 @@ namespace WEBLINK_CRM.repository
         private double ParseD(string s) =>
             double.TryParse(s, out double v) ? v : 0;
 
-        private VM_Proforma GetProformaData(int id)
+        private VM_Quotation GetQuotationData(int id)
         {
             try
             {
-                var vm = new VM_Proforma();
+                var vm = new VM_Quotation();
 
                 string query = @"
-      SELECT ID, ProformaNo, ProformaDate, ReverseCharge, State, CompanyName,
+      SELECT ID, QuotationNo, QuotationDate, ReverseCharge, State, CompanyName,
                CompanyCode, Address, cgstin as GSTNO, BillState, TotalAmtBeforeTax, TotalAmtAfterTax
-        FROM [WLSPLCRM].[stswlspl].[tblProformaMain]
-        WHERE ID = @ID;
+        FROM [WLSPLCRM].[stswlspl].[tblQuotationMain]
+        WHERE ID =@ID;
 
-        SELECT ID, ProformaID, ProductDescription, SACCode, Qty, Rate, Amount, TaxableValue,
+        SELECT ID, QuotationID, ProductDescription, SACCode, Qty, Rate, Amount, TaxableValue,
                CGSTRate, CGSTAmt, SGSTRate, SGSTAmt, IGSTRate, IGSTAmt, Total
-        FROM [WLSPLCRM].[stswlspl].[tblProformaDetails]
-        WHERE ProformaID = @ID
+        FROM [WLSPLCRM].[stswlspl].[tblQuotationDetails]
+        WHERE QuotationID = @ID
         ORDER BY ID;";
 
                 using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
@@ -768,8 +718,8 @@ namespace WEBLINK_CRM.repository
                         if (rdr.Read())
                         {
                             vm.ID = rdr["ID"] as int?;
-                            vm.ProformaNo = rdr["ProformaNo"]?.ToString();
-                            vm.ProformaDate = rdr["ProformaDate"] as DateTime?;
+                            vm.QuotationNo = rdr["QuotationNo"]?.ToString();
+                            vm.QuotationDate = rdr["QuotationDate"] as DateTime?;
                             vm.ReverseCharge = rdr["ReverseCharge"]?.ToString();
                             vm.State = rdr["State"]?.ToString();
                             vm.CompanyName = rdr["CompanyName"]?.ToString();
@@ -781,16 +731,16 @@ namespace WEBLINK_CRM.repository
                             vm.TotalAmtAfterTax = rdr["TotalAmtAfterTax"]?.ToString();
                         }
 
-                        vm.objtblProformaDtl = new List<VM_Proforma.ProformaDetailVM>();
+                        vm.objtblQuotationDtl = new List<VM_Quotation.QuotationDetailVM>();
 
                         if (rdr.NextResult())
                         {
                             while (rdr.Read())
                             {
-                                vm.objtblProformaDtl.Add(new VM_Proforma.ProformaDetailVM
+                                vm.objtblQuotationDtl.Add(new VM_Quotation.QuotationDetailVM
                                 {
                                     ID = rdr["ID"] as int?,
-                                    ProformaID = rdr["ProformaID"] as int?,
+                                    QuotationID = rdr["QuotationID"] as int?,
                                     ProductDescription = rdr["ProductDescription"]?.ToString(),
                                     SACCode = rdr["SACCode"]?.ToString(),
                                     Qty = rdr["Qty"]?.ToString(),
