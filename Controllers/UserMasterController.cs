@@ -16,7 +16,6 @@ namespace WEBLINK_CRM.Controllers
             _repository = repository;
         }
 
-        // Helper method for dropdown
         private void BindSalesTLList(RegisterUserr model)
         {
             model.SalesTLList = _repository.GetSalesTLManagers();
@@ -26,7 +25,44 @@ namespace WEBLINK_CRM.Controllers
         {
             var users = _repository.GetAllUsers();
 
+            var managers = users
+                .Where(u => u.Sales_TL_Manager == true && u.status == true)
+                .Select(u => new { UserCode = u.empcode, FullName = u.name })
+                .ToList();
+
+            ViewBag.SalesManagers = managers;
             return View(users);
+        }
+
+        [HttpPost]
+        public IActionResult GetFilteredUsers([FromBody] UserFilterDto filter)
+        {
+            try
+            {
+                var data = _repository.GetFilteredUsers(
+                    filter.ManagerEmpCode, filter.Status, filter.Search);
+
+                var result = data.Select(u => new {
+                    u.id,
+                    u.empcode,
+                    u.name,
+                    u.email,
+                    u.mobile,
+                    u.role,
+                    u.status,
+                    u.UserName,
+                    u.TL_Manager,
+                    u.Sales_TL_Manager,
+                    u.Level,
+                    u.Path
+                });
+
+                return Json(new { success = true, data = result });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpGet]

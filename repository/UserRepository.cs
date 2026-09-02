@@ -30,7 +30,7 @@ namespace WEBLINK_CRM.repository
                 SELECT *
                 FROM employees
                 WHERE isdeleted = 0
-                ORDER BY id DESC";
+                ORDER BY id ASC";
 
 
             SqlCommand cmd = new SqlCommand(query, con);
@@ -68,11 +68,10 @@ namespace WEBLINK_CRM.repository
                     Designation = dr["Designation"]?.ToString(),
 
                     TL_Manager = dr["TL_Manager"] == DBNull.Value
-    ? null
-    : dr["TL_Manager"].ToString(),
+                        ? null : dr["TL_Manager"].ToString(),
 
                     Sales_TL_Manager = dr["Sales_TL_Manager"] != DBNull.Value
-    && Convert.ToBoolean(dr["Sales_TL_Manager"]),
+                          && Convert.ToBoolean(dr["Sales_TL_Manager"]),
 
 
                 });
@@ -82,6 +81,80 @@ namespace WEBLINK_CRM.repository
 
             return list;
 
+        }
+
+        public List<RegisterUserr> GetFilteredUsers(string managerEmpCode, string status, string search)
+        {
+            List<RegisterUserr> list = new();
+            using SqlConnection con = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg"));
+
+            // If no manager selected, flat list with optional filters
+            string query = string.IsNullOrWhiteSpace(managerEmpCode)
+                ? @"SELECT *, 0 AS level, '|' + empcode + '|' AS path
+            FROM employees
+            WHERE isdeleted = 0
+              AND (@Search IS NULL OR name LIKE '%' + @Search + '%')
+              AND (@Status IS NULL OR 
+                   CASE WHEN @Status = 'Active' THEN 1 ELSE 0 END = status)
+            ORDER BY id ASC"
+                : @"WITH OrgHierarchy AS (
+                SELECT id, empcode, name, email, mobile, role, status,
+                       UserName, Designation, TL_Manager, Sales_TL_Manager,
+                       0 AS level,
+                       CAST('|' + empcode + '|' AS NVARCHAR(MAX)) AS path
+                FROM employees
+                WHERE isdeleted = 0 AND empcode = @ManagerEmpCode
+
+                UNION ALL
+
+                SELECT e.id, e.empcode, e.name, e.email, e.mobile, e.role, e.status,
+                       e.UserName, e.Designation, e.TL_Manager, e.Sales_TL_Manager,
+                       h.level + 1,
+                       CAST(h.path + e.empcode + '|' AS NVARCHAR(MAX))
+                FROM employees e
+                INNER JOIN OrgHierarchy h ON e.TL_Manager = h.empcode
+                WHERE e.isdeleted = 0
+            )
+            SELECT * FROM OrgHierarchy
+            WHERE (@Search IS NULL OR name LIKE '%' + @Search + '%')
+              AND (@Status IS NULL OR 
+                   CASE WHEN @Status = 'Active' THEN 1 ELSE 0 END = status)
+            ORDER BY path ASC";
+
+            SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@Search",
+                string.IsNullOrWhiteSpace(search) ? (object)DBNull.Value : search.Trim());
+            cmd.Parameters.AddWithValue("@Status",
+                string.IsNullOrWhiteSpace(status) ? (object)DBNull.Value : status.Trim());
+
+            if (!string.IsNullOrWhiteSpace(managerEmpCode))
+                cmd.Parameters.AddWithValue("@ManagerEmpCode", managerEmpCode.Trim());
+
+            con.Open();
+            SqlDataReader dr = cmd.ExecuteReader();
+            while (dr.Read())
+            {
+                list.Add(new RegisterUserr
+                {
+                    id = Convert.ToInt32(dr["id"]),
+                    empcode = dr["empcode"]?.ToString(),
+                    name = dr["name"]?.ToString(),
+                    email = dr["email"]?.ToString(),
+                    mobile = dr["mobile"]?.ToString(),
+                    role = dr["role"]?.ToString(),
+                    status = Convert.ToBoolean(dr["status"]),
+                    UserName = dr["UserName"]?.ToString(),
+                    Designation = dr["Designation"]?.ToString(),
+                    TL_Manager = dr["TL_Manager"] == DBNull.Value
+                                      ? null : dr["TL_Manager"].ToString(),
+                    Sales_TL_Manager = dr["Sales_TL_Manager"] != DBNull.Value
+                                         && Convert.ToBoolean(dr["Sales_TL_Manager"]),
+                    Level = Convert.ToInt32(dr["level"]),   // ← add this field
+                    Path = dr["path"]?.ToString()          // ← add this field
+                });
+            }
+            return list;
         }
 
         // ================= GET USER BY ID =================
@@ -141,10 +214,10 @@ namespace WEBLINK_CRM.repository
                             ? null
                             : dr["TL_Manager"].ToString(),
 
-                                            Sales_TL_Manager = dr["Sales_TL_Manager"] != DBNull.Value
+                    Sales_TL_Manager = dr["Sales_TL_Manager"] != DBNull.Value
                             && Convert.ToBoolean(dr["Sales_TL_Manager"]),
 
-                   ProfileImagePath = dr["ProfileImagePath"] == DBNull.Value
+                    ProfileImagePath = dr["ProfileImagePath"] == DBNull.Value
                             ? null
                             : dr["ProfileImagePath"].ToString()
 
@@ -451,10 +524,10 @@ namespace WEBLINK_CRM.repository
             SqlCommand cmd = new SqlCommand(query, con);
 
             cmd.Parameters.AddWithValue("@id", model.id);
-            cmd.Parameters.AddWithValue("@name",model.name ?? "");
-            cmd.Parameters.AddWithValue("@email",model.email ?? "");
-            cmd.Parameters.AddWithValue("@emailpsw",model.emailpsw ?? "");       
-            cmd.Parameters.AddWithValue("@mobile",model.mobile ?? "");
+            cmd.Parameters.AddWithValue("@name", model.name ?? "");
+            cmd.Parameters.AddWithValue("@email", model.email ?? "");
+            cmd.Parameters.AddWithValue("@emailpsw", model.emailpsw ?? "");
+            cmd.Parameters.AddWithValue("@mobile", model.mobile ?? "");
             cmd.Parameters.AddWithValue("@UserName", model.UserName ?? "");
             cmd.Parameters.AddWithValue("@panelpsw", model.panelpsw ?? "");
 

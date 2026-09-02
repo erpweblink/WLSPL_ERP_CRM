@@ -7,6 +7,8 @@ namespace WEBLINK_CRM.repository
     {
         List<RegisterUserr> GetAllUsers();
 
+        List<RegisterUserr> GetFilteredUsers(string managerEmpCode, string status, string search);
+
         RegisterUserr GetUserById(int id);
 
         bool CreateUser(RegisterUserr model);
