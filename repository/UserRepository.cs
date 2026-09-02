@@ -150,8 +150,8 @@ namespace WEBLINK_CRM.repository
                                       ? null : dr["TL_Manager"].ToString(),
                     Sales_TL_Manager = dr["Sales_TL_Manager"] != DBNull.Value
                                          && Convert.ToBoolean(dr["Sales_TL_Manager"]),
-                    Level = Convert.ToInt32(dr["level"]),   // ← add this field
-                    Path = dr["path"]?.ToString()          // ← add this field
+                    Level = Convert.ToInt32(dr["level"]),   
+                    Path = dr["path"]?.ToString()          
                 });
             }
             return list;

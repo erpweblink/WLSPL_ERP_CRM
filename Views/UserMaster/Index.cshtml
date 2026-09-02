@@ -860,7 +860,8 @@
 
         data.forEach((item, idx) => {
             const level  = item.level ?? 0;
-            const lvlCap = Math.min(level, 3);
+            //const lvlCap = Math.min(level, 3);
+             const { idx: lvlCap, label: roleLabel, icon } = getRoleInfo(item);
 
             const statusBadge = item.status
                 ? `<span class="active-status"><i class="fa fa-check-circle"></i> Active</span>`
@@ -921,6 +922,17 @@
         tbody.appendChild(fragment);
         currentPage = 1;
         paginateCurrentRows();
+    }
+
+    function getRoleInfo(item) {
+        const level = item.level ?? 0;
+        if (level === 0) return { idx: 0, label: 'Manager', icon: 'fa-user-tie' };
+
+        const isTL = item.sales_TL_Manager === true || item.sales_TL_Manager === 1;
+
+        return isTL
+            ? { idx: 1, label: 'Team Lead', icon: 'fa-user-shield' }
+            : { idx: 2, label: 'Member', icon: 'fa-user' };
     }
 
     function getFilterPayload() {
