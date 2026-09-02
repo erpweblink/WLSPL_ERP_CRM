@@ -1,5 +1,5 @@
 ﻿
-var GetProformaForm = function () {
+var GetQuotationForm = function () {
 
     var ID = window.location.pathname.split('/').pop();
 
@@ -16,11 +16,11 @@ var GetProformaForm = function () {
     }
     var Companytext = "";
 
+    var BindStateList = function () {
 
-    var BindStateList = function () {       
         $.ajax({
 
-            url: "/Proforma/GetState",
+            url: "/Quotation/GetState",
 
             data: {
                 Status: "1"
@@ -88,7 +88,7 @@ var GetProformaForm = function () {
 
         $.ajax({
 
-            url: "/Proforma/GetCompany",
+            url: "/Quotation/GetCompany",
 
             data: {
                 Status: "1"
@@ -143,9 +143,9 @@ var GetProformaForm = function () {
                                         .toLowerCase()
                                         .trim()
                                 ) ===
-                                Companytext
-                                    .toLowerCase()
-                                    .trim();
+                                    Companytext
+                                        .toLowerCase()
+                                        .trim();
 
                             });
 
@@ -199,7 +199,7 @@ var GetProformaForm = function () {
 
             $.ajax({
 
-                url: "/Proforma/GetCompanyByCode",
+                url: "/Quotation/GetCompanyByCode",
 
                 data: {
                     ID: companyID
@@ -215,7 +215,7 @@ var GetProformaForm = function () {
 
                         var result =
                             response.data &&
-                            response.data.length > 0
+                                response.data.length > 0
                                 ? response.data[0]
                                 : null;
 
@@ -957,7 +957,7 @@ var GetProformaForm = function () {
 
                     ID: 0,
 
-                    ProformaID:
+                    QuotationID:
                         parseInt(
                             $("#ID").val()
                         ) || 0,
@@ -1106,28 +1106,24 @@ var GetProformaForm = function () {
                     $("#ddlBillState")
                         .removeClass("is-invalid");
                 }
-           
-                 // -----------------------------------------
-                // STATE
-                // -----------------------------------------
-                if (!$("#ddlAgainstBy").val()) {
+
 
                 // -----------------------------------------
-                // PROFORMA DATE
+                // Quotation DATE
                 // -----------------------------------------
-                if (!$("#txtProformaDate").val()) {
+                if (!$("#txtQuotationDate").val()) {
 
                     errors.push(
-                        "Proforma Date is required."
+                        "Quotation Date is required."
                     );
 
-                    $("#txtProformaDate")
+                    $("#txtQuotationDate")
                         .addClass("is-invalid");
 
                 }
                 else {
 
-                    $("#txtProformaDate")
+                    $("#txtQuotationDate")
                         .removeClass("is-invalid");
                 }
 
@@ -1228,8 +1224,8 @@ var GetProformaForm = function () {
                             $("#ID").val()
                         ) || 0,
 
-                    ProformaDate:
-                        $("#txtProformaDate").val() ||
+                    QuotationDate:
+                        $("#txtQuotationDate").val() ||
                         null,
 
                     ReverseCharge:
@@ -1271,7 +1267,7 @@ var GetProformaForm = function () {
                             .val() ||
                         "0",
 
-                    objtblProformaDtl:
+                    objtblQuotationDtl:
                         ServiceDescriptionList
                 };
 
@@ -1280,7 +1276,7 @@ var GetProformaForm = function () {
                 // CONSOLE
                 // =================================================
                 console.log(
-                    "Proforma Data:",
+                    "Quotation Data:",
                     DataList
                 );
 
@@ -1304,7 +1300,7 @@ var GetProformaForm = function () {
                 $.ajax({
 
                     url:
-                        "/Proforma/CreateOrEdit",
+                        "/Quotation/CreateOrEdit",
 
                     type:
                         "POST",
@@ -1338,7 +1334,7 @@ var GetProformaForm = function () {
                                 showToast(
 
                                     response.message ||
-                                    "Proforma saved successfully.",
+                                    "Quotation saved successfully.",
 
                                     "success"
                                 );
@@ -1348,7 +1344,7 @@ var GetProformaForm = function () {
                                     function () {
 
                                         window.location.href =
-                                            "/Proforma/Index";
+                                            "/Quotation/Index";
 
                                     },
                                     1500
@@ -1360,7 +1356,7 @@ var GetProformaForm = function () {
 
                                     response.message ||
                                     response.Message ||
-                                    "Unable to save Proforma.",
+                                    "Unable to save Quotation.",
 
                                     "error"
                                 );
@@ -1388,7 +1384,7 @@ var GetProformaForm = function () {
 
 
                             showToast(
-                                "Error saving Proforma. Please try again.",
+                                "Error saving Quotation. Please try again.",
                                 "error"
                             );
                         },
@@ -1405,7 +1401,7 @@ var GetProformaForm = function () {
             });
     };
 
-    var loadProformaData = function () {
+    var loadQuotationData = function () {
 
         if (
             ID == null ||
@@ -1420,7 +1416,7 @@ var GetProformaForm = function () {
         $.ajax({
 
             url:
-                "/Proforma/GetProformaDataById",
+                "/Quotation/GetQuotationDataById",
 
             data: {
                 ID: ID
@@ -1442,7 +1438,7 @@ var GetProformaForm = function () {
 
                         showToast(
                             response.message ||
-                            "Unable to load Proforma.",
+                            "Unable to load Quotation.",
                             "error"
                         );
 
@@ -1458,14 +1454,14 @@ var GetProformaForm = function () {
                     // HEADER
                     // =================================================
                     var hdr =
-                        result.proformaHdr || {};
+                        result.quotationHdr || {};
 
 
                     // =================================================
                     // DETAILS
                     // =================================================
                     var details =
-                        result.proformaDtls || [];
+                        result.quotationDtls || [];
 
 
                     // =================================================
@@ -1476,7 +1472,7 @@ var GetProformaForm = function () {
 
 
                     $("#lblHeader")
-                        .html("UPDATE Proforma");
+                        .html("UPDATE Quotation");
 
 
                     $("#ID")
@@ -1494,31 +1490,31 @@ var GetProformaForm = function () {
                     BindCompanyList();
 
 
-        $(".add-row1").off("click").on("click", function () {
+                    // =================================================
+                    // OTHER HEADER VALUES
+                    // =================================================
+                    $("#txtAddress")
+                        .val(hdr.address || "");
 
 
                     $("#txtGSTNo")
                         .val(hdr.gstno || "");
 
-            var CGST = $("#txtCGST").val();
-            var CGSTAmt = $("#txtCGSTAmt").val();
 
                     $("#ddlReverseCharge")
                         .val(hdr.reverseCharge || "N")
                         .trigger("change");
 
 
-            var Total = $("#txtTotal").val();
-            var AllTotal = $("#txtAllTotal").val();
-
                     $("#ddlBillState")
                         .val(hdr.billState || "")
                         .trigger("change");
 
-                    $("#txtProformaDate")
+
+                    $("#txtQuotationDate")
                         .val(
                             formatDateToDDMMYYYY(
-                                hdr.proformaDate
+                                hdr.quotationDate
                             )
                         );
 
@@ -1615,7 +1611,7 @@ var GetProformaForm = function () {
                 ) {
 
                     console.error(
-                        "Error loading Proforma:",
+                        "Error loading Quotation:",
                         thrownError
                     );
 
@@ -1626,7 +1622,7 @@ var GetProformaForm = function () {
 
 
                     showToast(
-                        "Unable to load Proforma. Please try again.",
+                        "Unable to load Quotation. Please try again.",
                         "error"
                     );
                 }
@@ -1831,18 +1827,15 @@ var GetProformaForm = function () {
 
     $("#serviceBody").hide();
 
- 
+
     return {
 
         init: function () {
 
             BindCompanyList();
 
-            var basic = parseFloat(data[11]) || 0;
+            BindStateList();
 
-            var cgstAmt = parseFloat(data[6]) || 0;
-            var sgstAmt = parseFloat(data[8]) || 0;
-            var igstAmt = parseFloat(data[10]) || 0;
 
             if (
                 ID != null &&
@@ -1850,7 +1843,7 @@ var GetProformaForm = function () {
                 ID != "Create"
             ) {
 
-                loadProformaData();
+                loadQuotationData();
             }
             else {
                 const today =
@@ -1859,7 +1852,7 @@ var GetProformaForm = function () {
                         .split("T")[0];
 
 
-                $("#txtProformaDate")
+                $("#txtQuotationDate")
                     .val(today);
                 if ($("#tblDetailsBody tr").length === 0) {
                     addDetailRow(null);

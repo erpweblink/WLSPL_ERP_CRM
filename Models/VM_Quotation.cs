@@ -3,13 +3,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WEBLINK_CRM.Models
 {
-    public class VM_Proforma
+    public class VM_Quotation
     {
         public int? ID { get; set; } = default;
 
-        public string? ProformaNo { get; set; } = default;
+        public string? QuotationNo { get; set; } = default;
 
-        public DateTime? ProformaDate { get; set; }
+        public DateTime? QuotationDate { get; set; }
         public string? ReverseCharge { get; set; } = default;
 
         public string? State { get; set; } = default;
@@ -25,21 +25,19 @@ namespace WEBLINK_CRM.Models
 
         [NotMapped]
         public string? CreatedBy { get; set; } = default;
-        public string? AgainstBy { get; set; } = default;
-        public string? AgainstNo { get; set; } = default;
 
 
         public string? TotalAmtBeforeTax { get; set; } = default;
         public string? TotalAmtAfterTax { get; set; } = default;
 
-        public List<ProformaDetailVM>? objtblProformaDtl { get; set; } = default;
+        public List<QuotationDetailVM>? objtblQuotationDtl { get; set; } = default;
 
 
-        public class ProformaDetailVM
+        public class QuotationDetailVM
         {
             public int? ID { get; set; }
 
-            public int? ProformaID { get; set; }
+            public int? QuotationID { get; set; }
 
             public string? ProductDescription { get; set; }
 
