@@ -356,13 +356,10 @@ namespace WEBLINK_CRM.repository
                 cb.BeginText();
                 cb.SetFontAndSize(bf, 10);
                 cb.SetColorFill(BaseColor.WHITE);
-<<<<<<< Updated upstream
-                cb.ShowTextAligned(PdfContentByte.ALIGN_LEFT, "info@weblinkservices.net", 25f, 720f, 0);
-                cb.ShowTextAligned(PdfContentByte.ALIGN_RIGHT, "9921641313 / 9921671313 / 9921691313 / 9921711313", 570f, 720f, 0);
-=======
+
                 cb.ShowTextAligned(PdfContentByte.ALIGN_LEFT, "Email ID : info@weblinkservices.net", 25f, 720f, 0);
                 cb.ShowTextAligned(PdfContentByte.ALIGN_RIGHT, "Phone No. : 8421060192", 570f, 720f, 0);
->>>>>>> Stashed changes
+
                 cb.EndText();
 
                 cb.BeginText();
