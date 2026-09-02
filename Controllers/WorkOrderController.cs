@@ -101,7 +101,7 @@ namespace WEBLINK_CRM.Controllers
                         Message = "Invalid request."
                     });
                 }
-                DataList.CreatedBy = HttpContext.Session.GetString("EmployeeId");
+
                 int workOrderID = await objWorkOrder.SaveWorkOrder(DataList);
 
                 return Json(new

@@ -8,7 +8,6 @@
         border-radius: 4px;
         box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.25);
     }
-
 </style>
 <form id="WorkOrderform">
     <div id="loader" style="display:none;">
@@ -130,33 +129,7 @@
                     </div>
                 </div>
             </div>
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <div class="row align-items-center">
-                        <label class="col-md-4 col-form-label font-weight-bold text-md-right">
-                            <span class="text-danger">*</span> Against By
-                        </label>
-                        <div class="col-md-8">
-                            <select class="form-control" id="ddlAgainstBy" name="ddlAgainstBy">
-                                <option value="Direct">Direct</option>
-                                <option value="Quotation">Quotation</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="row align-items-center">
-                        <label class="col-md-4 col-form-label font-weight-bold text-md-right">
-                            <span class="text-danger">*</span> Against No.
-                        </label>
-                        <div class="col-md-8">
-                            <select class="form-control ddlselect" id="ddlAgainstNo" name="ddlAgainstNo">
-                                <option value="">-- Select --</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
+
             <input type="hidden" id="ID" name="ID" />
 
         </div>
@@ -249,7 +222,7 @@
             </div>
 
             <div class="col-md-3 text-start">
-                <a href="~/Proforma/Index">
+                <a href="~/WorkOrder/Index">
                     <input type="button" id="btnCancel" value="Cancel" class="btn btn-warning" />
                 </a>
             </div>

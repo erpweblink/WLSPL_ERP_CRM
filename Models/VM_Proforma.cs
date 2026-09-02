@@ -25,8 +25,6 @@ namespace WEBLINK_CRM.Models
 
         [NotMapped]
         public string? CreatedBy { get; set; } = default;
-        public string? AgainstBy { get; set; } = default;
-        public string? AgainstNo { get; set; } = default;
 
 
         public string? TotalAmtBeforeTax { get; set; } = default;

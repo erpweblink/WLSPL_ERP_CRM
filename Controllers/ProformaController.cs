@@ -92,6 +92,8 @@ namespace WEBLINK_CRM.Controllers
             try
             {
 
+                var loginId = HttpContext.Session.GetString("EmployeeId");
+
                 if (DataList == null)
                 {
                     return Json(new
@@ -100,7 +102,7 @@ namespace WEBLINK_CRM.Controllers
                         Message = "Invalid request."
                     });
                 }
-                DataList.CreatedBy = HttpContext.Session.GetString("EmployeeId");
+                DataList.CreatedBy = loginId;
                 int ID = await objProforma.Save(DataList);
 
                 return Json(new
@@ -295,76 +297,6 @@ namespace WEBLINK_CRM.Controllers
                 fileName = $"Proforma_{decryptedId}.pdf",
                 fileData = base64Pdf
             });
-        }
-
-        public async Task<IActionResult> GetQuotationNo(string Companyname)
-        {
-            try
-            {
-                if (HttpContext.Session.GetString("EmployeeId") != null)
-                {
-                    var loginId = HttpContext.Session.GetString("EmployeeId");
-                    if (loginId != null)
-                    {
-                        var list = await objProforma.GetQuotationNoList(Companyname);
-                        if (list != null)
-                        {
-                            return Json(new { Success = true, Data = list });
-                        }
-                        else
-                        {
-                            return Json(new { success = false, message = "Data Not Found.......!" });
-                        }
-                    }
-                    else
-                    {
-                        return RedirectToAction("Login", "Login");
-                    }
-                }
-                else
-                {
-                    return RedirectToAction("Login", "Login");
-                }
-            }
-            catch (Exception e)
-            {
-                return Json(new { success = false, message = e.Message });
-            }
-        }
-
-        public async Task<IActionResult> GetDetailsByQuotationNo(string AgainstNo)
-        {
-            try
-            {
-                if (HttpContext.Session.GetString("EmployeeId") != null)
-                {
-                    var loginId = HttpContext.Session.GetString("EmployeeId");
-                    if (loginId != null)
-                    {
-                        var list = await objProforma.GetDetailsByQuotationNo(AgainstNo);
-                        if (list != null)
-                        {
-                            return Json(new { Success = true, Data = list });
-                        }
-                        else
-                        {
-                            return Json(new { success = false, message = "Data Not Found.......!" });
-                        }
-                    }
-                    else
-                    {
-                        return RedirectToAction("Login", "Login");
-                    }
-                }
-                else
-                {
-                    return RedirectToAction("Login", "Login");
-                }
-            }
-            catch (Exception e)
-            {
-                return Json(new { success = false, message = e.Message });
-            }
         }
 
     }

@@ -16,8 +16,8 @@ var GetProformaForm = function () {
     }
     var Companytext = "";
 
+    var BindStateList = function () {
 
-    var BindStateList = function () {       
         $.ajax({
 
             url: "/Proforma/GetState",
@@ -1106,11 +1106,7 @@ var GetProformaForm = function () {
                     $("#ddlBillState")
                         .removeClass("is-invalid");
                 }
-           
-                 // -----------------------------------------
-                // STATE
-                // -----------------------------------------
-                if (!$("#ddlAgainstBy").val()) {
+
 
                 // -----------------------------------------
                 // PROFORMA DATE
@@ -1494,26 +1490,26 @@ var GetProformaForm = function () {
                     BindCompanyList();
 
 
-        $(".add-row1").off("click").on("click", function () {
+                    // =================================================
+                    // OTHER HEADER VALUES
+                    // =================================================
+                    $("#txtAddress")
+                        .val(hdr.address || "");
 
 
                     $("#txtGSTNo")
                         .val(hdr.gstno || "");
 
-            var CGST = $("#txtCGST").val();
-            var CGSTAmt = $("#txtCGSTAmt").val();
 
                     $("#ddlReverseCharge")
                         .val(hdr.reverseCharge || "N")
                         .trigger("change");
 
 
-            var Total = $("#txtTotal").val();
-            var AllTotal = $("#txtAllTotal").val();
-
                     $("#ddlBillState")
                         .val(hdr.billState || "")
                         .trigger("change");
+
 
                     $("#txtProformaDate")
                         .val(
@@ -1838,11 +1834,8 @@ var GetProformaForm = function () {
 
             BindCompanyList();
 
-            var basic = parseFloat(data[11]) || 0;
+            BindStateList();
 
-            var cgstAmt = parseFloat(data[6]) || 0;
-            var sgstAmt = parseFloat(data[8]) || 0;
-            var igstAmt = parseFloat(data[10]) || 0;
 
             if (
                 ID != null &&

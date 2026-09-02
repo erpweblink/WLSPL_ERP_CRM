@@ -34,7 +34,7 @@ namespace WEBLINK_CRM.repository
                 parameters.Add("@Status", Status);
 
                 var result = await connection.QueryAsync<object>(
-                    "SP_Proforma",
+                    "SP_WorkOrder",
                     parameters,
                     commandType: CommandType.StoredProcedure
                 );
@@ -56,7 +56,7 @@ namespace WEBLINK_CRM.repository
                 parameters.Add("@Code", Code);
 
                 var result = await connection.QueryAsync<object>(
-                    "SP_Proforma",
+                    "SP_WorkOrder",
                     parameters,
                     commandType: CommandType.StoredProcedure
                 );
@@ -65,27 +65,6 @@ namespace WEBLINK_CRM.repository
             }
         }
 
-        public async Task<List<object>> GetDetailsByQuotationNo(string Code)
-        {
-            using (var connection = new SqlConnection(
-                 _configuration.GetConnectionString("Conn_Stringg")))
-            {
-                await connection.OpenAsync();
-
-                var parameters = new DynamicParameters();
-
-                parameters.Add("@Action", "GetDetailsByQuotationNo");
-                parameters.Add("@QuotationNo", Code);
-
-                var result = await connection.QueryAsync<object>(
-                    "SP_Proforma",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
-
-                return result.ToList();
-            }
-        }
         public async Task<int> Save(VM_Proforma model)
         {
             try
@@ -108,9 +87,7 @@ namespace WEBLINK_CRM.repository
                     parameters.Add("@BillState", model.BillState);
                     parameters.Add("@TotalAmtBeforeTax", model.TotalAmtBeforeTax);
                     parameters.Add("@TotalAmtAfterTax", model.TotalAmtAfterTax);
-                    parameters.Add("@CreatedBy", model.CreatedBy);
-                    parameters.Add("@AgainstBy", model.AgainstBy);
-                    parameters.Add("@AgainstNo", model.AgainstNo);
+                    parameters.Add("@@CreatedBy", model.CreatedBy);
 
                     DataTable dtDetails = new DataTable();
                     dtDetails.Columns.Add("ProductDescription", typeof(string));
@@ -252,28 +229,6 @@ namespace WEBLINK_CRM.repository
 
                     return result > 0;
                 }
-            }
-        }
-
-        public async Task<List<object>> GetQuotationNoList(string CompanyCode)
-        {
-            using (var connection = new SqlConnection(
-              _configuration.GetConnectionString("Conn_Stringg")))
-            {
-                await connection.OpenAsync();
-
-                var parameters = new DynamicParameters();
-
-                parameters.Add("@Action", "GetQuotationNoList");
-                parameters.Add("@CompanyCode", CompanyCode);
-
-                var result = await connection.QueryAsync<object>(
-                    "SP_Proforma",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
-
-                return result.Cast<object>().ToList();
             }
         }
 
@@ -460,30 +415,41 @@ namespace WEBLINK_CRM.repository
                     prodTable.AddCell(HCell("Amount", 2));
                     prodTable.AddCell(HCell("Taxable\nValue", 2));
 
-                        if (isIGST)
-                        {
-                            prodTable.AddCell(HeaderCell("IGST(%)"));
-                            prodTable.AddCell(HeaderCell("IGST Amt"));
-                        }
-                        else
-                        {
-                            prodTable.AddCell(HeaderCell("CGST(%)"));
-                            prodTable.AddCell(HeaderCell("CGST Amt"));
-                            prodTable.AddCell(HeaderCell("SGST(%)"));
-                            prodTable.AddCell(HeaderCell("SGST Amt"));
-                        }
-                        prodTable.AddCell(HeaderCell("Total"));
+                    if (isIGST)
+                    {
+                        prodTable.AddCell(HCell("IGST %", 1, 2));
+                    }
+                    else
+                    {
+                        prodTable.AddCell(HCell("CGST %", 1, 2));
+                        prodTable.AddCell(HCell("SGST %", 1, 2));
+                    }
+                    prodTable.AddCell(HCell("Total", 2));
 
-                        PdfPCell BodyCell(string text, bool shaded) => new PdfPCell(new Phrase(text ?? "", Font9))
-                        {
-                            HorizontalAlignment = Element.ALIGN_CENTER,
-                            BackgroundColor = shaded ? altRow : BaseColor.WHITE,
-                            BorderColor = borderGray,
-                            BorderWidth = 0.5f,
-                            PaddingTop = 7f,
-                            PaddingBottom = 9f,
-                            MinimumHeight = 26f
-                        };
+                    // Row 2 (only the split Rate/Amount sub-columns)
+                    if (isIGST)
+                    {
+                        prodTable.AddCell(HCell("Rate"));
+                        prodTable.AddCell(HCell("Amount"));
+                    }
+                    else
+                    {
+                        prodTable.AddCell(HCell("Rate"));
+                        prodTable.AddCell(HCell("Amount"));
+                        prodTable.AddCell(HCell("Rate"));
+                        prodTable.AddCell(HCell("Amount"));
+                    }
+
+                    PdfPCell BCell(string text, int align = Element.ALIGN_CENTER) => new PdfPCell(new Phrase(text ?? "", tableBodyFont))
+                    {
+                        HorizontalAlignment = align,
+                        VerticalAlignment = Element.ALIGN_MIDDLE,
+                        BorderColor = borderBlack,
+                        BorderWidth = 0.5f,
+                        PaddingTop = 5f,
+                        PaddingBottom = 5f,
+                        MinimumHeight = 26f
+                    };
 
                     int rowid = 1;
                     if (vm.objtblProformaDtl != null)
@@ -777,7 +743,7 @@ namespace WEBLINK_CRM.repository
       SELECT ID, ProformaNo, ProformaDate, ReverseCharge, State, CompanyName,
                CompanyCode, Address, cgstin as GSTNO, BillState, TotalAmtBeforeTax, TotalAmtAfterTax
         FROM [WLSPLCRM].[stswlspl].[tblProformaMain]
-        WHERE ID = @ID;
+        WHERE ID = 5097;
 
         SELECT ID, ProformaID, ProductDescription, SACCode, Qty, Rate, Amount, TaxableValue,
                CGSTRate, CGSTAmt, SGSTRate, SGSTAmt, IGSTRate, IGSTAmt, Total

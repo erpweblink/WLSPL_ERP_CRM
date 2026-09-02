@@ -13,9 +13,7 @@ namespace WEBLINK_CRM.repository
         Task<List<ProformaDetailVM>> GetDetailsById(string wono);
         Task<List<object>> GetCompanyList(string Status);
         Task<List<object>> GetStateList(string Status);
-        Task<List<object>> GetQuotationNoList(string Companyname);
         Task<List<object>> GetCompanyByCode(string Code);
-        Task<List<object>> GetDetailsByQuotationNo(string Code);
  
         Task<VM_Proforma> GetProformaById(string ID);   
 
