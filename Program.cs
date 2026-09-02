@@ -39,6 +39,7 @@ builder.Services.AddScoped<IGoveServices, GovServicesRepo>();
 builder.Services.AddScoped<IMailingRepo, MailingRepo>();
 builder.Services.AddScoped<IWorkOrder, RepoWorkOrder>();
 builder.Services.AddScoped<IProforma, RepoProforma>();
+builder.Services.AddScoped<IQuotation, RepoQuotation>();
 builder.Services.AddScoped<IServicesRepo, ServicesRepo>();
 builder.Services.AddScoped<ITaxinvoiceRepo, TaxinvoiceRepo>();
 
