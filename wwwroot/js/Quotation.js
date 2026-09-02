@@ -224,7 +224,14 @@ var GetQuotationForm = function () {
 
                             return;
                         }
+                        if (
+                            ID != null &&
+                            ID != undefined &&
+                            ID != "Create"
+                        ) {
 
+                            return;
+                        }
 
                         $("#txtAddress")
                             .val(result.address || "");
