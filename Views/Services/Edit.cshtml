@@ -5,7 +5,18 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<style>
+<style type="text/css">
+    .section-title {
+        color: #425d7e;
+        font-size: 17px;
+        font-weight: 600;
+        margin: 5px 0 15px;
+    }
+
+        .section-title i {
+            margin-right: 7px;
+        }
+
     .card-header h3 {
         margin: 0 0 5px 0;
     }
@@ -188,7 +199,7 @@
 </style>
 
 <div class="card">
-    <div class="card-header">
+    <div class="card-header" style="background: linear-gradient(314deg, #0b0f14, #1a3e66);color: whitesmoke;">
         <div>
             <h3>
                 <i class="fa fa-cogs"></i>
@@ -1499,7 +1510,7 @@
     </div>
 </div>
 
-<script>
+<script type="text/javascript">
     function loadSEOConfiguration() {
 
         var seoType = $("#SEOType").val();

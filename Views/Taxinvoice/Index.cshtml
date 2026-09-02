@@ -40,7 +40,7 @@
         : System.Globalization.CultureInfo.GetCultureInfo("en-IN").DateTimeFormat.GetMonthName(selectedMonthNumber);
 }
 
-<style>
+<style type="text/css">
     .invoice-page {
         width: 100%;
         padding: 0;
@@ -892,6 +892,11 @@
                     <i class="fa fa-file-invoice"></i>
                     Tax Invoice List
                 </h3>
+                <a asp-action="Create"
+                   class="btn btn-primary add-btn btn-sm">
+                    <i class="fa fa-plus"></i>
+                    Create Invoice
+                </a>
             </div>
         </div>
 
@@ -1165,7 +1170,7 @@
     </div>
 </div>
 
-<script>
+<script type="text/javascript">
     const rowsPerPage = 20;
     let currentPage = 1;
     let allRows = [];
