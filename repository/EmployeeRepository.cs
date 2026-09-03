@@ -128,5 +128,45 @@ namespace WEBLINK_CRM.Repositories
 
             return employee;
         }
+
+        public Employee GetByEmail(string email)
+        {
+            using var con = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg")
+                    ?? throw new Exception("Connection string 'Conn_Stringg' not found."));
+
+            using var cmd = new SqlCommand(
+                "SELECT * FROM employees WHERE email = @Email", con);
+            cmd.Parameters.AddWithValue("@Email", email);
+            con.Open();
+            using var reader = cmd.ExecuteReader();
+            if (reader.Read())
+            {
+                return new Employee
+                {
+                    id = (int)reader["id"],
+                    email = reader["Email"].ToString(),
+                    name = reader["Name"].ToString(),
+                    UserName = reader["UserName"].ToString(),
+                    role = reader["Role"].ToString()
+                };
+            }
+            return null;
+        }
+
+        public void UpdatePassword(int employeeId, string newPassword)
+        {
+            using var con = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg")
+                    ?? throw new Exception("Connection string 'Conn_Stringg' not found."));
+
+            using var cmd = new SqlCommand(
+                "UPDATE employees SET panelpsw = @Password WHERE id = @Id", con);
+            cmd.Parameters.AddWithValue("@Password", newPassword); 
+            cmd.Parameters.AddWithValue("@Id", employeeId);
+            con.Open();
+            cmd.ExecuteNonQuery();
+        }
     }
+
 }
