@@ -101,9 +101,11 @@
                             </div>
                             <div class="profile-trigger-info d-none d-md-block">
                                 <span class="profile-trigger-name">@profileName</span>
-                                <span class="profile-trigger-role">@profileRole</span>
+                                <span class="profile-trigger-role d-none">@profileRole</span>
                             </div>
-                            <i class="las la-angle-down profile-chevron d-none d-md-block"></i>
+                            <i class="las la-angle-down profile-chevron d-none d-md-block"
+                               style="font-size: 12px !important;display: inline-flex !important;
+                               align-items: center !important;justify-content: center !important;"></i>
                         </a>
 
                         <!-- Dropdown -->
@@ -264,7 +266,7 @@
                                 <ul class="nav flex-column">
 
                                     <li class="nav-item">
-                                        <a class="nav-link" asp-controller="Quotation" asp-action="GetQuotationlist">
+                                        <a class="nav-link" asp-controller="Quotation" asp-action="Index">
                                             <div class="d-flex align-items-center"><span class="nav-link-text">Quotation</span></div>
                                         </a>
                                     </li>

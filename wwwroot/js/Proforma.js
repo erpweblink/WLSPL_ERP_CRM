@@ -94,10 +94,6 @@
                             $("#ddlAgainstNo").val(match.Name);
                         }
                     }
-
-                    // Re-lock it if we're restoring a saved Proforma. The rebuild
-                    // itself doesn't clear the disabled attribute, but do this
-                    // defensively so the lock always survives a rebind.
                     if (isEditLoad) {
                         $("#ddlAgainstNo").prop("disabled", true);
                     }
@@ -765,6 +761,7 @@
                     }
                     $("#ddlAgainstNo").prop("disabled", true);
 
+
                     $("#txtProformaDate").val(formatDateToDDMMYYYY(hdr.proformaDate));
 
                     $("#txtTotalDealBasicAmount").val(parseFloat(hdr.totalAmtBeforeTax || 0).toFixed(2));
@@ -833,6 +830,7 @@
             else {
                 BindCompanyList();
                 BindStateList();
+                BindAgainstNumber();
 
                 var today = new Date().toISOString().split("T")[0];
                 $("#txtProformaDate").val(today);

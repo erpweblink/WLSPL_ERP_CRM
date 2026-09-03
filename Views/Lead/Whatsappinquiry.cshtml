@@ -5,7 +5,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<style>
+<style type="text/css">
     .table tbody td {
         font-size: 13px;
         vertical-align: middle;
@@ -472,7 +472,7 @@
     </div>
 </div>
 
-<script>
+<script type="text/javascript">
     const rowsPerPage = 20;
     let currentPage = 1;
     let allRows = [];
@@ -481,21 +481,17 @@
     document.addEventListener("DOMContentLoaded", function () {
         allRows = Array.from(document.querySelectorAll("#tableBody tr.inquiry-row"));
         filteredRows = [...allRows];
-
         updateRecordCount();
         renderTable();
     });
 
     const searchInput = document.getElementById("searchInput");
-
     if (searchInput) {
         searchInput.addEventListener("input", function () {
             const searchValue = this.value.toLowerCase().trim();
-
             filteredRows = allRows.filter(function (row) {
                 return row.innerText.toLowerCase().includes(searchValue);
             });
-
             currentPage = 1;
             updateRecordCount();
             removeEmptyRow();
@@ -505,13 +501,9 @@
 
     function updateRecordCount() {
         const totalRecords = document.getElementById("totalRecords");
-
-        if (totalRecords) {
-            totalRecords.textContent = filteredRows.length;
-        }
+        if (totalRecords) totalRecords.textContent = filteredRows.length;
 
         const statusMessage = document.getElementById("statusMessage");
-
         if (statusMessage) {
             statusMessage.innerHTML = `
                 <i class="fab fa-whatsapp status-icon"></i>
@@ -522,10 +514,7 @@
 
     function renderTable() {
         removeEmptyRow();
-
-        allRows.forEach(function (row) {
-            row.style.display = "none";
-        });
+        allRows.forEach(function (row) { row.style.display = "none"; });
 
         if (filteredRows.length === 0) {
             showEmptyResult();
@@ -534,10 +523,7 @@
         }
 
         const startIndex = (currentPage - 1) * rowsPerPage;
-        const endIndex = startIndex + rowsPerPage;
-        const pageRows = filteredRows.slice(startIndex, endIndex);
-
-        pageRows.forEach(function (row) {
+        filteredRows.slice(startIndex, startIndex + rowsPerPage).forEach(function (row) {
             row.style.display = "table-row";
         });
 
@@ -546,134 +532,67 @@
 
     function showEmptyResult() {
         removeEmptyRow();
-
-        const tableBody = document.getElementById("tableBody");
         const emptyRow = document.createElement("tr");
-
         emptyRow.id = "dynamicEmptyRow";
-
         emptyRow.innerHTML = `
             <td colspan="10" class="empty-row">
                 <i class="fa fa-search"></i>
                 No matching WhatsApp inquiries found.
             </td>
         `;
-
-        tableBody.appendChild(emptyRow);
+        document.getElementById("tableBody").appendChild(emptyRow);
     }
 
     function removeEmptyRow() {
         const emptyRow = document.getElementById("dynamicEmptyRow");
-
-        if (emptyRow) {
-            emptyRow.remove();
-        }
+        if (emptyRow) emptyRow.remove();
     }
 
     function createPagination() {
         const pagination = document.getElementById("pagination");
-
-        if (!pagination) {
-            return;
-        }
+        if (!pagination) return;
 
         pagination.innerHTML = "";
-
         const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-
-        if (totalPages <= 1) {
-            return;
-        }
+        if (totalPages <= 1) return;
 
         const previous = document.createElement("li");
-
-        previous.className =
-            "page-item " +
-            (currentPage === 1 ? "disabled" : "");
-
-        previous.innerHTML = `
-            <a class="page-link" href="javascript:void(0)">
-                <i class="fa fa-chevron-left"></i>
-                Previous
-            </a>
-        `;
-
+        previous.className = "page-item " + (currentPage === 1 ? "disabled" : "");
+        previous.innerHTML = `<a class="page-link" href="javascript:void(0)"><i class="fa fa-chevron-left"></i> Previous</a>`;
         previous.addEventListener("click", function (e) {
             e.preventDefault();
-
-            if (currentPage > 1) {
-                currentPage--;
-                renderTable();
-                scrollToTable();
-            }
+            if (currentPage > 1) { currentPage--; renderTable(); scrollToTable(); }
         });
-
         pagination.appendChild(previous);
 
         for (let i = 1; i <= totalPages; i++) {
             const pageItem = document.createElement("li");
-
-            pageItem.className =
-                "page-item " +
-                (i === currentPage ? "active" : "");
-
-            pageItem.innerHTML = `
-                <a class="page-link" href="javascript:void(0)">
-                    ${i}
-                </a>
-            `;
-
+            pageItem.className = "page-item " + (i === currentPage ? "active" : "");
+            pageItem.innerHTML = `<a class="page-link" href="javascript:void(0)">${i}</a>`;
             pageItem.addEventListener("click", function (e) {
                 e.preventDefault();
-
                 currentPage = i;
                 renderTable();
                 scrollToTable();
             });
-
             pagination.appendChild(pageItem);
         }
 
         const next = document.createElement("li");
-
-        next.className =
-            "page-item " +
-            (currentPage === totalPages ? "disabled" : "");
-
-        next.innerHTML = `
-            <a class="page-link" href="javascript:void(0)">
-                Next
-                <i class="fa fa-chevron-right"></i>
-            </a>
-        `;
-
+        next.className = "page-item " + (currentPage === totalPages ? "disabled" : "");
+        next.innerHTML = `<a class="page-link" href="javascript:void(0)">Next <i class="fa fa-chevron-right"></i></a>`;
         next.addEventListener("click", function (e) {
             e.preventDefault();
-
-            if (currentPage < totalPages) {
-                currentPage++;
-                renderTable();
-                scrollToTable();
-            }
+            if (currentPage < totalPages) { currentPage++; renderTable(); scrollToTable(); }
         });
-
         pagination.appendChild(next);
     }
 
     function scrollToTable() {
         const table = document.getElementById("dataTable");
-
-        if (!table) {
-            return;
-        }
-
-        const rect = table.getBoundingClientRect();
-
-        if (rect.top < 0) {
-            table.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
+        if (!table) return;
+        if (table.getBoundingClientRect().top < 0) {
+            table.scrollIntoView({ behavior: "smooth", block: "start" });
         }
     }
 
@@ -689,33 +608,35 @@
         const inquiryId = select.getAttribute("data-inquiry-id");
         const salesEmpCode = select.value;
 
-        if (!inquiryId) {
-            showToast( "WhatsApp inquiry ID not found.","error");
-            return;
-        }
+        if (!inquiryId) { showToast("Inquiry ID not found.", "error"); return; }
+        if (!salesEmpCode) return;
 
-        if (!salesEmpCode) {
-            return;
-        }
+        showConfirmToast(
+            "Are you sure you want to assign this sales person?",
+            function () {
+                $.ajax({
+                    url: '@Url.Action("AssignSalesPerson", "Lead")',
+                    type: 'POST',
+                    data: { inquiryId: inquiryId, salesEmpCode: salesEmpCode, Action: "AssignToWebsite" },
+                    success: function (response) {
+                        if (response.success) {
+                            showToast("Sales person assigned successfully.", "success");
+                        } else {
+                            showToast(response.message || "Unable to assign sales person.", "error");
+                            clearSalesPerson(select);
+                        }
+                    },
+                    error: function () {
+                        showToast("Something went wrong while assigning the sales person.", "error");
+                        clearSalesPerson(select);
+                    }
+                });
+            },
+            function () { clearSalesPerson(select); }
+        );
+    }
 
-        $.ajax({
-            url: '@Url.Action("AssignSalesPerson", "Lead")',
-            type: 'POST',
-            data: {
-                inquiryId: inquiryId,
-                salesEmpCode: salesEmpCode,
-                Action: "AssignToWhatsapp"
-            },
-            success: function (response) {
-                if (response.success) {
-                    showToast( "Sales person assigned successfully.","success");  
-                } else {
-                     showToast( response.message || "Unable to assign sales person.","error");
-                }
-            },
-            error: function (xhr) {
-                 showToast( "Something went wrong while assigning the sales person.","error");
-            }
-        });
+    function clearSalesPerson(select) {
+        $(select).val(null).trigger("change.select2");
     }
 </script>

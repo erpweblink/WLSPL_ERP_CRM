@@ -62,7 +62,7 @@
         display: inline-block;
     }
 
-    .action-btn {
+   .action-btn {
         width: 32px;
         height: 30px;
         padding: 5px;
@@ -419,13 +419,290 @@
     }
 </style>
 
-<div class="card ">
+<style type="text/css">
+    /* ── all your existing styles unchanged ── */
+    .btn-filter-toggle {
+        background: #fff;
+        border: 1px solid #ddd;
+        color: #333;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+        .btn-filter-toggle:hover {
+            background: #f5f5f5;
+            border-color: #bbb;
+        }
+
+    #filterCard {
+        overflow: hidden;
+        max-height: 1000px;
+        opacity: 1;
+        transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.35s ease;
+    }
+
+        #filterCard.filter-collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+    /* filter card */
+    .filter-card {
+        background: #fff;
+        border: 1px solid #e7ebf0;
+        border-radius: 14px;
+        box-shadow: 0 4px 18px rgba(30,41,59,.06);
+        overflow: visible;
+        margin-bottom: 10px;
+        padding: 5px;
+    }
+
+    .modern-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 7px;
+        color: #526174;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+        .modern-label i {
+            color: #6b7cff;
+            font-size: 13px;
+        }
+
+    .modern-control {
+        height: 38px !important;
+        border: 1px solid #1e2022 !important;
+        border-radius: 7px !important;
+        background-color: #fff;
+        color: #344054;
+        font-size: 13px;
+        transition: all .2s ease;
+        box-shadow: none !important;
+    }
+
+        .modern-control:hover {
+            border-color: #b9c4d2 !important;
+        }
+
+        .modern-control:focus {
+            border-color: #6b7cff !important;
+            box-shadow: 0 0 0 3px rgba(107,124,255,.10) !important;
+        }
+
+        .modern-control:disabled {
+            background-color: #f3f5f7 !important;
+            color: #9aa4b2 !important;
+            cursor: not-allowed;
+        }
+
+    input[type="date"] {
+        cursor: pointer;
+    }
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+        .select2-container .select2-selection--single {
+            height: 38px !important;
+            border: 1px solid #1e2022 !important;
+            border-radius: 7px !important;
+            background: #fff !important;
+            display: flex !important;
+            align-items: center !important;
+            transition: all .2s ease;
+        }
+
+            .select2-container .select2-selection--single:hover {
+                border-color: #b9c4d2 !important;
+            }
+
+    .select2-container--open .select2-selection--single {
+        border-color: #6b7cff !important;
+        box-shadow: 0 0 0 3px rgba(107,124,255,.10);
+    }
+
+    .select2-container .select2-selection__rendered {
+        padding-left: 12px !important;
+        padding-right: 35px !important;
+        color: #344054 !important;
+        font-size: 13px;
+        line-height: 38px !important;
+    }
+
+    .select2-container .select2-selection__placeholder {
+        color: #98a2b3 !important;
+    }
+
+    .select2-container .select2-selection__arrow {
+        height: 36px !important;
+        right: 7px !important;
+    }
+
+    .select2-dropdown {
+        border: 1px solid #dce2e9 !important;
+        border-radius: 7px !important;
+        box-shadow: 0 8px 25px rgba(30,41,59,.12);
+        overflow: hidden;
+    }
+
+    .select2-results__option {
+        padding: 9px 12px !important;
+        font-size: 13px;
+        color: black;
+    }
+
+    .select2-results__option--highlighted {
+        background-color: #eef2ff !important;
+        color: #4f46e5 !important;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__clear {
+        margin-right: 8px;
+    }
+
+
+    .search-wrapper {
+        position: relative;
+        flex: 1;
+        max-width: 320px;
+    }
+
+        .search-wrapper > i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #98a2b3;
+            font-size: 14px;
+            z-index: 2;
+        }
+
+    .search-input {
+        width: 100%;
+        height: 38px;
+        padding: 0 12px 0 35px;
+        border: 1px solid #1e2022 !important;
+        border-radius: 7px;
+        outline: none;
+        color: #344054;
+        font-size: 13px;
+        transition: all .2s ease;
+    }
+
+        .search-input::placeholder {
+            color: #98a2b3;
+        }
+
+        .search-input:focus {
+            border-color: #6b7cff;
+            box-shadow: 0 0 0 3px rgba(107,124,255,.10);
+        }
+
+    .filter-actions {
+        display: flex;
+        gap: 7px;
+        align-items: center;
+        justify-content: flex-end;
+        padding-bottom: 2px;
+    }
+
+        .filter-actions .btn {
+            height: 38px;
+            border-radius: 7px;
+            padding: 0 14px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            transition: all .2s ease;
+        }
+
+    .btn-searchss {
+        background: linear-gradient(135deg, #2563eb, #4f46e5);
+        color: #fff;
+        box-shadow: 0 3px 8px rgba(37,99,235,.20);
+    }
+
+        .btn-searchss:hover {
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 12px rgba(37,99,235,.28);
+        }
+
+    .btn-search {
+        background: #fff;
+        color: #2563eb;
+        border: 1px solid #2563eb !important;
+    }
+
+        .btn-search:hover {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            color: #fff;
+            box-shadow: 0 3px 8px rgba(37,99,235,.20);
+        }
+
+    .btn-reset {
+        background: #fff;
+        color: #f50000;
+        border: 1px solid #fd001f !important;
+    }
+
+        .btn-reset:hover {
+            background: linear-gradient(135deg, #f90000, #db688a);
+            color: whitesmoke;
+        }
+
+    .record-info {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #8a94a6;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+        .record-info strong {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 34px;
+            height: 26px;
+            padding: 0 8px;
+            border-radius: 20px;
+            background: #eef2ff;
+            color: #4f46e5;
+            font-size: 12px;
+        }
+
+    @@media (max-width: 768px) {
+
+        .search-wrapper {
+            max-width: 100%;
+            flex-basis: 100%;
+        }
+
+        .record-info {
+            margin-left: 0;
+        }
+    }
+</style>
+
+<div class="card">
     <div class="card-header d-flex align-items-center justify-content-between">
         <h3 class="page-title mb-0">
             <i class="fa fa-users"></i>
             Company Management
         </h3>
-
         <a asp-action="Create"
            class="btn btn-primary add-btn btn-sm">
             <i class="fa fa-plus"></i>
@@ -434,67 +711,112 @@
     </div>
 
     <div class="card-body">
-        <div class="row align-items-center">
-            <div class="col-md-4">
-                <input type="text"
-                       id="searchInput"
-                       class="form-control search-box"
-                       placeholder="Search employee..." />
-            </div>
-
-            <div class="col-md-8 d-flex justify-content-end align-items-center">
-                <span class="record-info">
-                    Total Records :
-                    <strong id="totalRecords">@Model.Count()</strong>
+        <div class="d-flex align-items-center justify-content-between">
+            <button type="button" id="btnToggleFilter" class="btn btn-filter-toggle btn-sm">
+                <i class="fa-solid fa-filter"></i>
+                <span>Show Filters</span>
+            </button>
+            <div class="record-info">
+                <span>
+                    <i class="fa-solid fa-list-ol"></i> Total Records
                 </span>
+                <strong id="totalRecords">@Model.Count()</strong>
+            </div>
+        </div>
+        <br />
+        <div class="filter-card filter-collapsed" id="filterCard">
+            <div class="row g-3 align-items-end">
+                <div class="col-xl-3 col-lg-3 col-md-6">
+                    <label class="modern-label">
+                        <i class="fa-solid fa-magnifying-glass"></i> Search
+                    </label>
+
+                    <div class="search-wrapper">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text"
+                               id="searchInput"
+                               class="search-input"
+                               placeholder="Search company name..." />
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-lg-3 col-md-6">
+                    <label class="modern-label">
+                        <i class="fa-solid fa-user-tie"></i> Sales Manager
+                    </label>
+
+                    <select id="ddlTeamuser" class="form-control modern-control">
+                        <option value="">-- All Managers --</option>
+                        @if (ViewBag.SalesManagers != null)
+                        {
+                            foreach (var mgr in (IEnumerable<dynamic>)ViewBag.SalesManagers)
+                            {
+                                string userCode = mgr.UserCode;
+
+                                <option value="@userCode">
+                                    @mgr.FullName
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-xl-3 col-lg-3 col-md-6">
+                    <label class="modern-label">
+                        <i class="fa-solid fa-building-circle-check"></i> Status
+                    </label>
+
+                    <select id="ddlmeetingwith" class="form-control modern-control">
+                        <option value="">All</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Unpaid">Unpaid</option>
+                        <option value="Downloaded">Downloaded</option>
+                    </select>
+                </div>
+
+                <div class="col-xl-3 col-lg-3 col-md-6">
+                    <div class="filter-actions">
+                        <button type="button" id="btnSearchData" class="btn btn-search d-none" title="Search">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                        <button type="button" id="btnresetfilter" class="btn btn-reset" title="Reset">
+                            <i class="fa-solid fa-arrow-rotate-left"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="table-responsive">
-            <table class="table table-bordered table-hover"
-                   id="companyTable">
-
+            <table class="table table-bordered table-hover" id="companyTable">
                 <thead>
                     <tr>
                         <th>#</th>
-
                         <th>Company Code</th>
-
                         <th>Company Name</th>
-
                         <th>Email</th>
-
                         <th>Mobile</th>
-
                         <th>GST No</th>
-
                         <th>Status</th>
-
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-
                     @if (Model != null && Model.Any())
                     {
-
                         int count = 1;
 
                         foreach (var item in Model)
                         {
-
                             <tr>
-
                                 <td class="row-number">
                                     @count
                                 </td>
-
                                 <td>
                                     <span class="company-code">
                                         @item.CCode
                                     </span>
                                 </td>
-
                                 <td>
                                     <a href="javascript:void(0)"
                                        class="company-name open-company-modal"
@@ -502,19 +824,15 @@
                                         @item.CName
                                     </a>
                                 </td>
-
                                 <td>
                                     @item.Email
                                 </td>
-
                                 <td>
                                     @item.Mobile
                                 </td>
-
                                 <td>
                                     @item.GSTNo
                                 </td>
-
                                 <td>
                                     @if (item.typess == "Paid")
                                     {
@@ -531,27 +849,24 @@
                                         </span>
                                     }
                                 </td>
-
                                 <td>
                                     <div class="d-flex gap-1">
                                         <a asp-action="Edit"
                                            asp-route-id="@item.Id"
-                                           class="btn btn-sm action-btn edit-btn"
+                                           class="btn btn-warning btn-sm action-btn edit-btn"
                                            title="Edit">
                                             <i class="fa fa-edit"></i>
                                         </a>
                                         <a asp-action="Delete"
                                            asp-route-id="@item.Id"
-                                           class="btn btn-sm action-btn delete-btn"
+                                           class="btn btn-danger btn-sm action-btn delete-btn"
                                            title="Delete"
                                            onclick="return confirm('Are you sure you want to delete this company?');">
                                             <i class="fa fa-trash"></i>
                                         </a>
                                     </div>
                                 </td>
-
                             </tr>
-
                             count++;
                         }
                     }
@@ -560,14 +875,12 @@
                         <tr id="noDataRow">
                             <td colspan="11"
                                 class="no-record">
-
                                 <i class="fa fa-info-circle"></i>
-
                                 No company records found.
-
                             </td>
                         </tr>
                     }
+
                 </tbody>
             </table>
             <nav>
@@ -762,12 +1075,12 @@
                             <div style="background:#fff;border:1px solid #e0e0e0;border-radius:10px;padding:12px 16px;margin-bottom:12px;">
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <b>Company Name :</b>
-                                        <span id="lblHistorycname" class="ms-2"></span>
+                                        <b style="color: #8a94a6;">Company Name :</b>
+                                        <span id="lblHistorycname" class="ms-2 cm-field-value"></span>
                                     </div>
                                     <div class="col-md-6">
-                                        <b>Company Code :</b>
-                                        <span id="lblHistoryccode" class="ms-2"></span>
+                                        <b style="color: #8a94a6;">Company Code :</b>
+                                        <span id="lblHistoryccode" class="ms-2 cm-field-value"></span>
                                     </div>
                                 </div>
                             </div>
@@ -789,71 +1102,219 @@
 </div>
 
 <script type="text/javascript">
-    const rowsPerPage=100;
-    let currentPage=1;
-    let filteredRows=[];
-    const table=document.getElementById("companyTable");
-    const tbody=table.querySelector("tbody");
-    const searchInput=document.getElementById("searchInput");
-    const pagination=document.getElementById("pagination");
-    const totalRecords=document.getElementById("totalRecords");
-    const allRows=Array.from(tbody.querySelectorAll("tr")).filter(row=>!row.id);
-    filteredRows=allRows;
+    const rowsPerPage = 50;
+    let currentPage = 1;
 
-    function displayTable(page){
-        currentPage=page;
-        allRows.forEach(row=>{row.style.display="none";});
-        const start=(page-1)*rowsPerPage;
-        const end=start+rowsPerPage;
-        filteredRows.slice(start,end).forEach(row=>{row.style.display="";});
-        filteredRows.slice(start,end).forEach((row,index)=>{
-            const numberCell=row.querySelector(".row-number");
-            if(numberCell){
-                numberCell.innerText=start+index+1;
-            }
+    const tbody = document.querySelector("#companyTable tbody");
+
+    // ── Paginate whatever rows are currently in tbody ──
+    function paginateCurrentRows() {
+        const rows = Array.from(tbody.querySelectorAll("tr:not(#noDataRow)"));
+        const total = rows.length;
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+
+        rows.forEach((row, i) => {
+            row.style.display = (i >= start && i < end) ? "" : "none";
         });
-        createPagination();
+
+        // Re-number only visible rows
+        rows.slice(start, end).forEach((row, i) => {
+            const cell = row.querySelector(".row-number");
+            if (cell) cell.textContent = start + i + 1;
+        });
+
+        buildPagination(total);
+        document.getElementById("totalRecords").innerText = total;
     }
 
-    function createPagination(){
-        pagination.innerHTML="";
-        const totalPages=Math.ceil(filteredRows.length/rowsPerPage);
-        if(totalPages<=1)return;
+    function buildPagination(total) {
+        const pg = document.getElementById("pagination");
+        const totalPages = Math.ceil(total / rowsPerPage);
+        pg.innerHTML = "";
+        if (totalPages <= 1) return;
 
-        const previousLi=document.createElement("li");
-        previousLi.className="page-item "+(currentPage===1?"disabled":"");
-        previousLi.innerHTML=`<a class="page-link" href="javascript:void(0)"><i class="fa fa-chevron-left"></i></a>`;
-        previousLi.onclick=function(){
-            if(currentPage>1)displayTable(currentPage-1);
+        const mkLi = (label, page, disabled) => {
+            const li = document.createElement("li");
+            li.className = "page-item " + (disabled ? "disabled" : "");
+            li.innerHTML = `<a class="page-link" href="javascript:void(0)">${label}</a>`;
+            if (!disabled) li.onclick = () => { currentPage = page; paginateCurrentRows(); };
+            return li;
         };
-        pagination.appendChild(previousLi);
 
-        for(let i=1;i<=totalPages;i++){
-            const li=document.createElement("li");
-            li.className="page-item "+(i===currentPage?"active":"");
-            li.innerHTML=`<a class="page-link" href="javascript:void(0)">${i}</a>`;
-            li.onclick=function(){displayTable(i);};
-            pagination.appendChild(li);
+        // ── Prev button ──
+        pg.appendChild(mkLi('<i class="fa fa-chevron-left"></i>', currentPage - 1, currentPage === 1));
+
+        // ── Page numbers — show max 10 at a time ──
+        const maxVisible = 10;
+        let startPage, endPage;
+
+        if (totalPages <= maxVisible) {
+            // fewer than 10 pages — show all
+            startPage = 1;
+            endPage = totalPages;
+        } else {
+            // center current page in the window
+            const half = Math.floor(maxVisible / 2);
+            startPage = currentPage - half;
+            endPage   = currentPage + half - 1;
+
+            // clamp to valid range
+            if (startPage < 1) {
+                startPage = 1;
+                endPage   = maxVisible;
+            }
+            if (endPage > totalPages) {
+                endPage   = totalPages;
+                startPage = totalPages - maxVisible + 1;
+            }
         }
 
-        const nextLi=document.createElement("li");
-        nextLi.className="page-item "+(currentPage===totalPages?"disabled":"");
-        nextLi.innerHTML=`<a class="page-link" href="javascript:void(0)"><i class="fa fa-chevron-right"></i></a>`;
-        nextLi.onclick=function(){
-            if(currentPage<totalPages)displayTable(currentPage+1);
-        };
-        pagination.appendChild(nextLi);
+        // ── First page + ellipsis if window doesn't start at 1 ──
+        if (startPage > 1) {
+            pg.appendChild(mkLi(1, 1, false));
+            if (startPage > 2) {
+                const li = document.createElement("li");
+                li.className = "page-item disabled";
+                li.innerHTML = `<a class="page-link">…</a>`;
+                pg.appendChild(li);
+            }
+        }
+
+        // ── Visible page buttons ──
+        for (let i = startPage; i <= endPage; i++) {
+            const li = document.createElement("li");
+            li.className = "page-item " + (i === currentPage ? "active" : "");
+            li.innerHTML = `<a class="page-link" href="javascript:void(0)">${i}</a>`;
+            li.onclick = (function (page) {
+                return function () { currentPage = page; paginateCurrentRows(); };
+            })(i);
+            pg.appendChild(li);
+        }
+
+        // ── Ellipsis + last page if window doesn't reach the end ──
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const li = document.createElement("li");
+                li.className = "page-item disabled";
+                li.innerHTML = `<a class="page-link">…</a>`;
+                pg.appendChild(li);
+            }
+            pg.appendChild(mkLi(totalPages, totalPages, false));
+        }
+
+        // ── Next button ──
+        pg.appendChild(mkLi('<i class="fa fa-chevron-right"></i>', currentPage + 1, currentPage === totalPages));
     }
 
-    searchInput.addEventListener("keyup",function(){
-        const value=this.value.toLowerCase().trim();
-        filteredRows=allRows.filter(row=>row.innerText.toLowerCase().includes(value));
-        totalRecords.innerText=filteredRows.length;
-        currentPage=1;
-        displayTable(1);
+    // ── Render table from AJAX response ──
+    function renderTable(data) {
+        // ✅ Step 1: wipe the slate completely first
+        tbody.innerHTML = "";
+
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr id="noDataRow">
+                <td colspan="8" class="no-record">
+                    <i class="fa fa-info-circle"></i> No records found.
+                </td>
+            </tr>`;
+            document.getElementById("totalRecords").innerText = 0;
+            document.getElementById("pagination").innerHTML = "";
+            return;
+        }
+
+        // ✅ Step 2: build all rows into a fragment (single DOM write)
+        const fragment = document.createDocumentFragment();
+
+        data.forEach((item, index) => {
+            const isPaid = item.typess === "Paid";
+            const statusBadge = isPaid
+                ? `<span class="active-status"><i class="fa fa-check-circle"></i> Paid</span>`
+                : `<span class="inactive-status"><i class="fa fa-times-circle"></i> Un-Paid</span>`;
+
+            const tr = document.createElement("tr");
+            // ✅ Step 3: data-id is set cleanly on every fresh row
+            tr.innerHTML = `
+                <td class="row-number">${index + 1}</td>
+                <td><span class="company-code">${item.cCode ?? ""}</span></td>
+                <td>
+                    <a href="javascript:void(0)"
+                       class="company-name open-company-modal"
+                      data-id="${String(item.id).trim()}">
+                        ${item.cName ?? ""}
+                    </a>
+                </td>
+                <td>${item.email ?? ""}</td>
+                <td>${item.mobile ?? ""}</td>
+                <td>${item.gstNo ?? ""}</td>
+                <td>${statusBadge}</td>
+                <td>
+                    <div class="d-flex gap-1">
+                        <a href="/CompanyMaster/Edit/${item.id}"
+                           class="btn btn-sm action-btn edit-btn" title="Edit">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                        <a href="/CompanyMaster/Delete/${item.id}"
+                           class="btn btn-sm action-btn delete-btn" title="Delete"
+                           onclick="return confirm('Are you sure you want to delete this company?');">
+                            <i class="fa fa-trash"></i>
+                        </a>
+                    </div>
+                </td>`;
+            fragment.appendChild(tr);
+        });
+
+        // ✅ Step 4: commit all rows in one shot, then paginate
+        tbody.appendChild(fragment);
+        currentPage = 1;
+        paginateCurrentRows();
+    }
+
+    // ── AJAX filter ──
+    function getFilterPayload() {
+        return {
+            SessionName: $("#ddlTeamuser").val(),
+            typess: $("#ddlmeetingwith").val(),
+            CName: $("#searchInput").val()
+        };
+    }
+
+    function triggerSearch() {
+        $.ajax({
+            url: "/Companymaster/GetFilteredCompanies",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(getFilterPayload()),
+            success: function (res) {
+                if (!res.success) { showToast(res.message, "error"); return; }
+                renderTable(res.data);
+            },
+            error: function () { showToast("Failed to load filtered data.", "error"); }
+        });
+    }
+
+    // Debounce search input so it doesn't fire on every keystroke
+    let searchTimer;
+    document.getElementById("searchInput").addEventListener("keyup", function () {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(triggerSearch, 300);
     });
 
-    displayTable(1);
+    $("#ddlTeamuser, #ddlmeetingwith").on("change", function () {
+        triggerSearch();
+    });
+
+    $("#btnresetfilter").on("click", function () {
+        $("#ddlTeamuser").val("").trigger("change.select2");
+        $("#ddlmeetingwith").val("");
+        $("#searchInput").val("");
+        location.reload();
+    });
+
+    // ── Initial page load: paginate server-rendered rows ──
+    $(document).ready(function () {
+        paginateCurrentRows();
+    });
 </script>
 
 <script type="text/javascript">
@@ -861,6 +1322,20 @@
     const isAdmin = (currentUserRole === "Admin" || currentUserRole === "Sub Admin");
 
     $(document).ready(function () {
+
+        $("#btnToggleFilter").on("click", function () {
+            $("#filterCard").toggleClass("filter-collapsed");
+            if ($("#filterCard").hasClass("filter-collapsed")) {
+                $(this).find("span").text("Show Filters");
+                $(this).find("i").removeClass("fa-filter-circle-xmark").addClass("fa-filter");
+            } else {
+                $(this).find("span").text("Hide Filters");
+                $(this).find("i").removeClass("fa-filter").addClass("fa-filter-circle-xmark");
+            }
+        });
+
+        $("#ddlTeamuser").select2({width: "100%" });
+
         $("#ddlregbypopup").select2({
             theme: "premium",
             placeholder: "Select Sales Manager",
@@ -884,20 +1359,20 @@
 
     /* ── Open detail modal ── */
     $(document).on("click", ".open-company-modal", function () {
-        const companyId = $(this).data("id");
+        const companyId = $(this).attr("data-id");
         $.ajax({
-            url: "/CallAndMeeting/CloseFollowUpClick",
+            url: "/CompanyMaster/CloseFollowUpClick",
             type: "GET",
             data: { id: companyId },
             success: function (res) {
                 if (!res.success) { showToast(res.message, "error"); return; }
 
-                $("#commenthistoryId").text(res.commentId[0].ID_CommentHistory);
-                $("#companyid").text(res.commentId[0].id);
+                $("#commenthistoryId").val(res.commentId[0].ID_CommentHistory ?? 0);
+                $("#companyid").val(res.commentId[0].id);
                 $("#lblccode").text(res.commentId[0].ccode);
                 $("#lblcname").text(res.commentId[0].cname);
                 $("#lbloname").text(res.commentId[0].oname);
-                $("#lblemail").text(res.commentId[0].clientmail);
+                $("#lblemail").text(res.commentId[0].email);
                 $("#lblmobile").text(res.commentId[0].mobile);
                 $("#hrefmob").attr("href", "tel:" + res.commentId[0].mobile);
 
@@ -912,24 +1387,8 @@
                 $("#ddlregbypopup").prop("disabled", !isAdminRole);
                 isAdminRole ? $("#btnChange").show() : $("#btnChange").hide();
 
-                $("#ddlupdatefor").val(res.commentId[0].Updatefor);
                 hideAll();
-                if (res.commentId[0].Updatefor === "Call") {
-                    document.getElementById("DivCallUpdate").classList.remove("hidden");
-                    $("#ddlcallstatus").val(res.commentId[0].UpdateStatus);
-                    if (res.commentId[0].UpdateStatus === "Follow-up") {
-                        document.getElementById("lblfolldate").classList.remove("hidden");
-                        document.getElementById("txtfollowupdatee").classList.remove("hidden");
-                    }
-                } else {
-                    document.getElementById("DivMeetingUpdate").classList.remove("hidden");
-                    $("#ddlmeetingupdate").val(res.commentId[0].UpdateStatus);
-                    if (res.commentId[0].UpdateStatus === "Follow-up") {
-                        document.getElementById("lblfolldate").classList.remove("hidden");
-                        document.getElementById("txtfollowupdatee").classList.remove("hidden");
-                    }
-                }
-
+         
                 ShowDetailPanel();
                 new bootstrap.Modal(document.getElementById("companyDetailModal")).show();
             },
@@ -1008,7 +1467,7 @@
 
     function ChangeCompanyUser() {
         const newName = $("#ddlregbypopup").val();
-        const id = $("#companyid").text();
+        const id = $("#companyid").val();
 
         if (newName === "NoName" || newName === null) {
             showToast("Please Select Sales Person First", "warning");
@@ -1019,7 +1478,7 @@
             "Are you sure you want to change the company user?",
             function () {
                 $.ajax({
-                    url: "/CallAndMeeting/UpdateCompanyUser",
+                    url: "/CompanyMaster/UpdateCompanyUser",
                     type: "POST",
                     data: { newName: newName, CompCode: id },
                     success: function (res) {
@@ -1033,11 +1492,12 @@
     }
 
     $("#btnSave").on("click", function () {
+        debugger;
         if (!validateCompanyForm()) return;
         const companyData = getCompanyFormData();
 
         $.ajax({
-            url: "/CallAndMeeting/SaveCompanyUpdate",
+            url: "/CompanyMaster/SaveCompanyUpdate",
             type: "POST",
             contentType: "application/json",
             data: JSON.stringify(companyData),
@@ -1057,6 +1517,7 @@
 
     function getCompanyFormData() {
         const data = {};
+        debugger;
 
         $("#companyDetailModal").find("input, select, textarea").each(function () {
             if (!$(this).is(":visible")) return;
@@ -1071,16 +1532,18 @@
         });
 
         [
-            { name: "Ccode", selector: "#lblccode" },
-            { name: "CompanyName", selector: "#lblcname" },
-            { name: "PersonName", selector: "#lbloname" },
-            { name: "ClientMail", selector: "#lblemail" },
-            { name: "ContactNo", selector: "#lblmobile" },
-            { name: "Address", selector: "#lbladdress" },
-            { name: "Id", selector: "#commenthistoryId" }
+                { name: "Ccode",        selector: "#lblccode",        type: "label" },
+                { name: "CompanyName",  selector: "#lblcname",        type: "label" },
+                { name: "PersonName",   selector: "#lbloname",        type: "label" },
+                { name: "ClientMail",   selector: "#lblemail",        type: "label" },
+                { name: "ContactNo",    selector: "#lblmobile",       type: "label" },
+                { name: "Id",           selector: "#commenthistoryId",type: "input" },
+                { name: "Ids",          selector: "#companyid",       type: "input" }
         ].forEach(function (field) {
-            const text = $(field.selector).text().trim();
-            if (text) data[field.name] = text;
+                const val = field.type === "input"
+                    ? $(field.selector).val()
+                    : $(field.selector).text();
+                if (val && val.trim()) data[field.name] = val.trim();
         });
 
         return data;
@@ -1092,7 +1555,7 @@
         const CompanyName = $("#lblcname").text();
 
         $.ajax({
-            url: "/CallAndMeeting/GetCommmentHistory",
+            url: "/CompanyMaster/GetCommmentHistory",
             type: "GET",
             data: { CompanyCode: CompanyCode },
             success: function (res) {

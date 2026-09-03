@@ -25,7 +25,6 @@ namespace WEBLINK_CRM.repository
             using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
             {
                 await connection.OpenAsync();
-                //string query = "SELECT ccode,cname,name,UserName FROM Company cm LEFT JOIN employees em ON cm.sessionname = em.empcode WHERE (@actionBy = 'ddlList' AND cname LIKE '%' + @companyName + '%') OR (@actionBy <> 'ddlList' AND cname = @companyName)";
                 string query = @"WITH Employee AS(
                                             SELECT ccode,cname,name,UserName 
                                             FROM Company cm 
@@ -319,7 +318,7 @@ namespace WEBLINK_CRM.repository
             await connection.OpenAsync();
 
             const string sql = @"
-                SELECT DISTINCT TOP 100 ID_CommentHistory as Id,cname as CompanyName,message as FeedBack,
+                SELECT DISTINCT TOP 100 id as Id,cname as CompanyName,message as FeedBack,
                 commentdatetime as CommentDateTime,Updatefor as UpdateFor,followupdate as FollowDate, 
                 Updatefor +'- '+ updateStatus  as CallUpdateStatus, AdminRemark as AdminRemark
                 FROM stswlspl.[VW_FollowUpRpt]
@@ -459,7 +458,7 @@ namespace WEBLINK_CRM.repository
                 using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
                 {
                     await connection.OpenAsync();
-                    string query = @"SELECT * FROM [stswlspl].[VW_FollowUpRpt] WHERE ID_CommentHistory = @CommentId";
+                    string query = @"SELECT * FROM [stswlspl].[VW_FollowUpRpt] WHERE id = @CommentId";
 
                     var parameters = new DynamicParameters();
                     parameters.Add("@CommentId", Id);

@@ -1,25 +1,10 @@
-﻿@model IEnumerable<WEBLINK_CRM.Models.RegisterUserr>
+@model IEnumerable<WEBLINK_CRM.Models.RegisterUserr>
 
 @{
     ViewData["Title"] = "User Management";
 }
 
 <style type="text/css">
-    .search-box {
-        width: 315px;
-        height: 35px;
-        font-size: 13px;
-        border-radius: 6px;
-    }
-
-    .record-info {
-        font-size: 13px;
-        color: #6c757d;
-    }
-
-        .record-info strong {
-            color: #212529;
-        }
 
     .table tbody td {
         font-size: 13px;
@@ -28,47 +13,6 @@
 
     .table tbody tr:hover {
         background: #f4f8ff;
-    }
-
-    .lead-code {
-        color: #0d6efd;
-        font-weight: 600;
-    }
-
-    .company-name {
-        font-weight: 600;
-    }
-
-    .badge-new {
-        background: #0d6efd;
-        color: white;
-        padding: 5px 10px;
-        border-radius: 20px;
-        font-size: 11px;
-    }
-
-    .badge-active {
-        background: #198754;
-        color: white;
-        padding: 5px 10px;
-        border-radius: 20px;
-        font-size: 11px;
-    }
-
-    .badge-pending {
-        background: #ffc107;
-        color: #212529;
-        padding: 5px 10px;
-        border-radius: 20px;
-        font-size: 11px;
-    }
-
-    .badge-inactive {
-        background: #dc3545;
-        color: white;
-        padding: 5px 10px;
-        border-radius: 20px;
-        font-size: 11px;
     }
 
     .action-btn {
@@ -90,23 +34,6 @@
         color: #fff;
     }
 
-    .badge-default {
-        background: #6c757d;
-        color: white;
-        padding: 5px 10px;
-        border-radius: 20px;
-        font-size: 11px;
-    }
-
-    .source-badge {
-        background: #e9ecef;
-        color: #495057;
-        padding: 5px 9px;
-        border-radius: 15px;
-        font-size: 11px;
-        font-weight: 600;
-    }
-
     .no-record {
         text-align: center;
         padding: 30px !important;
@@ -116,21 +43,48 @@
     .active-status {
         background-color: #198754 !important;
         color: #ffffff !important;
-        padding: 6px 12px !important;
-        border-radius: 20px !important;
-        font-size: 13px !important;
-        font-weight: 600 !important;
-        display: inline-block;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
     }
 
     .inactive-status {
         background-color: #dc3545 !important;
         color: #ffffff !important;
-        padding: 6px 12px !important;
-        border-radius: 20px !important;
-        font-size: 13px !important;
-        font-weight: 600 !important;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .b-tl {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: #fff8e1;
+        color: #92400e;
+        padding: 4px 9px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        border: 1px solid #fde68a;
+    }
+
+    .b-role {
         display: inline-block;
+        background: #ede9fe;
+        color: #12263c8a;
+        padding: 3px 9px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
     }
 
     .pagination {
@@ -153,6 +107,474 @@
             background-color: #e9f2ff;
         }
 
+    .btn-filter-toggle {
+        background: #fff;
+        border: 1px solid #ddd;
+        color: #333;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+
+        .btn-filter-toggle:hover {
+            background: #f5f5f5;
+            border-color: #bbb;
+        }
+
+    #filterCard {
+        overflow: hidden;
+        max-height: 1000px;
+        opacity: 1;
+        transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.35s ease;
+    }
+
+        #filterCard.filter-collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+    .filter-card {
+        background: #fff;
+        border: 1px solid #e7ebf0;
+        border-radius: 14px;
+        box-shadow: 0 4px 18px rgba(30,41,59,.06);
+        overflow: visible;
+        margin-bottom: 10px;
+        padding: 5px;
+    }
+
+    .modern-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 7px;
+        color: #526174;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+        .modern-label i {
+            color: #6b7cff;
+            font-size: 13px;
+        }
+
+    .modern-control {
+        height: 38px !important;
+        border: 1px solid #1e2022 !important;
+        border-radius: 7px !important;
+        background-color: #fff;
+        color: #344054;
+        font-size: 13px;
+        transition: all .2s ease;
+        box-shadow: none !important;
+    }
+
+        .modern-control:hover {
+            border-color: #b9c4d2 !important;
+        }
+
+        .modern-control:focus {
+            border-color: #6b7cff !important;
+            box-shadow: 0 0 0 3px rgba(107,124,255,.10) !important;
+        }
+
+    .select2-container {
+        width: 100% !important;
+    }
+
+        .select2-container .select2-selection--single {
+            height: 38px !important;
+            border: 1px solid #1e2022 !important;
+            border-radius: 7px !important;
+            background: #fff !important;
+            display: flex !important;
+            align-items: center !important;
+            transition: all .2s ease;
+        }
+
+            .select2-container .select2-selection--single:hover {
+                border-color: #b9c4d2 !important;
+            }
+
+    .select2-container--open .select2-selection--single {
+        border-color: #6b7cff !important;
+        box-shadow: 0 0 0 3px rgba(107,124,255,.10);
+    }
+
+    .select2-container .select2-selection__rendered {
+        padding-left: 12px !important;
+        padding-right: 35px !important;
+        color: #344054 !important;
+        font-size: 13px;
+        line-height: 38px !important;
+    }
+
+    .select2-container .select2-selection__placeholder {
+        color: #98a2b3 !important;
+    }
+
+    .select2-container .select2-selection__arrow {
+        height: 36px !important;
+        right: 7px !important;
+    }
+
+    .select2-dropdown {
+        border: 1px solid #dce2e9 !important;
+        border-radius: 7px !important;
+        box-shadow: 0 8px 25px rgba(30,41,59,.12);
+        overflow: hidden;
+    }
+
+    .select2-results__option {
+        padding: 9px 12px !important;
+        font-size: 13px;
+        color: black;
+    }
+
+    .select2-results__option--highlighted {
+        background-color: #eef2ff !important;
+        color: #4f46e5 !important;
+    }
+
+    .search-wrapper {
+        position: relative;
+        flex: 1;
+        max-width: 320px;
+    }
+
+        .search-wrapper > i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #98a2b3;
+            font-size: 14px;
+            z-index: 2;
+        }
+
+    .search-input {
+        width: 100%;
+        height: 38px;
+        padding: 0 12px 0 35px;
+        border: 1px solid #1e2022 !important;
+        border-radius: 7px;
+        outline: none;
+        color: #344054;
+        font-size: 13px;
+        transition: all .2s ease;
+    }
+
+        .search-input::placeholder {
+            color: #98a2b3;
+        }
+
+        .search-input:focus {
+            border-color: #6b7cff;
+            box-shadow: 0 0 0 3px rgba(107,124,255,.10);
+        }
+
+    .filter-actions {
+        display: flex;
+        gap: 7px;
+        align-items: center;
+        padding-bottom: 2px;
+    }
+
+        .filter-actions .btn {
+            height: 38px;
+            border-radius: 7px;
+            padding: 0 14px;
+            font-size: 13px;
+            font-weight: 600;
+            border: none;
+            transition: all .2s ease;
+        }
+
+    .btn-reset {
+        background: #fff;
+        color: #f50000;
+        border: 1px solid #fd001f !important;
+    }
+
+        .btn-reset:hover {
+            background: linear-gradient(135deg, #f90000, #db688a);
+            color: whitesmoke;
+        }
+
+    .record-info {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #8a94a6;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+
+        .record-info strong {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 34px;
+            height: 26px;
+            padding: 0 8px;
+            border-radius: 20px;
+            background: #eef2ff;
+            color: #4f46e5;
+            font-size: 12px;
+        }
+
+    .view-toggle {
+        display: flex;
+        gap: 3px;
+        background: #e2e8f0;
+        border-radius: 6px;
+        padding: 3px;
+    }
+
+    .view-btn {
+        padding: 4px 11px;
+        border-radius: 4px;
+        border: none;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        color: #94a3b8;
+        background: transparent;
+        transition: all .15s;
+    }
+
+        .view-btn.active {
+            background: #fff;
+            color: #0d6efd;
+            box-shadow: 0 1px 3px rgba(0,0,0,.08);
+        }
+
+    .tree-cell {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .tree-guides {
+        display: flex;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .tree-guides {
+        display: flex;
+        align-items: stretch;
+    }
+
+    .tg-spacer {
+        width: 20px;
+        height: 28px;
+        flex-shrink: 0;
+        position: relative;
+    }
+
+        .tg-spacer::before {
+            content: '';
+            position: absolute;
+            left: 9px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            border-radius: 2px;
+            background: #dfe4f5;
+        }
+
+    .tg-elbow {
+        width: 20px;
+        height: 28px;
+        flex-shrink: 0;
+        margin-right: 6px;
+        position: relative;
+    }
+
+        .tg-elbow::before {
+            content: '';
+            position: absolute;
+            left: 9px;
+            top: 0;
+            height: 50%;
+            width: 2px;
+            border-radius: 2px;
+            background: #a8b6e6;
+        }
+
+        .tg-elbow::after {
+            content: '';
+            position: absolute;
+            left: 9px;
+            top: 50%;
+            width: 11px;
+            height: 2px;
+            border-bottom-left-radius: 6px;
+            background: #a8b6e6;
+        }
+
+    .tg-node-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #7c8ee0;
+        margin: 0 2px 0 -2px;
+        align-self: center;
+        flex-shrink: 0;
+    }
+
+    .tree-node-icon {
+        width: 26px;
+        height: 26px;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        flex-shrink: 0;
+    }
+
+    .tni-0 {
+        background: #1e4080;
+        color: #fff;
+    }
+
+    .tni-1 {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .tni-2 {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .tni-3 {
+        background: #f8f8f8;
+        color: #94a3b8;
+        border: 1px solid #e2e8f0;
+    }
+
+    .tree-name {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.3;
+    }
+
+    .tn-primary {
+        font-weight: 600;
+        color: #212529;
+        white-space: nowrap;
+    }
+
+    .tn-code {
+        font-size: 10px;
+        color: #94a3b8;
+        font-family: monospace;
+    }
+
+    .level-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 1px 7px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 700;
+        margin-left: 6px;
+        vertical-align: middle;
+    }
+
+    .lp-0 {
+        background: #1e4080;
+        color: #fff;
+    }
+
+    .lp-1 {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .lp-2 {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .lp-3 {
+        background: #f8fafc;
+        color: #94a3b8;
+        border: 1px solid #e2e8f0;
+    }
+
+    #userTable tbody tr.hlevel-0 {
+        background: #eef4ff;
+    }
+
+    #userTable tbody tr.hlevel-1 {
+        background: #f8fbff;
+    }
+
+    #userTable tbody tr.hlevel-2 {
+        background: #ffffff;
+    }
+
+    #userTable tbody tr.hlevel-3 {
+        background: #fafafa;
+    }
+
+    #userTable tbody tr:hover {
+        background: #f4f8ff !important;
+    }
+
+    .loading-overlay {
+        display: none;
+        position: absolute;
+        inset: 0;
+        background: rgba(255,255,255,.72);
+        backdrop-filter: blur(2px);
+        z-index: 20;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 10px;
+        border-radius: 6px;
+    }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+    .um-spinner {
+        width: 30px;
+        height: 30px;
+        border: 3px solid #dbeafe;
+        border-top-color: #0d6efd;
+        border-radius: 50%;
+        animation: um-spin .7s linear infinite;
+    }
+
+    @@keyframes um-spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .search-wrapper {
+            max-width: 100%;
+            flex-basis: 100%;
+        }
+
+        .record-info {
+            margin-left: 0;
+        }
+    }
 </style>
 
 <div class="card">
@@ -161,223 +583,408 @@
             <i class="fa fa-users"></i>
             User Management
         </h3>
-
-        <a asp-action="Create"
-           class="btn btn-primary btn-sm">
-            <i class="fa fa-plus"></i>
-            Add New User
+        <a asp-action="Create" class="btn btn-primary btn-sm">
+            <i class="fa fa-plus"></i> Add New User
         </a>
     </div>
 
-
     <div class="card-body">
-        <div class="row align-items-center">
-            <div class="col-md-4">
-                <input type="text"
-                       id="searchInput"
-                       class="form-control search-box"
-                       placeholder="Search employee..." />
-            </div>
 
-            <div class="col-md-8 d-flex justify-content-end align-items-center">
-                <span class="record-info">
-                    Total Records :
-                    <strong id="totalRecords">@Model.Count()</strong>
-                </span>
+        <div class="d-flex align-items-center justify-content-between">
+            <button type="button" id="btnToggleFilter" class="btn btn-filter-toggle btn-sm">
+                <i class="fa-solid fa-filter"></i>
+                <span>Show Filters</span>
+            </button>
+            <div class="record-info">
+                <span><i class="fa-solid fa-list-ol"></i> Total Records</span>
+                <strong id="totalRecords">@Model.Count()</strong>
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover"
-                   id="userTable">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Employee Code</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Mobile</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th>User Name</th>
+        <br />
 
-                        <th>TL Manager</th>
-                        <th>Sales TL</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @{
-                        int count = 1;
-                    }
-                    @foreach (var item in Model)
-                    {
+        <div class="filter-card filter-collapsed" id="filterCard">
+            <div class="row g-3 align-items-end">
+
+                <div class="col-xl-3 col-lg-3 col-md-6">
+                    <label class="modern-label">
+                        <i class="fa-solid fa-magnifying-glass"></i> Search
+                    </label>
+                    <div class="search-wrapper">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" id="searchInput" class="search-input"
+                               placeholder="Search name or username…" />
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-lg-3 col-md-6">
+                    <label class="modern-label">
+                        <i class="fa-solid fa-user-tie"></i> Sales Manager / TL
+                    </label>
+                    <select id="ddlTeamuser" class="form-control modern-control">
+                        <option value="">— All Managers —</option>
+                        @if (ViewBag.SalesManagers != null)
+                        {
+                            foreach (var mgr in (IEnumerable<dynamic>)ViewBag.SalesManagers)
+                            {
+                                string userCode = mgr.UserCode;
+                                <option value="@userCode">@mgr.FullName</option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-xl-1 col-lg-1 col-md-3">
+                    <label class="modern-label">
+                        <i class="fa-solid fa-circle-half-stroke"></i> Status
+                    </label>
+                    <select id="ddlStatus" class="form-control modern-control">
+                        <option value="">All</option>
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                    </select>
+                </div>
+
+                <div class="col-xl-3 col-lg-3 col-md-6 ms-lg-auto">
+                    <label class="modern-label">
+                        <i class="fa-solid fa-table-list"></i> View Mode
+                    </label>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="view-toggle">
+                            <button class="view-btn active" id="btnViewFlat" onclick="setView('flat')">
+                                <i class="fa fa-list"></i> Flat
+                            </button>
+                            <button class="view-btn" id="btnViewTree" onclick="setView('tree')">
+                                <i class="fa fa-sitemap"></i> Tree
+                            </button>
+                        </div>
+                        <div class="filter-actions">
+                            <button type="button" id="btnresetfilter" class="btn btn-reset" title="Reset">
+                                <i class="fa-solid fa-arrow-rotate-left"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div style="position:relative">
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="um-spinner"></div>
+                <span style="font-size:12px;color:#64748b">Loading…</span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover" id="userTable">
+                    <thead>
                         <tr>
-                            <td>@count</td>
-                            <td>@item.empcode</td>
-                            <td>
-                                <strong>@item.name</strong>
-                            </td>
-                            <td>@item.email</td>
-                            <td>@item.mobile</td>
-                            <td>@item.role</td>
-                            <td>
-                                @if (item.status)
-                                {
-                                    <span class="badge active-status">
-                                        <i class="fa fa-check-circle"></i>
-                                        Active
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge inactive-status">
-                                        <i class="fa fa-times-circle"></i>
-                                        Inactive
-                                    </span>
-                                }
-
-                            </td>
-
-                            <td>@item.UserName</td>
-
-                            <td>@item.TL_Manager</td>
-
-                            <td>@item.Sales_TL_Manager</td>
-
-                            <td>
-                                <div class="d-flex gap-1">
-                                    <a asp-action="Edit"
-                                       asp-route-id="@item.id"
-                                       class="btn btn-warning btn-sm action-btn edit-btn"
-                                       title="Edit">
-
-                                        <i class="fa fa-edit"></i>
-
-                                    </a>
-
-                                    <a asp-action="Delete"
-                                       asp-route-id="@item.id"
-                                       onclick="return confirm('Are you sure you want to delete this user?')"
-                                       class="btn btn-danger btn-sm action-btn delete-btn"
-                                       title="Delete">
-
-                                        <i class="fa fa-trash"></i>
-
-                                    </a>
-                                </div>
-
-                            </td>
-
-
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Mobile</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Username</th>
+                            <th>Action</th>
                         </tr>
-
-
-                        count++;
-
-                    }
-
-
-                </tbody>
-            </table>
-            <!-- Pagination -->
-            <nav>
-                <ul class="pagination justify-content-center mt-3"
-                    id="pagination">
-                </ul>
-            </nav>
+                    </thead>
+                    <tbody id="tableBody">
+                        @{
+                            int rowNum = 1;
+                        }
+                        @foreach (var item in Model)
+                        {
+                            <tr class="hlevel-0">
+                                <td class="row-number">@rowNum</td>
+                                <td>
+                                    <div class="tree-cell">
+                                        <div class="tree-node-icon tni-0">
+                                            <i class="fa fa-user-tie"></i>
+                                        </div>
+                                        <div class="tree-name">
+                                            <span class="tn-primary">@item.name</span>
+                                            <span class="tn-code">@item.empcode</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="font-size:12px;color:#475569">@item.email</td>
+                                <td style="font-size:12px">@item.mobile</td>
+                                <td><span class="b-role">@item.role</span></td>
+                                <td>
+                                    @if (item.status)
+                                    {
+                                        <span class="active-status"><i class="fa fa-check-circle"></i> Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inactive-status"><i class="fa fa-times-circle"></i> Inactive</span>
+                                    }
+                                </td>
+                                <td style="font-size:12px">@item.UserName</td>
+                                <td>
+                                    <div class="d-flex gap-1">
+                                        <a asp-action="Edit" asp-route-id="@item.id"
+                                           class="btn btn-warning btn-sm action-btn edit-btn" title="Edit">
+                                            <i class="fa fa-edit"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@item.id"
+                                           onclick="return confirm('Are you sure you want to delete this user?')"
+                                           class="btn btn-danger btn-sm action-btn delete-btn" title="Delete">
+                                            <i class="fa fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            rowNum++;
+                        }
+                    </tbody>
+                </table>
+            </div>
         </div>
+
+        <nav>
+            <ul class="pagination justify-content-center mt-3" id="pagination"></ul>
+        </nav>
+
     </div>
 </div>
 
 <script type="text/javascript">
-    const rowsPerPage = 10;
+
+    const ROWS_PER_PAGE = 50;
     let currentPage = 1;
-    const tableRows =
-    document.querySelectorAll("#userTable tbody tr");
-    function displayTable(page){
-    let start =
-    (page-1)*rowsPerPage;
-    let end =
-    start + rowsPerPage;
-    tableRows.forEach((row,index)=>{
-    row.style.display =
-    (index>=start && index<end)
-    ?""
-    :"none";
-    });
-    createPagination();
-    }
-    function createPagination(){
-    let pages =
-    Math.ceil(tableRows.length / rowsPerPage);
-    let pagination =
-    document.getElementById("pagination");
-    pagination.innerHTML="";
+    let currentView = 'flat';
+    let isHierarchy = false;
+    let searchTimer;
 
+    const tbody   = document.getElementById("tableBody");
+    const overlay = document.getElementById("loadingOverlay");
 
-    for(let i=1;i<=pages;i++){
-
-
-    let li=document.createElement("li");
-
-    li.className =
-    "page-item "+(i==currentPage?"active":"");
-
-
-    li.innerHTML =
-    `
-    <a class="page-link" href="#">
-    ${i}
-    </a>
-    `;
-
-
-    li.onclick=function(){
-
-    currentPage=i;
-
-    displayTable(i);
-
-    };
-
-
-    pagination.appendChild(li);
-
-
+    function setView(v) {
+        currentView = v;
+        document.getElementById('btnViewFlat').classList.toggle('active', v === 'flat');
+        document.getElementById('btnViewTree').classList.toggle('active', v === 'tree');
+        if (isHierarchy) triggerSearch();
     }
 
+    document.getElementById('btnToggleFilter').addEventListener('click', function () {
+        const card = document.getElementById('filterCard');
+        card.classList.toggle('filter-collapsed');
+        const collapsed = card.classList.contains('filter-collapsed');
+        this.querySelector('span').textContent = collapsed ? 'Show Filters' : 'Hide Filters';
+        const ic = this.querySelector('i');
+        ic.classList.toggle('fa-filter', collapsed);
+        ic.classList.toggle('fa-filter-circle-xmark', !collapsed);
+    });
 
+    function paginateCurrentRows() {
+        const rows  = Array.from(tbody.querySelectorAll("tr:not(#noDataRow)"));
+        const total = rows.length;
+        const start = (currentPage - 1) * ROWS_PER_PAGE;
+        const end   = Math.min(start + ROWS_PER_PAGE, total);
+
+        rows.forEach((r, i) => r.style.display = (i >= start && i < end) ? '' : 'none');
+
+        rows.slice(start, end).forEach((r, i) => {
+            const c = r.querySelector('.row-number');
+            if (c) c.textContent = start + i + 1;
+        });
+
+        buildPagination(total);
+        document.getElementById('totalRecords').textContent = total;
     }
 
+    function buildPagination(total) {
+        const pg         = document.getElementById("pagination");
+        const totalPages = Math.ceil(total / ROWS_PER_PAGE);
+        pg.innerHTML     = "";
+        if (totalPages <= 1) return;
 
+        const mkLi = (label, page, disabled) => {
+            const li = document.createElement("li");
+            li.className = "page-item " + (disabled ? "disabled" : "");
+            li.innerHTML = `<a class="page-link" href="javascript:void(0)">${label}</a>`;
+            if (!disabled) li.onclick = () => { currentPage = page; paginateCurrentRows(); };
+            return li;
+        };
 
+        pg.appendChild(mkLi('<i class="fa fa-chevron-left"></i>', currentPage - 1, currentPage === 1));
 
-    document.getElementById("searchInput")
-    .addEventListener("keyup",function(){
+        const MAX = 10;
+        let sp = currentPage - Math.floor(MAX / 2);
+        let ep = sp + MAX - 1;
+        if (sp < 1)          { sp = 1; ep = Math.min(MAX, totalPages); }
+        if (ep > totalPages) { ep = totalPages; sp = Math.max(1, totalPages - MAX + 1); }
 
+        if (sp > 1) {
+            pg.appendChild(mkLi(1, 1, false));
+            if (sp > 2) { const li = document.createElement("li"); li.className = "page-item disabled"; li.innerHTML = `<a class="page-link">…</a>`; pg.appendChild(li); }
+        }
 
-    let value=this.value.toLowerCase();
+        for (let i = sp; i <= ep; i++) {
+            const li = document.createElement("li");
+            li.className = "page-item " + (i === currentPage ? "active" : "");
+            li.innerHTML = `<a class="page-link" href="javascript:void(0)">${i}</a>`;
+            li.onclick = (function (p) { return function () { currentPage = p; paginateCurrentRows(); }; })(i);
+            pg.appendChild(li);
+        }
 
+        if (ep < totalPages) {
+            if (ep < totalPages - 1) { const li = document.createElement("li"); li.className = "page-item disabled"; li.innerHTML = `<a class="page-link">…</a>`; pg.appendChild(li); }
+            pg.appendChild(mkLi(totalPages, totalPages, false));
+        }
 
-    tableRows.forEach(row=>{
+        pg.appendChild(mkLi('<i class="fa fa-chevron-right"></i>', currentPage + 1, currentPage === totalPages));
+    }
 
+    function renderTable(data) {
+        tbody.innerHTML = "";
 
-    row.style.display =
-    row.innerText.toLowerCase()
-    .includes(value)
-    ?""
-    :"none";
+        if (!data || data.length === 0) {
+            tbody.innerHTML = `<tr id="noDataRow">
+                <td colspan="9" class="no-record">
+                    <i class="fa fa-info-circle"></i> No records found.
+                </td>
+            </tr>`;
+            document.getElementById('totalRecords').textContent = 0;
+            document.getElementById("pagination").innerHTML = "";
+            return;
+        }
 
+        isHierarchy = data.some(d => (d.level ?? 0) > 0);
 
+        const fragment    = document.createDocumentFragment();
+        const icons       = ['fa-user-tie', 'fa-user-shield', 'fa-user', 'fa-user-clock'];
+        const levelLabels = ['Manager', 'Team Lead', 'Member', 'Junior'];
+
+        data.forEach((item, idx) => {
+            const level  = item.level ?? 0;
+            //const lvlCap = Math.min(level, 3);
+             const { idx: lvlCap, label: roleLabel, icon } = getRoleInfo(item);
+
+            const statusBadge = item.status
+                ? `<span class="active-status"><i class="fa fa-check-circle"></i> Active</span>`
+                : `<span class="inactive-status"><i class="fa fa-times-circle"></i> Inactive</span>`;
+
+           let guides = '';
+                 if (isHierarchy && level > 0) {
+                        if (currentView === 'tree') {
+                            for (let i = 0; i < level - 1; i++) guides += `<div class="tg-spacer"></div>`;
+                            guides += `<div class="tg-elbow"></div><div class="tg-node-dot"></div>`;
+                        } else {
+                            for (let i = 0; i < level; i++) guides += `<div style="width:16px;flex-shrink:0"></div>`;
+                        }
+                    }
+
+            const lvlPill = isHierarchy
+                ? `<span class="level-pill lp-${lvlCap}">${levelLabels[lvlCap]}</span>`
+                : '';
+
+            const nameCell = `
+                <div class="tree-cell">
+                    <div class="tree-guides d-flex">${guides}</div>
+                    <div class="tree-node-icon tni-${lvlCap}">
+                        <i class="fa ${icons[lvlCap]}"></i>
+                    </div>
+                    <div class="tree-name">
+                        <span class="tn-primary">${item.name ?? ''}${lvlPill}</span>
+                        <span class="tn-code">${item.empcode ?? ''}</span>
+                    </div>
+                </div>`;
+
+            const tr = document.createElement("tr");
+            tr.className = `hlevel-${lvlCap}`;
+            tr.innerHTML = `
+                <td class="row-number">${idx + 1}</td>
+                <td>${nameCell}</td>
+                <td style="font-size:12px;color:#475569">${item.email ?? ''}</td>
+                <td style="font-size:12px">${item.mobile ?? ''}</td>
+                <td><span class="b-role">${item.role ?? ''}</span></td>
+                <td>${statusBadge}</td>
+                <td style="font-size:12px">${item.userName ?? ''}</td>
+                <td>
+                    <div class="d-flex gap-1">
+                        <a href="/UserMaster/Edit/${item.id}"
+                           class="btn btn-warning btn-sm action-btn edit-btn" title="Edit">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                        <a href="/UserMaster/Delete/${item.id}"
+                           class="btn btn-danger btn-sm action-btn delete-btn" title="Delete"
+                           onclick="return confirm('Are you sure you want to delete this user?');">
+                            <i class="fa fa-trash"></i>
+                        </a>
+                    </div>
+                </td>`;
+            fragment.appendChild(tr);
+        });
+
+        tbody.appendChild(fragment);
+        currentPage = 1;
+        paginateCurrentRows();
+    }
+
+    function getRoleInfo(item) {
+        const level = item.level ?? 0;
+        if (level === 0) return { idx: 0, label: 'Manager', icon: 'fa-user-tie' };
+
+        const isTL = item.sales_TL_Manager === true || item.sales_TL_Manager === 1;
+
+        return isTL
+            ? { idx: 1, label: 'Team Lead', icon: 'fa-user-shield' }
+            : { idx: 2, label: 'Member', icon: 'fa-user' };
+    }
+
+    function getFilterPayload() {
+        return {
+            ManagerEmpCode: document.getElementById('ddlTeamuser').value,
+            Status:         document.getElementById('ddlStatus').value,
+            Search:         document.getElementById('searchInput').value
+        };
+    }
+
+    function triggerSearch() {
+        overlay.classList.add('show');
+        $.ajax({
+            url:         '/UserMaster/GetFilteredUsers',
+            type:        'POST',
+            contentType: 'application/json',
+            data:        JSON.stringify(getFilterPayload()),
+            success: function (res) {
+                overlay.classList.remove('show');
+                if (!res.success) { console.error(res.message); return; }
+                renderTable(res.data);
+            },
+            error: function () {
+                overlay.classList.remove('show');
+                console.error('Filter request failed');
+            }
+        });
+    }
+
+    document.getElementById('searchInput').addEventListener('keyup', function () {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(triggerSearch, 300);
     });
 
+    document.getElementById('ddlStatus').addEventListener('change', triggerSearch);
 
+    document.getElementById('btnresetfilter').addEventListener('click', function () {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('ddlStatus').value   = '';
+        if (window.$ && $('#ddlTeamuser').data('select2')) {
+            $('#ddlTeamuser').val('').trigger('change.select2');
+        } else {
+            document.getElementById('ddlTeamuser').value = '';
+        }
+        isHierarchy = false;
+        location.reload();
     });
 
-
-
-    displayTable(1);
-
+    $(document).ready(function () {
+        $('#ddlTeamuser').select2({ width: '100%', allowClear: true, placeholder: '— All Managers —' });
+        $('#ddlTeamuser').on('change', triggerSearch);
+        paginateCurrentRows();
+    });
 
 </script>

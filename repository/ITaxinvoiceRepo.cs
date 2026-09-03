@@ -1,4 +1,6 @@
-﻿using WLSPL_ERP_CRM.Models;
+﻿using WEBLINK_CRM.Models;
+using WLSPL_ERP_CRM.Models;
+using static WLSPL_ERP_CRM.Models.Taxinvoice;
 
 namespace WLSPL_ERP_CRM.repository
 {
@@ -6,11 +8,23 @@ namespace WLSPL_ERP_CRM.repository
     {
 
 
-        Task<List<Taxinvoice.InvoiceList>> GetInfo(string financialYear,int? month);
+        Task<List<Taxinvoice.TaxInvoiceCreate>> GetInfo(string financialYear,int? month);
 
-        Task<List<Taxinvoice.InvoiceMonthSummary>>GetFinancialYearSummary(string financialYear);
+        Task<List<Taxinvoice.TaxInvoiceCreate>>GetFinancialYearSummary(string financialYear);
 
-        Task<Taxinvoice.TaxInvoicePdfViewModel?>GetInvoiceForPdfAsync(int id);
+        Task<Taxinvoice.TaxInvoiceCreateVM?>GetInvoiceForPdfAsync(int id);
+
+        Task<Taxinvoice.TaxInvoiceCreateVM?>Getinvoiceno();
+        Task<Taxinvoice.TaxInvoiceCreate?> Getinvoicenoss();
+
+        Task<List<TaxInvoiceCreate>>Getcompany();
+        Task<TaxInvoiceCreate> Getcompanybycname(string cname);
+
+        Task<bool> UpdateSave(TaxInvoiceCreateVM model, string Action);
+
+        Task<bool>Deletereords(int ID);
+        Task<dynamic>Getinvoicebyid(int ID);
+
 
     }
 }

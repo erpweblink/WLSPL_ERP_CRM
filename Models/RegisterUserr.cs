@@ -52,5 +52,15 @@ namespace WEBLINK_CRM.Models
         public DateTime regdate { get; set; }
 
         public string? ProfileImagePath { get; set; }
+
+        public int Level { get; set; }
+        public string? Path { get; set; }
+    }
+
+    public class UserFilterDto
+    {
+        public string? ManagerEmpCode { get; set; }
+        public string? Status { get; set; }
+        public string? Search { get; set; }
     }
 }

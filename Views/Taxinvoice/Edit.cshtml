@@ -1,0 +1,1493 @@
+﻿@model WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreateVM
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    bool isEdit = Model?.main != null && Model.main.Id > 0;
+
+    var companyList = Model?.companies
+        ?? new List<WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreate>();
+
+    var invoiceDetails = Model?.details
+        ?? new List<WLSPL_ERP_CRM.Models.Taxinvoice.InvoiceDetails>();
+}
+
+<style>
+
+    .required::after {
+        content: " *";
+        color: red;
+    }
+
+    .form-control {
+        border: 1px solid gray !important;
+    }
+
+        .form-control,
+        .form-control:focus {
+            background-color: #f4f5f6 !important;
+            border: 1px solid #ced4da;
+            color: #444;
+            border-radius: 3px;
+        }
+
+            .form-control[readonly],
+            .form-control:disabled {
+                background-color: #e8eaeb !important;
+                color: #6c757d;
+                cursor: default;
+            }
+
+    .select2-container .select2-selection--single {
+        background-color: #f4f5f6 !important;
+        border: 1px solid #343434 !important;
+        border-radius: 3px !important;
+        height: 38px !important;
+    }
+
+        .select2-container .select2-selection--single
+        .select2-selection__rendered {
+            line-height: 36px !important;
+            color: #444 !important;
+        }
+
+        .select2-container .select2-selection--single
+        .select2-selection__arrow {
+            height: 36px !important;
+        }
+
+    .card-body .row.form-row-item {
+        margin-bottom: 16px;
+    }
+
+    .invoice-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+        .invoice-table th,
+        .invoice-table td {
+            border: 1px solid #dee2e6;
+            padding: 4px 6px;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .invoice-table th {
+            background: linear-gradient(314deg, #0b0f14, #1a3e66);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .invoice-table td input,
+        .invoice-table td textarea {
+            width: 100%;
+            font-size: 11px;
+            border: 1px solid gray;
+            border-radius: 3px;
+            padding: 2px 4px;
+            background: #f4f5f6;
+            color: #444;
+        }
+
+            .invoice-table td input[readonly],
+            .invoice-table td input:disabled {
+                background: #e8eaeb !important;
+                color: #6c757d;
+                cursor: default;
+            }
+
+        .invoice-table td textarea {
+            min-height: 38px;
+            resize: vertical;
+        }
+
+    .col-sn {
+        width: 42px;
+    }
+
+    .col-desc {
+        width: 175px;
+    }
+
+    .col-sac {
+        width: 75px;
+    }
+
+    .col-qty {
+        width: 60px;
+    }
+
+    .col-rate {
+        width: 80px;
+    }
+
+    .col-taxable {
+        width: 90px;
+    }
+
+    .col-tax {
+        width: 110px;
+    }
+
+    .col-total {
+        width: 95px;
+    }
+
+    .col-action {
+        width: 36px;
+    }
+
+    .tax-pair {
+        display: grid;
+        grid-template-columns: 44px 1fr;
+        gap: 3px;
+    }
+
+    .tfoot-row td {
+        background: #f1f3f5;
+        font-weight: 600;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: 60% 40%;
+    }
+
+    .summary-right .summary-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #dee2e6;
+        padding: 6px 12px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+        .summary-right .summary-row input {
+            width: 130px;
+            text-align: right;
+            border: 1px solid #ced4da;
+            border-radius: 3px;
+            background: #e8eaeb !important;
+            color: #444;
+            font-size: 11px;
+            padding: 2px 6px;
+            height: 28px;
+        }
+
+    .words-box {
+        padding: 12px;
+        min-height: 90px;
+    }
+
+        .words-box textarea {
+            width: 100%;
+            min-height: 55px;
+            border: 1px solid #ced4da;
+            border-radius: 3px;
+            font-size: 11px;
+            padding: 4px 6px;
+            resize: vertical;
+            background: #f4f5f6;
+            color: #444;
+        }
+
+    .field-error {
+        border-color: #dc3545 !important;
+        background-color: #fff5f5 !important;
+        box-shadow: 0 0 0 0.15rem rgba(220,53,69,.15);
+    }
+
+    .err-msg {
+        font-size: 10px;
+        color: #dc3545;
+        display: block;
+        margin-top: 2px;
+    }
+
+    @@media print {
+
+        .add-row-btn,
+        .remove-row,
+        .action-btns {
+            display: none !important;
+        }
+
+        @@page {
+            size: A4 landscape;
+            margin: 8mm;
+        }
+    }
+
+</style>
+
+<form id="frmTaxInvoice">
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div class="card">
+
+        <div class="card-header d-flex align-items-center justify-content-between"
+             style="background:linear-gradient(314deg,#0b0f14,#1a3e66);">
+
+            <h5 style="margin:0;color:#fff;">
+                @(isEdit ? "Edit Tax Invoice" : "Tax Invoice")
+            </h5>
+
+            <button type="button"
+                    class="btn btn-primary btn-sm"
+                    onclick="window.history.back();">
+
+                <i class="fa fa-arrow-left"></i>
+                Back
+
+            </button>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row form-row-item">
+
+                <div class="col-md-6">
+
+                    <div class="form-group row">
+
+                        <label class="col-md-4 col-form-label font-weight-bold required">
+                            Invoice No
+                        </label>
+
+                        <div class="col-md-8">
+
+                            <input asp-for="main.invoiceno"
+                                   type="text"
+                                   class="form-control"
+                                   id="invoiceNo"
+                                   readonly />
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <div class="form-group row">
+
+                        <label class="col-md-4 col-form-label font-weight-bold required">
+                            Invoice Date
+                        </label>
+
+                        <div class="col-md-8">
+
+                            <input asp-for="main.invoicedate"
+                                   type="date"
+                                   class="form-control"
+                                   id="invoiceDate" />
+
+                            <span class="err-msg"
+                                  id="err-invoiceDate"></span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="row form-row-item">
+
+                <div class="col-md-6">
+
+                    <div class="form-group row">
+
+                        <label class="col-md-4 col-form-label font-weight-bold">
+                            Reverse Charge
+                        </label>
+
+                        <div class="col-md-8">
+
+                            <select asp-for="main.reversecharge"
+                                    class="form-control"
+                                    id="reverseCharge">
+
+                                <option value="N">N</option>
+                                <option value="Y">Y</option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <div class="form-group row">
+
+                        <label class="col-md-4 col-form-label font-weight-bold">
+                            Against By
+                        </label>
+
+                        <div class="col-md-8">
+
+                            <input asp-for="main.InvoiceType"
+                                   type="text"
+                                   class="form-control"
+                                   id="InvoiceType"
+                                   placeholder="Against By" />
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         BILL TO
+    ====================================================== -->
+
+    <div class="card mt-3">
+
+        <div class="card-header"
+             style="background:linear-gradient(314deg,#0b0f14,#1a3e66);">
+
+            <h5 style="margin:0;color:#fff;">
+                Bill To
+            </h5>
+
+        </div>
+
+        <div class="card-body">
+
+            <div class="row form-row-item">
+
+                <div class="col-md-6">
+
+                    <div class="form-group row">
+
+                        <label class="col-md-4 col-form-label font-weight-bold required">
+                            Company Name
+                        </label>
+
+                        <div class="col-md-8">
+
+                            <select asp-for="main.companyName"
+                                    class="form-control ddlselect"
+                                    id="companyName">
+
+                                <option value="">
+                                    Select Company
+                                </option>
+
+                                @foreach (var company in companyList)
+                                {
+                                    <option value="@company.companyName">
+                                        @company.companyName
+                                    </option>
+                                }
+
+                            </select>
+
+                            <span class="err-msg"
+                                  id="err-companyName"></span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <div class="form-group row">
+
+                        <label class="col-md-4 col-form-label font-weight-bold">
+                            Billing GST
+                        </label>
+
+                        <div class="col-md-8">
+
+                            <input asp-for="main.gstIn"
+                                   type="text"
+                                   class="form-control"
+                                   id="gstin" />
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="row form-row-item">
+
+                <div class="col-md-6">
+
+                    <div class="form-group row">
+
+                        <label class="col-md-4 col-form-label font-weight-bold">
+                            Billing Address
+                        </label>
+
+                        <div class="col-md-8">
+
+                            <textarea asp-for="main.Address"
+                                      class="form-control"
+                                      id="address"
+                                      rows="2"></textarea>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <div class="form-group row">
+
+                        <label class="col-md-4 col-form-label font-weight-bold">
+                            Billing Location
+                        </label>
+
+                        <div class="col-md-8">
+
+                            <input asp-for="main.BillingLocation"
+                                   type="text"
+                                   class="form-control"
+                                   id="Location" />
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="row form-row-item">
+
+                <div class="col-md-6">
+
+                    <div class="form-group row">
+
+                        <label class="col-md-4 col-form-label font-weight-bold">
+                            Pincode
+                        </label>
+
+                        <div class="col-md-8">
+
+                            <input asp-for="main.PinCode"
+                                   type="text"
+                                   class="form-control"
+                                   id="billingPincode" />
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <div class="form-group row">
+
+                        <label class="col-md-4 col-form-label font-weight-bold">
+                            Billing State
+                        </label>
+
+                        <div class="col-md-8">
+
+                            <input asp-for="main.state"
+                                   type="text"
+                                   class="form-control"
+                                   id="billingState" />
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="row form-row-item">
+
+                <div class="col-md-6">
+
+                    <div class="form-group row">
+
+                        <label class="col-md-4 col-form-label font-weight-bold">
+                            Billing State Code
+                        </label>
+
+                        <div class="col-md-8">
+
+                            <input asp-for="main.statecode"
+                                   type="text"
+                                   class="form-control"
+                                   id="billingStateCode" />
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="row form-row-item">
+
+                <div class="col-md-6">
+
+                    <div class="form-group row">
+
+                        <label class="col-md-4 col-form-label font-weight-bold">
+                            Transaction Mode
+                        </label>
+
+                        <div class="col-md-8">
+
+                            <select asp-for="main.TransMode"
+                                    class="form-control"
+                                    id="Transaction">
+
+                                <option value="">
+                                    Select Transaction Mode
+                                </option>
+
+                                <option value="Cheque">
+                                    Cheque
+                                </option>
+
+                                <option value="Online/UPI">
+                                    Online/UPI
+                                </option>
+
+                                <option value="Cash">
+                                    Cash
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <div class="form-group row">
+
+                        <label class="col-md-4 col-form-label font-weight-bold">
+                            Transaction No
+                        </label>
+
+                        <div class="col-md-8">
+
+                            <input asp-for="main.TransNo"
+                                   type="text"
+                                   class="form-control"
+                                   id="transNo" />
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="row form-row-item">
+
+                <div class="col-md-6">
+
+                    <div class="form-group row">
+
+                        <label class="col-md-4 col-form-label font-weight-bold">
+                            Transaction Date
+                        </label>
+
+                        <div class="col-md-8">
+
+                            <input asp-for="main.TransDate"
+                                   type="date"
+                                   class="form-control"
+                                   id="transDate" />
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <div class="form-group row">
+
+                        <label class="col-md-4 col-form-label font-weight-bold">
+                            Transaction Amount
+                        </label>
+
+                        <div class="col-md-8">
+
+                            <input asp-for="main.TransAmt"
+                                   type="text"
+                                   class="form-control"
+                                   id="TransAmt" />
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         ITEM DETAILS
+    ====================================================== -->
+
+    <div class="card mt-3">
+
+        <div class="card-header"
+             style="background:linear-gradient(314deg,#0b0f14,#1a3e66);">
+
+            <h5 style="margin:0;color:#fff;">
+                Item Details
+            </h5>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="invoice-table"
+                       id="invoiceTable">
+
+                    <thead>
+
+                        <tr>
+
+                            <th class="col-sn">S.No</th>
+                            <th class="col-desc">Description</th>
+                            <th class="col-sac">SAC Code</th>
+                            <th class="col-qty">Qty</th>
+                            <th class="col-rate">Rate</th>
+                            <th class="col-taxable">Taxable Value</th>
+                            <th class="col-tax">CGST % | Amt</th>
+                            <th class="col-tax">SGST % | Amt</th>
+                            <th class="col-tax">IGST % | Amt</th>
+                            <th class="col-total">Total</th>
+                            <th class="col-action">#</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="invoiceItems">
+                    </tbody>
+
+                    <tfoot>
+
+                        <tr class="tfoot-row">
+
+                            <td colspan="3"
+                                style="text-align:right;padding-right:10px;">
+                                TOTAL
+                            </td>
+
+                            <td>
+                                <input type="text"
+                                       id="totalQty"
+                                       readonly
+                                       class="form-control form-control-sm text-right" />
+                            </td>
+
+                            <td></td>
+
+                            <td>
+                                <input type="text"
+                                       id="totalTaxable"
+                                       readonly
+                                       class="form-control form-control-sm text-right" />
+                            </td>
+
+                            <td>
+                                <input type="text"
+                                       id="totalCGST"
+                                       readonly
+                                       class="form-control form-control-sm text-right" />
+                            </td>
+
+                            <td>
+                                <input type="text"
+                                       id="totalSGST"
+                                       readonly
+                                       class="form-control form-control-sm text-right" />
+                            </td>
+
+                            <td>
+                                <input type="text"
+                                       id="totalIGST"
+                                       readonly
+                                       class="form-control form-control-sm text-right" />
+                            </td>
+
+                            <td>
+                                <input type="text"
+                                       id="grandTotalTable"
+                                       readonly
+                                       class="form-control form-control-sm text-right" />
+                            </td>
+
+                            <td></td>
+
+                        </tr>
+
+                    </tfoot>
+
+                </table>
+
+            </div>
+
+            <div class="p-2 pt-3">
+
+                <button type="button"
+                        class="btn btn-success btn-sm add-row-btn"
+                        onclick="addInvoiceRow()">
+
+                    + Add New Row
+
+                </button>
+
+                <span class="err-msg d-inline-block ml-2"
+                      id="err-items"></span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         SUMMARY
+    ====================================================== -->
+
+    <div class="card mt-3">
+
+        <div class="card-header"
+             style="background:linear-gradient(314deg,#0b0f14,#1a3e66);">
+
+            <h5 style="margin:0;color:#fff;">
+                Summary
+            </h5>
+
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="summary-grid">
+
+                <div style="border-right:1px solid #dee2e6;">
+
+                    <div style="padding:10px 12px;font-size:12px;font-weight:700;border-bottom:1px solid #dee2e6;">
+
+                        Amount in Words
+
+                    </div>
+
+                    <div class="words-box">
+
+                        <label class="font-weight-bold mb-1"
+                               style="font-size:12px;">
+
+                            Total Amount (in words)
+
+                        </label>
+
+                        <textarea id="amountInWords"
+                                  asp-for="main.amtinwords"
+                                  style="color:red;font-size:large;font-weight:600;"
+                                  readonly></textarea>
+
+                    </div>
+
+                </div>
+
+                <div class="summary-right">
+
+                    <div style="padding:10px 12px;font-size:12px;font-weight:700;border-bottom:1px solid #dee2e6;">
+
+                        Tax Summary
+
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Total Amount Before Tax</span>
+                        <input type="text" id="summaryBeforeTax" readonly />
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Total CGST</span>
+                        <input type="text" id="summaryCGST" readonly />
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Total SGST</span>
+                        <input type="text" id="summarySGST" readonly />
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Total IGST</span>
+                        <input type="text" id="summaryIGST" readonly />
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Total Tax Amount</span>
+                        <input type="text" id="summaryTax" readonly />
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Grand Total</span>
+                        <input type="text" id="summaryGrandTotal" readonly />
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         BUTTONS
+    ====================================================== -->
+
+    <div class="row justify-content-center mt-3 mb-4 action-btns">
+
+        <div class="col-auto">
+
+            <button type="button"
+                    id="saveBtn"
+                    class="btn btn-primary px-4"
+                    onclick="saveInvoice()">
+
+                   @(isEdit ? "Update" : "Save")
+
+            </button>
+
+        </div>
+
+        <div class="col-auto">
+
+
+
+        </div>
+
+        <div class="col-auto">
+
+            <button type="button"
+                    class="btn btn-danger px-4"
+                    onclick="clearInvoice()">
+
+                Clear
+
+            </button>
+
+        </div>
+
+    </div>
+
+</form>
+
+
+<script>
+
+    let rowCounter = 0;
+
+    const isEdit = @(isEdit ? "true" : "false");
+    const invoiceId = @(isEdit ? Model.main.Id : 0);
+
+    const existingDetails =
+        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(invoiceDetails));
+
+    const existingCompany =
+        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model?.main?.companyName ?? ""));
+
+ 
+    // =========================================================
+    // DOCUMENT READY
+    // =========================================================
+
+    $(document).ready(function () {
+        $('#companyName').select2({
+            placeholder: 'Select Company',
+            allowClear: true,
+            width: '100%'
+        });
+
+        loadExistingInvoice();
+    });
+
+    // =========================================================
+    // LOAD EXISTING INVOICE
+    // =========================================================
+
+    function loadExistingInvoice() {
+        const tbody = document.getElementById('invoiceItems');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        rowCounter = 0;
+
+        if (!existingDetails || !Array.isArray(existingDetails) || existingDetails.length === 0) {
+            addInvoiceRow();
+            calculateAll();
+            return;
+        }
+
+        existingDetails.forEach(function (item) {
+            const row = addInvoiceRow();
+            if (!row) return;
+
+            row.dataset.detailId = item.id ?? item.Id ?? 0;
+
+            row.querySelector('.description').value = item.productdescription ?? item.ProductDescription ?? '';
+            row.querySelector('.sac-code').value = item.saccode ?? item.SacCode ?? '';
+            row.querySelector('.qty').value = item.qty ?? item.Qty ?? 0;
+            row.querySelector('.rate').value = item.rate ?? item.Rate ?? 0;
+
+            row.querySelector('.taxable-value').value =
+                Number(item.taxablevalue ?? item.TaxableValue ?? item.amount ?? item.Amount ?? 0).toFixed(2);
+
+            row.querySelector('.cgst-rate').value = item.cgstrate ?? item.CgstRate ?? 0;
+            row.querySelector('.cgst-amount').value = Number(item.cgstamt ?? item.CgstAmt ?? 0).toFixed(2);
+
+            row.querySelector('.sgst-rate').value = item.sgstrate ?? item.SgstRate ?? 0;
+            row.querySelector('.sgst-amount').value = Number(item.sgstamt ?? item.SgstAmt ?? 0).toFixed(2);
+
+            row.querySelector('.igst-rate').value = item.igstrate ?? item.IgstRate ?? 0;
+            row.querySelector('.igst-amount').value = Number(item.igstamt ?? item.IgstAmt ?? 0).toFixed(2);
+
+            row.querySelector('.row-total').value = Number(item.total ?? item.Total ?? 0).toFixed(2);
+
+            applyTaxState(row);
+        });
+
+        refreshSerialNumbers();
+        calculateAll();
+    }
+
+    // =========================================================
+    // COMPANY DETAILS
+    // =========================================================
+
+    function getCompanyDetails(cname) {
+        $.ajax({
+            url: '@Url.Action("Getcomapnybycname", "Taxinvoice")',
+            type: 'GET',
+            data: { cname: cname },
+            success: function (data) {
+                if (!data) return;
+                $('#gstin').val(data.gstIn || '');
+                $('#address').val(data.address || '');
+                $('#Location').val(data.location || '');
+                $('#billingState').val(data.state || '');
+                $('#billingPincode').val(data.pinCode || '');
+                $('#billingStateCode').val(data.statecode || '');
+            },
+            error: function () {
+                showToast("Error while loading company details.", "error");
+            }
+        });
+    }
+
+    // =========================================================
+    // TODAY
+    // =========================================================
+
+    function setTodayDate() {
+        const d = new Date();
+        const date = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        $('#invoiceDate').val(date);
+    }
+
+    // =========================================================
+    // ADD ROW
+    // =========================================================
+
+    function addInvoiceRow() {
+        rowCounter++;
+
+        const row = document.createElement('tr');
+        row.className = 'invoice-item-row';
+        row.dataset.detailId = 0;
+
+        row.innerHTML = `
+            <td><input type="text" value="${rowCounter}" readonly class="serial-number" /></td>
+            <td><textarea class="description" placeholder="Description"></textarea></td>
+            <td><input type="text" class="sac-code" placeholder="SAC Code" /></td>
+            <td><input type="number" class="qty" min="0" value="1" oninput="calculateRow(this)" /></td>
+            <td><input type="number" class="rate" min="0" value="0" oninput="calculateRow(this)" /></td>
+            <td><input type="number" class="taxable-value" value="0" readonly /></td>
+            <td>
+                <div class="tax-pair">
+                    <input type="number" class="cgst-rate" min="0" value="0" placeholder="%" oninput="taxChanged(this,'CGST')" />
+                    <input type="number" class="cgst-amount" value="0" readonly />
+                </div>
+            </td>
+            <td>
+                <div class="tax-pair">
+                    <input type="number" class="sgst-rate" min="0" value="0" placeholder="%" oninput="taxChanged(this,'SGST')" />
+                    <input type="number" class="sgst-amount" value="0" readonly />
+                </div>
+            </td>
+            <td>
+                <div class="tax-pair">
+                    <input type="number" class="igst-rate" min="0" value="0" placeholder="%" oninput="taxChanged(this,'IGST')" />
+                    <input type="number" class="igst-amount" value="0" readonly />
+                </div>
+            </td>
+            <td><input type="number" class="row-total" value="0" readonly /></td>
+            <td><button type="button" class="btn btn-danger btn-sm remove-row" onclick="removeRow(this)" style="padding:1px 6px;">×</button></td>
+        `;
+
+        document.getElementById('invoiceItems').appendChild(row);
+        refreshSerialNumbers();
+        return row;
+    }
+
+    // =========================================================
+    // REMOVE ROW
+    // =========================================================
+
+    function removeRow(btn) {
+        const rows = document.querySelectorAll('.invoice-item-row');
+        if (rows.length <= 1) {
+            showToast("At least one item row is required.", "warning");
+            return;
+        }
+
+        showConfirmToast("Remove this item row?", function () {
+            btn.closest('tr').remove();
+            refreshSerialNumbers();
+            calculateAll();
+        });
+    }
+
+    // =========================================================
+    // SERIAL NUMBERS
+    // =========================================================
+
+    function refreshSerialNumbers() {
+        document.querySelectorAll('.invoice-item-row').forEach(function (row, index) {
+            row.querySelector('.serial-number').value = index + 1;
+        });
+    }
+
+    // =========================================================
+    // TAX STATE
+    // =========================================================
+
+    function applyTaxState(row) {
+        const cgstInput = row.querySelector('.cgst-rate');
+        const sgstInput = row.querySelector('.sgst-rate');
+        const igstInput = row.querySelector('.igst-rate');
+
+        const cgst = parseFloat(cgstInput.value) || 0;
+        const sgst = parseFloat(sgstInput.value) || 0;
+        const igst = parseFloat(igstInput.value) || 0;
+
+        if (igst > 0) {
+            cgstInput.disabled = true;
+            sgstInput.disabled = true;
+            igstInput.disabled = false;
+        } else if (cgst > 0 || sgst > 0) {
+            igstInput.disabled = true;
+            cgstInput.disabled = false;
+            sgstInput.disabled = false;
+        } else {
+            cgstInput.disabled = false;
+            sgstInput.disabled = false;
+            igstInput.disabled = false;
+        }
+    }
+
+    // =========================================================
+    // TAX CHANGE
+    // =========================================================
+
+    function taxChanged(input, taxType) {
+        const row = input.closest('tr');
+        const cgst = row.querySelector('.cgst-rate');
+        const sgst = row.querySelector('.sgst-rate');
+        const igst = row.querySelector('.igst-rate');
+
+        let value = parseFloat(input.value) || 0;
+        if (value < 0) {
+            input.value = 0;
+            value = 0;
+        }
+
+        if (taxType === 'CGST' || taxType === 'SGST') {
+            if (value > 0) {
+                igst.value = 0;
+                igst.disabled = true;
+            } else if ((parseFloat(cgst.value) || 0) === 0 && (parseFloat(sgst.value) || 0) === 0) {
+                igst.disabled = false;
+            }
+        }
+
+        if (taxType === 'IGST') {
+            if (value > 0) {
+                cgst.value = 0;
+                sgst.value = 0;
+                cgst.disabled = true;
+                sgst.disabled = true;
+            } else {
+                cgst.disabled = false;
+                sgst.disabled = false;
+            }
+        }
+
+        calculateRow(input);
+    }
+
+    // =========================================================
+    // CALCULATE ROW
+    // =========================================================
+
+    function calculateRow(el) {
+        const row = el.closest('tr');
+        if (!row) return;
+
+        const qty = parseFloat(row.querySelector('.qty').value) || 0;
+        const rate = parseFloat(row.querySelector('.rate').value) || 0;
+        const taxable = qty * rate;
+
+        row.querySelector('.taxable-value').value = taxable.toFixed(2);
+
+        const cgstRate = parseFloat(row.querySelector('.cgst-rate').value) || 0;
+        const sgstRate = parseFloat(row.querySelector('.sgst-rate').value) || 0;
+        const igstRate = parseFloat(row.querySelector('.igst-rate').value) || 0;
+
+        const cgst = taxable * cgstRate / 100;
+        const sgst = taxable * sgstRate / 100;
+        const igst = taxable * igstRate / 100;
+
+        row.querySelector('.cgst-amount').value = cgst.toFixed(2);
+        row.querySelector('.sgst-amount').value = sgst.toFixed(2);
+        row.querySelector('.igst-amount').value = igst.toFixed(2);
+        row.querySelector('.row-total').value = (taxable + cgst + sgst + igst).toFixed(2);
+
+        calculateAll();
+    }
+
+    // =========================================================
+    // CALCULATE ALL
+    // =========================================================
+
+    function calculateAll() {
+        let totalQty = 0, totalTaxable = 0, totalCGST = 0, totalSGST = 0, totalIGST = 0, grand = 0;
+
+        document.querySelectorAll('.invoice-item-row').forEach(function (row) {
+            totalQty += parseFloat(row.querySelector('.qty').value) || 0;
+            totalTaxable += parseFloat(row.querySelector('.taxable-value').value) || 0;
+            totalCGST += parseFloat(row.querySelector('.cgst-amount').value) || 0;
+            totalSGST += parseFloat(row.querySelector('.sgst-amount').value) || 0;
+            totalIGST += parseFloat(row.querySelector('.igst-amount').value) || 0;
+            grand += parseFloat(row.querySelector('.row-total').value) || 0;
+        });
+
+        const totalTax = totalCGST + totalSGST + totalIGST;
+
+        $('#totalQty').val(totalQty);
+        $('#totalTaxable').val(totalTaxable.toFixed(2));
+        $('#totalCGST').val(totalCGST.toFixed(2));
+        $('#totalSGST').val(totalSGST.toFixed(2));
+        $('#totalIGST').val(totalIGST.toFixed(2));
+        $('#grandTotalTable').val(grand.toFixed(2));
+
+        $('#summaryBeforeTax').val(totalTaxable.toFixed(2));
+        $('#summaryCGST').val(totalCGST.toFixed(2));
+        $('#summarySGST').val(totalSGST.toFixed(2));
+        $('#summaryIGST').val(totalIGST.toFixed(2));
+        $('#summaryTax').val(totalTax.toFixed(2));
+        $('#summaryGrandTotal').val(grand.toFixed(2));
+
+        updateAmountInWords();
+    }
+
+    // =========================================================
+    // NUMBER TO WORDS
+    // =========================================================
+
+    function numberToWordsIndian(amount) {
+        amount = parseFloat(amount) || 0;
+        if (amount === 0) return "Zero Rupees Only";
+
+        amount = Math.round(amount * 100) / 100;
+
+        const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+            "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+        const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+        function convertBelowThousand(num) {
+            let result = "";
+            if (num >= 100) {
+                result += ones[Math.floor(num / 100)] + " Hundred ";
+                num %= 100;
+            }
+            if (num >= 20) {
+                result += tens[Math.floor(num / 10)] + " ";
+                num %= 10;
+            }
+            if (num > 0) result += ones[num] + " ";
+            return result.trim();
+        }
+
+        function convertIndian(num) {
+            if (num < 1000) return convertBelowThousand(num);
+            if (num < 100000) return convertIndian(Math.floor(num / 1000)) + " Thousand " + convertBelowThousand(num % 1000);
+            if (num < 10000000) return convertIndian(Math.floor(num / 100000)) + " Lakh " + convertIndian(num % 100000);
+            return convertIndian(Math.floor(num / 10000000)) + " Crore " + convertIndian(num % 10000000);
+        }
+
+        const rupees = Math.floor(amount);
+        const paise = Math.round((amount - rupees) * 100);
+
+        let words = convertIndian(rupees).replace(/\s+/g, " ").trim();
+        let result = words + " Rupees";
+
+        if (paise > 0) result += " and " + convertIndian(paise) + " Paise";
+        result += " Only";
+
+        return result;
+    }
+
+    // =========================================================
+    // AMOUNT WORDS
+    // =========================================================
+
+    function updateAmountInWords() {
+        const grandTotal = parseFloat($('#summaryGrandTotal').val()) || 0;
+        $('#amountInWords').val(numberToWordsIndian(grandTotal));
+    }
+
+    // =========================================================
+    // VALIDATION
+    // =========================================================
+
+    function validateInvoice() {
+        let valid = true;
+
+        $('.field-error').removeClass('field-error');
+        $('.err-msg').text('');
+
+        if (!$('#invoiceDate').val()) {
+            $('#invoiceDate').addClass('field-error');
+            $('#err-invoiceDate').text('Invoice Date is required.');
+            valid = false;
+        }
+
+        if (!$('#companyName').val()) {
+            $('#companyName').addClass('field-error');
+            $('#err-companyName').text('Company Name is required.');
+            valid = false;
+        }
+
+        const rows = document.querySelectorAll('.invoice-item-row');
+        if (rows.length === 0) {
+            $('#err-items').text('At least one invoice item is required.');
+            valid = false;
+        }
+
+        rows.forEach(function (row) {
+            const description = row.querySelector('.description');
+            const qty = row.querySelector('.qty');
+            const rate = row.querySelector('.rate');
+
+            if (!description.value.trim()) {
+                description.classList.add('field-error');
+                valid = false;
+            }
+            if ((parseFloat(qty.value) || 0) <= 0) {
+                qty.classList.add('field-error');
+                valid = false;
+            }
+            if ((parseFloat(rate.value) || 0) <= 0) {
+                rate.classList.add('field-error');
+                valid = false;
+            }
+        });
+
+        if (!valid) {
+            const firstError = document.querySelector('.field-error');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            showToast("Please fix the highlighted errors before saving.", "error");
+        }
+
+        return valid;
+    }
+
+    // =========================================================
+    // SAVE / UPDATE
+    // =========================================================
+
+    function saveInvoice() {
+        calculateAll();
+
+        if (!validateInvoice()) return;
+
+        const main = {
+            Id: invoiceId,
+            invoiceno: $('#invoiceNo').val() || null,
+            invoicedate: $('#invoiceDate').val() || null,
+            reversecharge: $('#reverseCharge').val() || null,
+            InvoiceType: $('#InvoiceType').val() || null,
+            companyName: $('#companyName').val() || null,
+            gstIn: $('#gstin').val() || null,
+            Address: $('#address').val() || null,
+            Location: $('#Location').val() || null,
+            PinCode: $('#billingPincode').val() || null,
+            state: $('#billingState').val() || null,
+            statecode: $('#billingStateCode').val() || null,
+            TransMode: $('#Transaction').val() || null,
+            TransNo: $('#transNo').val() || null,
+            TransDate: $('#transDate').val() || null,
+            TransAmt: $('#TransAmt').val() || null,
+
+            cgst: parseFloat($('.cgst-rate').first().val()) || 0,
+            sgst: parseFloat($('.sgst-rate').first().val()) || 0,
+            igst: parseFloat($('.igst-rate').first().val()) || 0,
+
+            cgstamt: parseFloat($('#summaryCGST').val()) || 0,
+            sgstamt: parseFloat($('#summarySGST').val()) || 0,
+            igstamt: parseFloat($('#summaryIGST').val()) || 0,
+
+            totalqty: parseFloat($('#totalQty').val()) || 0,
+            totalrate: parseFloat($('#summaryBeforeTax').val()) || 0,
+            taxablevalue: parseFloat($('#summaryBeforeTax').val()) || 0,
+            totalamtbeforetax: parseFloat($('#summaryBeforeTax').val()) || 0,
+            totalamtaftertax: parseFloat($('#summaryGrandTotal').val()) || 0,
+            total_tax_amount: String(parseFloat($('#summaryTax').val()) || 0),
+
+            amtinwords: $('#amountInWords').val() || null
+        };
+
+        const details = [];
+
+        document.querySelectorAll('.invoice-item-row').forEach(function (row) {
+            details.push({
+                id: parseInt(row.dataset.detailId || 0),
+                invoiceid: invoiceId,
+                productdescription: row.querySelector('.description').value.trim() || null,
+                saccode: row.querySelector('.sac-code').value.trim() || null,
+                qty: parseFloat(row.querySelector('.qty').value) || 0,
+                rate: parseFloat(row.querySelector('.rate').value) || 0,
+                amount: parseFloat(row.querySelector('.taxable-value').value) || 0,
+                taxablevalue: parseFloat(row.querySelector('.taxable-value').value) || 0,
+                cgstrate: parseFloat(row.querySelector('.cgst-rate').value) || 0,
+                cgstamt: parseFloat(row.querySelector('.cgst-amount').value) || 0,
+                sgstrate: parseFloat(row.querySelector('.sgst-rate').value) || 0,
+                sgstamt: parseFloat(row.querySelector('.sgst-amount').value) || 0,
+                igstrate: parseFloat(row.querySelector('.igst-rate').value) || 0,
+                igstamt: parseFloat(row.querySelector('.igst-amount').value) || 0,
+                total: parseFloat(row.querySelector('.row-total').value) || 0
+            });
+        });
+
+        const payload = { Main: main, Details: details };
+
+        const url = isEdit
+            ? '@Url.Action("UpdateInvoice", "Taxinvoice")'
+            : '@Url.Action("SaveInvoice", "Taxinvoice")';
+
+        const $btn = $('#saveBtn');
+        $btn.prop('disabled', true).text(isEdit ? 'Updating...' : 'Saving...');
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(payload),
+            success: function (response) {
+                if (response && response.success) {
+                    showToast(isEdit ? 'Invoice updated successfully.' : 'Invoice saved successfully.', 'success');
+                    setTimeout(function () {
+                        window.location.href = '@Url.Action("Index", "Taxinvoice")';
+                    }, 1200);
+                } else {
+                    showToast(response?.message || 'Operation failed.', 'error');
+                }
+            },
+            error: function () {
+                showToast('Error while processing invoice.', 'error');
+            },
+            complete: function () {
+                $btn.prop('disabled', false).text(isEdit ? 'Update' : 'Save');
+            }
+        });
+    }
+
+    // =========================================================
+    // CLEAR
+    // =========================================================
+
+    function clearInvoice() {
+        showConfirmToast("Are you sure you want to clear the invoice?", function () {
+            $('#companyName').val('').trigger('change');
+            $('#reverseCharge').val('N');
+            $('#Transaction').val('');
+
+            [
+                '#gstin', '#address', '#Location', '#billingState', '#billingPincode',
+                '#billingStateCode', '#transNo', '#transDate', '#TransAmt', '#amountInWords'
+            ].forEach(function (id) {
+                $(id).val('');
+            });
+
+            $('#invoiceItems').empty();
+            rowCounter = 0;
+            addInvoiceRow();
+            setTodayDate();
+
+            $('.field-error').removeClass('field-error');
+            $('.err-msg').text('');
+
+            calculateAll();
+            showToast("Invoice cleared.", "info");
+        });
+    }
+
+</script>

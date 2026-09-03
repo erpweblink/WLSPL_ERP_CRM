@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WEBLINK_CRM.repository;
+using WLSPL_ERP_CRM.Models;
 using WLSPL_ERP_CRM.repository;
+using static WLSPL_ERP_CRM.Models.Taxinvoice;
 
 namespace WLSPL_ERP_CRM.Controllers
 {
@@ -12,43 +13,6 @@ namespace WLSPL_ERP_CRM.Controllers
         {
             _TaxinvoiceRepo = taxinvoiceRepo;
         }
-        //public async Task<IActionResult> Index(string? financialYear, int? month)
-        //{
-        //    try
-        //    {
-        //        var today = DateTime.Now;
-
-        //        // Default Financial Year
-        //        if (string.IsNullOrEmpty(financialYear))
-        //        {
-        //            financialYear = today.Month >= 4
-        //                ? $"{today.Year}-{(today.Year + 1).ToString().Substring(2)}"
-        //                : $"{today.Year - 1}-{today.Year.ToString().Substring(2)}";
-        //        }
-
-        //        // Default current month
-        //        if (!month.HasValue)
-        //        {
-        //            month = today.Month;
-        //        }
-
-        //        var data = await _TaxinvoiceRepo.GetInfo(
-        //            financialYear,
-        //            month
-        //        );
-
-        //        ViewBag.SelectedFinancialYear = financialYear;
-        //        ViewBag.SelectedMonth = month;
-
-        //        return View(data);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        ViewBag.ErrorMessage = ex.Message;
-        //        return View("Error");
-        //    }
-        //}
-
 
         public async Task<IActionResult> Index(string? financialYear, int? month)
         {
@@ -129,13 +93,118 @@ namespace WLSPL_ERP_CRM.Controllers
                 return NotFound("Invoice not found.");
 
             return View(invoice);
+
+
+        }
+
+        public async Task<IActionResult> Create()
+        {
+            var invoiceMain = await _TaxinvoiceRepo.Getinvoicenoss();
+
+            var companies = await _TaxinvoiceRepo.Getcompany();
+
+            var model = new TaxInvoiceCreateVM
+            {
+                main = invoiceMain ?? new TaxInvoiceCreate(),
+                details = new List<Taxinvoice.InvoiceDetails>(),
+                companies = companies ?? new List<TaxInvoiceCreate>()
+            };
+
+            if (model.main.invoicedate == null)
+            {
+                model.main.invoicedate = DateTime.Today;
+            }
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult SaveInvoice([FromBody] TaxInvoiceCreateVM model)
+        {
+            model.main.sessionname = HttpContext.Session.GetString("EmpCode")?.ToString();
+
+            if (!ModelState.IsValid)
+                return Json(new { success = false, message = "Invalid data." });
+
+              var result = _TaxinvoiceRepo.UpdateSave(model, Action : "insert");
+
+            return Json(new { success = true, invoiceNo = model.main.invoiceno });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Getcomapnybycname(string cname)
+        {
+            if (string.IsNullOrWhiteSpace(cname))
+            {
+                return BadRequest("Company name is required.");
+            }
+
+            var result = await _TaxinvoiceRepo.Getcompanybycname(cname);
+
+            if (result == null)
+            {
+                return NotFound("Company not found.");
+            }
+
+            return Json(result);
+        }
+
+
+        [HttpGet]
+        public async Task<IActionResult> Deleteinvoice(int id)
+        {
+            var result = await _TaxinvoiceRepo.Deletereords(id);
+
+            if (result)
+            {
+                return Json(new
+                {
+                    success = true,
+                    message = "Invoice deleted successfully."
+                });
+            }
+
+            return Json(new
+            {
+                success = false,
+                message = "Invoice not found or could not be deleted."
+            });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var result = await _TaxinvoiceRepo.Getinvoicebyid(id);
+
+            if (result == null || result.main == null)
+            {
+                return NotFound();
+            }
+
+            var companies = await _TaxinvoiceRepo.Getcompany();
+
+            var vm = new Taxinvoice.TaxInvoiceCreateVM
+            {
+                main = result.main,
+                details = result.details ?? new List<Taxinvoice.InvoiceDetails>(),
+                companies = companies ?? new List<Taxinvoice.TaxInvoiceCreate>()
+            };
+
+            return View(vm);
+        }
+
+        [HttpPost]
+        public IActionResult UpdateInvoice([FromBody] TaxInvoiceCreateVM model)
+        {
+            model.main.sessionname = HttpContext.Session.GetString("EmpCode")?.ToString();
+
+            if (!ModelState.IsValid)
+                return Json(new { success = false, message = "Invalid data." });
+
+            var result = _TaxinvoiceRepo.UpdateSave(model, Action: "updateOldData");
+
+            return Json(new { success = true, invoiceNo = model.main.invoiceno });
         }
 
     }
-
-
-
-
-
 
 }

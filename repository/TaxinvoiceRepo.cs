@@ -1,7 +1,10 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
+using System;
 using System.Data;
+using WEBLINK_CRM.Models;
 using WLSPL_ERP_CRM.Models;
+using static WLSPL_ERP_CRM.Models.Taxinvoice;
 
 namespace WLSPL_ERP_CRM.repository
 {
@@ -13,10 +16,75 @@ namespace WLSPL_ERP_CRM.repository
             _configuration = configuration;
         }
 
-        public async Task<List<Taxinvoice.InvoiceMonthSummary>> GetFinancialYearSummary(
-       string financialYear)
+        public async Task<bool> Deletereords(int ID)
         {
-            var result = new List<Taxinvoice.InvoiceMonthSummary>();
+            using var con = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg"));
+
+            await con.OpenAsync();
+
+            var result = await con.QueryFirstOrDefaultAsync<bool>(
+                "SP_DeleteInvoice",
+                new
+                {
+                    ID = ID
+                },
+                commandType: CommandType.StoredProcedure
+            );
+
+            return result;
+        }
+
+
+        public async Task<List<TaxInvoiceCreate>> Getcompany()
+        {
+            using var connection = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg"));
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@Action", "Getcompany");
+
+            var companies = await connection.QueryAsync<TaxInvoiceCreate>(
+                "SP_TaxInvoice",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+
+            return companies.ToList();
+
+        }
+
+        public async Task<TaxInvoiceCreate> Getcompanybycname(string cname)
+        {
+            try
+            {
+                using var connection = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg"));
+
+                var parameters = new DynamicParameters();
+
+                parameters.Add("@Action", "Getcompanybycname");
+                parameters.Add("@cname", cname);
+
+                var result = await connection.QueryFirstOrDefaultAsync<TaxInvoiceCreate>(
+                    "SP_TaxInvoice",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        public async Task<List<Taxinvoice.TaxInvoiceCreate>> GetFinancialYearSummary(
+           string financialYear)
+        {
+            var result = new List<Taxinvoice.TaxInvoiceCreate>();
 
             if (string.IsNullOrWhiteSpace(financialYear))
                 return result;
@@ -41,58 +109,58 @@ namespace WLSPL_ERP_CRM.repository
                 await con.OpenAsync();
 
                 string query = @"
-            SELECT 
-                MONTH(invoicedate) AS Mon,
+                SELECT 
+                    MONTH(invoicedate) AS Mon,
 
-                COUNT(invoiceno) AS TotalInvoice,
+                    COUNT(invoiceno) AS TotalInvoice,
 
-                ISNULL(
-                    SUM(
-                        CAST(totalamtbeforetax AS DECIMAL(18,2))
-                    ), 0
-                ) AS TotalTaxableValue,
+                    ISNULL(
+                        SUM(
+                            CAST(totalamtbeforetax AS DECIMAL(18,2))
+                        ), 0
+                    ) AS TotalTaxableValue,
 
-                ISNULL(
-                    SUM(
-                        CAST(ISNULL(cgstamt, 0) AS DECIMAL(18,2))
-                        +
-                        CAST(ISNULL(sgstamt, 0) AS DECIMAL(18,2))
-                        +
-                        CAST(ISNULL(igstamt, 0) AS DECIMAL(18,2))
-                    ), 0
-                ) AS TotalTaxAmount,
+                    ISNULL(
+                        SUM(
+                            CAST(ISNULL(cgstamt, 0) AS DECIMAL(18,2))
+                            +
+                            CAST(ISNULL(sgstamt, 0) AS DECIMAL(18,2))
+                            +
+                            CAST(ISNULL(igstamt, 0) AS DECIMAL(18,2))
+                        ), 0
+                    ) AS TotalTaxAmount,
 
-                ISNULL(
-                    SUM(
-                        CAST(totalamtaftertax AS DECIMAL(18,2))
-                    ), 0
-                ) AS GrandTotal
+                    ISNULL(
+                        SUM(
+                            CAST(totalamtaftertax AS DECIMAL(18,2))
+                        ), 0
+                    ) AS GrandTotal
 
-            FROM invoicemain
+                FROM invoicemain
 
-            WHERE 
-                e_invoice_cancel_status IS NULL
-                AND invoicedate >= @StartDate
-                AND invoicedate < DATEADD(DAY, 1, @EndDate)
+                WHERE 
+                    e_invoice_cancel_status IS NULL
+                    AND invoicedate >= @StartDate
+                    AND invoicedate < DATEADD(DAY, 1, @EndDate)
 
-            GROUP BY MONTH(invoicedate)
+                GROUP BY MONTH(invoicedate)
 
-            ORDER BY
-                CASE
-                    WHEN MONTH(invoicedate) = 4 THEN 1
-                    WHEN MONTH(invoicedate) = 5 THEN 2
-                    WHEN MONTH(invoicedate) = 6 THEN 3
-                    WHEN MONTH(invoicedate) = 7 THEN 4
-                    WHEN MONTH(invoicedate) = 8 THEN 5
-                    WHEN MONTH(invoicedate) = 9 THEN 6
-                    WHEN MONTH(invoicedate) = 10 THEN 7
-                    WHEN MONTH(invoicedate) = 11 THEN 8
-                    WHEN MONTH(invoicedate) = 12 THEN 9
-                    WHEN MONTH(invoicedate) = 1 THEN 10
-                    WHEN MONTH(invoicedate) = 2 THEN 11
-                    WHEN MONTH(invoicedate) = 3 THEN 12
-                END;
-        ";
+                ORDER BY
+                    CASE
+                        WHEN MONTH(invoicedate) = 4 THEN 1
+                        WHEN MONTH(invoicedate) = 5 THEN 2
+                        WHEN MONTH(invoicedate) = 6 THEN 3
+                        WHEN MONTH(invoicedate) = 7 THEN 4
+                        WHEN MONTH(invoicedate) = 8 THEN 5
+                        WHEN MONTH(invoicedate) = 9 THEN 6
+                        WHEN MONTH(invoicedate) = 10 THEN 7
+                        WHEN MONTH(invoicedate) = 11 THEN 8
+                        WHEN MONTH(invoicedate) = 12 THEN 9
+                        WHEN MONTH(invoicedate) = 1 THEN 10
+                        WHEN MONTH(invoicedate) = 2 THEN 11
+                        WHEN MONTH(invoicedate) = 3 THEN 12
+                    END;
+            ";
 
                 using (SqlCommand cmd =
                        new SqlCommand(query, con))
@@ -111,9 +179,9 @@ namespace WLSPL_ERP_CRM.repository
                         while (await reader.ReadAsync())
                         {
                             result.Add(
-                                new Taxinvoice.InvoiceMonthSummary
+                                new Taxinvoice.TaxInvoiceCreate
                                 {
-                                    Mon = Convert.ToInt32(
+                                    mon = Convert.ToInt32(
                                         reader["Mon"]),
 
                                     TotalInvoice = Convert.ToInt32(
@@ -137,10 +205,9 @@ namespace WLSPL_ERP_CRM.repository
         }
 
 
-
-        public async Task<List<Taxinvoice.InvoiceList>> GetInfo(
-     string financialYear,
-     int? month)
+        public async Task<List<Taxinvoice.TaxInvoiceCreate>> GetInfo(
+         string financialYear,
+         int? month)
         {
             using var connection = new SqlConnection(
                 _configuration.GetConnectionString("Conn_Stringg"));
@@ -151,7 +218,7 @@ namespace WLSPL_ERP_CRM.repository
             parameters.Add("@FinancialYear", financialYear);
             parameters.Add("@Month", month);
 
-            var result = await connection.QueryAsync<Taxinvoice.InvoiceList>(
+            var result = await connection.QueryAsync<Taxinvoice.TaxInvoiceCreate>(
                 "SP_comapnylistDetails",
                 parameters,
                 commandType: CommandType.StoredProcedure
@@ -160,7 +227,43 @@ namespace WLSPL_ERP_CRM.repository
             return result.ToList();
         }
 
-        public async Task<Taxinvoice.TaxInvoicePdfViewModel?> GetInvoiceForPdfAsync(int id)
+
+
+        public async Task<dynamic> Getinvoicebyid(int ID)
+        {
+            using var con = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg"));
+
+            await con.OpenAsync();
+
+            using var multi = await con.QueryMultipleAsync(
+                "SP_TaxInvoice",
+                new
+                {
+                    id = ID,
+                    Action = "GetInvoiceById"
+                },
+                commandType: CommandType.StoredProcedure
+            );
+
+            var main = await multi.ReadFirstOrDefaultAsync<Taxinvoice.TaxInvoiceCreate>();
+
+            if (main == null)
+            {
+                return null;
+            }
+
+            var details = (await multi.ReadAsync<Taxinvoice.InvoiceDetails>())
+                .ToList();
+
+            return new Taxinvoice.TaxInvoiceCreateVM
+            {
+                main = main,
+                details = details
+            };
+        }
+
+        public async Task<Taxinvoice.TaxInvoiceCreateVM?> GetInvoiceForPdfAsync(int id)
         {
             using var con = new SqlConnection(
                 _configuration.GetConnectionString("Conn_Stringg"));
@@ -218,6 +321,7 @@ namespace WLSPL_ERP_CRM.repository
             e_invoice_status,
             e_invoice_cancel_status,
             e_invoice_cancel_by,
+            e_invoice_created_by,
             e_invoice_cancel_date,
             JsonFile,
             InvoiceType
@@ -225,7 +329,7 @@ namespace WLSPL_ERP_CRM.repository
         WHERE id = @id;
     ";
 
-            var main = await con.QueryFirstOrDefaultAsync<Taxinvoice.InvoiceMain>(
+            var main = await con.QueryFirstOrDefaultAsync<Taxinvoice.TaxInvoiceCreate>(
                 mainQuery,
                 new { id }
             );
@@ -268,91 +372,352 @@ namespace WLSPL_ERP_CRM.repository
             );
 
 
-    
+            // =========================================================
+            // VIEW MODEL
+            // =========================================================
 
-            var model = new Taxinvoice.TaxInvoicePdfViewModel
+            var model = new Taxinvoice.TaxInvoiceCreateVM
             {
-                Main = main,
-                Details = details.ToList()
+                main = main,
+                details = details.ToList()
             };
 
 
-         
-
-            model.CompanyName = "Web Link Services Pvt. Ltd.";
-
-            model.CompanyAddress =
-                "12th Floor, City Avenue Complex, Above Max Showroom, " +
-                "W.K. Pimpri, Pune, Maharashtra";
-
-            model.CompanyPhone = "+91 8420610192";
-
-            model.CompanyEmail = "info@weblinkservices.net";
-
-            model.CompanyGSTIN = "27AABCW8929Z2P";
-
-            model.CompanyLogo = "~/assets/images/logo-dark.png";
-
-
             // =========================================================
-            // BANK DETAILS
+            // RETURN
             // =========================================================
-
-            model.BankName = "ICICI BANK";
-
-            model.AccountNo = "91600208536854";
-
-            model.IFSC = "ICIC0001641";
-
-            model.Branch =
-                "Aundh Bank Ltd - Ratnani Branch, Pune";
-
-
-            // =========================================================
-            // TOTALS
-            // =========================================================
-
-            model.TotalQuantity =
-                main.totalqty ?? 0;
-
-            model.TotalAmount =
-                main.totalrate ?? 0;
-
-            model.TotalTaxableValue =
-                main.taxablevalue ?? 0;
-
-            model.TotalCGST =
-                main.cgstamt ?? 0;
-
-            model.TotalSGST =
-                main.sgstamt ?? 0;
-
-            model.TotalIGST =
-                main.igstamt ?? 0;
-
-            model.TotalTaxAmount =
-                (main.cgstamt ?? 0)
-                + (main.sgstamt ?? 0)
-                + (main.igstamt ?? 0);
-
-            model.GrandTotal =
-                main.totalamtaftertax ?? 0;
-
-            model.AmountInWords =
-                main.amtinwords;
-
-            model.Remark =
-                main.Remarks ?? main.Remarkss;
-
-
-
-
-            model.RoundOff =
-                Math.Round(model.GrandTotal, 0)
-                - model.GrandTotal;
-
 
             return model;
+        }
+
+
+        public async Task<Taxinvoice.TaxInvoiceCreateVM?> Getinvoiceno()
+        {
+            try
+            {
+                using var connection = new SqlConnection(
+                    _configuration.GetConnectionString("Conn_Stringg"));
+
+                var parameters = new DynamicParameters();
+
+                parameters.Add("@Action", "GetInvoiceNo");
+                //parameters.Add("@id", id);
+
+                var result = await connection.QueryFirstOrDefaultAsync<Taxinvoice.TaxInvoiceCreateVM>(
+                    "SP_TaxInvoice",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<Taxinvoice.TaxInvoiceCreate?> Getinvoicenoss()
+        {
+            try
+            {
+                using var connection = new SqlConnection(
+                    _configuration.GetConnectionString("Conn_Stringg"));
+
+                var parameters = new DynamicParameters();
+
+                parameters.Add("@Action", "GetInvoiceNo");
+                //parameters.Add("@id", id);
+
+                var result = await connection.QueryFirstOrDefaultAsync<Taxinvoice.TaxInvoiceCreate>(
+                    "SP_TaxInvoice",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateSave(TaxInvoiceCreateVM model, string Action)
+        {
+            try
+            {
+                using var connection = new SqlConnection(
+                    _configuration.GetConnectionString("Conn_Stringg"));
+
+                await connection.OpenAsync();
+
+                // =====================================================
+                // MAIN INVOICE PARAMETERS
+                // =====================================================
+
+                var parameters = new DynamicParameters();
+
+                parameters.Add("@id", model.main.Id);
+                parameters.Add("@invoiceno", model.main.invoiceno);
+                parameters.Add("@invoicedate", model.main.invoicedate);
+                parameters.Add("@reversecharge", model.main.reversecharge);
+
+                // Company
+                parameters.Add("@companyname", model.main.companyName);
+                parameters.Add("@cgstin", model.main.gstIn);
+                parameters.Add("@address", model.main.Address);
+                parameters.Add("@BillingLocation", model.main.Location);
+                parameters.Add("@BillingPincode", model.main.PinCode);
+
+                parameters.Add("@state", "Maharashtra");
+                parameters.Add("@billstate", model.main.state);
+                parameters.Add("@BillingStatecode", model.main.statecode);
+
+                // Transaction
+                parameters.Add("@TransMode", model.main.TransMode);
+                parameters.Add("@TransNo", model.main.TransNo);
+                parameters.Add("@TransDate", model.main.TransDate);
+                parameters.Add("@TransAmt", model.main.TransAmt);
+
+                // =====================================================
+                // GST
+                // =====================================================
+
+                parameters.Add("@cgst", model.main.cgst);
+                parameters.Add("@cgstamt", model.main.cgstamt);
+
+                parameters.Add("@sgst", model.main.sgst);
+                parameters.Add("@sgstamt", model.main.sgstamt);
+
+                parameters.Add("@igst", model.main.igst);
+                parameters.Add("@igstamt", model.main.igstamt);
+
+                // =====================================================
+                // TOTALS
+                // =====================================================
+
+                parameters.Add("@totalqty", model.main.totalqty);
+                parameters.Add("@totalrate", model.main.totalrate);
+                parameters.Add("@taxablevalue", model.main.taxablevalue);
+                parameters.Add("@totalamtbeforetax", model.main.totalamtbeforetax);
+                parameters.Add("@totalamtaftertax", model.main.totalamtaftertax);
+
+                // =====================================================
+                // OTHER
+                // =====================================================
+
+                parameters.Add("@amtinwords", model.main.amtinwords);
+                parameters.Add("@sessionname", model.main.sessionname);
+
+                // =====================================================
+                // BILLING
+                // =====================================================
+
+                parameters.Add("@BillingAddress", model.main.Address);
+                parameters.Add("@BillingLocation", model.main.Location);
+                parameters.Add("@BillingGST", model.main.gstIn);
+                parameters.Add("@BillingPincode", model.main.PinCode);
+                parameters.Add("@BillingStatecode", model.main.statecode);
+
+                // =====================================================
+                // ACTION
+                // =====================================================
+
+                parameters.Add("@action", Action);
+
+                // =====================================================
+                // OUTPUT INVOICE ID
+                // =====================================================
+
+                parameters.Add(
+                    "@myinvoice",
+                    dbType: DbType.Int32,
+                    direction: ParameterDirection.Output
+                );
+
+                // =====================================================
+                // SAVE MAIN INVOICE
+                // =====================================================
+
+                int rowsAffected = await connection.ExecuteAsync(
+                    "[dbo].[SP_AddInvoice]",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+
+                // =====================================================
+                // GET INVOICE ID
+                // =====================================================
+
+                int myInvoice = parameters.Get<int>("@myinvoice");
+
+                // If UPDATE, use existing invoice ID
+                if (Action.Equals(
+                        "updateOldData",
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    myInvoice = model.main.Id;
+
+                    // =================================================
+                    // DELETE OLD DETAILS
+                    // =================================================
+
+                    await DeleteInvoiceDetails(
+                        myInvoice,
+                        connection
+                    );
+                }
+
+                // =====================================================
+                // INSERT NEW DETAILS
+                // =====================================================
+
+                if (model.details != null &&
+                    model.details.Count > 0 &&
+                    myInvoice > 0)
+                {
+                    foreach (var detail in model.details)
+                    {
+                        var parametersd = new DynamicParameters();
+
+                        parametersd.Add(
+                            "@invoiceid",
+                            myInvoice
+                        );
+
+                        parametersd.Add(
+                            "@productdescription",
+                            detail.productdescription
+                        );
+
+                        parametersd.Add(
+                            "@saccode",
+                            detail.saccode
+                        );
+
+                        parametersd.Add(
+                            "@qty",
+                            detail.qty
+                        );
+
+                        parametersd.Add(
+                            "@rate",
+                            detail.rate
+                        );
+
+                        parametersd.Add(
+                            "@taxablevalue",
+                            detail.taxablevalue
+                        );
+
+                        // CGST
+                        parametersd.Add(
+                            "@cgstrate",
+                            detail.cgstrate
+                        );
+
+                        parametersd.Add(
+                            "@cgstamt",
+                            detail.cgstamt
+                        );
+
+                        // SGST
+                        parametersd.Add(
+                            "@sgstrate",
+                            detail.sgstrate
+                        );
+
+                        parametersd.Add(
+                            "@sgstamt",
+                            detail.sgstamt
+                        );
+
+                        // IGST
+                        parametersd.Add(
+                            "@igstrate",
+                            detail.igstrate
+                        );
+
+                        parametersd.Add(
+                            "@igstamt",
+                            detail.igstamt
+                        );
+
+                        // Total
+                        parametersd.Add(
+                            "@total",
+                            detail.total
+                        );
+
+                        // =================================================
+                        // INSERT DETAIL
+                        // =================================================
+
+                        const string invoicedetailsSql = @"
+                    INSERT INTO [InvoiceDetails]
+                    (
+                        [invoiceid],
+                        [productdescription],
+                        [saccode],
+                        [qty],
+                        [rate],
+                        [taxablevalue],
+                        [cgstrate],
+                        [cgstamt],
+                        [sgstrate],
+                        [sgstamt],
+                        [igstrate],
+                        [igstamt],
+                        [total]
+                    )
+                    VALUES
+                    (
+                        @invoiceid,
+                        @productdescription,
+                        @saccode,
+                        @qty,
+                        @rate,
+                        @taxablevalue,
+                        @cgstrate,
+                        @cgstamt,
+                        @sgstrate,
+                        @sgstamt,
+                        @igstrate,
+                        @igstamt,
+                        @total
+                    );";
+
+                        await connection.ExecuteAsync(
+                            invoicedetailsSql,
+                            parametersd
+                        );
+                    }
+                }
+
+                return rowsAffected > 0;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        private async Task DeleteInvoiceDetails(int invoiceId, SqlConnection connection)
+        {
+            const string sql = @"
+        DELETE FROM [InvoiceDetails]
+        WHERE [invoiceid] = @invoiceId;
+    ";
+
+            await connection.ExecuteAsync(
+                sql,
+                new
+                {
+                    invoiceId = invoiceId
+                }
+            );
         }
 
 

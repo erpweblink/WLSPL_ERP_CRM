@@ -5,7 +5,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<style>
+<style type="text/css">
 
     .form-label {
         font-weight: 600;
@@ -47,7 +47,7 @@
     .section-title {
         font-size: 16px;
         font-weight: 600;
-        color: #1673f9;
+        color: #425d7e;
         margin: 8px 0 18px;
         padding-bottom: 8px;
         border-bottom: 1px solid #e9edf2;
@@ -109,7 +109,7 @@
 </style>
 
 <div class="card">
-    <div class="card-header">
+    <div class="card-header" style="background: linear-gradient(314deg, #0b0f14, #1a3e66);color: whitesmoke;">
         <h3>
             <i class="fa @(Model.ID == 0 ? "fa-user-plus" : "fa-edit")"></i>
             @(Model.ID == 0 ? " Create New Lead" : " Edit Lead")
@@ -469,7 +469,7 @@
     </div>
 </div>
 
-<script>
+<script type="text/javascript">
 
     // Automatically capitalize City
     document.addEventListener("DOMContentLoaded", function () {

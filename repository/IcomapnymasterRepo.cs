@@ -14,15 +14,12 @@ namespace WEBLINK_CRM.repository
 
         Task<List<Company>> GetLeadlist(string Action, Company Model);
 
-        Task<List<Companymaster>> GetcompanyList(Companymaster Model, string Action);  
+        Task<List<Companymaster>> GetcompanyList(Companymaster Model, string Action);
+
+        Task<List<Companymaster>> GetFilteredcompanyList(Companymaster model);
         //Task<dynamic> GetcompanybyId(string Id);
         Task<Companymaster> GetcompanybyId(string Id);
         Task<List<dynamic>> GetcompanyName(string Name);
-
-        Task<List<dynamic>> GetcompanyNameDashboard(string Name,string userName, string role);
-
-        Task<dynamic> GetcompanybyIdDashboard(string Id);
-        Task<dynamic> GetcompanybyCCodeFromMainSearch(string CCode);
 
         Task<int> DeleteReord(string ID, String CreatedBy);
 
@@ -30,6 +27,14 @@ namespace WEBLINK_CRM.repository
 
         Task<List<Employee>> GetBDE(string Action);
 
+        Task<List<dynamic>> GetHirechyEmployees(string code);
+
+        Task<dynamic> GetCommentHistoryById(int Id);
+        Task<List<dynamic>> GetCommentHistoryList(string Ccode);
+        Task<dynamic> GetActiveEmployeeList();
+        Task<int> UpdateCompanyCreatedByName(string newName, string CompCode, string SessionName);
+        Task<int> FromListSubmitCommentHistory(CallandMeeting Model);
+        Task<int> UpdateOldCommentHistory(int id);
 
     }
 }
