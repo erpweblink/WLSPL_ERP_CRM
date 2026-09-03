@@ -47,54 +47,100 @@
                 <img src="https://www.weblinkservices.net/assets-web/logo-main.png" alt="WEB LINK Services" />
             </div>
 
-            <h2>Welcome back</h2>
-            <p class="sub">Sign in to access your CRM dashboard</p>
+            <!-- ============ LOGIN SECTION ============ -->
+            <div id="loginSection">
+                <h2>Welcome back</h2>
+                <p class="sub">Sign in to access your CRM dashboard</p>
 
-            <form asp-controller="Login" asp-action="Index" method="post" id="loginForm">
-                @Html.AntiForgeryToken()
+                <form asp-controller="Login" asp-action="Index" method="post" id="loginForm">
+                    @Html.AntiForgeryToken()
 
-                <!-- ✅ input MUST come BEFORE label for float CSS to work -->
-                <div class="field">
-                    <input type="text" id="username" name="username"
-                           placeholder=" " autocomplete="username" />
-                    <label for="username">
-                        <i class="fa-regular fa-user" style="margin-right:5px;"></i>Username or Email
-                    </label>
+                    <div class="field">
+                        <input type="text" id="username" name="username" placeholder=" " autocomplete="username" />
+                        <label for="username"><i class="fa-regular fa-user" style="margin-right:5px;"></i>Username or Email</label>
+                    </div>
+
+                    <div class="field">
+                        <input type="password" id="password" name="password" placeholder=" " autocomplete="current-password" />
+                        <label for="password"><i class="fa-solid fa-lock" style="margin-right:5px;font-size:12px;"></i>Password</label>
+                        <span class="eye" onclick="togglePwd()"><i class="fa-regular fa-eye" id="eyeIcon"></i></span>
+                    </div>
+
+                    <div class="row-meta">
+                        <label class="check-label">
+                            <input type="checkbox" id="rememberMe" name="rememberMe" value="true" />
+                            Remember me
+                        </label>
+                        <a href="#" class="forgot" id="lnkForgotPassword">Forgot password?</a>
+                    </div>
+
+                    <button type="button" class="btn-login" onclick="handleLogin()">
+                        <i class="fa-solid fa-right-to-bracket"></i> Login to your Account
+                    </button>
+                </form>
+            </div>
+
+            <!-- ============ FORGOT PASSWORD SECTION ============ -->
+            <div id="forgotSection" style="display:none;">
+
+                <!-- Step 1: email -->
+                <div id="fpStep1" class="fp-step active">
+                    <h2>Forgot password</h2>
+                    <p class="sub">Enter your registered email, we'll send you an OTP</p>
+                    <div class="field">
+                        <input type="text" id="fpEmail" placeholder=" " autocomplete="off" />
+                        <label for="fpEmail"><i class="fa-regular fa-envelope" style="margin-right:5px;"></i>Email address</label>
+                    </div>
+                    <div id="fpEmailFeedback" style="font-size:13px;margin:-8px 0 12px;"></div>
+                    <button type="button" class="btn-login" id="btnSendOtp">Send OTP</button>
+                    <div class="row-meta"><a href="#" class="forgot" id="lnkBackToLogin1">&larr; Back to sign in</a></div>
                 </div>
 
-                <div class="field">
-                    <input type="password" id="password" name="password"
-                           placeholder=" " autocomplete="current-password" />
-                    <label for="password">
-                        <i class="fa-solid fa-lock" style="margin-right:5px;font-size:12px;"></i>Password
-                    </label>
-                    <span class="eye" onclick="togglePwd()">
-                        <i class="fa-regular fa-eye" id="eyeIcon"></i>
-                    </span>
+                <!-- Step 2: OTP -->
+                <div id="fpStep2" class="fp-step" style="display:none;">
+                    <h2>Enter OTP</h2>
+                    <p class="sub">We've sent a 6-digit code to <span id="fpEmailDisplay"></span></p>
+                    <div class="field">
+                        <input type="text" id="fpOtp" maxlength="6" inputmode="numeric" pattern="[0-9]*"
+                               placeholder=" " style="letter-spacing:6px;text-align:center;" autocomplete="off" />
+                        <label for="fpOtp">6-digit code</label>
+                    </div>
+                    <button type="button" class="btn-login" id="btnVerifyOtp">Verify OTP</button>
+                    <div class="row-meta">
+                        <a href="#" class="forgot" id="lnkResendOtp">Resend OTP</a>
+                        <a href="#" class="forgot" id="lnkBackToLogin2">Back to sign in</a>
+                    </div>
                 </div>
 
-                <div class="row-meta">
-                    <label class="check-label">
-                        <input type="checkbox" id="rememberMe" name="rememberMe" value="true" />
-                        Remember me
-                    </label>
-                    <a href="#" class="forgot">Forgot password?</a>
+                <!-- Step 3: new password -->
+                <div id="fpStep3" class="fp-step" style="display:none;">
+                    <h2>Reset password</h2>
+                    <p class="sub">Enter and confirm your new password</p>
+                    <div class="field">
+                        <input type="password" id="fpNewPassword" placeholder=" " autocomplete="new-password" />
+                        <label for="fpNewPassword"><i class="fa-solid fa-lock" style="margin-right:5px;font-size:12px;"></i>New password</label>
+                        <span class="eye" onclick="toggleFieldPwd('fpNewPassword','fpNewPwdEye')"><i class="fa-regular fa-eye" id="fpNewPwdEye"></i></span>
+                    </div>
+                    <div class="field">
+                        <input type="password" id="fpConfirmPassword" placeholder=" " autocomplete="new-password" />
+                        <label for="fpConfirmPassword"><i class="fa-solid fa-lock" style="margin-right:5px;font-size:12px;"></i>Confirm password</label>
+                        <span class="eye" onclick="toggleFieldPwd('fpConfirmPassword','fpConfirmPwdEye')"><i class="fa-regular fa-eye" id="fpConfirmPwdEye"></i></span>
+                    </div>
+                    <button type="button" class="btn-login" id="btnUpdatePassword">Update password</button>
+                    <div class="row-meta"><a href="#" class="forgot" id="lnkBackToLogin3">&larr; Back to sign in</a></div>
                 </div>
 
-                <button type="button" class="btn-login" onclick="handleLogin()">
-                    <i class="fa-solid fa-right-to-bracket"></i> Login to your Account
-                </button>
-            </form>
+            </div>
 
             <div class="secure">
                 <i class="fa-solid fa-circle-check"></i>
-                Secure SSL connection · WEB LINK CRM
+                WEB LINK CRM
             </div>
         </div>
 
     </div>
 
-    <script>
+    <script type="text/javascript">
         /* ── Toast ── */
         function showToast(msg, type, title) {
             type = type || 'success';
@@ -147,29 +193,187 @@
 
             @if (ViewBag.ErrorMessage != null)
             {
-                    <text>
-                    showToast('@Html.Raw(ViewBag.ErrorMessage)', 'error', 'Login failed');
-                    </text>
+                            <text>
+                            showToast('@Html.Raw(ViewBag.ErrorMessage)', 'error', 'Login failed');
+                            </text>
             }
 
             @if (ViewBag.LoginSuccess != null)
             {
-                    <text>
-                    showToast('@Html.Raw(ViewBag.LoginSuccess)', 'success', 'Welcome!');
-                    setTimeout(function () {
-                        window.location.href = '@Html.Raw(ViewBag.RedirectUrl)';
-                    }, 2000);
-                    </text>
+                            <text>
+                            showToast('@Html.Raw(ViewBag.LoginSuccess)', 'success', 'Welcome!');
+                            setTimeout(function () {
+                                window.location.href = '@Html.Raw(ViewBag.RedirectUrl)';
+                            }, 2000);
+                            </text>
             }
 
             @if (TempData["LogoutMessage"] != null)
             {
-                    <text>
-                    showToast('@Html.Raw(TempData["LogoutMessage"])', 'info', 'Logged out');
-                    </text>
+                            <text>
+                            showToast('@Html.Raw(TempData["LogoutMessage"])', 'info', 'Logged out');
+                            </text>
             }
 
         });
+    </script>
+
+    <script type="text/javascript">
+                        /* ── Password toggle (generic, for any field) ── */
+        function toggleFieldPwd(inputId, iconId) {
+                    var input = document.getElementById(inputId);
+                    var icon = document.getElementById(iconId);
+                    if (!input || !icon) return;
+
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.className = 'fa-regular fa-eye-slash';
+                    } else {
+                        input.type = 'password';
+                        icon.className = 'fa-regular fa-eye';
+            }
+         }
+            function getAntiForgeryToken() {
+                var el = document.querySelector('input[name="__RequestVerificationToken"]');
+                return el ? el.value : '';
+            }
+
+            async function postJson(url, dataObj) {
+                var form = new FormData();
+                for (var key in dataObj) form.append(key, dataObj[key]);
+                form.append('__RequestVerificationToken', getAntiForgeryToken());
+
+                var res = await fetch(url, { method: 'POST', body: form });
+                return await res.json();
+            }
+
+            function setBtnLoading(btn, isLoading, text) {
+                if (!btn) return;
+                if (isLoading) {
+                    if (btn.dataset.originalText === undefined) btn.dataset.originalText = btn.innerHTML;
+                    btn.disabled = true;
+                    btn.innerHTML = text || 'Please wait...';
+                } else {
+                    btn.disabled = false;
+                    if (btn.dataset.originalText !== undefined) btn.innerHTML = btn.dataset.originalText;
+                }
+            }
+
+            (function () {
+                var loginSection = document.getElementById('loginSection');
+                var forgotSection = document.getElementById('forgotSection');
+                var step1 = document.getElementById('fpStep1');
+                var step2 = document.getElementById('fpStep2');
+                var step3 = document.getElementById('fpStep3');
+
+                var fpEmail = document.getElementById('fpEmail');
+                var fpEmailFeedback = document.getElementById('fpEmailFeedback');
+                var fpEmailDisplay = document.getElementById('fpEmailDisplay');
+                var fpOtp = document.getElementById('fpOtp');
+                var fpNewPassword = document.getElementById('fpNewPassword');
+                var fpConfirmPassword = document.getElementById('fpConfirmPassword');
+
+                var btnSendOtp = document.getElementById('btnSendOtp');
+                var btnVerifyOtp = document.getElementById('btnVerifyOtp');
+                var btnUpdatePassword = document.getElementById('btnUpdatePassword');
+
+                var emailIsRegistered = false;
+
+                function showLogin() {
+                    forgotSection.style.display = 'none';
+                    loginSection.style.display = '';
+                }
+                function showForgot() {
+                    loginSection.style.display = 'none';
+                    forgotSection.style.display = '';
+                    goToStep(step1);
+                    fpEmail.value = ''; fpOtp.value = '';
+                    fpNewPassword.value = ''; fpConfirmPassword.value = '';
+                    fpEmailFeedback.textContent = '';
+                    emailIsRegistered = false;
+                }
+                function goToStep(step) {
+                    [step1, step2, step3].forEach(function (s) { s.style.display = 'none'; });
+                    step.style.display = '';
+                }
+
+
+                document.getElementById('lnkForgotPassword').addEventListener('click', function (e) { e.preventDefault(); showForgot(); });
+                document.getElementById('lnkBackToLogin1').addEventListener('click', function (e) { e.preventDefault(); showLogin(); });
+                document.getElementById('lnkBackToLogin2').addEventListener('click', function (e) { e.preventDefault(); showLogin(); });
+                document.getElementById('lnkBackToLogin3').addEventListener('click', function (e) { e.preventDefault(); showLogin(); });
+
+                fpEmail.addEventListener('blur', async function () {
+                    var email = fpEmail.value.trim();
+                    emailIsRegistered = false;
+                    if (!email) { fpEmailFeedback.textContent = ''; return; }
+
+                    fpEmailFeedback.textContent = 'Checking...';
+                    var result = await postJson('/Login/CheckEmailExists', { email: email });
+                    if (fpEmail.value.trim() !== email) return; // stale response guard
+
+                    if (result.exists) {
+                        emailIsRegistered = true;
+                        fpEmailFeedback.textContent = 'Email found. You can send an OTP.';
+                    } else {
+                        fpEmailFeedback.textContent = 'No account found with this email address.';
+                    }
+                });
+                fpEmail.addEventListener('input', function () { emailIsRegistered = false; });
+
+                btnSendOtp.addEventListener('click', async function () {
+                    debugger;
+                    var email = fpEmail.value.trim();
+                    if (!emailIsRegistered) { showToast('This email is not registered with us.', 'warning'); return; }
+
+                    setBtnLoading(btnSendOtp, true, 'Sending...');
+                    var result = await postJson('/Login/SendOtp', { email: email });
+                    setBtnLoading(btnSendOtp, false);
+
+                    if (result.success) {
+                        fpEmailDisplay.textContent = email;
+                        goToStep(step2);
+                        showToast('Please check your inbox for the 6-digit code.', 'success', 'OTP Sent');
+                    } else {
+                        showToast(result.message, 'error');
+                    }
+                });
+
+                document.getElementById('lnkResendOtp').addEventListener('click', function (e) { e.preventDefault(); btnSendOtp.click(); });
+
+                btnVerifyOtp.addEventListener('click', async function () {
+                    var email = fpEmail.value.trim();
+                    var otp = fpOtp.value.trim();
+                    if (!/^\d{6}$/.test(otp)) { showToast('Please enter the 6-digit OTP.', 'warning'); return; }
+
+                    setBtnLoading(btnVerifyOtp, true, 'Verifying...');
+                    var result = await postJson('/Login/VerifyOtp', { email: email, otp: otp });
+                    setBtnLoading(btnVerifyOtp, false);
+
+                    if (result.success) goToStep(step3);
+                    else showToast(result.message, 'error');
+                });
+
+                btnUpdatePassword.addEventListener('click', async function () {
+                    var email = fpEmail.value.trim();
+                    var pass = fpNewPassword.value;
+                    var confirm = fpConfirmPassword.value;
+
+                    if (!pass || pass.length < 3) { showToast('Password must be at least 3 characters.', 'warning'); return; }
+                    if (pass !== confirm) { showToast('Passwords do not match.', 'warning'); return; }
+
+                    setBtnLoading(btnUpdatePassword, true, 'Updating...');
+                    var result = await postJson('/Login/ResetPassword', { email: email, newPassword: pass, confirmPassword: confirm });
+                    setBtnLoading(btnUpdatePassword, false);
+
+                    if (result.success) {
+                        showToast('Password updated. Please sign in.', 'success');
+                        setTimeout(showLogin, 1200);
+                    } else {
+                        showToast(result.message, 'error');
+                    }
+                });
+            })();
     </script>
 
 </body>
