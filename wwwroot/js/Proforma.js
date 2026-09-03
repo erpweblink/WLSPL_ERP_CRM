@@ -101,6 +101,10 @@
                     if (isEditLoad) {
                         $("#ddlAgainstNo").prop("disabled", true);
                     }
+
+                    if (isEditLoad) {
+                        $("#ddlAgainstNo").prop("disabled", true);
+                    }
                 }
                 else {
                     showToast(response.message || "Quotation data not found.", "error");
@@ -755,15 +759,8 @@
 
                     $("#ddlReverseCharge").val(hdr.reverseCharge || "N").trigger("change");
                     $("#ddlAgainstBy").val(hdr.againstBy || "Direct").trigger("change");
-                    BindStateList(function () {
-                        $("#ddlBillState").val(hdr.billState || "").trigger("change");
-                    });
-
-                    // If AgainstBy is "Direct", BindAgainstNumber never runs, so set + lock directly here.
-                    if ((hdr.againstBy || "Quotation") === "Quotation") {
-                        $("#ddlAgainstNo").val(hdr.againstNo || "");
-                    }
-                    $("#ddlAgainstNo").prop("disabled", true);
+                    $("#ddlBillState").val(hdr.billState || "").trigger("change");
+                    $("#ddlAgainstNo").val(hdr.againstNo || "").trigger("change");
 
                     $("#txtProformaDate").val(formatDateToDDMMYYYY(hdr.proformaDate));
 
@@ -833,6 +830,7 @@
             else {
                 BindCompanyList();
                 BindStateList();
+                BindAgainstNumber();
 
                 var today = new Date().toISOString().split("T")[0];
                 $("#txtProformaDate").val(today);
