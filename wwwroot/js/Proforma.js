@@ -84,17 +84,22 @@
 
                     $("#ddlAgainstNo").html(html);
 
+                    // The list was just rebuilt from scratch -- re-apply the saved
+                    // selection or it silently reverts to the placeholder.
                     if (AgainstNo && AgainstNo.trim() !== "") {
                         var match = users.find(function (x) {
                             return (x.Name || "").toLowerCase().trim() === AgainstNo.toLowerCase().trim();
                         });
-
                         if (match) {
-                            // Options are keyed by Name (see html above), not ID.
-                            // Set the value only -- do NOT trigger "change" here, that would
-                            // fire GetDetailsByQuotationNo and overwrite already-loaded rows.
                             $("#ddlAgainstNo").val(match.Name);
                         }
+                    }
+
+                    // Re-lock it if we're restoring a saved Proforma. The rebuild
+                    // itself doesn't clear the disabled attribute, but do this
+                    // defensively so the lock always survives a rebind.
+                    if (isEditLoad) {
+                        $("#ddlAgainstNo").prop("disabled", true);
                     }
                 }
                 else {
@@ -108,7 +113,6 @@
             error: function (xhr) {
                 console.error("Get Quotation No Error:", xhr.responseText);
                 showToast("Unable to load Quotation No list.", "error");
-
                 if (typeof callback === "function") {
                     callback();
                 }
@@ -743,7 +747,7 @@
 
                     $("#ID").val(hdr.id || ID);
 
-                    Companytext = hdr.companyName || "";
+                    Companytext = hdr.companyCode || "";
                     AgainstNo = hdr.againstNo || "";
 
                     $("#txtAddress").val(hdr.address || "");
@@ -751,8 +755,15 @@
 
                     $("#ddlReverseCharge").val(hdr.reverseCharge || "N").trigger("change");
                     $("#ddlAgainstBy").val(hdr.againstBy || "Direct").trigger("change");
-                    $("#ddlBillState").val(hdr.billState || "").trigger("change");
-                    $("#ddlAgainstNo").val(hdr.againstNo || "").trigger("change");
+                    BindStateList(function () {
+                        $("#ddlBillState").val(hdr.billState || "").trigger("change");
+                    });
+
+                    // If AgainstBy is "Direct", BindAgainstNumber never runs, so set + lock directly here.
+                    if ((hdr.againstBy || "Quotation") === "Quotation") {
+                        $("#ddlAgainstNo").val(hdr.againstNo || "");
+                    }
+                    $("#ddlAgainstNo").prop("disabled", true);
 
                     $("#txtProformaDate").val(formatDateToDDMMYYYY(hdr.proformaDate));
 
