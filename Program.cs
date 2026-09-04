@@ -42,6 +42,7 @@ builder.Services.AddScoped<IProforma, RepoProforma>();
 builder.Services.AddScoped<IQuotation, RepoQuotation>();
 builder.Services.AddScoped<IServicesRepo, ServicesRepo>();
 builder.Services.AddScoped<ITaxinvoiceRepo, TaxinvoiceRepo>();
+builder.Services.AddScoped<IDashboardRepo, DashboardRepo>();
 
 
 // ======================================================
