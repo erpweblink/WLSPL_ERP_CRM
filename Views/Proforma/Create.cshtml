@@ -2,12 +2,209 @@
     ViewBag.Title = "Create";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<style>
+<style type="text/css">
+
+    .required::after {
+        content: " *";
+        color: red;
+    }
+
     .table-invalid {
         border: 2px solid #dc3545 !important;
         border-radius: 4px;
         box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.25);
     }
+
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+
+    /* ── All form inputs / selects / textareas — grey, like Tax Invoice ── */
+    .form-control {
+        border: 1px solid gray !important;
+    }
+
+        .form-control,
+        .form-control:focus {
+            background-color: #f4f5f6 !important;
+            border: 1px solid #ced4da;
+            color: #444;
+            border-radius: 3px;
+        }
+
+            .form-control[readonly],
+            .form-control:disabled {
+                background-color: #e8eaeb !important;
+                color: #6c757d;
+                cursor: default;
+            }
+
+    /* Select2 match */
+    .select2-container .select2-selection--single {
+        background-color: #f4f5f6 !important;
+        border: 1px solid #343434 !important;
+        border-radius: 3px !important;
+        height: 38px !important;
+    }
+
+        .select2-container .select2-selection--single .select2-selection__rendered {
+            line-height: 36px !important;
+            color: #444 !important;
+        }
+
+        .select2-container .select2-selection--single .select2-selection__arrow {
+            height: 36px !important;
+        }
+
+    /* ── Consistent card-body row spacing ── */
+    .card-body .row.form-row-item {
+        margin-bottom: 16px;
+    }
+
+        .card-body .row.form-row-item:last-child {
+            margin-bottom: 0;
+        }
+
+    .card-header {
+        background: linear-gradient(314deg, #0b0f14, #1a3e66);
+    }
+
+
+    .btn {
+        border-radius: 8px;
+        height: 43px;
+        font-weight: 600;
+        transition: .3s;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        border: none;
+    }
+
+        .btn-danger:hover {
+            background: #bb2d3b;
+            transform: translateY(-2px);
+        }
+
+    /* ── Services table — matches Tax Invoice's Item Details table ── */
+    .invoice-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+        .invoice-table th,
+        .invoice-table td {
+            border: 1px solid #dee2e6;
+            padding: 4px 6px;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .invoice-table th {
+            background: linear-gradient(314deg, #0b0f14, #1a3e66);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: normal;
+        }
+
+        .invoice-table td input,
+        .invoice-table td textarea {
+            width: 100%;
+            font-size: 11px;
+            border: 1px solid gray;
+            border-radius: 3px;
+            padding: 2px 4px;
+            background: #f4f5f6;
+            color: #444;
+        }
+
+            .invoice-table td input[readonly],
+            .invoice-table td input:disabled {
+                background: #e8eaeb !important;
+                color: #6c757d;
+                cursor: default;
+            }
+
+        .invoice-table td textarea {
+            min-height: 38px;
+            resize: vertical;
+        }
+
+    .col-action {
+        width: 50px;
+    }
+
+    .col-desc {
+        width: 200px;
+    }
+
+    .col-sac {
+        width: 85px;
+    }
+
+    .col-qty {
+        width: 65px;
+    }
+
+    .col-rate {
+        width: 85px;
+    }
+
+    .col-tax {
+        width: 120px;
+    }
+
+    .col-taxable {
+        width: 95px;
+    }
+
+    .col-total {
+        width: 100px;
+    }
+
+    .tax-pair {
+        display: grid;
+        grid-template-columns: 46px 1fr;
+        gap: 3px;
+    }
+
+    /* ── Summary block, matches Tax Invoice's Summary card ── */
+    .summary-right .summary-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #dee2e6;
+        padding: 8px 14px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+        .summary-right .summary-row:last-child {
+            border-bottom: none;
+        }
+
+        .summary-right .summary-row input {
+            width: 160px;
+            text-align: right;
+            border: 1px solid #ced4da;
+            border-radius: 3px;
+            background: #e8eaeb !important;
+            color: #444;
+            font-size: 12px;
+            padding: 4px 8px;
+            height: 32px;
+        }
+
+            .summary-right .summary-row input.numeric {
+                background: #f4f5f6 !important;
+            }
 
 </style>
 <form id="WorkOrderform">
@@ -18,28 +215,23 @@
                  alt="Loading..." />
         </div>
     </div>
-    <div class="card">
-        <div class="card-header d-flex align-items-center justify-content-between">
-            <h3 style="color:black; margin:0;" id="lblHeader">
-                Create Proforma
-            </h3>
 
-            <button type="button"
-                    class="btn btn-primary"
-                    onclick="window.history.back();">
+    <!-- ══════════════ PROFORMA HEADER ══════════════ -->
+    <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between"
+             style="background:  linear-gradient(314deg, #0b0f14, #1a3e66);">
+            <h5 style="margin:0; color:#fff;">Create Proforma</h5>
+            <button type="button" class="btn btn-primary btn-sm" onclick="window.history.back();">
                 <i class="fa fa-arrow-left"></i> Back
             </button>
-
         </div>
+
         <div class="card-body">
 
-            <div class="row mb-3">
-                <!-- Proforma Date -->
+            <div class="row form-row-item">
                 <div class="col-md-6">
-                    <div class="row align-items-center">
-                        <label class="col-md-4 col-form-label font-weight-bold text-md-right">
-                            <span class="text-danger">*</span> Proforma Date
-                        </label>
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold required">Proforma Date</label>
                         <div class="col-md-8">
                             <input type="date"
                                    class="form-control"
@@ -49,13 +241,9 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Reverse Charge -->
                 <div class="col-md-6">
-                    <div class="row align-items-center">
-                        <label class="col-md-4 col-form-label font-weight-bold text-md-right">
-                            <span class="text-danger">*</span> Reverse Charge (Y/N)
-                        </label>
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold required">Reverse Charge (Y/N)</label>
                         <div class="col-md-8">
                             <select class="form-control" id="ddlReverseCharge" name="ddlReverseCharge">
                                 <option value="N">N</option>
@@ -66,42 +254,34 @@
                 </div>
             </div>
 
-            <div class="row mb-3">
-                <!-- Company Name -->
+         
+
+            <input type="hidden" id="ID" name="ID" />
+
+        </div>
+    </div>
+
+    <!-- ══════════════ BILL TO ══════════════ -->
+    <div class="card mt-3">
+        <div class="card-header">
+            <h5>Bill To</h5>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row form-row-item">
                 <div class="col-md-6">
-                    <div class="row align-items-center">
-                        <label class="col-md-4 col-form-label font-weight-bold text-md-right">
-                            <span class="text-danger">*</span> Company Name
-                        </label>
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold required">Company Name</label>
                         <div class="col-md-8">
                             <select class="form-control ddlselect" id="ddlCompanyname" name="ddlCompanyname">
                             </select>
                         </div>
                     </div>
                 </div>
-
-                <!-- Bill State -->
                 <div class="col-md-6">
-                    <div class="row align-items-center">
-                        <label class="col-md-4 col-form-label font-weight-bold text-md-right">
-                            <span class="text-danger">*</span> State
-                        </label>
-                        <div class="col-md-8">
-                            <select class="form-control ddlselect" id="ddlBillState" name="ddlBillState">
-                                <option value="">-- Select --</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <!-- GSTIN -->
-                <div class="col-md-6">
-                    <div class="row align-items-center">
-                        <label class="col-md-4 col-form-label font-weight-bold text-md-right">
-                            <span class="text-danger">*</span> GSTIN
-                        </label>
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold required">GSTIN</label>
                         <div class="col-md-8">
                             <input type="text"
                                    class="form-control"
@@ -113,14 +293,11 @@
                 </div>
             </div>
 
-            <div class="row mb-3">
-                <!-- Address -->
-                <div class="col-md-12">
-                    <div class="row">
-                        <label class="col-md-2 col-form-label font-weight-bold">
-                            <span class="text-danger">*</span> Address
-                        </label>
-                        <div class="col-md-10">
+            <div class="row form-row-item">
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold required">Address</label>
+                        <div class="col-md-8">
                             <textarea class="form-control"
                                       id="txtAddress"
                                       name="txtAddress"
@@ -129,13 +306,22 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row mb-3">
                 <div class="col-md-6">
-                    <div class="row align-items-center">
-                        <label class="col-md-4 col-form-label font-weight-bold text-md-right">
-                            <span class="text-danger">*</span> Against By
-                        </label>
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold required">State</label>
+                        <div class="col-md-8">
+                            <select class="form-control ddlselect" id="ddlBillState" name="ddlBillState">
+                                <option value="">-- Select --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row form-row-item">
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold required">Against By</label>
                         <div class="col-md-8">
                             <select class="form-control" id="ddlAgainstBy" name="ddlAgainstBy">
                                 <option value="Direct">Direct</option>
@@ -145,10 +331,8 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="row align-items-center">
-                        <label class="col-md-4 col-form-label font-weight-bold text-md-right">
-                            <span class="text-danger">*</span> Against No.
-                        </label>
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold required">Against No.</label>
                         <div class="col-md-8">
                             <select class="form-control ddlselect" id="ddlAgainstNo" name="ddlAgainstNo">
                                 <option value="">-- Select --</option>
@@ -157,45 +341,38 @@
                     </div>
                 </div>
             </div>
-            <input type="hidden" id="ID" name="ID" />
-
         </div>
-
     </div>
 
-    <div class="card">
-        <div class="card-header text-uppercase">
-            <h3 style="color:black">Add Services</h3>
+    <!-- ══════════════ ITEM DETAILS ══════════════ -->
+    <div class="card mt-3">
+        <div class="card-header">
+            <h5><i class="fa fa-list-alt"></i> Item Details</h5>
         </div>
 
         <div class="row">
             <div class="col-md-12">
-
                 <div class="card-body">
-
 
                     <input type="hidden" id="rowID" value="" />
                     <div class="table-responsive">
                         <!-- Service Entry Table -->
                         <table id="tbldetails"
-                               class="table table-striped table-bordered dt-responsive nowrap"
+                               class="invoice-table"
                                style="width:100%;">
 
-                            <thead class="clsthed">
+                            <thead>
                                 <tr>
-                                    <th>Action</th>
-                                    <th>Service Name</th>
-                                    <th>SAC Code</th>
-                                    <th>QTY</th>
-                                    <th>Rate</th>
-                                    <th>CGST (%)</th>
-                                    <th>CGST Amt</th>
-                                    <th>SGST (%)</th>
-                                    <th>SGST Amt</th>
-                                    <th>IGST (%)</th>
-                                    <th>IGST Amt</th>
-                                    <th>Amount</th>
-                                    <th>All Total</th>
+                                    <th class="col-action">Action</th>
+                                    <th class="col-desc">Service Name</th>
+                                    <th class="col-sac">SAC Code</th>
+                                    <th class="col-qty">QTY</th>
+                                    <th class="col-rate">Rate</th>
+                                    <th class="col-tax">CGST % | Amt</th>
+                                    <th class="col-tax">SGST % | Amt</th>
+                                    <th class="col-tax">IGST % | Amt</th>
+                                    <th class="col-taxable">Amount</th>
+                                    <th class="col-total">All Total</th>
                                 </tr>
                             </thead>
 
@@ -205,69 +382,64 @@
 
                         </table>
                     </div>
-                    <div class="col-md-12 text-center">
+                    <div class="col-md-12 text-center pt-2">
                         <input type="button"
                                class="btn btn-primary btn-sm btnAddRow"
                                value="Add Service"
                                id="btnAddRow" />
                     </div>
                 </div>
-
             </div>
         </div>
+    </div>
 
-
-        <div class="row">
-            <div class="col-md-8">
-            </div>
-            <div class="col-md-4">
-                <div class="table-responsive">
-                    <table style="width:100%!important" id="tblAccountDetails" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0">
-                        <thead class="clsthead">
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td id="lblTotalDealBasicAmount">Basic Amount</td>
-                                <td><input class="form-control numeric" value="0" id="txtTotalDealBasicAmount" name="txtTotalDealBasicAmount" /></td>
-                            </tr>
-                            <tr id="trTotalDealGSTAmount">
-                                <td> GST Amount</td>
-                                <td><input class="form-control" value="0" id="txtTotalDealGSTAmount" name="txtTotalDealGSTAmount" readonly /></td>
-                            </tr>
-                            <tr>
-                                <td>Total Amount</td>
-                                <td><input class="form-control" id="txtTotalAmountBalance" name="txtTotalAmountBalance" readonly /></td>
-                            </tr>
-                        </tbody>
-                    </table>
+    <!-- ══════════════ SUMMARY ══════════════ -->
+    <div class="card mt-3">
+        <div class="card-header">
+            <h5>Summary</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="summary-right">
+                <div class="summary-row">
+                    <span>Basic Amount</span>
+                    <input class="numeric" value="0" id="txtTotalDealBasicAmount" name="txtTotalDealBasicAmount" />
+                </div>
+                <div class="summary-row">
+                    <span>GST Amount</span>
+                    <input value="0" id="txtTotalDealGSTAmount" name="txtTotalDealGSTAmount" readonly />
+                </div>
+                <div class="summary-row">
+                    <span>Total Amount</span>
+                    <input id="txtTotalAmountBalance" name="txtTotalAmountBalance" readonly />
                 </div>
             </div>
         </div>
-        <div class="row justify-content-center mt-3">
-            <div class="col-md-3 text-end">
-                <button type="submit" id="btnSubmit" class="btn btn-primary">Save</button>
-            </div>
+    </div>
 
-            <div class="col-md-3 text-start">
-                <a href="~/Proforma/Index">
-                    <input type="button" id="btnCancel" value="Cancel" class="btn btn-warning" />
-                </a>
-            </div>
-
+    <!-- ══════════════ ACTION BUTTONS ══════════════ -->
+    <div class="row justify-content-center mt-3 mb-4">
+        <div class="col-auto">
+            <button type="submit" id="btnSubmit" class="btn btn-primary px-4">
+                <i class="fa fa-save"></i> Save
+            </button>
         </div>
-        <br />
+        <div class="col-auto">
+            <a href="~/Proforma/Index">
+                <input type="button" id="btnCancel" value="Cancel" class="btn btn-danger px-4" />
+            </a>
+        </div>
     </div>
 
 </form>
 <script>
     $(document).ready(function () {
 
-          $('.ddlselect').select2({
-              selectOnClose: true,
-              width: '100%'
-          });
+        $('.ddlselect').select2({
+            selectOnClose: true,
+            width: '100%'
+        });
 
-      });
+    });
 </script>
 @section Scripts {
 
@@ -281,4 +453,3 @@
     </script>
 
 }
-
