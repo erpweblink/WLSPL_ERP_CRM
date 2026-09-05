@@ -9,6 +9,7 @@ namespace WLSPL_ERP_CRM.repository
 
 
         Task<List<Taxinvoice.TaxInvoiceCreate>> GetInfo(string financialYear,int? month);
+        Task<List<Taxinvoice.TaxInvoiceCreate>> GetApprovelList();
 
         Task<List<Taxinvoice.TaxInvoiceCreate>>GetFinancialYearSummary(string financialYear);
 
@@ -25,6 +26,7 @@ namespace WLSPL_ERP_CRM.repository
         Task<bool>Deletereords(int ID);
         Task<dynamic>Getinvoicebyid(int ID);
 
-
+        Task<bool> Approve(int id, string user);
+        Task<bool> Reject(int id, string user);
     }
 }
