@@ -81,5 +81,27 @@ namespace WEBLINK_CRM.Controllers
                     parent.Children.Add(emp);
             }
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetEmployeeInfo(string empCode)
+        {
+            if (string.IsNullOrWhiteSpace(empCode))
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Employee code is required."
+                });
+            }
+
+            var result = await _repo.GetEmployeeCompanies(empCode);
+
+            return Json(new
+            {
+                success = true,
+                data = result
+            });
+        }
+
     }
 }

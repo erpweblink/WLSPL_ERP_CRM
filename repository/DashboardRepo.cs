@@ -151,5 +151,59 @@ namespace WEBLINK_CRM.Repositories
 
             return list;
         }
+
+        public Task<EmployeeNodeInfo> GetEmployeeCompanies(string sessionName)
+        {
+            var info = new EmployeeNodeInfo();
+            const string sql = @"
+                --- Company Details
+                SELECT e.empcode AS EmployeeCode , e.name AS EmployeeName, COUNT(c.sessionname) AS TotalCompanies,
+                SUM(CASE WHEN LOWER(c.type) = 'paid' THEN 1 ELSE 0 END) AS PaidCompanies,
+                SUM(CASE WHEN LOWER(c.type) = 'unpaid' THEN 1 ELSE 0 END) AS UnPaidCompanies
+                FROM employees e LEFT JOIN Company c 
+                ON c.sessionname = e.empcode AND c.status = 1
+                WHERE e.empcode = @SessionName AND e.isdeleted = 0 AND e.status = 1
+                GROUP BY e.empcode, e.name, e.role;
+ 
+                --- Meeting details
+                SELECT name, DATENAME(month, GETDATE()) AS CurrentMonth, 
+                SUM(CASE WHEN Type = 'Fresh' THEN MeetingNo ELSE 0 END) AS FreshMeetings,
+                SUM(CASE WHEN Type = 'Follow-up' THEN MeetingNo ELSE 0 END) AS FollowupMeetings,
+                SUM(CASE WHEN Type = 'Services' THEN MeetingNo ELSE 0 END) AS ServicesMeetings,
+                SUM(MeetingNo) AS AllMeetings FROM (SELECT COUNT(cname) AS MeetingNo, name, Type 
+                FROM stswlspl.VW_FollowUpRpt WHERE sessionname = @SessionName
+                AND commentdatetime >= DATEADD(month, DATEDIFF(month, 0, GETDATE()), 0) 
+                AND commentdatetime < DATEADD(month, DATEDIFF(month, 0, GETDATE()) + 1, 0) 
+                AND Updatefor = 'Meeting' 
+                GROUP BY name, Type) AS CombinedResults 
+                GROUP BY name;";
+
+            using var con = new SqlConnection(_connectionString);
+            using var cmd = new SqlCommand(sql, con);
+            cmd.Parameters.AddWithValue("@SessionName", sessionName);
+            con.Open();
+            using var reader = cmd.ExecuteReader();
+            if (reader.Read())
+            {
+                info.EmployeeCode = reader["EmployeeCode"] == DBNull.Value ? "0" : reader["EmployeeCode"].ToString();
+                info.EmployeeName = reader["EmployeeName"] == DBNull.Value ? "0" : reader["EmployeeName"].ToString();
+                info.TotalCompanies = reader["TotalCompanies"] == DBNull.Value ? "0" : reader["TotalCompanies"].ToString();
+                info.PaidCompanies = reader["PaidCompanies"] == DBNull.Value ? "0" : reader["PaidCompanies"].ToString();
+                info.UnPaidCompanies = reader["UnPaidCompanies"] == DBNull.Value ? "0" : reader["UnPaidCompanies"].ToString();
+            }
+
+            if (reader.NextResult())
+            {
+                if (reader.Read())
+                {
+                    info.Fresh = reader["FreshMeetings"] == DBNull.Value ? "0" : reader["FreshMeetings"].ToString();
+                    info.FollowUp = reader["FollowupMeetings"] == DBNull.Value ? "0" : reader["FollowupMeetings"].ToString();
+                    info.Service = reader["ServicesMeetings"] == DBNull.Value ? "0" : reader["ServicesMeetings"].ToString();
+                    info.Total = reader["AllMeetings"] == DBNull.Value ? "0" : reader["AllMeetings"].ToString();
+                }
+            }
+
+            return Task.FromResult(info);
+        }
     }
 }
