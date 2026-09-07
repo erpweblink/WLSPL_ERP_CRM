@@ -186,6 +186,12 @@
         color: var(--text-secondary);
     }
 
+    .empcode {
+        font-size: 11.5px !important;
+        color: #8196af !important;
+        font-weight: 700 !important;
+    }
+
     .employee-role {
         color: var(--nc) !important;
         font-weight: 600 !important;
@@ -279,49 +285,46 @@
             box-shadow: var(--shadow-card);
         }
 
-    .node:not(.active)[data-role="manager"]::after,
-    .node:not(.active)[data-role="team-lead"]::after {
-        content: "+";
-        position: absolute;
-        right: 10px;
-        top: 10px;
-        width: 20px;
-        height: 20px;
+    .team-count-wrapper {
         display: flex;
         align-items: center;
+        width: 100%;
+        margin-top: 6px;
+    }
+
+        .team-count-wrapper .team-count {
+            margin-top: 0;
+        }
+
+    .team-toggle-btn {
+        margin-left: auto; /* pushes button to the far right */
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
         justify-content: center;
+        border: 1px solid color-mix(in srgb, var(--nc) 22%, white);
         border-radius: 6px;
         background: color-mix(in srgb, var(--nc) 8%, white);
         color: var(--nc);
         font-size: 14px;
         font-weight: 700;
-        border: 1px solid color-mix(in srgb, var(--nc) 22%, white);
-        transition: background .18s ease, color .18s ease, border-color .18s ease;
+        line-height: 1;
+        cursor: pointer;
+        transition: all .18s ease;
     }
 
-    .node:not(.active)[data-role="manager"]:hover::after,
-    .node:not(.active)[data-role="team-lead"]:hover::after {
-        background: color-mix(in srgb, var(--nc) 18%, white);
-        border-color: color-mix(in srgb, var(--nc) 35%, white);
-    }
+        .team-toggle-btn:hover {
+            background: var(--nc);
+            color: #fff;
+            border-color: var(--nc);
+        }
 
-    .node.active::after {
-        content: "−";
-        position: absolute;
-        right: 10px;
-        top: 10px;
-        width: 20px;
-        height: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 6px;
-        background: var(--nc);
-        color: #fff;
-        font-size: 14px;
-        font-weight: 700;
-        border: 1px solid var(--nc);
-    }
+        .team-toggle-btn:active {
+            transform: scale(.92);
+        }
+
 
     .node.active {
         border-top-color: var(--nc);
@@ -725,8 +728,9 @@
                     <div class='node-avatar'>{Safe(GetInitials(tl.Name))}</div>
                     <div>
                         <strong>{Safe(tl.Name)}</strong>
+                        <small class='empcode'>{Safe(tl.EmpCode)}</small>
                         <small class='employee-role'>
-                            <i class='fas fa-user-tag'></i>{Safe(tl.CustRole)}
+                            <i class='fas fa-user-tag'></i>{Safe(tl.Role)}
                         </small>
                         <small class='employee-designation'>
                             <i class='fas fa-briefcase'></i>Team Lead
@@ -748,8 +752,9 @@
                         <div class='node-avatar'>{Safe(GetInitials(exec.Name))}</div>
                         <div>
                             <strong>{Safe(exec.Name)}</strong>
+                            <small class='empcode'>{Safe(exec.EmpCode)}</small>
                             <small class='employee-role'>
-                                <i class='fas fa-user-tag'></i>{Safe(exec.CustRole)}
+                                <i class='fas fa-user-tag'></i>{Safe(exec.Role)}
                             </small>
                             <small class='employee-designation'>
                                 <i class='fas fa-briefcase'></i>Executive
@@ -771,9 +776,6 @@
             html.AppendHtml("</div></div>"); // close executive-container + tl-column
         }
 
-        // ── 2. Mid-level (Assistant Sales Manager, Other) ────────────
-        // These can have their OWN children (TLs or Executives)
-        // so we render them recursively using the same manager pattern
         foreach (var mid in midLevelChildren)
         {
             var midId = Convert.ToString(mid.EmpCode) ?? "";
@@ -807,8 +809,9 @@
                     <div class='node-avatar'>{Safe(GetInitials(mid.Name))}</div>
                     <div>
                         <strong>{Safe(mid.Name)}</strong>
+                        <small class='empcode'>{Safe(mid.EmpCode)}</small>
                         <small class='employee-role'>
-                            <i class='fas fa-user-tag'></i>{Safe(mid.CustRole)}
+                            <i class='fas fa-user-tag'></i>{Safe(mid.Role)}
                         </small>
                         <small class='employee-designation'>
                             <i class='fas fa-briefcase'></i>{designation}
@@ -820,10 +823,9 @@
                      data-manager-id='{Safe(midId)}'></div>
         ");
 
-            // ← RECURSIVE CALL: render this mid-level node's own children
             html.AppendHtml(RenderEmployeeChildren(mid, midId));
 
-            html.AppendHtml("</div>"); // close tl-column
+            html.AppendHtml("</div>");
         }
 
         // ── 3. Direct Sales Executives (leaf nodes) ──────────────────
@@ -836,8 +838,9 @@
                     <div class='node-avatar'>{Safe(GetInitials(exec.Name))}</div>
                     <div>
                         <strong>{Safe(exec.Name)}</strong>
+                        <small class='empcode'>{Safe(exec.EmpCode)}</small>
                         <small class='employee-role'>
-                            <i class='fas fa-user-tag'></i>{Safe(exec.CustRole)}
+                            <i class='fas fa-user-tag'></i>{Safe(exec.Role)}
                         </small>
                         <small class='employee-designation'>
                             <i class='fas fa-briefcase'></i>Executive
@@ -848,7 +851,7 @@
         ");
         }
 
-        html.AppendHtml("</div></div>"); // close tl-row + tl-horizontal-container
+        html.AppendHtml("</div></div>");
 
         return html;
     }
@@ -892,14 +895,20 @@
 
             html.AppendHtml($@"
                 <div class='manager-block'>
-                    <div class='node' data-role='{empRole}' onclick='toggleTeamLeads(this)'
+                    <div class='node' data-role='{empRole}'
                          data-manager-id='{Safe(employeeId)}' title='{Safe(employee.Role)}'>
                         <div class='node-avatar'>{Safe(GetInitials(employee.Name))}</div>
                         <div>
                             <strong>{Safe(employee.Name)}</strong>
+                            <small class='empcode'>{Safe(employee.EmpCode)}</small>
                             <small class='employee-role'><i class='fas fa-user-tag'></i>{Safe(employee.Role)}</small>
                             <small class='employee-designation'><i class='fas fa-briefcase'></i>{designation}</small>
-                            <small class='team-count'>{count}</small>
+                            <div class='team-count-wrapper'>
+                               <small class='team-count'>{count}</small>
+                                 <button type='button' class='team-toggle-btn'
+                                 onclick='event.stopPropagation(); toggleTeamLeads(this.closest("".node""))'
+                                  aria-label='Toggle team'>+</button>
+                            </div>
                         </div>
                     </div>
                     <div class='manager-vertical-connector' data-manager-id='{Safe(employeeId)}'></div>
@@ -936,6 +945,7 @@ else
                     <div class="node-avatar">@GetInitials(root.Name)</div>
                     <div>
                         <strong>@root.Name</strong>
+                        <small class="empcode">@root.EmpCode</small>
                         <small class="employee-role">
                             <i class="fas fa-user-tag"></i>
                             @root.CustRole
@@ -957,7 +967,7 @@ else
 
 <script type="text/javascript">
 
-      function toggleTeamLeads(managerNode) {
+    function toggleTeamLeads(managerNode) {
         const managerId = managerNode.getAttribute("data-manager-id");
 
         const container = managerNode.parentElement;
@@ -972,6 +982,7 @@ else
 
         if (!tlContainer) return;
 
+        const toggleButton = managerNode.querySelector(".team-toggle-btn");
         const isVisible = tlContainer.style.display === "flex";
 
         if (isVisible) {
@@ -979,10 +990,12 @@ else
             tlContainer.style.display = "none";
             managerNode.classList.remove("active");
             if (connector) connector.style.display = "none";
+            if (toggleButton) toggleButton.textContent = "+";
         } else {
             tlContainer.style.display = "flex";
             managerNode.classList.add("active");
             if (connector) connector.style.display = "block";
+             if (toggleButton) toggleButton.textContent = "-";
         }
     }
 
