@@ -4,6 +4,6 @@ namespace WEBLINK_CRM.Repositories
 {
     public interface IDashboardRepo
     {
-        List<EmployeeNode> GetAllEmployees();
+        List<EmployeeNode> GetEmployeeHierarchy(string employeeCode);
     }
 }

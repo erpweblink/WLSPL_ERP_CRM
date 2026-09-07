@@ -9,6 +9,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     var root = Model?.FirstOrDefault();
+    string rootRole = root != null ? DataRole(root.CustRole) : "manager";
 }
 
 <style type="text/css">
@@ -21,27 +22,17 @@
         --text-primary: #1A2035;
         --text-secondary: #5C6B82;
         --text-muted: #9BAABF;
-        /* Role palette */
-        --c-admin: #E0394B;
+        --c-admin: #4571b3;
         --c-manager: #D97706;
         --c-lead: #0284C7;
         --c-exec: #059669;
-        /* Role tints (light backgrounds) */
-        --c-admin-tint: rgba(224, 57, 75, 0.08);
-        --c-manager-tint: rgba(217,119, 6, 0.08);
-        --c-lead-tint: rgba( 2,132,199, 0.08);
-        --c-exec-tint: rgba( 5,150,105, 0.08);
-        /* Radius */
         --r-sm: 8px;
         --r-md: 14px;
         --r-lg: 18px;
-        /* Shadows */
         --shadow-card: 0 2px 8px rgba(16,30,54,.07), 0 1px 2px rgba(16,30,54,.04);
         --shadow-hover: 0 8px 28px rgba(16,30,54,.13), 0 2px 6px rgba(16,30,54,.06);
         --shadow-admin: 0 8px 28px rgba(224,57,75,.18);
-        /* Connector */
         --line-w: 2px;
-        /* Font */
         --font: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
     }
 
@@ -86,7 +77,6 @@
 
     .node {
         --nc: #9BAABF;
-        --nc-tint: rgba(155,170,191,0.08);
         position: relative;
         display: grid;
         grid-template-columns: 48px 1fr;
@@ -220,7 +210,6 @@
             color: var(--text-muted);
         }
 
-    /* Team count pill */
     .team-count {
         display: inline-flex !important;
         align-items: center;
@@ -251,7 +240,7 @@
         min-width: 240px;
         border-radius: var(--r-lg);
         box-shadow: var(--shadow-admin);
-        background: #c5577140;
+        background: rgba(224,57,75,.06);
     }
 
         .node[data-role="admin"] .node-avatar {
@@ -268,19 +257,19 @@
     .node[data-role="manager"] {
         --nc: var(--c-manager);
         min-width: 215px;
-        background: #d9770621;
+        background: rgba(217,119,6,.06);
     }
 
     .node[data-role="team-lead"] {
         --nc: var(--c-lead);
         min-width: 200px;
-        background: #0d85c324;
+        background: rgba(2,132,199,.06);
     }
 
     .node[data-role="executive"] {
         --nc: var(--c-exec);
         min-width: 192px;
-        background: #05966924;
+        background: rgba(5,150,105,.06);
         cursor: default;
     }
 
@@ -350,11 +339,11 @@
         gap: 20px;
         flex-wrap: wrap;
         margin: 32px 0 0;
-        padding-top: 0; /* no extra space for lines */
+        padding-top: 0;
+        padding-bottom: 16px;
         position: relative;
     }
 
-        /* REMOVED: vertical stem from admin → managers */
         .manager-container::before {
             display: none;
         }
@@ -367,7 +356,6 @@
         animation: fadeUp .3s ease both;
     }
 
-        /* REMOVED: vertical stem above each manager block */
         .manager-block::before {
             display: none;
         }
@@ -384,7 +372,6 @@
         animation: expandTree .24s ease both;
     }
 
-        /* Vertical drop: manager card → horizontal branch */
         .tl-horizontal-container::before {
             content: "";
             position: absolute;
@@ -397,7 +384,6 @@
             border-radius: 2px;
         }
 
-    /* Horizontal branch line */
     .tl-horizontal-line {
         height: var(--line-w);
         width: 100%;
@@ -425,7 +411,6 @@
         padding-top: 20px;
     }
 
-        /* Vertical drop: horizontal line → team lead card */
         .tl-column::before {
             content: "";
             position: absolute;
@@ -437,6 +422,33 @@
             transform: translateX(-50%);
             border-radius: 2px;
         }
+
+        .tl-column > .tl-horizontal-container {
+            display: none;
+            flex-direction: column !important;
+            align-items: center;
+            margin-top: 12px;
+            min-width: unset;
+            width: max-content;
+        }
+
+            .tl-column > .tl-horizontal-container > .tl-horizontal-line {
+                display: none;
+            }
+
+            .tl-column > .tl-horizontal-container > .tl-row {
+                flex-direction: column !important;
+                align-items: center;
+                gap: 10px;
+            }
+
+                .tl-column > .tl-horizontal-container > .tl-row > .tl-column {
+                    padding-top: 0;
+                }
+
+                    .tl-column > .tl-horizontal-container > .tl-row > .tl-column::before {
+                        display: none;
+                    }
 
     .executive-container {
         display: none;
@@ -564,7 +576,7 @@
         }
 
         [data-bs-theme="dark"] .node[data-role="admin"] {
-            background: #18212F;
+            background: rgba(248,113,113,.06);
         }
 
         [data-bs-theme="dark"] .node-avatar {
@@ -634,14 +646,29 @@
     }
 </style>
 
-
 @functions {
 
     private string Safe(object value)
     {
-        return HtmlEncoder.Default.Encode(
-            Convert.ToString(value) ?? ""
-        );
+        return HtmlEncoder.Default.Encode(Convert.ToString(value) ?? "");
+    }
+
+    private string DataRole(string role)
+    {
+        if (string.IsNullOrWhiteSpace(role))
+            return "executive";
+
+        return role.Trim() switch
+        {
+            "Admin" => "admin",
+            "Sub Admin" => "admin",
+            "Other" => "admin",   // ← ADD THIS (Vaibhav SubAdmin case)
+            "Sales Manager" => "manager",
+            "Assistant Sales Manager" => "manager",
+            "Sales TL" => "team-lead",
+            "Sales Executive" => "executive",
+            _ => "executive"
+        };
     }
 
     private IHtmlContent RenderEmployeeChildren(EmployeeNode employee, string employeeId)
@@ -649,273 +676,178 @@
         var html = new HtmlContentBuilder();
 
         var children = employee.Children?
-            .Where(x =>
-                !string.Equals(
-                    Convert.ToString(x.EmpCode),
-                    Convert.ToString(employee.EmpCode),
-                    StringComparison.OrdinalIgnoreCase))
+            .Where(x => !string.Equals(
+                Convert.ToString(x.EmpCode),
+                Convert.ToString(employee.EmpCode),
+                StringComparison.OrdinalIgnoreCase))
             .ToList()
             ?? new List<EmployeeNode>();
 
-        if (!children.Any())
-        {
-            return html;
-        }
+        if (!children.Any()) return html;
 
+        // Separate into three buckets
         var teamLeads = children
-            .Where(c =>
-                !string.IsNullOrWhiteSpace(c.Role) &&
-                (
-                    c.Role.Contains(
-                        "Team Lead",
-                        StringComparison.OrdinalIgnoreCase) ||
-
-                    c.Role.Contains(
-                        "Lead",
-                        StringComparison.OrdinalIgnoreCase) ||
-
-                    c.Role.Contains(
-                        "Supervisor",
-                        StringComparison.OrdinalIgnoreCase)
-                ))
+            .Where(c => string.Equals(c.CustRole, "Sales TL", StringComparison.OrdinalIgnoreCase))
             .ToList();
 
-        var executives = children
-            .Where(c =>
-                !string.IsNullOrWhiteSpace(c.Role) &&
-                c.Role.Contains(
-                    "Executive",
-                    StringComparison.OrdinalIgnoreCase))
+        var directExecutives = children
+            .Where(c => string.Equals(c.CustRole, "Sales Executive", StringComparison.OrdinalIgnoreCase))
             .ToList();
 
-        var otherChildren = children
-            .Where(c =>
-                !teamLeads.Contains(c) &&
-                !executives.Contains(c))
+        // Everything else: Assistant Sales Manager, Other, etc.
+        var midLevelChildren = children
+            .Where(c => !teamLeads.Contains(c) && !directExecutives.Contains(c))
             .ToList();
 
-        if (teamLeads.Any())
+        html.AppendHtml($@"
+        <div class='tl-horizontal-container' data-manager-id='{Safe(employeeId)}'>
+            <div class='tl-horizontal-line'></div>
+            <div class='tl-row'>
+    ");
+
+        // ── 1. Team Leads (Sales TL) ─────────────────────────────────
+        foreach (var tl in teamLeads)
         {
+            var tlId = Convert.ToString(tl.EmpCode) ?? "";
+            var tlRole = DataRole(tl.CustRole);
+
+            var tlExecutives = tl.Children?
+                .Where(c => !string.Equals(c.EmpCode, tl.EmpCode, StringComparison.OrdinalIgnoreCase))
+                .ToList()
+                ?? new List<EmployeeNode>();
+
             html.AppendHtml($@"
-                <div class='tl-horizontal-container'
-                     data-manager-id='{Safe(employeeId)}'>
+            <div class='tl-column'>
+                <div class='node' data-role='{tlRole}'
+                     onclick='toggleExecutives(this)'
+                     data-tl-id='{Safe(tlId)}'>
+                    <div class='node-avatar'>{Safe(GetInitials(tl.Name))}</div>
+                    <div>
+                        <strong>{Safe(tl.Name)}</strong>
+                        <small class='employee-role'>
+                            <i class='fas fa-user-tag'></i>{Safe(tl.CustRole)}
+                        </small>
+                        <small class='employee-designation'>
+                            <i class='fas fa-briefcase'></i>Team Lead
+                        </small>
+                        <small class='team-count'>Team {tlExecutives.Count}</small>
+                    </div>
+                </div>
+                <div class='tl-vertical-connector' data-tl-id='{Safe(tlId)}'></div>
+                <div class='executive-container' data-tl-id='{Safe(tlId)}'>
+        ");
 
-                    <div class='tl-horizontal-line'></div>
-
-                    <div class='tl-row'>
-            ");
-
-            foreach (var tl in teamLeads)
+            if (tlExecutives.Any())
             {
-                var tlId = Convert.ToString(tl.EmpCode) ?? "";
-
-                var tlExecutives = tl.Children?
-                    .Where(c =>
-                        !string.IsNullOrWhiteSpace(c.Role) &&
-                        c.Role.Contains(
-                            "Executive",
-                            StringComparison.OrdinalIgnoreCase))
-                    .ToList()
-                    ?? new List<EmployeeNode>();
-
-                html.AppendHtml($@"
-                    <div class='tl-column'>
-
-                        <div class='node'
-                             data-role='team-lead'
-                             onclick='toggleExecutives(this)'
-                             data-tl-id='{Safe(tlId)}'>
-
-                            <div class='node-avatar'>
-                                {Safe(GetInitials(tl.Name))}
-                            </div>
-
-                            <div>
-
-                                <strong>
-                                    {Safe(tl.Name)}
-                                </strong>
-
-                                <small class='employee-role'>
-                                    <i class='fas fa-user-tag'></i>
-                                    {Safe(tl.Role)}
-                                </small>
-
-                                <small class='employee-designation'>
-                                    <i class='fas fa-briefcase'></i>
-                                    Team Lead
-                                </small>
-
-                                <small class='team-count'>
-                                    Team {tlExecutives.Count}
-                                </small>
-
-                            </div>
-
+                foreach (var exec in tlExecutives)
+                {
+                    var execRole = DataRole(exec.CustRole);
+                    html.AppendHtml($@"
+                    <div class='node' data-role='{execRole}'>
+                        <div class='node-avatar'>{Safe(GetInitials(exec.Name))}</div>
+                        <div>
+                            <strong>{Safe(exec.Name)}</strong>
+                            <small class='employee-role'>
+                                <i class='fas fa-user-tag'></i>{Safe(exec.CustRole)}
+                            </small>
+                            <small class='employee-designation'>
+                                <i class='fas fa-briefcase'></i>Executive
+                            </small>
                         </div>
-
-                        <div class='tl-vertical-connector'
-                             data-tl-id='{Safe(tlId)}'>
-                        </div>
-
-                        <div class='executive-container'
-                             data-tl-id='{Safe(tlId)}'>
+                    </div>
                 ");
-
-
-                if (tlExecutives.Any())
-                {
-                    foreach (var exec in tlExecutives)
-                    {
-                        html.AppendHtml($@"
-                            <div class='node'
-                                 data-role='executive'>
-
-                                <div class='node-avatar'>
-                                    {Safe(GetInitials(exec.Name))}
-                                </div>
-
-                                <div>
-
-                                    <strong>
-                                        {Safe(exec.Name)}
-                                    </strong>
-
-                                    <small class='employee-role'>
-                                        <i class='fas fa-user-tag'></i>
-                                        {Safe(exec.Role)}
-                                    </small>
-
-                                    <small class='employee-designation'>
-                                        <i class='fas fa-briefcase'></i>
-                                        Executive
-                                    </small>
-
-                                </div>
-
-                            </div>
-                        ");
-
-                    }
                 }
-                else
-                {
-                    html.AppendHtml(@"
-                        <div class='node'
-                             data-role='executive'
-                             style='background:#eee;'>
-
-                            <div>
-                                <small>
-                                    No team members
-                                </small>
-                            </div>
-
-                        </div>
-                    ");
-                }
-
-                html.AppendHtml("</div></div>");
+            }
+            else
+            {
+                html.AppendHtml(@"
+                <div class='node' data-role='executive' style='background:#eee;'>
+                    <div><small>No team members</small></div>
+                </div>
+            ");
             }
 
-            html.AppendHtml("</div></div>");
+            html.AppendHtml("</div></div>"); // close executive-container + tl-column
         }
 
-        else if (otherChildren.Any())
+        // ── 2. Mid-level (Assistant Sales Manager, Other) ────────────
+        // These can have their OWN children (TLs or Executives)
+        // so we render them recursively using the same manager pattern
+        foreach (var mid in midLevelChildren)
         {
-            html.AppendHtml($@"
-                <div class='tl-horizontal-container'
-                     data-manager-id='{Safe(employeeId)}'>
+            var midId = Convert.ToString(mid.EmpCode) ?? "";
+            var midRole = DataRole(mid.CustRole);
 
-                    <div class='tl-horizontal-line'></div>
+            var midChildCount = mid.Children?
+                .Where(c => !string.Equals(c.EmpCode, mid.EmpCode, StringComparison.OrdinalIgnoreCase))
+                .Count() ?? 0;
 
-                    <div class='tl-row'>
-            ");
+            var midTLCount = mid.Children?
+                .Where(c => string.Equals(c.CustRole, "Sales TL", StringComparison.OrdinalIgnoreCase))
+                .Count() ?? 0;
 
-            foreach (var child in otherChildren)
+            string midCount = midTLCount > 0
+                ? "TL: " + midTLCount
+                : "Team: " + midChildCount;
+
+            string designation = mid.CustRole switch
             {
-                var childId = Convert.ToString(child.EmpCode) ?? "";
+                "Assistant Sales Manager" => "Asst. Manager",
+                "Sales Manager" => "Manager",
+                _ => mid.CustRole ?? "Staff"
+            };
 
-                var childMembers =
-                    child.Children?.ToList()
-                    ?? new List<EmployeeNode>();
+            // Render the mid-level node card
+            html.AppendHtml($@"
+            <div class='tl-column'>
+                <div class='node' data-role='{midRole}'
+                     onclick='toggleTeamLeads(this)'
+                     data-manager-id='{Safe(midId)}'>
+                    <div class='node-avatar'>{Safe(GetInitials(mid.Name))}</div>
+                    <div>
+                        <strong>{Safe(mid.Name)}</strong>
+                        <small class='employee-role'>
+                            <i class='fas fa-user-tag'></i>{Safe(mid.CustRole)}
+                        </small>
+                        <small class='employee-designation'>
+                            <i class='fas fa-briefcase'></i>{designation}
+                        </small>
+                        <small class='team-count'>{midCount}</small>
+                    </div>
+                </div>
+                <div class='manager-vertical-connector'
+                     data-manager-id='{Safe(midId)}'></div>
+        ");
 
-                html.AppendHtml($@"
-                    <div class='tl-column'>
+            // ← RECURSIVE CALL: render this mid-level node's own children
+            html.AppendHtml(RenderEmployeeChildren(mid, midId));
 
-                        <div class='node'
-                             data-role='team-lead'
-                             onclick='toggleExecutives(this)'
-                             data-tl-id='{Safe(childId)}'>
-
-                            <div>
-                                <strong>
-                                    {Safe(child.Name)}
-                                </strong>
-                            </div>
-
-                            <small>
-                                {Safe(child.Role)}
-                            </small>
-
-                            <small style='font-size:12px;color:gray;'>
-                                Team: {childMembers.Count}
-                            </small>
-
-                        </div>
-
-                        <div class='tl-vertical-connector'
-                             data-tl-id='{Safe(childId)}'>
-                        </div>
-
-                        <div class='executive-container'
-                             data-tl-id='{Safe(childId)}'>
-                ");
-
-                if (childMembers.Any())
-                {
-                    foreach (var member in childMembers)
-                    {
-                        html.AppendHtml($@"
-                            <div class='node'
-                                 data-role='executive'>
-
-                                <div>
-                                    <strong>
-                                        {Safe(member.Name)}
-                                    </strong>
-                                </div>
-
-                                <small>
-                                    {Safe(member.Role)}
-                                </small>
-
-                            </div>
-                        ");
-                    }
-                }
-                else
-                {
-                    html.AppendHtml(@"
-                        <div class='node'
-                             data-role='executive'
-                             style='background:#eee;'>
-
-                            <div>
-                                <small>
-                                    No team members
-                                </small>
-                            </div>
-
-                        </div>
-                    ");
-                }
-
-                html.AppendHtml("</div></div>");
-            }
-
-            html.AppendHtml("</div></div>");
+            html.AppendHtml("</div>"); // close tl-column
         }
+
+        // ── 3. Direct Sales Executives (leaf nodes) ──────────────────
+        foreach (var exec in directExecutives)
+        {
+            var execRole = DataRole(exec.CustRole);
+            html.AppendHtml($@"
+            <div class='tl-column'>
+                <div class='node' data-role='{execRole}'>
+                    <div class='node-avatar'>{Safe(GetInitials(exec.Name))}</div>
+                    <div>
+                        <strong>{Safe(exec.Name)}</strong>
+                        <small class='employee-role'>
+                            <i class='fas fa-user-tag'></i>{Safe(exec.CustRole)}
+                        </small>
+                        <small class='employee-designation'>
+                            <i class='fas fa-briefcase'></i>Executive
+                        </small>
+                    </div>
+                </div>
+            </div>
+        ");
+        }
+
+        html.AppendHtml("</div></div>"); // close tl-row + tl-horizontal-container
 
         return html;
     }
@@ -925,155 +857,73 @@
         var html = new HtmlContentBuilder();
 
         var children = root.Children?
-            .Where(x =>
-                !string.Equals(
-                    Convert.ToString(x.EmpCode),
-                    Convert.ToString(root.EmpCode),
-                    StringComparison.OrdinalIgnoreCase))
+            .Where(x => !string.Equals(Convert.ToString(x.EmpCode), Convert.ToString(root.EmpCode), StringComparison.OrdinalIgnoreCase))
             .ToList()
             ?? new List<EmployeeNode>();
 
-        if (!children.Any())
-        {
-            return html;
-        }
+        if (!children.Any()) return html;
 
-        html.AppendHtml(@"
-            <div class='level'>
-
-                <div class='manager-container'
-                     style='display:flex;'>
-        ");
+        html.AppendHtml(@"<div class='level'><div class='manager-container' style='display:flex;'>");
 
         foreach (var employee in children)
         {
-            var employeeId =
-                Convert.ToString(employee.EmpCode) ?? "";
+            var employeeId = Convert.ToString(employee.EmpCode) ?? "";
+            var empRole = DataRole(employee.OrgRole);
 
             var teamLeads = employee.Children?
-                .Where(c =>
-                    !string.IsNullOrWhiteSpace(c.Role) &&
-                    (
-                        c.Role.Contains(
-                            "Team Lead",
-                            StringComparison.OrdinalIgnoreCase) ||
+                 .Where(c => string.Equals(c.CustRole, "Sales TL", StringComparison.OrdinalIgnoreCase))
+                 .ToList()
+                 ?? new List<EmployeeNode>();
 
-                        c.Role.Contains(
-                            "Lead",
-                            StringComparison.OrdinalIgnoreCase) ||
+            var teamCount = employee.Children?.Count ?? 0;
+            string count = teamLeads.Any()
+                ? "Team Leader: " + teamLeads.Count
+                : "Team: " + teamCount;
 
-                        c.Role.Contains(
-                            "Supervisor",
-                            StringComparison.OrdinalIgnoreCase)
-                    ))
-                .ToList()
-                ?? new List<EmployeeNode>();
-
-            var teamCount =
-                employee.Children?.Count ?? 0;
-
-            string count;
-
-            if (teamLeads.Any())
+            // Designation label — contextual
+            string designation = empRole switch
             {
-                count =
-                    "Team Leader: " +
-                    teamLeads.Count;
-            }
-            else
-            {
-                count =
-                    "Team: " +
-                    teamCount;
-            }
+                "manager" => "Manager",
+                "team-lead" => "Team Lead",
+                "executive" => "Executive",
+                _ => "Staff"
+            };
 
             html.AppendHtml($@"
                 <div class='manager-block'>
-
-                    <div class='node'
-                         data-role='manager'
-                         onclick='toggleTeamLeads(this)'
-                         data-manager-id='{Safe(employeeId)}'
-                         title='{Safe(employee.Role)}'>
-
-                        <div class='node-avatar'>
-                            {Safe(GetInitials(employee.Name))}
-                        </div>
-
+                    <div class='node' data-role='{empRole}' onclick='toggleTeamLeads(this)'
+                         data-manager-id='{Safe(employeeId)}' title='{Safe(employee.Role)}'>
+                        <div class='node-avatar'>{Safe(GetInitials(employee.Name))}</div>
                         <div>
-
-                            <strong>
-                                {Safe(employee.Name)}
-                            </strong>
-
-                            <small class='employee-role'>
-                                <i class='fas fa-user-tag'></i>
-                                {Safe(employee.Role)}
-                            </small>
-
-                            <small class='employee-designation'>
-                                <i class='fas fa-briefcase'></i>
-                                Managers
-                            </small>
-
-                            <small class='team-count'>
-                                {count}
-                            </small>
-
+                            <strong>{Safe(employee.Name)}</strong>
+                            <small class='employee-role'><i class='fas fa-user-tag'></i>{Safe(employee.Role)}</small>
+                            <small class='employee-designation'><i class='fas fa-briefcase'></i>{designation}</small>
+                            <small class='team-count'>{count}</small>
                         </div>
-
                     </div>
-
-                    <div class='manager-vertical-connector'
-                         data-manager-id='{Safe(employeeId)}'>
-                    </div>
+                    <div class='manager-vertical-connector' data-manager-id='{Safe(employeeId)}'></div>
             ");
 
-
-
-            html.AppendHtml(
-     RenderEmployeeChildren(
-         employee,
-         employeeId));
-
-
+            html.AppendHtml(RenderEmployeeChildren(employee, employeeId));
             html.AppendHtml("</div>");
         }
 
-        html.AppendHtml(@"
-                </div>
-            </div>
-        ");
-
+        html.AppendHtml("</div></div>");
         return html;
     }
 
     private string GetInitials(string name)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            return "?";
-
-        var parts = name
-            .Trim()
-            .Split(
-                ' ',
-                StringSplitOptions.RemoveEmptyEntries);
-
-        if (parts.Length == 1)
-            return parts[0].Substring(0, 1).ToUpper();
-
-        return (
-            parts[0].Substring(0, 1) +
-            parts[^1].Substring(0, 1)
-        ).ToUpper();
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return parts[0].Substring(0, 1).ToUpper();
+        return (parts[0].Substring(0, 1) + parts[^1].Substring(0, 1)).ToUpper();
     }
 }
 
 @if (root == null)
 {
-    <div class="alert alert-warning">
-        No employees found.
-    </div>
+    <div class="alert alert-warning m-3">No data found for your account.</div>
 }
 else
 {
@@ -1081,27 +931,20 @@ else
         <div class="tree">
 
             <div class="level">
-
-                <div class="node"
-                     data-role="admin">
-
-                    <div class="node-avatar">
-                        @GetInitials(root.Name)
-                    </div>
-
+                <div class="node" data-role="@rootRole">
+                    <div class="node-avatar">@GetInitials(root.Name)</div>
                     <div>
-                        <strong>
-                            @root.Name
-                        </strong>
-
+                        <strong>@root.Name</strong>
                         <small class="employee-role">
-                            <i class="fas fa-star"></i>
-                            @root.Role
+                            <i class="fas fa-user-tag"></i>
+                            @root.CustRole
                         </small>
+                        @if (root.Children?.Any() == true)
+                        {
+                            <small class="team-count">Team @root.Children.Count</small>
+                        }
                     </div>
-
                 </div>
-
             </div>
 
             @RenderManagers(root)
@@ -1110,156 +953,112 @@ else
     </div>
 }
 
+
 <script type="text/javascript">
 
-    function toggleTeamLeads(managerNode) {
+  function toggleTeamLeads(managerNode) {
+    const managerId = managerNode.getAttribute("data-manager-id");
 
-        const managerId =
-            managerNode.getAttribute("data-manager-id");
+    // Find the immediate parent wrapper (manager-block or tl-column)
+    const container = managerNode.parentElement;
+    if (!container) return;
 
-        const container =
-            managerNode.closest(".manager-block");
-
-        if (!container)
-            return;
-
-        const tlContainer =
-            container.querySelector(
-                `.tl-horizontal-container[data-manager-id="${managerId}"]`
-            );
-
-        const connector =
-            container.querySelector(
-                `.manager-vertical-connector[data-manager-id="${managerId}"]`
-            );
-
-        if (!tlContainer)
-            return;
-
-        const isVisible =
-            tlContainer.style.display === "flex";
-
-        tlContainer.style.display =
-            isVisible ? "none" : "flex";
-
-        managerNode.classList.toggle(
-            "active",
-            !isVisible
-        );
-
-        if (connector) {
-            connector.style.display =
-                isVisible ? "none" : "block";
-        }
-
-        if (isVisible) {
-
-            container
-                .querySelectorAll(".executive-container")
-                .forEach(e => {
-                    e.style.display = "none";
-                });
-
-            container
-                .querySelectorAll(".tl-vertical-connector")
-                .forEach(e => {
-                    e.style.display = "none";
-                });
-
-            container
-                .querySelectorAll(".tl-column .node")
-                .forEach(e => {
-                    e.classList.remove("active");
-                });
-        }
-    }
-
-
-    function toggleExecutives(teamLeadNode) {
-
-        const tlId =
-            teamLeadNode.getAttribute("data-tl-id");
-
-        const column =
-            teamLeadNode.closest(".tl-column");
-
-        if (!column)
-            return;
-
-        const executiveContainer =
-            column.querySelector(
-                `.executive-container[data-tl-id="${tlId}"]`
-            );
-
-        const verticalConnector =
-            column.querySelector(
-                `.tl-vertical-connector[data-tl-id="${tlId}"]`
-            );
-
-        if (!executiveContainer)
-            return;
-
-        const isVisible =
-            executiveContainer.style.display === "flex";
-
-        executiveContainer.style.display =
-            isVisible ? "none" : "flex";
-
-        teamLeadNode.classList.toggle(
-            "active",
-            !isVisible
-        );
-
-        if (verticalConnector) {
-
-            verticalConnector.style.display =
-                isVisible ? "none" : "block";
-        }
-    }
-
-    document.addEventListener(
-        "DOMContentLoaded",
-        function () {
-
-            const containers =
-                document.querySelectorAll(
-                    ".tl-horizontal-container"
-                );
-
-            containers.forEach(container => {
-
-                const row =
-                    container.querySelector(
-                        ".tl-row");
-
-                if (!row)
-                    return;
-
-                const columns =
-                    row.querySelectorAll(
-                        ".tl-column");
-
-                if (columns.length > 0) {
-
-                    const line =
-                        container.querySelector(
-                            ".tl-horizontal-line");
-
-                    if (line) {
-
-                        const width =
-                            Math.max(
-                                145,
-                                (columns.length * 160) +
-                                ((columns.length - 1) * 15)
-                            );
-
-                        line.style.width =
-                            width + "px";
-                    }
-                }
-            });
-
-        }
+    // Find DIRECT child tl-horizontal-container only — not nested ones
+    const tlContainer = container.querySelector(
+        `:scope > .tl-horizontal-container[data-manager-id="${managerId}"]`
     );
+    const connector = container.querySelector(
+        `:scope > .manager-vertical-connector[data-manager-id="${managerId}"]`
+    );
+
+    if (!tlContainer) return;
+
+    const isVisible = tlContainer.style.display === "flex";
+
+    if (isVisible) {
+        // Closing — collapse ONLY this node's descendants, not siblings
+        collapseContainer(tlContainer);
+        tlContainer.style.display = "none";
+        managerNode.classList.remove("active");
+        if (connector) connector.style.display = "none";
+    } else {
+        // Opening
+        tlContainer.style.display = "flex";
+        managerNode.classList.add("active");
+        if (connector) connector.style.display = "block";
+    }
+}
+
+function toggleExecutives(teamLeadNode) {
+    const tlId = teamLeadNode.getAttribute("data-tl-id");
+
+    // Only look inside the immediate parent tl-column
+    const column = teamLeadNode.parentElement;
+    if (!column) return;
+
+    const executiveContainer = column.querySelector(
+        `:scope > .executive-container[data-tl-id="${tlId}"]`
+    );
+    const verticalConnector = column.querySelector(
+        `:scope > .tl-vertical-connector[data-tl-id="${tlId}"]`
+    );
+
+    if (!executiveContainer) return;
+
+    const isVisible = executiveContainer.style.display === "flex";
+    executiveContainer.style.display = isVisible ? "none" : "flex";
+    teamLeadNode.classList.toggle("active", !isVisible);
+
+    if (verticalConnector)
+        verticalConnector.style.display = isVisible ? "none" : "block";
+}
+
+// Recursively collapse only the children INSIDE a given container
+function collapseContainer(container) {
+    // Collapse all executive-containers inside
+    container.querySelectorAll(".executive-container").forEach(el => {
+        el.style.display = "none";
+    });
+
+    // Collapse all nested tl-horizontal-containers inside
+    container.querySelectorAll(".tl-horizontal-container").forEach(el => {
+        el.style.display = "none";
+    });
+
+    // Hide all vertical connectors inside
+    container.querySelectorAll(".tl-vertical-connector").forEach(el => {
+        el.style.display = "none";
+    });
+
+    // Hide all manager vertical connectors inside
+    container.querySelectorAll(".manager-vertical-connector").forEach(el => {
+        el.style.display = "none";
+    });
+
+    // Remove active state from all nodes inside
+    container.querySelectorAll(".node.active").forEach(el => {
+        el.classList.remove("active");
+    });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Only compute widths for TOP-LEVEL tl-horizontal-containers
+    document.querySelectorAll(
+        ".manager-block > .tl-horizontal-container"
+    ).forEach(container => {
+        const row = container.querySelector(".tl-row");
+        if (!row) return;
+        const columns = row.querySelectorAll(".tl-column");
+        if (columns.length > 0) {
+            const line = container.querySelector(".tl-horizontal-line");
+            if (line) {
+                const width = Math.max(
+                    145,
+                    (columns.length * 220) + ((columns.length - 1) * 16)
+                );
+                line.style.width = width + "px";
+            }
+        }
+    });
+});
 </script>

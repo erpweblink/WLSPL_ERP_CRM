@@ -18,70 +18,79 @@ namespace WEBLINK_CRM.Controllers
 
         public ActionResult Index()
         {
-            var allEmployees = _repo.GetAllEmployees();
+            var currentEmpCode = HttpContext.Session.GetString("EmpCode");
+            if (string.IsNullOrWhiteSpace(currentEmpCode))
+                return View(new List<EmployeeNode>());
 
-            var tree = BuildManagerSalesTree(allEmployees);
-
-            return View(tree);
-        }
-
-        private static List<EmployeeNode> BuildManagerSalesTree(List<EmployeeNode> employees)
-        {
-            var result = new List<EmployeeNode>();
-
+            var employees = _repo.GetEmployeeHierarchy(currentEmpCode);
             if (employees == null || employees.Count == 0)
-                return result;
+                return View(new List<EmployeeNode>());
 
-            // Clear children
-            foreach (var employee in employees)
+            BuildTree(employees);
+
+            // The logged-in employee's own node
+            var selfNode = employees.FirstOrDefault(e =>
+                string.Equals(e.EmpCode?.Trim(), currentEmpCode.Trim(),
+                    StringComparison.OrdinalIgnoreCase));
+
+            EmployeeNode root;
+
+            if (selfNode == null)
             {
-                employee.Children = new List<EmployeeNode>();
+                // Fallback: lowest level node
+                var minLevel = employees.Min(x => x.HierarchyLevel);
+                root = employees.First(x => x.HierarchyLevel == minLevel);
+            }
+            else if (selfNode.CustRole == "Admin")
+            {
+                // Admin sees a virtual root — create a wrapper
+                // with all level-1 nodes as children
+                root = selfNode;
+            }
+            else
+            {
+                // For any other role: find the highest ancestor
+                // that is IN the returned list (level 1 node in returned set)
+                var minLevel = employees.Min(x => x.HierarchyLevel);
+                root = employees.FirstOrDefault(x => x.HierarchyLevel == minLevel)
+                       ?? selfNode;
             }
 
-            // Create lookup by employee code
-            var employeeLookup = employees
-                .Where(x => !string.IsNullOrWhiteSpace(x.EmpCode))
+            return View(new List<EmployeeNode> { root });
+        }
+
+        private static void BuildTree(List<EmployeeNode> employees)
+        {
+            // Reset children
+            foreach (var emp in employees)
+                emp.Children = new List<EmployeeNode>();
+
+            // Build lookup by EmpCode
+            var lookup = employees
+                .Where(e => !string.IsNullOrWhiteSpace(e.EmpCode))
+                .GroupBy(
+                    e => e.EmpCode.Trim(),
+                    StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(
-                    x => x.EmpCode.Trim(),
-                    x => x,
+                    g => g.Key,
+                    g => g.First(),
                     StringComparer.OrdinalIgnoreCase);
 
-            // Build ParentCode hierarchy
-            foreach (var employee in employees)
+            foreach (var emp in employees)
             {
-                if (string.IsNullOrWhiteSpace(employee.ParentCode))
+                if (string.IsNullOrWhiteSpace(emp.ParentCode))
                     continue;
 
-                var parentCode = employee.ParentCode.Trim();
+                // Skip self-referencing root nodes
+                if (string.Equals(emp.EmpCode?.Trim(), emp.ParentCode?.Trim(),
+                    StringComparison.OrdinalIgnoreCase))
+                    continue;
 
-                if (employeeLookup.TryGetValue(parentCode, out var parent))
-                {
-                    // Don't add itself as child
-                    if (!string.Equals(
-                        employee.EmpCode,
-                        parent.EmpCode,
-                        StringComparison.OrdinalIgnoreCase))
-                    {
-                        parent.Children.Add(employee);
-                    }
-                }
+                // Only attach to parent if parent EXISTS in returned list
+                // This handles cases where Admin (level 0) is not returned
+                if (lookup.TryGetValue(emp.ParentCode.Trim(), out var parent))
+                    parent.Children.Add(emp);
             }
-
-            // Root employees
-            // Your WLSPL/01 Admin is the root.
-            var roots = employees
-                .Where(x =>
-                    string.IsNullOrWhiteSpace(x.ParentCode) ||
-                    string.Equals(
-                        x.EmpCode,
-                        x.ParentCode,
-                        StringComparison.OrdinalIgnoreCase))
-                .ToList();
-
-            result.AddRange(roots);
-
-            return result;
         }
-
     }
 }

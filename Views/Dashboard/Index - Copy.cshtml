@@ -9,30 +9,47 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     var root = Model?.FirstOrDefault();
+
+    string rootRole= root.OrgRole?.ToLowerInvariant() ?? "";
+      
 }
 
-<style>
+<style type="text/css">
     :root {
-        --page-bg: #f5f7fb;
-        --surface: #ffffff;
-        --surface-soft: #f8fafc;
-        --text: #172033;
-        --text-secondary: #64748b;
-        --text-light: #94a3b8;
-        --border: #e5e9f2;
-        --line: #cbd5e1;
-        --admin: #ef4444;
-        --manager: #f59e0b;
-        --teamlead: #0891b2;
-        --executive: #10b981;
-        --shadow-card: 0 4px 12px rgba(15, 23, 42, .06), 0 1px 3px rgba(15, 23, 42, .04);
-        --shadow-hover: 0 16px 35px rgba(15, 23, 42, .13);
-        --radius: 16px;
+        --page-bg: #F4F6FA;
+        --surface: #FFFFFF;
+        --surface-soft: #F9FAFB;
+        --border: #E8ECF2;
+        --connector: #CBD5E1;
+        --text-primary: #1A2035;
+        --text-secondary: #5C6B82;
+        --text-muted: #9BAABF;
+        --c-admin: #4571b3;
+        --c-manager: #D97706;
+        --c-lead: #0284C7;
+        --c-exec: #059669;
+        --r-sm: 8px;
+        --r-md: 14px;
+        --r-lg: 18px;
+        --shadow-card: 0 2px 8px rgba(16,30,54,.07), 0 1px 2px rgba(16,30,54,.04);
+        --shadow-hover: 0 8px 28px rgba(16,30,54,.13), 0 2px 6px rgba(16,30,54,.06);
+        --shadow-admin: 0 8px 28px rgba(224,57,75,.18);
+        --line-w: 2px;
+        --font: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
     }
 
-    /* =========================================================
-           PAGE
-           ========================================================= */
+    @@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
+
+    html,
+    body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
 
     body {
         background: var(--page-bg);
@@ -40,31 +57,23 @@
 
     .tree-page {
         width: 100%;
-        font-family: 'Inter', sans-serif;
+        max-width: 100%;
+        font-family: var(--font);
     }
-
-    /* =========================================================
-           TREE AREA
-           ========================================================= */
 
     .tree {
         width: 100%;
         max-width: 1800px;
         margin: 0 auto;
-        padding: 40px 30px 70px;
+        padding: 48px 32px 80px;
         position: relative;
-        overflow-x: auto;
+        overflow-x: hidden;
         overflow-y: visible;
-        border-radius: 24px;
-        background: linear-gradient( rgba(255,255,255,.96), rgba(255,255,255,.96) ), radial-gradient( circle, #dce3ef 1px, transparent 1px );
-        background-size: auto, 24px 24px;
-        border: 1px solid #e7ebf3;
-        box-shadow: 0 10px 35px rgba(15,23,42,.06);
+        border-radius: 20px;
+        background: #F8FAFD;
+        border: 1px solid var(--border);
+        box-shadow: 0 2px 12px rgba(16,30,54,.05);
     }
-
-    /* =========================================================
-           LEVEL
-           ========================================================= */
 
     .level {
         display: flex;
@@ -72,102 +81,83 @@
         align-items: flex-start;
         position: relative;
         width: 100%;
-        margin: 10px 0 45px;
-        gap: 25px;
+        max-width: 100%;
+        margin: 0;
     }
 
-    /* =========================================================
-           BASE NODE
-           ========================================================= */
-
     .node {
-        --node-color: #64748b;
+        --nc: #9BAABF;
         position: relative;
         display: grid;
-        grid-template-columns: 48px 1fr;
+        grid-template-columns: 48px minmax(0, 1fr);
         grid-auto-rows: min-content;
         align-items: center;
         column-gap: 12px;
-        min-width: 220px;
-        min-height: 78px;
-        padding: 12px 16px 12px 12px;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        padding: 13px 14px 13px 12px;
         background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
+        border-top: 2.5px solid var(--nc);
+        border-left: 1.5px solid color-mix(in srgb, var(--nc) 35%, var(--border));
+        border-right: 1.5px solid color-mix(in srgb, var(--nc) 35%, var(--border));
+        border-bottom: 1.5px solid color-mix(in srgb, var(--nc) 35%, var(--border));
+        border-radius: var(--r-md);
         text-align: left;
         cursor: pointer;
         box-shadow: var(--shadow-card);
-        transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
         z-index: 5;
     }
 
         .node:hover {
-            transform: translateY(-4px);
+            transform: translateY(-3px);
             box-shadow: var(--shadow-hover);
-            border-color: color-mix( in srgb, var(--node-color) 35%, white );
+            border-top-color: var(--nc);
+            border-left-color: color-mix(in srgb, var(--nc) 55%, var(--border));
+            border-right-color: color-mix(in srgb, var(--nc) 55%, var(--border));
+            border-bottom-color: color-mix(in srgb, var(--nc) 55%, var(--border));
         }
 
         .node:active {
             transform: translateY(-1px);
         }
 
-        /* =========================================================
-           TOP COLOR BAR
-           ========================================================= */
-
-        .node::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 16px;
-            right: 16px;
-            height: 3px;
-            background: var(--node-color);
-            border-radius: 0 0 8px 8px;
-            opacity: .9;
-        }
-
-    /* =========================================================
-           AVATAR
-           ========================================================= */
-
     .node-avatar {
         grid-row: 1 / -1;
-        width: 48px;
-        height: 48px;
-        border-radius: 14px;
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient( 135deg, color-mix( in srgb, var(--node-color) 16%, white ), color-mix( in srgb, var(--node-color) 5%, white ) );
-        color: var(--node-color);
-        border: 1px solid color-mix( in srgb, var(--node-color) 20%, white );
-        font-family: 'Poppins', sans-serif;
-        font-size: 14px;
+        background: color-mix(in srgb, var(--nc) 12%, white);
+        color: var(--nc);
+        font-family: var(--font);
+        font-size: 13px;
         font-weight: 700;
-        box-shadow: 0 3px 8px rgba(15,23,42,.08);
+        letter-spacing: .3px;
+        border: 1.5px solid color-mix(in srgb, var(--nc) 22%, white);
         position: relative;
+        flex-shrink: 0;
     }
-
-        /* =========================================================
-           STATUS / LEVEL ICON
-           ========================================================= */
 
         .node-avatar::after {
             position: absolute;
-            right: -5px;
-            bottom: -5px;
-            width: 17px;
-            height: 17px;
+            right: -4px;
+            bottom: -4px;
+            width: 16px;
+            height: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            background: var(--node-color);
-            color: white;
-            font-size: 9px;
-            border: 2px solid white;
-            box-shadow: 0 2px 5px rgba(15,23,42,.18);
+            background: var(--nc);
+            color: #fff;
+            font-size: 8px;
+            font-weight: 700;
+            border: 2px solid #fff;
+            box-shadow: 0 1px 4px rgba(16,30,54,.2);
         }
 
     .node[data-role="admin"] .node-avatar::after {
@@ -176,137 +166,130 @@
 
     .node[data-role="manager"] .node-avatar::after {
         content: "M";
-        font-size: 8px;
+        font-size: 7px;
     }
 
     .node[data-role="team-lead"] .node-avatar::after {
         content: "L";
-        font-size: 8px;
+        font-size: 7px;
     }
 
     .node[data-role="executive"] .node-avatar::after {
         content: "✓";
     }
 
-    /* =========================================================
-           TEXT
-           ========================================================= */
-
     .node strong {
         display: block;
         margin: 0 0 3px;
-        color: var(--text);
-        font-family: 'Poppins', sans-serif;
-        font-size: 13.5px;
+        color: var(--text-primary);
+        font-family: var(--font);
+        font-size: 13px;
         font-weight: 700;
-        line-height: 1.35;
+        line-height: 1.3;
         white-space: normal;
+        overflow-wrap: anywhere;
+        padding-right: 22px;
     }
 
     .node small {
         display: block;
+        font-size: 10.5px;
+        line-height: 1.5;
         color: var(--text-secondary);
-        font-size: 11px;
-        line-height: 1.45;
     }
-
-    /* =========================================================
-           ROLE
-           ========================================================= */
 
     .employee-role {
-        color: var(--node-color) !important;
-        font-weight: 600;
-        font-size: 10.5px !important;
-        margin-top: 1px;
+        color: var(--nc) !important;
+        font-weight: 600 !important;
+        font-size: 10px !important;
     }
 
-    /* =========================================================
-           DESIGNATION
-           ========================================================= */
-
-    .employee-designation {
-        color: var(--text-secondary) !important;
-        font-size: 10.5px !important;
-        margin-top: 1px;
-    }
-
-        .employee-role i,
-        .employee-designation i {
-            width: 12px;
-            margin-right: 3px;
-            color: var(--node-color);
-            font-size: 9px;
+        .employee-role i {
+            width: 11px;
+            margin-right: 2px;
+            font-size: 8.5px;
+            color: var(--nc);
         }
 
-    /* =========================================================
-           TEAM COUNT
-           ========================================================= */
-
-    .team-count {
-        display: inline-block !important;
-        width: fit-content;
-        margin-top: 5px;
-        padding: 3px 8px;
-        border-radius: 20px;
-        background: color-mix( in srgb, var(--node-color) 9%, white );
-        color: var(--node-color) !important;
-        font-size: 9.5px !important;
-        font-weight: 700;
-        line-height: 1.3;
+    .employee-designation {
+        color: var(--text-muted) !important;
+        font-size: 10px !important;
     }
 
-    /* =========================================================
-           ADMIN
-           ========================================================= */
+        .employee-designation i {
+            width: 11px;
+            margin-right: 2px;
+            font-size: 8.5px;
+            color: var(--text-muted);
+        }
+
+    .team-count {
+        display: inline-flex !important;
+        align-items: center;
+        gap: 4px;
+        margin-top: 6px;
+        padding: 2px 8px;
+        border-radius: 20px;
+        background: color-mix(in srgb, var(--nc) 10%, white);
+        color: var(--nc) !important;
+        font-size: 9.5px !important;
+        font-weight: 700 !important;
+        letter-spacing: .2px;
+        border: 1px solid color-mix(in srgb, var(--nc) 20%, white);
+    }
+
+        .team-count::before {
+            content: "";
+            display: inline-block;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--nc);
+            opacity: .75;
+        }
 
     .node[data-role="admin"] {
-        --node-color: var(--admin);
-        min-width: 250px;
-        min-height: 92px;
-        border-radius: 18px;
-        box-shadow: 0 12px 28px rgba(239,68,68,.14);
+        --nc: var(--c-admin);
+        min-width: 240px;
+        width: 240px;
+        border-radius: var(--r-lg);
+        box-shadow: var(--shadow-admin);
+        background: rgba(224,57,75,.06);
     }
 
         .node[data-role="admin"] .node-avatar {
-            width: 56px;
-            height: 56px;
-            border-radius: 16px;
-            font-size: 17px;
-        }
-
-        .node[data-role="admin"] strong {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
             font-size: 16px;
         }
 
-    /* =========================================================
-           MANAGER
-           ========================================================= */
+        .node[data-role="admin"] strong {
+            font-size: 15px;
+        }
 
     .node[data-role="manager"] {
-        --node-color: var(--manager);
-        min-width: 220px;
-        min-height: 82px;
+        --nc: var(--c-manager);
+        min-width: 0;
+        width: 215px;
+        max-width: 215px;
+        background: rgba(217,119,6,.06);
     }
-
-    /* =========================================================
-           TEAM LEAD
-           ========================================================= */
 
     .node[data-role="team-lead"] {
-        --node-color: var(--teamlead);
-        min-width: 205px;
-        min-height: 78px;
+        --nc: var(--c-lead);
+        min-width: 0;
+        width: 200px;
+        max-width: 200px;
+        background: rgba(2,132,199,.06);
     }
 
-    /* =========================================================
-           EXECUTIVE
-           ========================================================= */
-
     .node[data-role="executive"] {
-        --node-color: var(--executive);
-        min-width: 195px;
-        min-height: 70px;
+        --nc: var(--c-exec);
+        min-width: 0;
+        width: 192px;
+        max-width: 192px;
+        background: rgba(5,150,105,.06);
         cursor: default;
     }
 
@@ -315,9 +298,57 @@
             box-shadow: var(--shadow-card);
         }
 
-    /* =========================================================
-           MANAGER CONTAINER
-           ========================================================= */
+    .node:not(.active)[data-role="manager"]::after,
+    .node:not(.active)[data-role="team-lead"]::after {
+        content: "+";
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        background: color-mix(in srgb, var(--nc) 8%, white);
+        color: var(--nc);
+        font-size: 14px;
+        font-weight: 700;
+        border: 1px solid color-mix(in srgb, var(--nc) 22%, white);
+        transition: background .18s ease, color .18s ease, border-color .18s ease;
+    }
+
+    .node:not(.active)[data-role="manager"]:hover::after,
+    .node:not(.active)[data-role="team-lead"]:hover::after {
+        background: color-mix(in srgb, var(--nc) 18%, white);
+        border-color: color-mix(in srgb, var(--nc) 35%, white);
+    }
+
+    .node.active::after {
+        content: "−";
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        background: var(--nc);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        border: 1px solid var(--nc);
+    }
+
+    .node.active {
+        border-top-color: var(--nc);
+        border-left-color: color-mix(in srgb, var(--nc) 55%, var(--border));
+        border-right-color: color-mix(in srgb, var(--nc) 55%, var(--border));
+        border-bottom-color: color-mix(in srgb, var(--nc) 55%, var(--border));
+        box-shadow: 0 4px 18px color-mix(in srgb, var(--nc) 16%, transparent), var(--shadow-card);
+    }
 
     .manager-container {
         display: flex;
@@ -325,89 +356,65 @@
         justify-content: center;
         align-items: flex-start;
         width: 100%;
-        gap: 28px;
+        max-width: 100%;
+        gap: 20px;
         flex-wrap: wrap;
-        margin: 10px 0 40px;
-        padding-top: 38px;
+        margin: 32px 0 0;
+        padding: 0 10px;
         position: relative;
+        overflow-x: hidden;
     }
-
-        /* Main root connector */
-
-        .manager-container::before {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            width: 2px;
-            height: 22px;
-            background: var(--line);
-            transform: translateX(-50%);
-        }
-
 
     .manager-block {
         display: flex;
         flex-direction: column;
         align-items: center;
         position: relative;
-        animation: fadeUp .35s ease both;
+        flex: 0 1 215px;
+        width: 215px;
+        max-width: 215px;
+        min-width: 0;
+        animation: fadeUp .3s ease both;
     }
 
-        .manager-block::before {
-            position: absolute;
-            top: -38px;
-            left: 50%;
-            width: 2px;
-            height: 38px;
-            background: var(--line);
-            transform: translateX(-50%);
-        }
-
-    /* =========================================================
-           TEAM LEAD AREA
-           ========================================================= */
+    .manager-container > .manager-block {
+        flex-shrink: 1;
+    }
 
     .tl-horizontal-container {
         display: none;
         flex-direction: column;
         align-items: center;
         position: relative;
-        width: max-content;
-        min-width: 100%;
-        margin-top: 25px;
+        width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        margin-top: 16px;
         padding-top: 20px;
-        animation: expandTree .28s ease both;
+        animation: expandTree .24s ease both;
     }
-
-        /* Connector from manager */
 
         .tl-horizontal-container::before {
             content: "";
             position: absolute;
             top: 0;
             left: 50%;
-            width: 2px;
+            width: var(--line-w);
             height: 20px;
-            background: var(--line);
+            background: var(--connector);
             transform: translateX(-50%);
+            border-radius: 2px;
         }
 
-    /* =========================================================
-           HORIZONTAL TEAM LEAD LINE
-           ========================================================= */
-
     .tl-horizontal-line {
-        height: 2px;
+        height: var(--line-w);
         width: 100%;
-        min-width: 180px;
-        margin-bottom: 22px;
-        background: linear-gradient( 90deg, transparent, var(--line) 10%, var(--line) 90%, transparent );
-        position: relative;
+        max-width: 100%;
+        min-width: 0;
+        margin-bottom: 20px;
+        background: var(--connector);
+        border-radius: 2px;
     }
-
-    /* =========================================================
-           TEAM LEAD ROW
-           ========================================================= */
 
     .tl-row {
         display: flex;
@@ -415,183 +422,140 @@
         justify-content: center;
         align-items: flex-start;
         flex-wrap: wrap;
-        gap: 20px;
+        gap: 16px;
         width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        overflow-x: hidden;
     }
-
-    /* =========================================================
-           TEAM LEAD COLUMN
-           ========================================================= */
 
     .tl-column {
         display: flex;
         flex-direction: column;
         align-items: center;
         position: relative;
+        flex: 0 1 200px;
+        width: 200px;
+        max-width: 200px;
+        min-width: 0;
         padding-top: 20px;
     }
-
-        /* connector from horizontal line */
 
         .tl-column::before {
             content: "";
             position: absolute;
             top: 0;
             left: 50%;
-            width: 2px;
+            width: var(--line-w);
             height: 20px;
-            background: var(--line);
+            background: var(--connector);
             transform: translateX(-50%);
+            border-radius: 2px;
         }
 
-    /* =========================================================
-           EXECUTIVES
-           ========================================================= */
+        .tl-column > .tl-horizontal-container {
+            display: none;
+            flex-direction: column !important;
+            align-items: center;
+            margin-top: 12px;
+            min-width: 0;
+            width: 100%;
+            max-width: 100%;
+        }
+
+            .tl-column > .tl-horizontal-container > .tl-horizontal-line {
+                display: none;
+            }
+
+            .tl-column > .tl-horizontal-container > .tl-row {
+                flex-direction: column !important;
+                align-items: center;
+                gap: 10px;
+                width: 100%;
+            }
+
+                .tl-column > .tl-horizontal-container > .tl-row > .tl-column {
+                    width: 100%;
+                    max-width: 200px;
+                    min-width: 0;
+                    padding-top: 0;
+                }
+
+                    .tl-column > .tl-horizontal-container > .tl-row > .tl-column::before {
+                        display: none;
+                    }
 
     .executive-container {
         display: none;
         flex-direction: column;
         align-items: center;
-        gap: 10px;
-        margin-top: 18px;
-        padding: 4px 8px 12px;
-        max-height: 420px;
+        gap: 8px;
+        width: 100%;
+        max-width: 100%;
+        margin-top: 0;
+        padding: 4px 6px 10px;
+        max-height: 400px;
         overflow-y: auto;
+        overflow-x: hidden;
         scrollbar-width: thin;
-        animation: expandTree .25s ease both;
+        animation: expandTree .22s ease both;
     }
-
-    /* connector */
 
     .tl-vertical-connector {
         display: none;
-        width: 2px;
+        width: var(--line-w);
         height: 18px;
-        margin-top: 0;
-        background: var(--line);
-        border-radius: 10px;
+        background: var(--connector);
+        border-radius: 2px;
     }
-
-    /* =========================================================
-           OLD CONNECTORS HIDDEN
-           ========================================================= */
 
     .manager-connector,
-    .manager-vertical-connector {
-        display: none;
-    }
-
+    .manager-vertical-connector,
     .executive-connector {
         display: none;
     }
 
-    /* =========================================================
-           ACTIVE CARD
-           ========================================================= */
-
-    .node.active {
-        border-color: color-mix( in srgb, var(--node-color) 35%, white );
-        box-shadow: 0 12px 30px color-mix( in srgb, var(--node-color) 18%, transparent );
-    }
-
-        /* Expand/collapse button */
-
-        .node.active::after {
-            content: "−";
-            position: absolute;
-            right: 9px;
-            top: 9px;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: color-mix( in srgb, var(--node-color) 10%, white );
-            color: var(--node-color);
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-    .node:not(.active)[data-role="manager"]::after,
-    .node:not(.active)[data-role="team-lead"]::after {
-        content: "+";
-        position: absolute;
-        right: 9px;
-        top: 9px;
-        width: 20px;
-        height: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        background: #f1f5f9;
-        color: var(--text-light);
-        font-size: 13px;
-        font-weight: 600;
-        transition: all .2s ease;
-    }
-
-    .node:not(.active)[data-role="manager"]:hover::after,
-    .node:not(.active)[data-role="team-lead"]:hover::after {
-        background: var(--node-color);
-        color: white;
-    }
-
-    /* =========================================================
-           EMPTY NODE
-           ========================================================= */
-
     .node[style*="background:#eee"] {
-        --node-color: #94a3b8;
-        background: #f8fafc !important;
-        border: 1px dashed #cbd5e1;
+        --nc: #B0BEC5;
+        background: var(--surface-soft) !important;
+        border: 1.5px dashed var(--border) !important;
         box-shadow: none;
-        opacity: .85;
+        opacity: .75;
         cursor: default;
     }
 
         .node[style*="background:#eee"] strong,
         .node[style*="background:#eee"] small {
-            color: #94a3b8 !important;
+            color: var(--text-muted) !important;
         }
 
-    /* =========================================================
-           SCROLLBARS
-           ========================================================= */
-
     .tree::-webkit-scrollbar,
-    .manager-container::-webkit-scrollbar,
+    .executive-container::-webkit-scrollbar,
     .tl-row::-webkit-scrollbar,
-    .executive-container::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
+    .manager-container::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
     }
 
     .tree::-webkit-scrollbar-thumb,
-    .manager-container::-webkit-scrollbar-thumb,
+    .executive-container::-webkit-scrollbar-thumb,
     .tl-row::-webkit-scrollbar-thumb,
-    .executive-container::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 20px;
+    .manager-container::-webkit-scrollbar-thumb {
+        background: var(--connector);
+        border-radius: 10px;
     }
 
     .tree::-webkit-scrollbar-track,
-    .manager-container::-webkit-scrollbar-track,
+    .executive-container::-webkit-scrollbar-track,
     .tl-row::-webkit-scrollbar-track,
-    .executive-container::-webkit-scrollbar-track {
+    .manager-container::-webkit-scrollbar-track {
         background: transparent;
     }
 
-    /* =========================================================
-           ANIMATIONS
-           ========================================================= */
-
     @@keyframes fadeUp {
-
         from {
             opacity: 0;
-            transform: translateY(12px);
+            transform: translateY(10px);
         }
 
         to {
@@ -601,10 +565,9 @@
     }
 
     @@keyframes expandTree {
-
         from {
             opacity: 0;
-            transform: translateY(-8px);
+            transform: translateY(-6px);
         }
 
         to {
@@ -613,130 +576,254 @@
         }
     }
 
-    /* =========================================================
-           DARK MODE
-           ========================================================= */
-
-    [data-bs-theme="dark"] body {
-        background: #0f141c;
+    [data-bs-theme="dark"] {
+        --page-bg: #0F172A;
+        --surface: #18212F;
+        --surface-soft: #1E2A3B;
+        --border: #2A3750;
+        --connector: #334466;
+        --text-primary: #F1F5F9;
+        --text-secondary: #8DA0B8;
+        --text-muted: #5C7490;
+        --c-admin: #F87171;
+        --c-manager: #FBBF24;
+        --c-lead: #38BDF8;
+        --c-exec: #34D399;
+        --shadow-card: 0 2px 8px rgba(0,0,0,.4), 0 1px 3px rgba(0,0,0,.3);
+        --shadow-hover: 0 8px 28px rgba(0,0,0,.5);
+        --shadow-admin: 0 8px 28px rgba(248,113,113,.2);
     }
 
-    [data-bs-theme="dark"] .tree {
-        background: linear-gradient( rgba(20,27,38,.97), rgba(20,27,38,.97) ), radial-gradient( circle, #293241 1px, transparent 1px );
-        border-color: #273142;
-        box-shadow: 0 15px 40px rgba(0,0,0,.35);
-    }
-
-    [data-bs-theme="dark"] .node {
-        background: #18202c;
-        border-color: #2a3444;
-        box-shadow: 0 5px 15px rgba(0,0,0,.25);
-    }
-
-        [data-bs-theme="dark"] .node strong {
-            color: #f8fafc;
+        [data-bs-theme="dark"] body {
+            background: var(--page-bg);
         }
 
-        [data-bs-theme="dark"] .node small {
-            color: #94a3b8;
+        [data-bs-theme="dark"] .tree {
+            background: #141C28;
+            border-color: var(--border);
+            box-shadow: 0 4px 20px rgba(0,0,0,.45);
         }
 
-    [data-bs-theme="dark"] .employee-designation {
-        color: #94a3b8 !important;
-    }
-
-    [data-bs-theme="dark"] .node-avatar {
-        background: #202a38;
-        border-color: #344052;
-    }
-
-    [data-bs-theme="dark"] .manager-container::before,
-    [data-bs-theme="dark"] .manager-block::before,
-    [data-bs-theme="dark"] .tl-horizontal-container::before,
-    [data-bs-theme="dark"] .tl-horizontal-line,
-    [data-bs-theme="dark"] .tl-column::before,
-    [data-bs-theme="dark"] .tl-vertical-connector {
-        background: #3a4658;
-    }
-
-    [data-bs-theme="dark"] .node:not(.active)[data-role="manager"]::after,
-    [data-bs-theme="dark"] .node:not(.active)[data-role="team-lead"]::after {
-        background: #263142;
-        color: #94a3b8;
-    }
-
-    /* =========================================================
-           MOBILE
-           ========================================================= */
-
-    @@media (max-width: 768px) {
-
-        .tree-page {
-            padding: 10px 5px 40px;
+        [data-bs-theme="dark"] .node[data-role="manager"] {
+            background: rgba(217,119,6,.07);
         }
 
+        [data-bs-theme="dark"] .node[data-role="team-lead"] {
+            background: rgba(56,189,248,.06);
+        }
+
+        [data-bs-theme="dark"] .node[data-role="executive"] {
+            background: rgba(52,211,153,.06);
+        }
+
+        [data-bs-theme="dark"] .node[data-role="admin"] {
+            background: rgba(248,113,113,.06);
+        }
+
+        [data-bs-theme="dark"] .node-avatar {
+            background: color-mix(in srgb, var(--nc) 16%, #18212F);
+            border-color: color-mix(in srgb, var(--nc) 28%, #18212F);
+        }
+
+        [data-bs-theme="dark"] .team-count {
+            background: color-mix(in srgb, var(--nc) 14%, #18212F);
+            border-color: color-mix(in srgb, var(--nc) 25%, #18212F);
+        }
+
+        [data-bs-theme="dark"] .node:not(.active)[data-role="manager"]::after,
+        [data-bs-theme="dark"] .node:not(.active)[data-role="team-lead"]::after {
+            background: color-mix(in srgb, var(--nc) 12%, #18212F);
+            border-color: color-mix(in srgb, var(--nc) 25%, #18212F);
+        }
+
+    @@media (max-width: 1200px) {
         .tree {
-            padding: 30px 10px 50px;
-            border-radius: 16px;
-        }
-
-        .level {
-            margin-bottom: 30px;
+            padding-left: 24px;
+            padding-right: 24px;
         }
 
         .manager-container {
-            justify-content: flex-start;
-            flex-wrap: nowrap;
-            overflow-x: auto;
-            padding: 38px 25px 25px;
-            gap: 18px;
-            scroll-snap-type: x mandatory;
+            gap: 16px;
         }
 
         .manager-block {
-            flex: 0 0 auto;
-            scroll-snap-align: center;
-        }
-
-        .tl-row {
-            flex-wrap: nowrap;
-            justify-content: flex-start;
-            overflow-x: auto;
-            padding: 5px 20px 20px;
-            scroll-snap-type: x mandatory;
-        }
-
-        .tl-column {
-            flex: 0 0 auto;
-            scroll-snap-align: center;
-        }
-
-        .node[data-role="admin"] {
-            min-width: 225px;
+            flex-basis: 205px;
+            width: 205px;
+            max-width: 205px;
         }
 
         .node[data-role="manager"] {
-            min-width: 205px;
+            width: 205px;
+            max-width: 205px;
+        }
+    }
+
+    @@media (max-width: 992px) {
+        .tree {
+            padding: 36px 18px 60px;
+        }
+
+        .manager-container {
+            gap: 14px;
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .manager-block {
+            flex: 0 1 200px;
+            width: 200px;
+            max-width: 200px;
+        }
+
+        .node[data-role="manager"] {
+            width: 200px;
+            max-width: 200px;
+        }
+
+        .tl-column {
+            flex-basis: 190px;
+            width: 190px;
+            max-width: 190px;
         }
 
         .node[data-role="team-lead"] {
-            min-width: 195px;
+            width: 190px;
+            max-width: 190px;
         }
 
         .node[data-role="executive"] {
-            min-width: 190px;
+            width: 185px;
+            max-width: 185px;
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .tree {
+            padding: 28px 10px 50px;
+            border-radius: 14px;
+            overflow-x: hidden;
+        }
+
+        .manager-container {
+            justify-content: center;
+            flex-wrap: wrap;
+            overflow-x: hidden;
+            padding: 0 5px 24px;
+            gap: 14px;
+        }
+
+        .manager-block {
+            flex: 0 1 198px;
+            width: 198px;
+            max-width: 198px;
+        }
+
+        .node[data-role="admin"] {
+            min-width: 210px;
+            width: 210px;
+            max-width: 210px;
+        }
+
+        .node[data-role="manager"] {
+            min-width: 0;
+            width: 198px;
+            max-width: 198px;
+        }
+
+        .node[data-role="team-lead"] {
+            min-width: 0;
+            width: 188px;
+            max-width: 188px;
+        }
+
+        .node[data-role="executive"] {
+            min-width: 0;
+            width: 180px;
+            max-width: 180px;
+        }
+
+        .tl-horizontal-container {
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .tl-row {
+            flex-wrap: wrap;
+            justify-content: center;
+            overflow-x: hidden;
+            padding: 0 2px 16px;
+            gap: 12px;
+        }
+
+        .tl-column {
+            flex: 0 1 188px;
+            width: 188px;
+            max-width: 188px;
+        }
+
+            .tl-column > .tl-horizontal-container > .tl-row {
+                flex-direction: column !important;
+                flex-wrap: nowrap;
+            }
+    }
+
+    @@media (max-width: 480px) {
+        .tree {
+            padding: 24px 6px 40px;
+        }
+
+        .manager-container {
+            gap: 12px;
+            padding-left: 2px;
+            padding-right: 2px;
+        }
+
+        .manager-block {
+            flex: 0 1 100%;
+            width: 100%;
+            max-width: 215px;
+        }
+
+        .node[data-role="manager"] {
+            width: 100%;
+            max-width: 215px;
+        }
+
+        .tl-row {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tl-column {
+            flex: 0 1 auto;
+            width: 100%;
+            max-width: 200px;
         }
     }
 </style>
-
 
 @functions {
 
     private string Safe(object value)
     {
-        return HtmlEncoder.Default.Encode(
-            Convert.ToString(value) ?? ""
-        );
+        return HtmlEncoder.Default.Encode(Convert.ToString(value) ?? "");
+    }
+
+    private string DataRole(string role)
+    {
+        if (string.IsNullOrWhiteSpace(role))
+            return "executive";
+
+        return role switch
+        {
+            "Admin" => "admin",
+            "Sub Admin" => "admin",
+            "Sales Manager" => "manager",
+            "Sales TL" => "team-lead",
+            "Sales Executive" => "executive",
+            _ => "executive"
+        };
     }
 
     private IHtmlContent RenderEmployeeChildren(EmployeeNode employee, string employeeId)
@@ -744,168 +831,84 @@
         var html = new HtmlContentBuilder();
 
         var children = employee.Children?
-            .Where(x =>
-                !string.Equals(
-                    Convert.ToString(x.EmpCode),
-                    Convert.ToString(employee.EmpCode),
-                    StringComparison.OrdinalIgnoreCase))
+            .Where(x => !string.Equals(Convert.ToString(x.EmpCode), Convert.ToString(employee.EmpCode), StringComparison.OrdinalIgnoreCase))
             .ToList()
             ?? new List<EmployeeNode>();
 
-        if (!children.Any())
-        {
-            return html;
-        }
+        if (!children.Any()) return html;
 
         var teamLeads = children
-            .Where(c =>
-                !string.IsNullOrWhiteSpace(c.Role) &&
-                (
-                    c.Role.Contains(
-                        "Team Lead",
-                        StringComparison.OrdinalIgnoreCase) ||
-
-                    c.Role.Contains(
-                        "Lead",
-                        StringComparison.OrdinalIgnoreCase) ||
-
-                    c.Role.Contains(
-                        "Supervisor",
-                        StringComparison.OrdinalIgnoreCase)
-                ))
+            .Where(c => !string.IsNullOrWhiteSpace(c.Role) &&
+                (c.Role.Contains("Team Lead", StringComparison.OrdinalIgnoreCase) ||
+                 c.Role.Contains("Lead", StringComparison.OrdinalIgnoreCase) ||
+                 c.Role.Contains("Supervisor", StringComparison.OrdinalIgnoreCase)))
             .ToList();
 
         var executives = children
-            .Where(c =>
-                !string.IsNullOrWhiteSpace(c.Role) &&
-                c.Role.Contains(
-                    "Executive",
-                    StringComparison.OrdinalIgnoreCase))
+            .Where(c => !string.IsNullOrWhiteSpace(c.Role) &&
+                c.Role.Contains("Executive", StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         var otherChildren = children
-            .Where(c =>
-                !teamLeads.Contains(c) &&
-                !executives.Contains(c))
+            .Where(c => !teamLeads.Contains(c) && !executives.Contains(c))
             .ToList();
 
         if (teamLeads.Any())
         {
             html.AppendHtml($@"
-                <div class='tl-horizontal-container'
-                     data-manager-id='{Safe(employeeId)}'>
-
+                <div class='tl-horizontal-container' data-manager-id='{Safe(employeeId)}'>
                     <div class='tl-horizontal-line'></div>
-
                     <div class='tl-row'>
             ");
 
             foreach (var tl in teamLeads)
             {
                 var tlId = Convert.ToString(tl.EmpCode) ?? "";
+                var tlRole = DataRole(tl.OrgRole);
 
                 var tlExecutives = tl.Children?
-                    .Where(c =>
-                        !string.IsNullOrWhiteSpace(c.Role) &&
-                        c.Role.Contains(
-                            "Executive",
-                            StringComparison.OrdinalIgnoreCase))
+                    .Where(c => !string.IsNullOrWhiteSpace(c.Role) &&
+                        c.Role.Contains("Executive", StringComparison.OrdinalIgnoreCase))
                     .ToList()
                     ?? new List<EmployeeNode>();
 
                 html.AppendHtml($@"
                     <div class='tl-column'>
-
-                        <div class='node'
-                             data-role='team-lead'
-                             onclick='toggleExecutives(this)'
-                             data-tl-id='{Safe(tlId)}'>
-
-                            <div class='node-avatar'>
-                                {Safe(GetInitials(tl.Name))}
-                            </div>
-
+                        <div class='node' data-role='{tlRole}' onclick='toggleExecutives(this)' data-tl-id='{Safe(tlId)}'>
+                            <div class='node-avatar'>{Safe(GetInitials(tl.Name))}</div>
                             <div>
-
-                                <strong>
-                                    {Safe(tl.Name)}
-                                </strong>
-
-                                <small class='employee-role'>
-                                    <i class='fas fa-user-tag'></i>
-                                    {Safe(tl.Role)}
-                                </small>
-
-                                <small class='employee-designation'>
-                                    <i class='fas fa-briefcase'></i>
-                                    Team Lead
-                                </small>
-
-                                <small class='team-count'>
-                                    Team: {tlExecutives.Count}
-                                </small>
-
+                                <strong>{Safe(tl.Name)}</strong>
+                                <small class='employee-role'><i class='fas fa-user-tag'></i>{Safe(tl.Role)}</small>
+                                <small class='employee-designation'><i class='fas fa-briefcase'></i>Team Lead</small>
+                                <small class='team-count'>Team {tlExecutives.Count}</small>
                             </div>
-
                         </div>
-
-                        <div class='tl-vertical-connector'
-                             data-tl-id='{Safe(tlId)}'>
-                        </div>
-
-                        <div class='executive-container'
-                             data-tl-id='{Safe(tlId)}'>
+                        <div class='tl-vertical-connector' data-tl-id='{Safe(tlId)}'></div>
+                        <div class='executive-container' data-tl-id='{Safe(tlId)}'>
                 ");
-
 
                 if (tlExecutives.Any())
                 {
                     foreach (var exec in tlExecutives)
                     {
+                        var execRole = DataRole(exec.OrgRole);
                         html.AppendHtml($@"
-                            <div class='node'
-                                 data-role='executive'>
-
-                                <div class='node-avatar'>
-                                    {Safe(GetInitials(exec.Name))}
-                                </div>
-
+                            <div class='node' data-role='{execRole}'>
+                                <div class='node-avatar'>{Safe(GetInitials(exec.Name))}</div>
                                 <div>
-
-                                    <strong>
-                                        {Safe(exec.Name)}
-                                    </strong>
-
-                                    <small class='employee-role'>
-                                        <i class='fas fa-user-tag'></i>
-                                        {Safe(exec.Role)}
-                                    </small>
-
-                                    <small class='employee-designation'>
-                                        <i class='fas fa-briefcase'></i>
-                                        Executive
-                                    </small>
-
+                                    <strong>{Safe(exec.Name)}</strong>
+                                    <small class='employee-role'><i class='fas fa-user-tag'></i>{Safe(exec.Role)}</small>
+                                    <small class='employee-designation'><i class='fas fa-briefcase'></i>Executive</small>
                                 </div>
-
                             </div>
                         ");
-
                     }
                 }
                 else
                 {
                     html.AppendHtml(@"
-                        <div class='node'
-                             data-role='executive'
-                             style='background:#eee;'>
-
-                            <div>
-                                <small>
-                                    No team members
-                                </small>
-                            </div>
-
+                        <div class='node' data-role='executive' style='background:#eee;'>
+                            <div><small>No team members</small></div>
                         </div>
                     ");
                 }
@@ -915,76 +918,46 @@
 
             html.AppendHtml("</div></div>");
         }
-
         else if (otherChildren.Any())
         {
             html.AppendHtml($@"
-                <div class='tl-horizontal-container'
-                     data-manager-id='{Safe(employeeId)}'>
-
+                <div class='tl-horizontal-container' data-manager-id='{Safe(employeeId)}'>
                     <div class='tl-horizontal-line'></div>
-
                     <div class='tl-row'>
             ");
 
             foreach (var child in otherChildren)
             {
                 var childId = Convert.ToString(child.EmpCode) ?? "";
-
-                var childMembers =
-                    child.Children?.ToList()
-                    ?? new List<EmployeeNode>();
+                var childRole = DataRole(child.OrgRole);
+                var childMembers = child.Children?.ToList() ?? new List<EmployeeNode>();
 
                 html.AppendHtml($@"
                     <div class='tl-column'>
-
-                        <div class='node'
-                             data-role='team-lead'
-                             onclick='toggleExecutives(this)'
-                             data-tl-id='{Safe(childId)}'>
-
+                        <div class='node' data-role='{childRole}' onclick='toggleExecutives(this)' data-tl-id='{Safe(childId)}'>
+                            <div class='node-avatar'>{Safe(GetInitials(child.Name))}</div>
                             <div>
-                                <strong>
-                                    {Safe(child.Name)}
-                                </strong>
+                                <strong>{Safe(child.Name)}</strong>
+                                <small class='employee-role'><i class='fas fa-user-tag'></i>{Safe(child.Role)}</small>
+                                <small class='team-count'>Team {childMembers.Count}</small>
                             </div>
-
-                            <small>
-                                {Safe(child.Role)}
-                            </small>
-
-                            <small style='font-size:12px;color:gray;'>
-                                Team: {childMembers.Count}
-                            </small>
-
                         </div>
-
-                        <div class='tl-vertical-connector'
-                             data-tl-id='{Safe(childId)}'>
-                        </div>
-
-                        <div class='executive-container'
-                             data-tl-id='{Safe(childId)}'>
+                        <div class='tl-vertical-connector' data-tl-id='{Safe(childId)}'></div>
+                        <div class='executive-container' data-tl-id='{Safe(childId)}'>
                 ");
 
                 if (childMembers.Any())
                 {
                     foreach (var member in childMembers)
                     {
+                        var memRole = DataRole(member.OrgRole);
                         html.AppendHtml($@"
-                            <div class='node'
-                                 data-role='executive'>
-
+                            <div class='node' data-role='{memRole}'>
+                                <div class='node-avatar'>{Safe(GetInitials(member.Name))}</div>
                                 <div>
-                                    <strong>
-                                        {Safe(member.Name)}
-                                    </strong>
+                                    <strong>{Safe(member.Name)}</strong>
+                                    <small class='employee-role'><i class='fas fa-user-tag'></i>{Safe(member.Role)}</small>
                                 </div>
-
-                                <small>
-                                    {Safe(member.Role)}
-                                </small>
-
                             </div>
                         ");
                     }
@@ -992,16 +965,8 @@
                 else
                 {
                     html.AppendHtml(@"
-                        <div class='node'
-                             data-role='executive'
-                             style='background:#eee;'>
-
-                            <div>
-                                <small>
-                                    No team members
-                                </small>
-                            </div>
-
+                        <div class='node' data-role='executive' style='background:#eee;'>
+                            <div><small>No team members</small></div>
                         </div>
                     ");
                 }
@@ -1020,155 +985,76 @@
         var html = new HtmlContentBuilder();
 
         var children = root.Children?
-            .Where(x =>
-                !string.Equals(
-                    Convert.ToString(x.EmpCode),
-                    Convert.ToString(root.EmpCode),
-                    StringComparison.OrdinalIgnoreCase))
+            .Where(x => !string.Equals(Convert.ToString(x.EmpCode), Convert.ToString(root.EmpCode), StringComparison.OrdinalIgnoreCase))
             .ToList()
             ?? new List<EmployeeNode>();
 
-        if (!children.Any())
-        {
-            return html;
-        }
+        if (!children.Any()) return html;
 
-        html.AppendHtml(@"
-            <div class='level'>
-
-                <div class='manager-container'
-                     style='display:flex;'>
-        ");
+        html.AppendHtml(@"<div class='level'><div class='manager-container' style='display:flex;'>");
 
         foreach (var employee in children)
         {
-            var employeeId =
-                Convert.ToString(employee.EmpCode) ?? "";
+            var employeeId = Convert.ToString(employee.EmpCode) ?? "";
+            var empRole = DataRole(employee.OrgRole);
 
             var teamLeads = employee.Children?
-                .Where(c =>
-                    !string.IsNullOrWhiteSpace(c.Role) &&
-                    (
-                        c.Role.Contains(
-                            "Team Lead",
-                            StringComparison.OrdinalIgnoreCase) ||
-
-                        c.Role.Contains(
-                            "Lead",
-                            StringComparison.OrdinalIgnoreCase) ||
-
-                        c.Role.Contains(
-                            "Supervisor",
-                            StringComparison.OrdinalIgnoreCase)
-                    ))
+                .Where(c => !string.IsNullOrWhiteSpace(c.Role) &&
+                    (c.Role.Contains("Team Lead", StringComparison.OrdinalIgnoreCase) ||
+                     c.Role.Contains("Lead", StringComparison.OrdinalIgnoreCase) ||
+                     c.Role.Contains("Supervisor", StringComparison.OrdinalIgnoreCase)))
                 .ToList()
                 ?? new List<EmployeeNode>();
 
-            var teamCount =
-                employee.Children?.Count ?? 0;
+            var teamCount = employee.Children?.Count ?? 0;
+            string count = teamLeads.Any()
+                ? "Team Leader: " + teamLeads.Count
+                : "Team: " + teamCount;
 
-            string count;
-
-            if (teamLeads.Any())
+            // Designation label — contextual
+            string designation = empRole switch
             {
-                count =
-                    "Team Leader: " +
-                    teamLeads.Count;
-            }
-            else
-            {
-                count =
-                    "Team: " +
-                    teamCount;
-            }
+                "manager" => "Manager",
+                "team-lead" => "Team Lead",
+                "executive" => "Executive",
+                _ => "Staff"
+            };
 
             html.AppendHtml($@"
                 <div class='manager-block'>
-
-                    <div class='node'
-                         data-role='manager'
-                         onclick='toggleTeamLeads(this)'
-                         data-manager-id='{Safe(employeeId)}'
-                         title='{Safe(employee.Role)}'>
-
-                        <div class='node-avatar'>
-                            {Safe(GetInitials(employee.Name))}
-                        </div>
-
+                    <div class='node' data-role='{empRole}' onclick='toggleTeamLeads(this)'
+                         data-manager-id='{Safe(employeeId)}' title='{Safe(employee.Role)}'>
+                        <div class='node-avatar'>{Safe(GetInitials(employee.Name))}</div>
                         <div>
-
-                            <strong>
-                                {Safe(employee.Name)}
-                            </strong>
-
-                            <small class='employee-role'>
-                                <i class='fas fa-user-tag'></i>
-                                {Safe(employee.Role)}
-                            </small>
-
-                            <small class='employee-designation'>
-                                <i class='fas fa-briefcase'></i>
-                                Managers
-                            </small>
-
-                            <small class='team-count'>
-                                {count}
-                            </small>
-
+                            <strong>{Safe(employee.Name)}</strong>
+                            <small class='employee-role'><i class='fas fa-user-tag'></i>{Safe(employee.Role)}</small>
+                            <small class='employee-designation'><i class='fas fa-briefcase'></i>{designation}</small>
+                            <small class='team-count'>{count}</small>
                         </div>
-
                     </div>
-
-                    <div class='manager-vertical-connector'
-                         data-manager-id='{Safe(employeeId)}'>
-                    </div>
+                    <div class='manager-vertical-connector' data-manager-id='{Safe(employeeId)}'></div>
             ");
 
-
-
-            html.AppendHtml(
-     RenderEmployeeChildren(
-         employee,
-         employeeId));
-
-
+            html.AppendHtml(RenderEmployeeChildren(employee, employeeId));
             html.AppendHtml("</div>");
         }
 
-        html.AppendHtml(@"
-                </div>
-            </div>
-        ");
-
+        html.AppendHtml("</div></div>");
         return html;
     }
 
     private string GetInitials(string name)
     {
-        if (string.IsNullOrWhiteSpace(name))
-            return "?";
-
-        var parts = name
-            .Trim()
-            .Split(
-                ' ',
-                StringSplitOptions.RemoveEmptyEntries);
-
-        if (parts.Length == 1)
-            return parts[0].Substring(0, 1).ToUpper();
-
-        return (
-            parts[0].Substring(0, 1) +
-            parts[^1].Substring(0, 1)
-        ).ToUpper();
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return parts[0].Substring(0, 1).ToUpper();
+        return (parts[0].Substring(0, 1) + parts[^1].Substring(0, 1)).ToUpper();
     }
 }
 
 @if (root == null)
 {
-    <div class="alert alert-warning">
-        No employees found.
-    </div>
+    <div class="alert alert-warning m-3">No data found for your account.</div>
 }
 else
 {
@@ -1176,26 +1062,16 @@ else
         <div class="tree">
 
             <div class="level">
-
-                <div class="node"
-                     data-role="admin">
-
-                    <div class="node-avatar">
-                        @GetInitials(root.Name)
-                    </div>
-
+                <div class="node" data-role="@rootRole">
+                    <div class="node-avatar">@GetInitials(root.Name)</div>
                     <div>
-                        <strong>
-                            @root.Name
-                        </strong>
+                        <strong>@root.Name</strong>
+                        <small class="employee-role">
+                            <i class="fas fa-star"></i>
+                            @root.OrgRole
+                        </small>
                     </div>
-
-                    <small>
-                        @root.Role
-                    </small>
-
                 </div>
-
             </div>
 
             @RenderManagers(root)
@@ -1204,157 +1080,52 @@ else
     </div>
 }
 
-<script>
 
-       function toggleTeamLeads(managerNode) {
+<script type="text/javascript">
 
-        const managerId =
-            managerNode.getAttribute("data-manager-id");
-
-        const container =
-            managerNode.closest(".manager-block");
-
-        if (!container)
-            return;
-
-        const tlContainer =
-            container.querySelector(
-                `.tl-horizontal-container[data-manager-id="${managerId}"]`
-            );
-
-        const connector =
-            container.querySelector(
-                `.manager-vertical-connector[data-manager-id="${managerId}"]`
-            );
-
-        if (!tlContainer)
-            return;
-
-        const isVisible =
-            tlContainer.style.display === "flex";
-
-        tlContainer.style.display =
-            isVisible ? "none" : "flex";
-
-        managerNode.classList.toggle(
-            "active",
-            !isVisible
-        );
-
-        if (connector) {
-            connector.style.display =
-                isVisible ? "none" : "block";
-        }
-
+    function toggleTeamLeads(managerNode) {
+        const managerId  = managerNode.getAttribute("data-manager-id");
+        const container  = managerNode.closest(".manager-block");
+        if (!container) return;
+        const tlContainer = container.querySelector(`.tl-horizontal-container[data-manager-id="${managerId}"]`);
+        const connector   = container.querySelector(`.manager-vertical-connector[data-manager-id="${managerId}"]`);
+        if (!tlContainer) return;
+        const isVisible = tlContainer.style.display === "flex";
+        tlContainer.style.display = isVisible ? "none" : "flex";
+        managerNode.classList.toggle("active", !isVisible);
+        if (connector) connector.style.display = isVisible ? "none" : "block";
         if (isVisible) {
-
-            container
-                .querySelectorAll(".executive-container")
-                .forEach(e => {
-                    e.style.display = "none";
-                });
-
-            container
-                .querySelectorAll(".tl-vertical-connector")
-                .forEach(e => {
-                    e.style.display = "none";
-                });
-
-            container
-                .querySelectorAll(".tl-column .node")
-                .forEach(e => {
-                    e.classList.remove("active");
-                });
+            container.querySelectorAll(".executive-container").forEach(e => e.style.display = "none");
+            container.querySelectorAll(".tl-vertical-connector").forEach(e => e.style.display = "none");
+            container.querySelectorAll(".tl-column .node").forEach(e => e.classList.remove("active"));
         }
     }
 
-
-     function toggleExecutives(teamLeadNode) {
-
-        const tlId =
-            teamLeadNode.getAttribute("data-tl-id");
-
-        const column =
-            teamLeadNode.closest(".tl-column");
-
-        if (!column)
-            return;
-
-        const executiveContainer =
-            column.querySelector(
-                `.executive-container[data-tl-id="${tlId}"]`
-            );
-
-        const verticalConnector =
-            column.querySelector(
-                `.tl-vertical-connector[data-tl-id="${tlId}"]`
-            );
-
-        if (!executiveContainer)
-            return;
-
-        const isVisible =
-            executiveContainer.style.display === "flex";
-
-        executiveContainer.style.display =
-            isVisible ? "none" : "flex";
-
-        teamLeadNode.classList.toggle(
-            "active",
-            !isVisible
-        );
-
-        if (verticalConnector) {
-
-            verticalConnector.style.display =
-                isVisible ? "none" : "block";
-        }
+    function toggleExecutives(teamLeadNode) {
+        const tlId = teamLeadNode.getAttribute("data-tl-id");
+        const column = teamLeadNode.closest(".tl-column");
+        if (!column) return;
+        const executiveContainer = column.querySelector(`.executive-container[data-tl-id="${tlId}"]`);
+        const verticalConnector  = column.querySelector(`.tl-vertical-connector[data-tl-id="${tlId}"]`);
+        if (!executiveContainer) return;
+        const isVisible = executiveContainer.style.display === "flex";
+        executiveContainer.style.display = isVisible ? "none" : "flex";
+        teamLeadNode.classList.toggle("active", !isVisible);
+        if (verticalConnector) verticalConnector.style.display = isVisible ? "none" : "block";
     }
 
-    document.addEventListener(
-        "DOMContentLoaded",
-        function () {
-
-            const containers =
-                document.querySelectorAll(
-                    ".tl-horizontal-container"
-                );
-
-            containers.forEach(container => {
-
-                const row =
-                    container.querySelector(
-                        ".tl-row");
-
-                if (!row)
-                    return;
-
-                const columns =
-                    row.querySelectorAll(
-                        ".tl-column");
-
-                if (columns.length > 0) {
-
-                    const line =
-                        container.querySelector(
-                            ".tl-horizontal-line");
-
-                    if (line) {
-
-                        const width =
-                            Math.max(
-                                145,
-                                (columns.length * 160) +
-                                ((columns.length - 1) * 15)
-                            );
-
-                        line.style.width =
-                            width + "px";
-                    }
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".tl-horizontal-container").forEach(container => {
+            const row = container.querySelector(".tl-row");
+            if (!row) return;
+            const columns = row.querySelectorAll(".tl-column");
+            if (columns.length > 0) {
+                const line = container.querySelector(".tl-horizontal-line");
+                if (line) {
+                    const width = Math.max(145, (columns.length * 160) + ((columns.length - 1) * 15));
+                    line.style.width = width + "px";
                 }
-            });
-
-        }
-    );
-
+            }
+        });
+    });
 </script>
