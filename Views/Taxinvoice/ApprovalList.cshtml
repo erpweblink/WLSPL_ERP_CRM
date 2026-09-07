@@ -1,0 +1,526 @@
+﻿@model IEnumerable<WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreate>
+@{
+    ViewData["Title"] = "ApprovalList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+ 
+
+    /* ── Pill action buttons ── */
+    .btn-pill {
+        border: none;
+        border-radius: 20px;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #fff;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+        .btn-pill i {
+            font-size: 11px;
+        }
+
+    .btn-pill-edit {
+        background: #3b7ddd;
+    }
+
+        .btn-pill-edit:hover {
+            background: #2f66b8;
+            color: #fff;
+        }
+
+    .btn-pill-show {
+        background: #17a2b8;
+    }
+
+        .btn-pill-show:hover {
+            background: #128294;
+            color: #fff;
+        }
+
+    .btn-pill-delete {
+        background: #dc3545;
+    }
+
+        .btn-pill-delete:hover {
+            background: #bb2d3b;
+            color: #fff;
+        }
+
+    .btn-pill-pdf {
+        background: #6c5ce7;
+    }
+
+        .btn-pill-pdf:hover {
+            background: #5847c9;
+            color: #fff;
+        }
+
+    /* APPROVE */
+    .btn-pill-approve {
+        background: #28a745;
+        color: #fff;
+    }
+
+        .btn-pill-approve:hover {
+            background: #218838;
+            color: #fff;
+        }
+
+    /* REJECT */
+    .btn-pill-reject {
+        background: #dc3545;
+        color: #fff;
+    }
+
+        .btn-pill-reject:hover {
+            background: #bb2d3b;
+            color: #fff;
+        }
+
+
+    .pagination .page-link {
+        border-radius: 6px;
+        margin: 0 2px;
+        color: #14a3a0;
+        border: 1px solid #e1e6ea;
+    }
+
+    .pagination .page-item.active .page-link {
+        background-color: #14a3a0;
+        border-color: #14a3a0;
+    }
+</style>
+<!-- Loader -->
+<div id="loader" style="display:none;">
+    <div class="text-center">
+        <img src="~/assets/images/loader.gif"
+             class="loader-gif"
+             alt="Loading..." />
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex align-items-center justify-content-between">
+        <h3 class="mb-0 text-uppercase">
+            <i class="fa-jelly-fill fa-regular fa-file"></i>
+            Tax Invoice Approval List
+        </h3>
+
+     
+
+    </div>
+    <div class="card-body">
+
+        <!-- Search / Record Information -->
+        <div class="row align-items-center mb-3">
+
+            <div class="col-md-4 mb-2 mb-md-0">
+
+                <input type="text"
+                       id="searchInput"
+                       class="form-control"
+                       placeholder="Search Invoice..." />
+
+            </div>
+
+            <div class="col-md-8 text-md-end">
+
+                <span class="record-info">
+
+                    Show
+
+                    <select id="ddlStatus"
+                            class="form-select form-select-sm d-inline-block"
+                            style="width:auto;">
+
+                        <option value="10">10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100" selected>100</option>
+                        <option value="all">All</option>
+
+                    </select>
+
+                    &nbsp;&nbsp;
+
+                    Total Records :
+                    <strong id="totalRecords">
+                        @(Model?.Count() ?? 0)
+                    </strong>
+
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <!-- ================= TABLE ================= -->
+        <div class="table-responsive">
+
+            <table id="tblProforma"
+                   class="table table-bordered table-hover align-middle"
+                   style="width:100%;">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>Sr.No.</th>
+
+                        <th>Sales Person</th>
+
+                        <th>Invoice Date</th>
+
+                        <th>Invoice No.</th>
+
+                        <th>Company Name</th>
+
+                        <th>GST Amount</th>
+
+                        <th>Total Amount</th>
+
+                        <th class="text-center"
+                            style="width:120px;">
+                            Action
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @if (Model != null && Model.Any())
+                    {
+                        int count = 1;
+
+                        foreach (var item in Model)
+                        {
+                            <tr>
+
+                                <td class="row-number">
+                                    @count
+                                </td>
+                                <td>
+                                    <strong>
+                                        @item.sessionname
+                                    </strong>
+                                </td>
+
+                                <td>
+                                    @(item.invoicedate.HasValue
+                                                                ? item.invoicedate.Value.ToString("dd/MM/yyyy")
+                                                                : "")
+                        </td>
+                        <td>
+                            <strong>
+                                @item.invoiceno
+                            </strong>
+                        </td>
+
+                                <td>
+                                    @item.companyName
+                                </td>
+
+                                <td class="text-end">
+                                    @item.totalamtbeforetax
+                                </td>
+
+                                <td class="text-end">
+                                    @item.totalamtaftertax
+                                </td>
+
+                                <td>
+
+                                    <div class="d-flex justify-content-center gap-1 flex-wrap">
+                                        <button type="button"
+                                                class="btn-pill btn-pill-pdf"
+                                                title="Download PDF"
+                                                onclick="window.open('@Url.Action("GetPdf", "Taxinvoice", new { id = item.Id })', '_blank')">
+                                            <i class="fa fa-file-pdf"></i> PDF
+                                        </button>
+
+
+                                        <button type="button"
+                                                class="btn-pill btn-pill-approve"
+                                                title="Approve"
+                                                onclick="Approve('@item.Id')"
+                                                style="display:inline-block !important; visibility:visible !important;">
+                                            <i class="fa fa-check"></i> Approve
+                                        </button>
+
+                                        <button type="button"
+                                                class="btn-pill btn-pill-reject"
+                                                title="Reject"
+                                                onclick="Reject('@item.Id')"
+                                                style="display:inline-block !important; visibility:visible !important;">
+                                            <i class="fa fa-times"></i> Reject
+                                        </button>
+
+                                     
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                                        count++;
+                        }
+                    }
+                    else
+                    {
+                        <tr id="noDataRow">
+
+                            <td colspan="8"
+                                class="text-center py-4">
+
+                                <i class="fa fa-info-circle me-2"></i>
+
+                                No Tax-Invoice records found.
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <nav>
+
+            <ul class="pagination justify-content-center mt-3"
+                id="pagination">
+            </ul>
+
+        </nav>
+
+    </div>
+
+</div>
+
+
+<script>
+    const searchInput = document.getElementById("searchInput");
+    const pagination = document.getElementById("pagination");
+    const totalRecords = document.getElementById("totalRecords");
+    const pageSizeDropdown = document.getElementById("ddlStatus");
+
+    const table = document.getElementById("tblProforma");
+    const tbody = table.querySelector("tbody");
+
+    let allRows = [];
+    let filteredRows = [];
+    let currentPage = 1;
+    let rowsPerPage = 100;
+
+
+    function loadRows() {
+        allRows = Array.from(tbody.querySelectorAll("tr")).filter(row => !row.id);
+        filteredRows = allRows;
+        updateTotalRecords();
+        displayTable(1);
+    }
+
+
+    function updateTotalRecords() {
+        totalRecords.innerText = filteredRows.length;
+    }
+
+
+    function displayTable(page) {
+        currentPage = page;
+
+        allRows.forEach(function (row) {
+            row.style.display = "none";
+        });
+
+        let start = 0;
+        if (rowsPerPage !== "all") {
+            start = (page - 1) * parseInt(rowsPerPage);
+        }
+
+        let end = rowsPerPage === "all"
+            ? filteredRows.length
+            : start + parseInt(rowsPerPage);
+
+        filteredRows.slice(start, end).forEach(function (row, index) {
+            row.style.display = "";
+            let numberCell = row.querySelector(".row-number");
+            if (numberCell) {
+                numberCell.innerText = start + index + 1;
+            }
+        });
+
+        createPagination();
+    }
+
+
+    function createPagination() {
+        pagination.innerHTML = "";
+
+        if (rowsPerPage === "all") {
+            return;
+        }
+
+        const totalPages = Math.ceil(filteredRows.length / parseInt(rowsPerPage));
+
+        if (totalPages <= 1) {
+            return;
+        }
+
+        // Previous
+        const previousLi = document.createElement("li");
+        previousLi.className = "page-item " + (currentPage === 1 ? "disabled" : "");
+        previousLi.innerHTML = `
+            <a class="page-link" href="javascript:void(0)">
+                <i class="fa fa-chevron-left"></i>
+            </a>
+        `;
+        previousLi.onclick = function () {
+            if (currentPage > 1) {
+                displayTable(currentPage - 1);
+            }
+        };
+        pagination.appendChild(previousLi);
+
+        // Page Numbers
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement("li");
+            li.className = "page-item " + (i === currentPage ? "active" : "");
+            li.innerHTML = `
+                <a class="page-link" href="javascript:void(0)">
+                    ${i}
+                </a>
+            `;
+            li.onclick = function () {
+                displayTable(i);
+            };
+            pagination.appendChild(li);
+        }
+
+        // Next
+        const nextLi = document.createElement("li");
+        nextLi.className = "page-item " + (currentPage === totalPages ? "disabled" : "");
+        nextLi.innerHTML = `
+            <a class="page-link" href="javascript:void(0)">
+                <i class="fa fa-chevron-right"></i>
+            </a>
+        `;
+        nextLi.onclick = function () {
+            if (currentPage < totalPages) {
+                displayTable(currentPage + 1);
+            }
+        };
+        pagination.appendChild(nextLi);
+    }
+
+
+    searchInput.addEventListener("keyup", function () {
+        const value = this.value.toLowerCase().trim();
+        filteredRows = allRows.filter(function (row) {
+            return row.textContent.toLowerCase().includes(value);
+        });
+        updateTotalRecords();
+        currentPage = 1;
+        displayTable(1);
+    });
+
+    pageSizeDropdown.addEventListener("change", function () {
+        rowsPerPage = this.value === "all" ? "all" : parseInt(this.value);
+        currentPage = 1;
+        displayTable(1);
+    });
+
+
+    $(document).ready(function () {
+        loadRows();
+    });
+
+   function Approve(id) {
+        if (!id || id === "" || id === "0") {
+            showToast("Invalid Taxinvoice ID.", "error");
+            return;
+        }
+        if (!confirm("Are you sure you want to Approve this Tax-Invoice?")) {
+            return;
+        }
+
+        $("#loader").show();
+
+        $.ajax({
+            url: '@Url.Action("Approve", "Taxinvoice")',
+            type: "POST",
+            data: {
+                ID: id
+            },
+            success: function (response) {
+                if (response.success === true) {
+                    showToast(response.message || "Taxinvoice Approved successfully.", "success");
+
+                    setTimeout(function () {
+                        location.reload();
+                    }, 800);
+                }
+                else {
+                    showToast(response.message || "Unable to Approve Taxinvoice.", "error");
+                }
+            },
+            complete: function () {
+                $("#loader").hide();
+            },
+            error: function (xhr) {
+                showToast("Something went wrong while Approve Taxinvoice.", "error");
+            }
+        });
+    }
+
+    function Reject(id) {
+        if (!id || id === "" || id === "0") {
+            showToast("Invalid Taxinvoice ID.", "error");
+            return;
+        }
+        if (!confirm("Are you sure you want to Reject this Tax-Invoice?")) {
+            return;
+        }
+
+        $("#loader").show();
+
+        $.ajax({
+            url: '@Url.Action("Reject", "Taxinvoice")',
+            type: "POST",
+            data: {
+                ID: id
+            },
+            success: function (response) {
+                if (response.success === true) {
+                    showToast(response.message || "Taxinvoice Rejected successfully.", "success");
+
+                    setTimeout(function () {
+                        location.reload();
+                    }, 800);
+                }
+                else {
+                    showToast(response.message || "Unable to Reject Taxinvoice.", "error");
+                }
+            },
+            complete: function () {
+                $("#loader").hide();
+            },
+            error: function (xhr) {
+                showToast("Something went wrong while Reject Taxinvoice.", "error");
+            }
+        });
+    }
+
+     
+</script>

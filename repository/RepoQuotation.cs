@@ -644,6 +644,14 @@ namespace WEBLINK_CRM.repository
                         under.RestoreState();
                     }
                 }
+                document.NewPage();
+                string imagePath = Path.Combine(_env.WebRootPath, "assets", "QuotationImg", "WLSPL_Mailer.jpg");
+
+                Image cover = Image.GetInstance(imagePath);
+                cover.ScaleAbsolute(PageSize.A4.Width, PageSize.A4.Height);
+                cover.SetAbsolutePosition(0, 0);
+                document.SetMargins(0, 0, 0, 0);
+                document.Add(cover);
 
                 document.Close();
                 writer.Close();

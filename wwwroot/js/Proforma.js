@@ -94,6 +94,7 @@
                             $("#ddlAgainstNo").val(match.Name);
                         }
                     }
+
                     if (isEditLoad) {
                         $("#ddlAgainstNo").prop("disabled", true);
                     }
@@ -755,11 +756,9 @@
                         $("#ddlBillState").val(hdr.billState || "").trigger("change");
                     });
 
-                    // If AgainstBy is "Direct", BindAgainstNumber never runs, so set + lock directly here.
                     if ((hdr.againstBy || "Quotation") === "Quotation") {
                         $("#ddlAgainstNo").val(hdr.againstNo || "");
                     }
-                    $("#ddlAgainstNo").prop("disabled", true);
 
 
                     $("#txtProformaDate").val(formatDateToDDMMYYYY(hdr.proformaDate));
@@ -787,7 +786,7 @@
 
                     BindCompanyList(function () {
 
-                        if (hdr.companyCode) {                         
+                        if (hdr.companyCode) {
                             $("#ddlCompanyname").val(hdr.companyCode).trigger("change");
                         }
 
@@ -839,7 +838,7 @@
                     addDetailRow(null);
                 }
 
-                
+
             }
             calculateGrandTotals();
         }
