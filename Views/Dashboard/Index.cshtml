@@ -9,6 +9,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     var root = Model?.FirstOrDefault();
+
     string rootRole = root != null ? DataRole(root.CustRole) : "manager";
 }
 
@@ -240,7 +241,7 @@
         min-width: 240px;
         border-radius: var(--r-lg);
         box-shadow: var(--shadow-admin);
-        background: rgba(224,57,75,.06);
+        background: #a6c1f159;
     }
 
         .node[data-role="admin"] .node-avatar {
@@ -257,7 +258,7 @@
     .node[data-role="manager"] {
         --nc: var(--c-manager);
         min-width: 215px;
-        background: rgba(217,119,6,.06);
+        background: rgb(255 153 35 / 22%);
     }
 
     .node[data-role="team-lead"] {
@@ -395,9 +396,9 @@
 
     .tl-row {
         display: flex;
-        flex-direction: row;
+        flex-direction: column;
         justify-content: center;
-        align-items: flex-start;
+        align-items: center;
         flex-wrap: wrap;
         gap: 16px;
         width: 100%;
@@ -886,7 +887,7 @@
                 "manager" => "Manager",
                 "team-lead" => "Team Lead",
                 "executive" => "Executive",
-                _ => "Staff"
+                _ => "Sub-Admin"
             };
 
             html.AppendHtml($@"
@@ -956,109 +957,91 @@ else
 
 <script type="text/javascript">
 
-  function toggleTeamLeads(managerNode) {
-    const managerId = managerNode.getAttribute("data-manager-id");
+      function toggleTeamLeads(managerNode) {
+        const managerId = managerNode.getAttribute("data-manager-id");
 
-    // Find the immediate parent wrapper (manager-block or tl-column)
-    const container = managerNode.parentElement;
-    if (!container) return;
+        const container = managerNode.parentElement;
+        if (!container) return;
 
-    // Find DIRECT child tl-horizontal-container only — not nested ones
-    const tlContainer = container.querySelector(
-        `:scope > .tl-horizontal-container[data-manager-id="${managerId}"]`
-    );
-    const connector = container.querySelector(
-        `:scope > .manager-vertical-connector[data-manager-id="${managerId}"]`
-    );
+        const tlContainer = container.querySelector(
+            `:scope > .tl-horizontal-container[data-manager-id="${managerId}"]`
+        );
+        const connector = container.querySelector(
+            `:scope > .manager-vertical-connector[data-manager-id="${managerId}"]`
+        );
 
-    if (!tlContainer) return;
+        if (!tlContainer) return;
 
-    const isVisible = tlContainer.style.display === "flex";
+        const isVisible = tlContainer.style.display === "flex";
 
-    if (isVisible) {
-        // Closing — collapse ONLY this node's descendants, not siblings
-        collapseContainer(tlContainer);
-        tlContainer.style.display = "none";
-        managerNode.classList.remove("active");
-        if (connector) connector.style.display = "none";
-    } else {
-        // Opening
-        tlContainer.style.display = "flex";
-        managerNode.classList.add("active");
-        if (connector) connector.style.display = "block";
-    }
-}
-
-function toggleExecutives(teamLeadNode) {
-    const tlId = teamLeadNode.getAttribute("data-tl-id");
-
-    // Only look inside the immediate parent tl-column
-    const column = teamLeadNode.parentElement;
-    if (!column) return;
-
-    const executiveContainer = column.querySelector(
-        `:scope > .executive-container[data-tl-id="${tlId}"]`
-    );
-    const verticalConnector = column.querySelector(
-        `:scope > .tl-vertical-connector[data-tl-id="${tlId}"]`
-    );
-
-    if (!executiveContainer) return;
-
-    const isVisible = executiveContainer.style.display === "flex";
-    executiveContainer.style.display = isVisible ? "none" : "flex";
-    teamLeadNode.classList.toggle("active", !isVisible);
-
-    if (verticalConnector)
-        verticalConnector.style.display = isVisible ? "none" : "block";
-}
-
-// Recursively collapse only the children INSIDE a given container
-function collapseContainer(container) {
-    // Collapse all executive-containers inside
-    container.querySelectorAll(".executive-container").forEach(el => {
-        el.style.display = "none";
-    });
-
-    // Collapse all nested tl-horizontal-containers inside
-    container.querySelectorAll(".tl-horizontal-container").forEach(el => {
-        el.style.display = "none";
-    });
-
-    // Hide all vertical connectors inside
-    container.querySelectorAll(".tl-vertical-connector").forEach(el => {
-        el.style.display = "none";
-    });
-
-    // Hide all manager vertical connectors inside
-    container.querySelectorAll(".manager-vertical-connector").forEach(el => {
-        el.style.display = "none";
-    });
-
-    // Remove active state from all nodes inside
-    container.querySelectorAll(".node.active").forEach(el => {
-        el.classList.remove("active");
-    });
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-    // Only compute widths for TOP-LEVEL tl-horizontal-containers
-    document.querySelectorAll(
-        ".manager-block > .tl-horizontal-container"
-    ).forEach(container => {
-        const row = container.querySelector(".tl-row");
-        if (!row) return;
-        const columns = row.querySelectorAll(".tl-column");
-        if (columns.length > 0) {
-            const line = container.querySelector(".tl-horizontal-line");
-            if (line) {
-                const width = Math.max(
-                    145,
-                    (columns.length * 220) + ((columns.length - 1) * 16)
-                );
-                line.style.width = width + "px";
-            }
+        if (isVisible) {
+            collapseContainer(tlContainer);
+            tlContainer.style.display = "none";
+            managerNode.classList.remove("active");
+            if (connector) connector.style.display = "none";
+        } else {
+            tlContainer.style.display = "flex";
+            managerNode.classList.add("active");
+            if (connector) connector.style.display = "block";
         }
+    }
+
+    function toggleExecutives(teamLeadNode) {
+        const tlId = teamLeadNode.getAttribute("data-tl-id");
+
+        const column = teamLeadNode.parentElement;
+        if (!column) return;
+
+        const executiveContainer = column.querySelector(
+            `:scope > .executive-container[data-tl-id="${tlId}"]`
+        );
+        const verticalConnector = column.querySelector(
+            `:scope > .tl-vertical-connector[data-tl-id="${tlId}"]`
+        );
+
+        if (!executiveContainer) return;
+
+        const isVisible = executiveContainer.style.display === "flex";
+        executiveContainer.style.display = isVisible ? "none" : "flex";
+        teamLeadNode.classList.toggle("active", !isVisible);
+
+        if (verticalConnector)
+            verticalConnector.style.display = isVisible ? "none" : "block";
+    }
+
+    function collapseContainer(container) {
+        container.querySelectorAll(".executive-container").forEach(el => {
+            el.style.display = "none";
+        });
+
+        container.querySelectorAll(".tl-horizontal-container").forEach(el => {
+            el.style.display = "none";
+        });
+
+        container.querySelectorAll(".tl-vertical-connector").forEach(el => {
+            el.style.display = "none";
+        });
+
+        container.querySelectorAll(".manager-vertical-connector").forEach(el => {
+            el.style.display = "none";
+        });
+
+        container.querySelectorAll(".node.active").forEach(el => {
+            el.classList.remove("active");
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(
+            ".manager-block > .tl-horizontal-container"
+        ).forEach(container => {
+            const row = container.querySelector(".tl-row");
+            if (!row) return;
+            const columns = row.querySelectorAll(".tl-column");
+            if (columns.length > 0) {
+                const line = container.querySelector(".tl-horizontal-line");
+                line.style.width ="100%";
+            }
+        });
     });
-});
 </script>

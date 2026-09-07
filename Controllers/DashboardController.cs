@@ -28,7 +28,6 @@ namespace WEBLINK_CRM.Controllers
 
             BuildTree(employees);
 
-            // The logged-in employee's own node
             var selfNode = employees.FirstOrDefault(e =>
                 string.Equals(e.EmpCode?.Trim(), currentEmpCode.Trim(),
                     StringComparison.OrdinalIgnoreCase));
@@ -37,20 +36,15 @@ namespace WEBLINK_CRM.Controllers
 
             if (selfNode == null)
             {
-                // Fallback: lowest level node
                 var minLevel = employees.Min(x => x.HierarchyLevel);
                 root = employees.First(x => x.HierarchyLevel == minLevel);
             }
             else if (selfNode.CustRole == "Admin")
             {
-                // Admin sees a virtual root — create a wrapper
-                // with all level-1 nodes as children
                 root = selfNode;
             }
             else
             {
-                // For any other role: find the highest ancestor
-                // that is IN the returned list (level 1 node in returned set)
                 var minLevel = employees.Min(x => x.HierarchyLevel);
                 root = employees.FirstOrDefault(x => x.HierarchyLevel == minLevel)
                        ?? selfNode;
@@ -61,11 +55,9 @@ namespace WEBLINK_CRM.Controllers
 
         private static void BuildTree(List<EmployeeNode> employees)
         {
-            // Reset children
             foreach (var emp in employees)
                 emp.Children = new List<EmployeeNode>();
 
-            // Build lookup by EmpCode
             var lookup = employees
                 .Where(e => !string.IsNullOrWhiteSpace(e.EmpCode))
                 .GroupBy(
@@ -81,13 +73,10 @@ namespace WEBLINK_CRM.Controllers
                 if (string.IsNullOrWhiteSpace(emp.ParentCode))
                     continue;
 
-                // Skip self-referencing root nodes
                 if (string.Equals(emp.EmpCode?.Trim(), emp.ParentCode?.Trim(),
                     StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                // Only attach to parent if parent EXISTS in returned list
-                // This handles cases where Admin (level 0) is not returned
                 if (lookup.TryGetValue(emp.ParentCode.Trim(), out var parent))
                     parent.Children.Add(emp);
             }

@@ -67,7 +67,16 @@ namespace WEBLINK_CRM.Repositories
                             WHEN e.HierarchyLevel = 0 THEN 'Admin'
                             WHEN e.role = 'SubAdmin' THEN 'Sub Admin'
                             WHEN e.HierarchyLevel = 1 AND e.role = 'Sales' THEN 'Sales Manager'
-                            WHEN e.HierarchyLevel >= 3 AND e.SalesTLManager = 1 THEN 'Sales TL'
+                           -- WHEN e.HierarchyLevel >= 3 AND e.SalesTLManager = 1 THEN 'Sales TL'
+                            WHEN e.HierarchyLevel >= 3 AND (
+                                     e.SalesTLManager = 1
+                                     OR EXISTS (
+                                         SELECT 1
+                                         FROM EmployeeHierarchy c
+                                         WHERE c.ParentCode = e.empcode
+                                     )
+                                 )
+                            THEN 'Sales TL'
                             WHEN e.role = 'Sales'
                                  AND EXISTS
                                  (
