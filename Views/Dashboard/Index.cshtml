@@ -1,569 +1,1622 @@
-﻿@{
-	ViewData["Title"] = "Index";
-	Layout = "~/Views/Shared/_Layout.cshtml";
+﻿@using Microsoft.AspNetCore.Html
+@using System.Text.Encodings.Web
+@using WLSPL_ERP_CRM.Models
+
+@model List<WLSPL_ERP_CRM.Models.EmployeeNode>
+
+@{
+    ViewData["Title"] = "Employee Hierarchy";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var root = Model?.FirstOrDefault();
+
+    string rootRole = root != null ? DataRole(root.CustRole) : "manager";
 }
 
 <style type="text/css">
-	.MapBackground {
-		background-color: transparent;
-		/* #efd8ea */
-	}
+    :root {
+        --page-bg: #F4F6FA;
+        --surface: #FFFFFF;
+        --surface-soft: #F9FAFB;
+        --border: #E8ECF2;
+        --connector: #CBD5E1;
+        --text-primary: #1A2035;
+        --text-secondary: #5C6B82;
+        --text-muted: #9BAABF;
+        --c-admin: #1a80e1;
+        --c-manager: #D97706;
+        --c-assimanager: #1d3a58;
+        --c-lead: #7843e7;
+        --c-exec: #059669;
+        --r-sm: 8px;
+        --r-md: 14px;
+        --r-lg: 18px;
+        --shadow-card: 0 2px 8px rgba(16,30,54,.07), 0 1px 2px rgba(16,30,54,.04);
+        --shadow-hover: 0 8px 28px rgba(16,30,54,.13), 0 2px 6px rgba(16,30,54,.06);
+        --shadow-admin: 0 8px 28px rgba(224,57,75,.18);
+        --line-w: 2px;
+        --font: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+    }
 
-	.doughnut-wrapper {
-		width: 220px; /* 👈 control size here */
-		height: 220px;
-	}
+    @@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
-	#callMeetingChart {
-		width: 100% !important;
-		height: 100% !important;
-	}
+    *, *::before, *::after {
+        box-sizing: border-box;
+    }
 
-	.clickable-card {
-		cursor: pointer;
-	}
+    body {
+        background: var(--page-bg);
+    }
 
-	.modelprofile1 {
-		border-radius: 5px;
-	}
+    .tree-page {
+        width: 100%;
+        font-family: var(--font);
+    }
 
-	.headingcls {
-		background-color: #423f3f;
-	}
+    .tree {
+        width: 100%;
+        max-width: 1800px;
+        margin: 0 auto;
+        padding: 48px 32px 80px;
+        position: relative;
+        overflow-x: auto;
+        overflow-y: visible;
+        border-radius: 20px;
+        background: #F8FAFD;
+        border: 1px solid var(--border);
+        box-shadow: 0 2px 12px rgba(16,30,54,.05);
+    }
+
+    .level {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        position: relative;
+        width: 100%;
+        margin: 0;
+        gap: 20px;
+    }
+
+    .node {
+        --nc: #9BAABF;
+        position: relative;
+        display: grid;
+        grid-template-columns: 48px 1fr;
+        grid-auto-rows: min-content;
+        align-items: center;
+        column-gap: 12px;
+        min-width: 210px;
+        padding: 13px 14px 13px 12px;
+        background: var(--surface);
+        border-top: 2.5px solid var(--nc);
+        border-left: 1.5px solid color-mix(in srgb, var(--nc) 35%, var(--border));
+        border-right: 1.5px solid color-mix(in srgb, var(--nc) 35%, var(--border));
+        border-bottom: 1.5px solid color-mix(in srgb, var(--nc) 35%, var(--border));
+        border-radius: var(--r-md);
+        text-align: left;
+        cursor: pointer;
+        box-shadow: var(--shadow-card);
+        transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+        z-index: 5;
+    }
+
+    .node {
+        position: relative;
+    }
+
+    .employee-info-btn {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 15px;
+        height: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: 1px solid #0476eb;
+        border-radius: 50%;
+        background: #0476ebad;
+        color: #ffffff;
+        font-size: 7px;
+        cursor: pointer;
+        z-index: 1;
+        transition: all .2s ease;
+    }
+
+        .employee-info-btn:hover {
+            background: var(--nc);
+            color: #fff;
+            border-color: var(--nc);
+            transform: scale(1.1);
+        }
+
+        .employee-info-btn i {
+            font-size: 9px;
+        }
+
+
+
+    .node:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-hover);
+        border-top-color: var(--nc);
+        border-left-color: color-mix(in srgb, var(--nc) 55%, var(--border));
+        border-right-color: color-mix(in srgb, var(--nc) 55%, var(--border));
+        border-bottom-color: color-mix(in srgb, var(--nc) 55%, var(--border));
+    }
+
+    .node:active {
+        transform: translateY(-1px);
+    }
+
+    .node-avatar {
+        grid-row: 1 / -1;
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: color-mix(in srgb, var(--nc) 12%, white);
+        color: var(--nc);
+        font-family: var(--font);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: .3px;
+        border: 1.5px solid color-mix(in srgb, var(--nc) 22%, white);
+        position: relative;
+        flex-shrink: 0;
+    }
+
+        .node-avatar::after {
+            position: absolute;
+            right: -4px;
+            bottom: -4px;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--nc);
+            color: #fff;
+            font-size: 8px;
+            font-weight: 700;
+            border: 2px solid #fff;
+            box-shadow: 0 1px 4px rgba(16,30,54,.2);
+        }
+
+    .node[data-role="admin"] .node-avatar::after {
+        content: "★";
+    }
+
+    .node[data-role="manager"] .node-avatar::after {
+        content: "M";
+        font-size: 7px;
+    }
+
+    .node[data-role="team-lead"] .node-avatar::after {
+        content: "L";
+        font-size: 7px;
+    }
+
+    .node[data-role="executive"] .node-avatar::after {
+        content: "✓";
+    }
+
+    .node strong {
+        display: block;
+        margin: 0 0 3px;
+        color: var(--text-primary);
+        font-family: var(--font);
+        font-size: 19px;
+        font-weight: 700;
+        line-height: 1.3;
+        white-space: normal;
+        padding-right: 22px;
+    }
+
+    .node small {
+        display: block;
+        font-size: 10.5px;
+        line-height: 1.5;
+        color: var(--text-secondary);
+    }
+
+    .empcode {
+        font-size: 11.5px !important;
+        color: #9d9fa1 !important;
+        font-weight: 700 !important;
+    }
+
+    .employee-role {
+        color: var(--nc) !important;
+        font-weight: 600 !important;
+        font-size: 10px !important;
+    }
+
+        .employee-role i {
+            width: 11px;
+            margin-right: 2px;
+            font-size: 8.5px;
+            color: var(--nc);
+        }
+
+    .employee-designation {
+        color: var(--text-muted) !important;
+        font-size: 10px !important;
+    }
+
+        .employee-designation i {
+            width: 11px;
+            margin-right: 2px;
+            font-size: 8.5px;
+            color: var(--text-muted);
+        }
+
+    .team-count {
+        display: inline-flex !important;
+        align-items: center;
+        gap: 4px;
+        margin-top: 6px;
+        padding: 2px 8px;
+        border-radius: 20px;
+        background: color-mix(in srgb, var(--nc) 10%, white);
+        color: var(--nc) !important;
+        font-size: 9.5px !important;
+        font-weight: 700 !important;
+        letter-spacing: .2px;
+        border: 1px solid color-mix(in srgb, var(--nc) 20%, white);
+    }
+
+        .team-count::before {
+            content: "";
+            display: inline-block;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--nc);
+            opacity: .75;
+        }
+
+    .node[data-role="admin"] {
+        --nc: var(--c-admin);
+        min-width: 255px;
+        border-radius: var(--r-lg);
+        box-shadow: var(--shadow-admin);
+        background: #1a80e133;
+    }
+
+        .node[data-role="admin"] .node-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            font-size: 16px;
+        }
+
+        .node[data-role="admin"] strong {
+            font-size: 20px;
+        }
+
+    .node[data-role="manager"] {
+        --nc: var(--c-manager);
+        min-width: 255px;
+        background: rgb(255 153 35 / 22%);
+    }
+
+    .node[data-role="assimanager"] {
+        --nc: var(--c-assimanager);
+        min-width: 255px;
+        background: rgb(97 151 201 / 32%);
+    }
+
+    .node[data-role="team-lead"] {
+        --nc: var(--c-lead);
+        min-width: 255px;
+        background: #704ac136;
+    }
+
+    .node[data-role="executive"] {
+        --nc: var(--c-exec);
+        min-width: 255px;
+        background: rgb(5 150 105 / 19%);
+        cursor: default;
+    }
+
+        .node[data-role="executive"]:hover {
+            transform: none;
+            box-shadow: var(--shadow-card);
+        }
+
+    .team-count-wrapper {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        margin-top: 6px;
+    }
+
+        .team-count-wrapper .team-count {
+            margin-top: 0;
+        }
+
+    .team-toggle-btn {
+        margin-left: auto;
+        width: 25px;
+        height: 25px;
+        padding: 3px 3px 6px 3px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        background: var(--nc);
+        color: #fff;
+        border-color: var(--nc);
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1;
+        cursor: pointer;
+        transition: all .18s ease;
+    }
+
+        .team-toggle-btn:hover {
+            border: 1px solid color-mix(in srgb, var(--nc) 22%, white);
+            background: color-mix(in srgb, var(--nc) 8%, white);
+            color: var(--nc);
+        }
+
+        .team-toggle-btn:active {
+            transform: scale(.92);
+        }
+
+
+    .node.active {
+        border-top-color: var(--nc);
+        border-left-color: color-mix(in srgb, var(--nc) 55%, var(--border));
+        border-right-color: color-mix(in srgb, var(--nc) 55%, var(--border));
+        border-bottom-color: color-mix(in srgb, var(--nc) 55%, var(--border));
+        box-shadow: 0 4px 18px color-mix(in srgb, var(--nc) 16%, transparent), var(--shadow-card);
+    }
+
+    .manager-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin: 32px 0 0;
+        padding-top: 0;
+        padding-bottom: 16px;
+        position: relative;
+    }
+
+        .manager-container::before {
+            display: none;
+        }
+
+    .manager-block {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        animation: fadeUp .3s ease both;
+    }
+
+        .manager-block::before {
+            display: none;
+        }
+
+    .tl-horizontal-container {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        width: max-content;
+        min-width: 100%;
+        margin-top: 16px;
+        padding-top: 20px;
+        animation: expandTree .24s ease both;
+    }
+
+        .tl-horizontal-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: var(--line-w);
+            height: 20px;
+            background: var(--connector);
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+    .tl-horizontal-line {
+        height: var(--line-w);
+        width: 100%;
+        min-width: 160px;
+        margin-bottom: 20px;
+        background: var(--connector);
+        border-radius: 2px;
+    }
+
+    .tl-row {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        width: 100%;
+    }
+
+    .tl-column {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        padding-top: 20px;
+    }
+
+        .tl-column::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: var(--line-w);
+            height: 20px;
+            background: var(--connector);
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        .tl-column > .tl-horizontal-container {
+            display: none;
+            flex-direction: column !important;
+            align-items: center;
+            margin-top: 12px;
+            min-width: unset;
+            width: max-content;
+        }
+
+            .tl-column > .tl-horizontal-container > .tl-horizontal-line {
+                display: none;
+            }
+
+            .tl-column > .tl-horizontal-container > .tl-row {
+                flex-direction: column !important;
+                align-items: center;
+                gap: 10px;
+            }
+
+                .tl-column > .tl-horizontal-container > .tl-row > .tl-column {
+                    padding-top: 0;
+                }
+
+                    .tl-column > .tl-horizontal-container > .tl-row > .tl-column::before {
+                        display: none;
+                    }
+
+    .executive-container {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        margin-top: 0;
+        padding: 4px 6px 10px;
+        max-height: 400px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        animation: expandTree .22s ease both;
+    }
+
+    .tl-vertical-connector {
+        display: none;
+        width: var(--line-w);
+        height: 18px;
+        background: var(--connector);
+        border-radius: 2px;
+    }
+
+    .manager-connector,
+    .manager-vertical-connector,
+    .executive-connector {
+        display: none;
+    }
+
+    .node[style*="background:#eee"] {
+        --nc: #B0BEC5;
+        background: var(--surface-soft) !important;
+        border: 1.5px dashed var(--border) !important;
+        box-shadow: none;
+        opacity: .75;
+        cursor: default;
+    }
+
+        .node[style*="background:#eee"] strong,
+        .node[style*="background:#eee"] small {
+            color: var(--text-muted) !important;
+        }
+
+    .tree::-webkit-scrollbar,
+    .executive-container::-webkit-scrollbar,
+    .tl-row::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+    }
+
+    .tree::-webkit-scrollbar-thumb,
+    .executive-container::-webkit-scrollbar-thumb,
+    .tl-row::-webkit-scrollbar-thumb {
+        background: var(--connector);
+        border-radius: 10px;
+    }
+
+    .tree::-webkit-scrollbar-track,
+    .executive-container::-webkit-scrollbar-track,
+    .tl-row::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    @@keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@keyframes expandTree {
+        from {
+            opacity: 0;
+            transform: translateY(-6px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @@media (max-width: 768px) {
+        .tree {
+            padding: 28px 10px 50px;
+            border-radius: 14px;
+        }
+
+        .manager-container {
+            justify-content: flex-start;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding: 0 20px 24px;
+            gap: 14px;
+            scroll-snap-type: x mandatory;
+        }
+
+        .manager-block {
+            flex: 0 0 auto;
+            scroll-snap-align: center;
+        }
+
+        .tl-row {
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            overflow-x: auto;
+            padding: 0 16px 16px;
+            scroll-snap-type: x mandatory;
+        }
+
+        .tl-column {
+            flex: 0 0 auto;
+            scroll-snap-align: center;
+        }
+
+        .node[data-role="admin"] {
+            min-width: 210px;
+        }
+
+        .node[data-role="manager"] {
+            min-width: 198px;
+        }
+
+        .node[data-role="team-lead"] {
+            min-width: 188px;
+        }
+
+        .node[data-role="executive"] {
+            min-width: 180px;
+        }
+    }
 </style>
 
+<style type="text/css">
+    /* Modal Structure */
+    .modal-content {
+        border: none;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
+    }
 
-<!-- Page Content-->
-<div class="">
-	<div class="container-fluid px-3">
-		<div class="row justify-content-center">
-			<div class="col-md-12 col-lg-4">
-				<div class="card">
-					<div class="card-body">
-						<div class="row d-flex justify-content-center border-dashed-bottom pb-3">
-							<div class="col-9">
-								<p class="text-dark mb-0 fw-semibold fs-14">Sessions</p>
-								<h3 class="mt-2 mb-0 fw-bold">24k</h3>
-							</div>
-							<!--end col-->
-							<div class="col-3 align-self-center">
-								<div class="d-flex justify-content-center align-items-center thumb-xl bg-light rounded-circle mx-auto">
-									<i class="iconoir-hexagon-dice h1 align-self-center mb-0 text-secondary"></i>
-								</div>
-							</div>
-							<!--end col-->
-						</div>
-						<!--end row-->
-						<p class="mb-0 text-truncate text-muted mt-3">
-							<span class="text-success">8.5%</span>
-							New Sessions Today
-						</p>
-					</div>
-					<!--end card-body-->
-				</div>
-				<!--end card-->
-			</div>
-			<!--end col-->
-			<div class="col-md-6 col-lg-4">
-				<div class="card">
-					<div class="card-body">
-						<div class="row d-flex justify-content-center border-dashed-bottom pb-3">
-							<div class="col-9">
-								<p class="text-dark mb-0 fw-semibold fs-14">Avg.Sessions</p>
-								<h3 class="mt-2 mb-0 fw-bold">00:18</h3>
-							</div>
-							<!--end col-->
-							<div class="col-3 align-self-center">
-								<div class="d-flex justify-content-center align-items-center thumb-xl bg-light rounded-circle mx-auto">
-									<i class="iconoir-clock h1 align-self-center mb-0 text-secondary"></i>
-								</div>
-							</div>
-							<!--end col-->
-						</div>
-						<!--end row-->
-						<p class="mb-0 text-truncate text-muted mt-3">
-							<span class="text-success">1.5%</span>
-							Weekly Avg.Sessions
-						</p>
-					</div>
-					<!--end card-body-->
-				</div>
-				<!--end card-->
-			</div>
-			<!--end col-->
-			<div class="col-md-6 col-lg-4">
-				<div class="card">
-					<div class="card-body">
-						<div class="row d-flex justify-content-center border-dashed-bottom pb-3">
-							<div class="col-9">
-								<p class="text-dark mb-0 fw-semibold fs-14">
-									Bounce
-									Rate
-								</p>
-								<h3 class="mt-2 mb-0 fw-bold">36.45%</h3>
-							</div>
-							<!--end col-->
-							<div class="col-3 align-self-center">
-								<div class="d-flex justify-content-center align-items-center thumb-xl bg-light rounded-circle mx-auto">
-									<i class="iconoir-percentage-circle h1 align-self-center mb-0 text-secondary"></i>
-								</div>
-							</div>
-							<!--end col-->
-						</div>
-						<!--end row-->
-						<p class="mb-0 text-truncate text-muted mt-3">
-							<span class="text-danger">8%</span>
-							Up Bounce Rate Weekly
-						</p>
-					</div>
-					<!--end card-body-->
-				</div>
-				<!--end card-->
-			</div>
-			<!--end col-->
-		</div>
-		<!--end row-->
-		<div class="row justify-content-center">
-			<div class="col-md-6 col-lg-8">
-				<div class="card">
-					<div class="card-header">
-						<div class="row align-items-center">
-							<div class="col">
-								<h4 class="card-title">Audience Overview</h4>
-							</div>
-							<!--end col-->
-							<div class="col-auto">
-								<div class="dropdown">
-									<a href="#" class="btn bt btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-										<i class="icofont-calendar fs-5 me-1"></i>
-										This Year<i class="las la-angle-down ms-1"></i>
-									</a>
-									<div class="dropdown-menu dropdown-menu-end">
-										<a class="dropdown-item" href="#">Today</a>
-										<a class="dropdown-item" href="#">Last Week</a>
-										<a class="dropdown-item" href="#">Last Month</a>
-										<a class="dropdown-item" href="#">This Year</a>
-									</div>
-								</div>
-							</div>
-							<!--end col-->
-						</div>
-						<!--end row-->
-					</div>
-					<!--end card-header-->
-					<div class="card-body pt-0">
-						<div id="audience_overview" class="apex-charts"></div>
-					</div>
-					<!--end card-body-->
-				</div>
-				<!--end card-->
-			</div>
-			<!--end col-->
-			<div class="col-md-6 col-lg-4">
-				<div class="card">
-					<div class="card-body">
-						<div class="row align-items-center">
-							<div class="col">
-								<p class="text-dark mb-0 fw-semibold fs-14">New Visitors</p>
-								<h2 class="mt-0 mb-0 fw-bold">1,282</h2>
-							</div>
-							<!--end col-->
-							<div class="col-auto align-self-center">
-								<div class="img-group d-flex">
-									<a class="user-avatar position-relative d-inline-block" href="#">
-										<img src="assets/images/users/avatar-1.jpg" alt="avatar" class="thumb-md shadow-sm rounded-circle">
-									</a>
-									<a class="user-avatar position-relative d-inline-block ms-n2" href="#">
-										<img src="assets/images/users/avatar-2.jpg" alt="avatar" class="thumb-md shadow-sm rounded-circle">
-									</a>
-									<a class="user-avatar position-relative d-inline-block ms-n2" href="#">
-										<img src="assets/images/users/avatar-4.jpg" alt="avatar" class="thumb-md shadow-sm rounded-circle">
-									</a>
-									<a class="user-avatar position-relative d-inline-block ms-n2" href="#">
-										<img src="assets/images/users/avatar-3.jpg" alt="avatar" class="thumb-md shadow-sm rounded-circle">
-									</a>
-									<a href class="user-avatar position-relative d-inline-block ms-1">
-										<span class="thumb-md shadow-sm justify-content-center d-flex align-items-center bg-info-subtle rounded-circle fw-semibold fs-6">+6</span>
-									</a>
-								</div>
-								<small class="text-muted">
-									Logined
-									Visitors
-								</small>
-							</div>
-							<!--end col-->
-						</div>
-						<!--end row-->
-						<div id="visitors_report" class="apex-charts mb-2"></div>
-						<button type="button" class="btn btn-primary w-100 btn-lg fs-14">
-							More
-							Detail <i class="fa-solid fa-arrow-right-long"></i>
-						</button>
-					</div>
-					<!--end card-body-->
-				</div>
-				<!--end card-->
-			</div>
-			<!--end col-->
-		</div>
-		<!--end row-->
+    /* Header */
+    .modal-header {
+        padding: 14px 18px;
+        border-bottom: none !important;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
 
-		<div class="row">
-			<div class="col-lg-6">
-				<div class="card card-h-100">
-					<div class="card-header">
-						<div class="row align-items-center">
-							<div class="col">
-								<h4 class="card-title">Browser Used & Traffic Reports</h4>
-							</div>
-							<!--end col-->
-						</div>
-						<!--end row-->
-					</div>
-					<!--end card-header-->
-					<div class="card-body pt-0">
-						<div class="table-responsive browser_users">
-							<table class="table mb-0">
-								<thead class="table-light">
-									<tr>
-										<th class="border-top-0">Browser</th>
-										<th class="border-top-0">Sessions</th>
-										<th class="border-top-0">Bounce Rate</th>
-										<th class="border-top-0">Transactions</th>
-									</tr>
-									<!--end tr-->
-								</thead>
-								<tbody>
-									<tr>
-										<td><img src="assets/images/logos/chrome.png" alt height="24" class="me-2">Chrome</td>
-										<td>10853<small class="text-muted">(52%)</small></td>
-										<td> 52.80%</td>
-										<td>566<small class="text-muted">(92%)</small></td>
-									</tr>
-									<!--end tr-->
-									<tr>
-										<td>
-											<img src="assets/images/logos/micro-edge.png" alt height="24" class="me-2">Microsoft
-											Edge
-										</td>
-										<td>2545<small class="text-muted">(47%)</small></td>
-										<td> 47.54%</td>
-										<td>498<small class="text-muted">(81%)</small></td>
-									</tr>
-									<!--end tr-->
-									<tr>
-										<td><img src="assets/images/logos/in-explorer.png" alt height="24" class="me-2">Internet-Explorer</td>
-										<td>1836<small class="text-muted">(38%)</small></td>
-										<td> 41.12%</td>
-										<td>455<small class="text-muted">(74%)</small></td>
-									</tr>
-									<!--end tr-->
-									<tr>
-										<td><img src="assets/images/logos/opera.png" alt height="24" class="me-2">Opera</td>
-										<td>1958<small class="text-muted">(31%)</small></td>
-										<td> 36.82%</td>
-										<td>361<small class="text-muted">(61%)</small></td>
-									</tr>
-									<!--end tr-->
-									<tr>
-										<td><img src="assets/images/logos/chrome.png" alt height="24" class="me-2">Chrome</td>
-										<td>10853<small class="text-muted">(52%)</small></td>
-										<td> 52.80%</td>
-										<td>566<small class="text-muted">(92%)</small></td>
-									</tr>
-									<!--end tr-->
-								</tbody>
-							</table>
-							<!--end table-->
-						</div>
-						<!--end /div-->
-					</div>
-					<!--end card-body-->
-				</div>
-				<!--end card-->
-			</div>
-			<!--end col-->
-			<div class="col-lg-6">
-				<div class="card card-h-100">
-					<div class="card-header">
-						<div class="row align-items-center">
-							<div class="col">
-								<h4 class="card-title">Total Visits</h4>
-							</div>
-							<!--end col-->
-						</div>
-						<!--end row-->
-					</div>
-					<!--end card-header-->
-					<div class="card-body pt-0">
-						<div class="table-responsive">
-							<table class="table mb-0">
-								<thead class="table-light">
-									<tr>
-										<th class="border-top-0">Channel</th>
-										<th class="border-top-0">Sessions</th>
-										<th class="border-top-0">Prev.Period</th>
-										<th class="border-top-0">% Change</th>
-									</tr>
-									<!--end tr-->
-								</thead>
-								<tbody>
-									<tr>
-										<td><a href class="text-primary">Organic search</a></td>
-										<td>10853<small class="text-muted">(52%)</small></td>
-										<td>566<small class="text-muted">(92%)</small></td>
-										<td> 52.80% <i class="fas fa-caret-up text-success font-16"></i></td>
-									</tr>
-									<!--end tr-->
-									<tr>
-										<td><a href class="text-primary">Direct</a></td>
-										<td>2545<small class="text-muted">(47%)</small></td>
-										<td>498<small class="text-muted">(81%)</small></td>
-										<td> -17.20% <i class="fas fa-caret-down text-danger font-16"></i></td>
-									</tr>
-									<!--end tr-->
-									<tr>
-										<td><a href class="text-primary">Referal</a></td>
-										<td>1836<small class="text-muted">(38%)</small></td>
-										<td>455<small class="text-muted">(74%)</small></td>
-										<td> 41.12% <i class="fas fa-caret-up text-success font-16"></i></td>
+    .modal-header-content {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-									</tr>
-									<!--end tr-->
-									<tr>
-										<td><a href class="text-primary">Email</a></td>
-										<td>1958<small class="text-muted">(31%)</small></td>
-										<td>361<small class="text-muted">(61%)</small></td>
-										<td> -8.24% <i class="fas fa-caret-down text-danger font-16"></i></td>
-									</tr>
-									<!--end tr-->
-									<tr>
-										<td><a href class="text-primary">Social</a></td>
-										<td>1566<small class="text-muted">(26%)</small></td>
-										<td>299<small class="text-muted">(49%)</small></td>
-										<td> 29.33% <i class="fas fa-caret-up text-success"></i></td>
-									</tr>
-									<!--end tr-->
-								</tbody>
-							</table>
-							<!--end table-->
-						</div>
-						<!--end /div-->
-						<p class="m-0 fs-12 fst-italic ps-2 text-muted">Last data updated - 13min ago <a href="#!" class="link-danger ms-1 "><i class="align-middle iconoir-refresh"></i></a></p>
-					</div>
-					<!--end card-body-->
-				</div>
-				<!--end card-->
-			</div>
-			<!--end col-->
-		</div>
-		<!--end row-->
-		<div class="row justify-content-center">
-			<div class="col-md-6 col-lg-4">
-				<div class="card">
-					<div class="card-header">
-						<div class="row align-items-center">
-							<div class="col">
-								<h4 class="card-title">Traffic Sources</h4>
-							</div>
-							<!--end col-->
-							<div class="col-auto">
-								<div class="dropdown">
-									<a href="#" class="btn bt btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-										<i class="icofont-search-user fs-5 me-1"></i>
-										Direct<i class="las la-angle-down ms-1"></i>
-									</a>
-									<div class="dropdown-menu dropdown-menu-end">
-										<a class="dropdown-item" href="#">Email</a>
-										<a class="dropdown-item" href="#">Referral</a>
-										<a class="dropdown-item" href="#">Direct</a>
-										<a class="dropdown-item" href="#">Organic</a>
-										<a class="dropdown-item" href="#">Campaign</a>
-									</div>
-								</div>
-							</div>
-							<!--end col-->
-						</div>
-						<!--end row-->
-					</div>
-					<!--end card-header-->
-					<div class="card-body pt-0">
-						<div class>
-							<div id="traffic_sources" class="apex-charts d-block w-90 mx-auto"></div>
-							<hr class="hr-dashed border-secondary w-25 mt-0 mx-auto">
-						</div>
-						<div class="text-center">
-							<h4>Direct Visitors</h4>
-							<p class="text-muted mt-2">
-								This is a
-								simple hero unit, a simple
-								jumbotron-style component
-							</p>
-							<button type="button" class="btn btn-outline-primary px-3 mt-2">
-								More
-								details
-							</button>
-						</div>
-					</div>
-					<!--end card-body-->
-				</div>
-				<!--end card-->
-			</div>
-			<!--end col-->
-			<div class="col-md-6 col-lg-8">
-				<div class="card">
-					<div class="card-header">
-						<div class="row align-items-center">
-							<div class="col">
-								<h4 class="card-title">
-									Organic
-									Traffic In World
-								</h4>
-							</div>
-							<!--end col-->
-							<div class="col-auto">
-								<div class="dropdown">
-									<a href="#" class="btn bt btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-										<i class="icofont-calendar fs-5 me-1"></i>
-										Today<i class="las la-angle-down ms-1"></i>
-									</a>
-									<div class="dropdown-menu dropdown-menu-end">
-										<a class="dropdown-item" href="#">Today</a>
-										<a class="dropdown-item" href="#">Last Week</a>
-										<a class="dropdown-item" href="#">Last Month</a>
-										<a class="dropdown-item" href="#">This Year</a>
-									</div>
-								</div>
-							</div>
-							<!--end col-->
-						</div>
-						<!--end row-->
-					</div>
-					<!--end card-header-->
-					<div class="card-body pt-0">
-						<div class="row">
-							<div class="col-lg-8">
-								<div id="map_2" class style="height:320px"></div>
-							</div>
-							<!--end col-->
-							<div class="col-lg-4 align-self-center">
-								<div class="d-flex align-items-center my-3">
-									<img src="assets/images/flags/us_flag.jpg" class="thumb-sm align-self-center rounded-circle" alt="...">
-									<div class="flex-grow-1 ms-2">
-										<h5 class="mb-1">35,365</h5>
-										<p class="text-muted mb-0">
-											USA
-											. Last Month
-											<span class="text-success">
-												2.5%
-												<i class="mdi mdi-arrow-up"></i>
-											</span>
-										</p>
-									</div>
-									<!--end media-body-->
-								</div>
-								<!--end media-->
-								<div class="d-flex align-items-center my-3">
-									<img src="assets/images/flags/germany_flag.jpg" class="thumb-sm align-self-center rounded-circle" alt="...">
-									<div class="flex-grow-1 ms-2">
-										<h5 class="mb-1">24,865</h5>
-										<p class="text-muted mb-0">
-											Germany
-											. Last Month
-											<span class="text-success">
-												1.2%
-												<i class="mdi mdi-arrow-up"></i>
-											</span>
-										</p>
-									</div>
-									<!--end media-body-->
-								</div>
-								<!--end media-->
-								<div class="d-flex align-items-center my-3">
-									<img src="assets/images/flags/spain_flag.jpg" class="thumb-sm align-self-center rounded-circle" alt="...">
-									<div class="flex-grow-1 ms-2">
-										<h5 class="mb-1">18,369</h5>
-										<p class="text-muted mb-0">
-											Spain
-											. Last Month
-											<span class="text-success">
-												0.8%
-												<i class="mdi mdi-arrow-up"></i>
-											</span>
-										</p>
-									</div>
-									<!--end media-body-->
-								</div>
-								<!--end media-->
-								<div class="d-flex align-items-center my-3">
-									<img src="assets/images/flags/baha_flag.jpg" class="thumb-sm align-self-center rounded-circle" alt="...">
-									<div class="flex-grow-1 ms-2">
-										<h5 class="mb-1">11,325</h5>
-										<p class="text-muted mb-0">
-											Bahamas
-											. Last Month
-											<span class="text-success">
-												2.5%
-												<i class="mdi mdi-arrow-up"></i>
-											</span>
-										</p>
-									</div>
-									<!--end media-body-->
-								</div>
-								<!--end media-->
-							</div>
-							<!--end col-->
-						</div>
-						<!--end row-->
+    .modal-icon-box {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 13px;
+    }
 
-					</div>
-					<!--end card-body-->
-				</div>
-				<!--end card-->
-			</div>
-			<!--end col-->
-		</div>
-		<!--end row-->
-	</div><!-- container -->
-	<!--Start Rightbar-->
-	<!--Start Rightbar/offcanvas-->
-	<div class="offcanvas offcanvas-end" tabindex="-1" id="Appearance" aria-labelledby="AppearanceLabel">
-		<div class="offcanvas-header border-bottom justify-content-between">
-			<h5 class="m-0 font-14" id="AppearanceLabel">Appearance</h5>
-			<button type="button" class="btn-close text-reset p-0 m-0 align-self-center" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-		</div>
-		<div class="offcanvas-body">
-			<h6>Account Settings</h6>
-			<div class="p-2 text-start mt-3">
-				<div class="form-check form-switch mb-2">
-					<input class="form-check-input" type="checkbox" id="settings-switch1">
-					<label class="form-check-label" for="settings-switch1">Auto updates</label>
-				</div><!--end form-switch-->
-				<div class="form-check form-switch mb-2">
-					<input class="form-check-input" type="checkbox" id="settings-switch2" checked>
-					<label class="form-check-label" for="settings-switch2">Location Permission</label>
-				</div><!--end form-switch-->
-				<div class="form-check form-switch">
-					<input class="form-check-input" type="checkbox" id="settings-switch3">
-					<label class="form-check-label" for="settings-switch3">Show offline Contacts</label>
-				</div><!--end form-switch-->
-			</div><!--end /div-->
-			<h6>General Settings</h6>
-			<div class="p-2 text-start mt-3">
-				<div class="form-check form-switch mb-2">
-					<input class="form-check-input" type="checkbox" id="settings-switch4">
-					<label class="form-check-label" for="settings-switch4">Show me Online</label>
-				</div><!--end form-switch-->
-				<div class="form-check form-switch mb-2">
-					<input class="form-check-input" type="checkbox" id="settings-switch5" checked>
-					<label class="form-check-label" for="settings-switch5">Status visible to all</label>
-				</div><!--end form-switch-->
-				<div class="form-check form-switch">
-					<input class="form-check-input" type="checkbox" id="settings-switch6">
-					<label class="form-check-label" for="settings-switch6">Notifications Popup</label>
-				</div><!--end form-switch-->
-			</div><!--end /div-->
-		</div><!--end offcanvas-body-->
-	</div>
-</div>
+
+    /* Red Close Button */
+    .btn-close-custom {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: rgba(220, 50, 50, 0.18);
+        border: 1.5px solid rgba(220, 80, 80, 0.45);
+        color: #f87171;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 12px;
+        transition: background 0.2s, color 0.2s;
+        padding: 0;
+        line-height: 1;
+    }
+
+        .btn-close-custom:hover {
+            background: rgba(220, 50, 50, 0.4);
+            color: #fff;
+            border-color: rgba(220, 80, 80, 0.75);
+        }
+
+    /* Modal Body */
+    .modal-body {
+        padding: 14px 16px;
+        background: #fff;
+    }
+
+    .employee-info-header {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .modal-title.employee-name {
+        color: #fff !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        margin: 0 !important;
+        line-height: 1.3;
+    }
+
+    .employee-code {
+        color: rgba(255, 255, 255, 0.55);
+        font-size: 11px;
+        font-weight: 400;
+    }
+
+    /* Section Label */
+    .stats-label {
+        font-size: 10px;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin: 0 0 8px;
+    }
+
+    /* Stats Grid */
+    .company-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .company-stat {
+        padding: 10px 8px;
+        border-radius: 10px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+        .company-stat:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Colored top accent bar */
+        .company-stat::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: 10px 10px 0 0;
+        }
+
+        /* Company stat accent bars */
+        .company-stat.total::before {
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+        }
+
+        .company-stat.paid::before {
+            background: linear-gradient(90deg, #10b981, #059669);
+        }
+
+        .company-stat.unpaid::before {
+            background: linear-gradient(90deg, #f97316, #ea580c);
+        }
+
+        /* Meeting stat accent bars */
+        .company-stat.fresh::before {
+            background: linear-gradient(90deg, #8b5cf6, #7c3aed);
+        }
+
+        .company-stat.followup::before {
+            background: linear-gradient(90deg, #60a5fa, #2563eb);
+        }
+
+        .company-stat.service::before {
+            background: linear-gradient(90deg, #34d399, #059669);
+        }
+
+    /* Stat Icon */
+    .stat-icon {
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+
+    /* Company stat icon colors */
+    .company-stat.total .stat-icon {
+        color: #2563eb;
+    }
+
+    .company-stat.paid .stat-icon {
+        color: #059669;
+    }
+
+    .company-stat.unpaid .stat-icon {
+        color: #ea580c;
+    }
+
+    /* Meeting stat icon colors */
+    .company-stat.fresh .stat-icon {
+        color: #7c3aed;
+    }
+
+    .company-stat.followup .stat-icon {
+        color: #2563eb;
+    }
+
+    .company-stat.service .stat-icon {
+        color: #059669;
+    }
+
+    /* Stat Title */
+    .company-stat .stat-title {
+        display: block;
+        font-size: 10px;
+        color: #64748b;
+        margin-bottom: 4px;
+        font-weight: 500;
+    }
+
+    /* Stat Number */
+    .company-stat strong {
+        display: block;
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    /* Company stat backgrounds */
+    .company-stat.total {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .company-stat.paid {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    .company-stat.unpaid {
+        background: #fff7ed;
+        color: #ea580c;
+    }
+
+    /* Meeting stat backgrounds */
+    .company-stat.fresh {
+        background: #f5f3ff;
+        color: #7c3aed;
+    }
+
+    .company-stat.followup {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .company-stat.service {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    /* Total Meetings Bar */
+    .total-meetings-bar {
+        background: linear-gradient(100deg, #0b0f14, #1a3e66);
+        border-radius: 10px;
+        padding: 10px 14px;
+        margin-top: 8px;
+    }
+
+    .total-meetings-info {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: #fff;
+        font-size: 13px;
+    }
+
+        .total-meetings-info strong {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+</style>
+
+@functions {
+
+    private string Safe(object value)
+    {
+        return HtmlEncoder.Default.Encode(Convert.ToString(value) ?? "");
+    }
+
+    private string DataRole(string role)
+    {
+        if (string.IsNullOrWhiteSpace(role))
+            return "executive";
+
+        return role.Trim() switch
+        {
+            "Admin" => "admin",
+            "Sub Admin" => "admin",
+            "Other" => "admin",   // ← ADD THIS (Vaibhav SubAdmin case)
+            "Sales Manager" => "manager",
+            "Assistant Sales Manager" => "assimanager",
+            "Sales TL" => "team-lead",
+            "Sales Executive" => "executive",
+            _ => "executive"
+        };
+    }
+
+    private IHtmlContent RenderEmployeeChildren(EmployeeNode employee, string employeeId)
+    {
+        var html = new HtmlContentBuilder();
+
+        var children = employee.Children?
+            .Where(x => !string.Equals(
+                Convert.ToString(x.EmpCode),
+                Convert.ToString(employee.EmpCode),
+                StringComparison.OrdinalIgnoreCase))
+            .ToList()
+            ?? new List<EmployeeNode>();
+
+        if (!children.Any()) return html;
+
+        // Separate into three buckets
+        var teamLeads = children
+            .Where(c => string.Equals(c.CustRole, "Sales TL", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        var directExecutives = children
+            .Where(c => string.Equals(c.CustRole, "Sales Executive", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        // Everything else: Assistant Sales Manager, Other, etc.
+        var midLevelChildren = children
+            .Where(c => !teamLeads.Contains(c) && !directExecutives.Contains(c))
+            .ToList();
+
+        html.AppendHtml($@"
+        <div class='tl-horizontal-container' data-manager-id='{Safe(employeeId)}'>
+            <div class='tl-horizontal-line'></div>
+            <div class='tl-row'>
+    ");
+
+        // ── 1. Team Leads (Sales TL) ─────────────────────────────────
+        foreach (var tl in teamLeads)
+        {
+            var tlId = Convert.ToString(tl.EmpCode) ?? "";
+            var tlRole = DataRole(tl.CustRole);
+
+            var tlExecutives = tl.Children?
+                .Where(c => !string.Equals(c.EmpCode, tl.EmpCode, StringComparison.OrdinalIgnoreCase))
+                .ToList()
+                ?? new List<EmployeeNode>();
+
+            html.AppendHtml($@"
+            <div class='tl-column'>
+                <div class='node' data-role='{tlRole}'
+                     data-tl-id='{Safe(tlId)}'>
+                    <div class='node-avatar'>{Safe(GetInitials(tl.Name))}</div>
+                    <div>
+                        <strong>{Safe(tl.Name)}</strong>
+                        <small class='empcode'>{Safe(tl.EmpCode)}</small>
+                        <small class='employee-role'>
+                            <i class='fas fa-user-tag'></i>{Safe(tl.Role)}
+                        </small>
+                        <small class='employee-designation'>
+                            <i class='fas fa-briefcase'></i>Team Lead
+                        </small>
+                       <div class='team-count-wrapper'>
+                            <small class='team-count'>Team {tlExecutives.Count}</small>
+                            <button type='button' class='team-toggle-btn'
+                                    onclick='event.stopPropagation(); toggleExecutives(this.closest("".node""))'
+                                    aria-label='Toggle team'>+</button>
+                       </div>
+                    </div>
+                    <button type='button' class='employee-info-btn'
+                            data-empcode={Safe(tl.EmpCode)}
+                            onclick='event.stopPropagation(); showEmployeeInfo(this);'
+                            title='Employee Information'>
+                            <i class='fas fa-info'></i>
+                     </button>
+                </div>
+                <div class='tl-vertical-connector' data-tl-id='{Safe(tlId)}'></div>
+                <div class='executive-container' data-tl-id='{Safe(tlId)}'>
+        ");
+
+            if (tlExecutives.Any())
+            {
+                foreach (var exec in tlExecutives)
+                {
+                    var execRole = DataRole(exec.CustRole);
+                    html.AppendHtml($@"
+                    <div class='node' data-role='{execRole}'>
+                        <div class='node-avatar'>{Safe(GetInitials(exec.Name))}</div>
+                        <div>
+                            <strong>{Safe(exec.Name)}</strong>
+                            <small class='empcode'>{Safe(exec.EmpCode)}</small>
+                            <small class='employee-role'>
+                                <i class='fas fa-user-tag'></i>{Safe(exec.Role)}
+                            </small>
+                            <small class='employee-designation'>
+                                <i class='fas fa-briefcase'></i>Executive
+                            </small>
+                        </div>
+                    </div>
+                ");
+                }
+            }
+            else
+            {
+                html.AppendHtml(@"
+                <div class='node' data-role='executive' style='background:#eee;'>
+                    <div><small>No team members</small></div>
+                </div>
+            ");
+            }
+
+            html.AppendHtml("</div></div>"); // close executive-container + tl-column
+        }
+
+        foreach (var mid in midLevelChildren)
+        {
+            var midId = Convert.ToString(mid.EmpCode) ?? "";
+            var midRole = DataRole(mid.CustRole);
+
+            var midChildCount = mid.Children?
+                .Where(c => !string.Equals(c.EmpCode, mid.EmpCode, StringComparison.OrdinalIgnoreCase))
+                .Count() ?? 0;
+
+            var midTLCount = mid.Children?
+                .Where(c => string.Equals(c.CustRole, "Sales TL", StringComparison.OrdinalIgnoreCase))
+                .Count() ?? 0;
+
+            string midCount = midTLCount > 0
+                ? "TL: " + midTLCount
+                : "Team: " + midChildCount;
+
+            string designation = mid.CustRole switch
+            {
+                "Assistant Sales Manager" => "Asst. Manager",
+                "Sales Manager" => "Manager",
+                _ => mid.CustRole ?? "Staff"
+            };
+
+            // Render the mid-level node card
+            html.AppendHtml($@"
+            <div class='tl-column'>
+                <div class='node' data-role='{midRole}'
+                     onclick='toggleTeamLeads(this)'
+                     data-manager-id='{Safe(midId)}'>
+                    <div class='node-avatar'>{Safe(GetInitials(mid.Name))}</div>
+                    <div>
+                        <strong>{Safe(mid.Name)}</strong>
+                        <small class='empcode'>{Safe(mid.EmpCode)}</small>
+                        <small class='employee-role'>
+                            <i class='fas fa-user-tag'></i>{Safe(mid.Role)}
+                        </small>
+                        <small class='employee-designation'>
+                            <i class='fas fa-briefcase'></i>{designation}
+                        </small>
+                        <div class='team-count-wrapper'>
+                            <small class='team-count'>{midCount}</small>
+                            <button type='button' class='team-toggle-btn'
+                                    onclick='event.stopPropagation(); toggleTeamLeads(this.closest("".node""))'
+                                    aria-label='Toggle team'>+</button>
+                        </div>
+                    </div>
+                    <button type='button' class='employee-info-btn'
+                            data-empcode={Safe(mid.EmpCode)}
+                            onclick='event.stopPropagation(); showEmployeeInfo(this);'
+                            title='Employee Information'>
+                            <i class='fas fa-info'></i>
+                     </button>
+                </div>
+                <div class='manager-vertical-connector'
+                     data-manager-id='{Safe(midId)}'></div>
+        ");
+
+            html.AppendHtml(RenderEmployeeChildren(mid, midId));
+
+            html.AppendHtml("</div>");
+        }
+
+        // ── 3. Direct Sales Executives (leaf nodes) ──────────────────
+        foreach (var exec in directExecutives)
+        {
+            var execRole = DataRole(exec.CustRole);
+            html.AppendHtml($@"
+            <div class='tl-column'>
+                <div class='node' data-role='{execRole}'>
+                    <div class='node-avatar'>{Safe(GetInitials(exec.Name))}</div>
+                    <div>
+                        <strong>{Safe(exec.Name)}</strong>
+                        <small class='empcode'>{Safe(exec.EmpCode)}</small>
+                        <small class='employee-role'>
+                            <i class='fas fa-user-tag'></i>{Safe(exec.Role)}
+                        </small>
+                        <small class='employee-designation'>
+                            <i class='fas fa-briefcase'></i>Executive
+                        </small>
+                    </div>
+                     <button type='button' class='employee-info-btn'
+                            data-empcode={Safe(exec.EmpCode)}
+                            onclick='event.stopPropagation(); showEmployeeInfo(this);'
+                            title='Employee Information'>
+                            <i class='fas fa-info'></i>
+                     </button>
+                </div>
+            </div>
+        ");
+        }
+
+        html.AppendHtml("</div></div>");
+
+        return html;
+    }
+
+    private IHtmlContent RenderManagers(EmployeeNode root)
+    {
+        var html = new HtmlContentBuilder();
+
+        var children = root.Children?
+            .Where(x => !string.Equals(Convert.ToString(x.EmpCode), Convert.ToString(root.EmpCode), StringComparison.OrdinalIgnoreCase))
+            .ToList()
+            ?? new List<EmployeeNode>();
+
+        if (!children.Any()) return html;
+
+        html.AppendHtml(@"<div class='level'><div class='manager-container' style='display:flex;'>");
+
+        foreach (var employee in children)
+        {
+            var employeeId = Convert.ToString(employee.EmpCode) ?? "";
+            var empRole = DataRole(employee.OrgRole);
+
+            var teamLeads = employee.Children?
+                 .Where(c => string.Equals(c.CustRole, "Sales TL", StringComparison.OrdinalIgnoreCase))
+                 .ToList()
+                 ?? new List<EmployeeNode>();
+
+            var teamCount = employee.Children?.Count ?? 0;
+            string count = teamLeads.Any()
+                ? "Team Leader: " + teamLeads.Count
+                : "Team: " + teamCount;
+
+            // Designation label — contextual
+            string designation = empRole switch
+            {
+                "manager" => "Manager",
+                "team-lead" => "Team Lead",
+                "executive" => "Executive",
+                _ => "Sub-Admin"
+            };
+
+            html.AppendHtml($@"
+                <div class='manager-block'>
+                    <div class='node' data-role='{empRole}'
+                         data-manager-id='{Safe(employeeId)}' title='{Safe(employee.Role)}'>
+                        <div class='node-avatar'>{Safe(GetInitials(employee.Name))}</div>
+                        <div>
+                            <strong>{Safe(employee.Name)}</strong>
+                            <small class='empcode'>{Safe(employee.EmpCode)}</small>
+                            <small class='employee-role'><i class='fas fa-user-tag'></i>{Safe(employee.Role)}</small>
+                            <small class='employee-designation'><i class='fas fa-briefcase'></i>{designation}</small>
+                            <div class='team-count-wrapper'>
+                               <small class='team-count'>{count}</small>
+                                 <button type='button' class='team-toggle-btn'
+                                 onclick='event.stopPropagation(); toggleTeamLeads(this.closest("".node""))'
+                                  aria-label='Toggle team'>+</button>
+                            </div>
+                        </div>
+                        <button type='button'
+                            class='employee-info-btn'
+                            data-empcode={Safe(employee.EmpCode)}
+                            onclick='event.stopPropagation(); showEmployeeInfo(this);'
+                            title='Employee Information'>
+                            <i class='fas fa-info'></i>
+                        </button>
+                    </div>
+                    <div class='manager-vertical-connector' data-manager-id='{Safe(employeeId)}'></div>
+            ");
+
+            html.AppendHtml(RenderEmployeeChildren(employee, employeeId));
+            html.AppendHtml("</div>");
+        }
+
+        html.AppendHtml("</div></div>");
+        return html;
+    }
+
+    private string GetInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return parts[0].Substring(0, 1).ToUpper();
+        return (parts[0].Substring(0, 1) + parts[^1].Substring(0, 1)).ToUpper();
+    }
+}
+
+@if (root == null)
+{
+    <div class="alert alert-warning m-3">No data found for your account.</div>
+}
+else
+{
+    <input type="hidden" id="currentEmpCode" value="@Context.Session.GetString("EmpCode")" />
+    <input type="hidden" id="currentRole" value="@Context.Session.GetString("Role")" />
+    <div class="tree-page">
+        <div class="tree">
+            <div class="level">
+                <div class="node" data-role="@rootRole">
+                    <div class="node-avatar">@GetInitials(root.Name)</div>
+                    <div>
+                        <strong>@root.Name</strong>
+                        <small class="empcode">@root.EmpCode</small>
+                        <small class="employee-role">
+                            <i class="fas fa-user-tag"></i>
+                            @root.CustRole
+                        </small>
+                        @if (root.Children?.Any() == true)
+                        {
+                            <small class="team-count">Team @root.Children.Count</small>
+                        }
+                    </div>
+                    @if (Context.Session.GetString("Role")?.ToLower() == "admin")
+                    {
+                        <button type="button"
+                                class="employee-info-btn"
+                                data-empcode="@root.EmpCode"
+                                onclick="event.stopPropagation(); showEmployeeInfo(this);"
+                                title="Employee Information">
+                            <i class="fas fa-info"></i>
+                        </button>
+                    }
+                </div>
+            </div>
+
+            @RenderManagers(root)
+
+        </div>
+    </div>
+
+    <div class="modal fade" id="employeeInfoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header" style="background: linear-gradient(314deg, #0b0f14, #1a3e66) !important;">
+                    <div class="modal-header-content">
+                        <div class="modal-icon-box">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="employee-info-header">
+                            <h3 class="modal-title employee-name mb-0"></h3>
+                            <small class="employee-code"></small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="stats-label">Company Overview</p>
+                    <div class="company-stats">
+                        <div class="company-stat total">
+                            <div class="stat-icon"><i class="fas fa-building"></i></div>
+                            <span class="stat-title">Total Companies</span>
+                            <strong class="total-companies">0</strong>
+                        </div>
+                        <div class="company-stat paid">
+                            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                            <span class="stat-title">Paid Companies</span>
+                            <strong class="paid-companies">0</strong>
+                        </div>
+                        <div class="company-stat unpaid">
+                            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                            <span class="stat-title">Unpaid Companies</span>
+                            <strong class="unpaid-companies">0</strong>
+                        </div>
+                    </div>
+
+                    <div class="meetings-section">
+                        <hr />
+                        <p class="stats-label">
+                            <i class="fas fa-calendar-day me-1"></i> This Month's Meetings
+                        </p>
+                        <div class="company-stats meetings-stats">
+                            <div class="company-stat fresh">
+                                <div class="stat-icon"><i class="fas fa-star"></i></div>
+                                <span class="stat-title">Fresh</span>
+                                <strong class="fresh-meetings">0</strong>
+                            </div>
+                            <div class="company-stat followup">
+                                <div class="stat-icon"><i class="fas fa-redo"></i></div>
+                                <span class="stat-title">Follow-up</span>
+                                <strong class="followup-meetings">0</strong>
+                            </div>
+                            <div class="company-stat service">
+                                <div class="stat-icon"><i class="fas fa-tools"></i></div>
+                                <span class="stat-title">Services</span>
+                                <strong class="service-meetings">0</strong>
+                            </div>
+                        </div>
+                        <div class="total-meetings-bar mt-3">
+                            <div class="total-meetings-info">
+                                <span><i class="fas fa-chart-bar me-1"></i> Total Meetings</span>
+                                <strong class="total-meetings">0</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+
+       const currentEmpCode = document.getElementById("currentEmpCode")?.value?.trim();
+       const currentRole  = document.getElementById("currentRole")?.value?.trim()?.toLowerCase();
+
+       if (currentRole === "admin") return;
+
+       const currentNode = document.querySelector(
+            `.node[data-tl-id="${currentEmpCode}"],
+             .node[data-manager-id="${currentEmpCode}"]`
+        );
+
+        function expandAncestors(element) {
+            if (!element) return;
+
+            let parent = element.parentElement;
+
+            while (parent) {
+
+                if (parent.classList.contains("tl-horizontal-container") &&
+                    parent.style.display !== "flex") {
+                    parent.style.display = "flex";
+                    const managerId = parent.getAttribute("data-manager-id");
+                    if (managerId) {
+                        const managerNode = document.querySelector(
+                            `.node[data-manager-id="${managerId}"]`
+                        );
+                        if (managerNode) {
+                            managerNode.classList.add("active");
+                            const connector = managerNode.parentElement?.querySelector(
+                                `:scope > .manager-vertical-connector[data-manager-id="${managerId}"]`
+                            );
+                            if (connector) connector.style.display = "block";
+                            const btn = managerNode.querySelector(".team-toggle-btn");
+                            if (btn) btn.textContent = "−";
+                        }
+                    }
+                }
+                if (parent.classList.contains("executive-container") &&
+                    parent.style.display !== "flex") {
+
+                    parent.style.display = "flex";
+
+                    const tlId = parent.getAttribute("data-tl-id");
+                    if (tlId) {
+                        const tlNode = document.querySelector(
+                            `.node[data-tl-id="${tlId}"]`
+                        );
+                        if (tlNode) {
+                            tlNode.classList.add("active");
+                            const vertConnector = tlNode.parentElement?.querySelector(
+                                `:scope > .tl-vertical-connector[data-tl-id="${tlId}"]`
+                            );
+                            if (vertConnector) vertConnector.style.display = "block";
+                            const btn = tlNode.querySelector(".team-toggle-btn");
+                            if (btn) btn.textContent = "−";
+                        }
+                    }
+                }
+
+                parent = parent.parentElement;
+            }
+        }
+
+        function expandOwnChildren(empCode, role) {
+            if (["manager", "assimanager", "team-lead"].includes(role)) {
+                const ownContainer = document.querySelector(
+                    `.tl-horizontal-container[data-manager-id="${empCode}"]`
+                );
+                if (ownContainer && ownContainer.style.display !== "flex") {
+                    ownContainer.style.display = "flex";
+                    const ownNode = document.querySelector(
+                        `.node[data-manager-id="${empCode}"]`
+                    );
+                    if (ownNode) {
+                        ownNode.classList.add("active");
+                        const connector = ownNode.parentElement?.querySelector(
+                            `:scope > .manager-vertical-connector[data-manager-id="${empCode}"]`
+                        );
+                        if (connector) connector.style.display = "block";
+                        const btn = ownNode.querySelector(".team-toggle-btn");
+                        if (btn) btn.textContent = "−";
+                    }
+                }
+                if (role === "team-lead") {
+                    const execContainer = document.querySelector(
+                        `.executive-container[data-tl-id="${empCode}"]`
+                    );
+                    if (execContainer && execContainer.style.display !== "flex") {
+                        execContainer.style.display = "flex";
+                        const tlNode = document.querySelector(
+                            `.node[data-tl-id="${empCode}"]`
+                        );
+                        if (tlNode) {
+                            tlNode.classList.add("active");
+                            const vertConnector = tlNode.parentElement?.querySelector(
+                                `:scope > .tl-vertical-connector[data-tl-id="${empCode}"]`
+                            );
+                            if (vertConnector) vertConnector.style.display = "block";
+                            const btn = tlNode.querySelector(".team-toggle-btn");
+                            if (btn) btn.textContent = "−";
+                        }
+                    }
+                }
+            }
+        }
+
+        if (currentNode) {
+            expandAncestors(currentNode);
+        } else {
+            const infoBtn = document.querySelector(
+                `.employee-info-btn[data-empcode="${currentEmpCode}"]`
+            );
+            if (infoBtn) {
+                expandAncestors(infoBtn.closest(".node"));
+            }
+        }
+
+        const roleMapped = {
+            "salesmanager"          : "manager",
+            "assistantsalesmanager" : "assimanager",
+            "salestl"               : "team-lead",
+            "salesexecutive"        : "executive"
+        };
+
+        const normalizedRole = currentRole?.replace(/\s+/g, "").toLowerCase();
+        const mappedRole = roleMapped[normalizedRole] ?? currentRole;
+
+        expandOwnChildren(currentEmpCode, mappedRole);
+    });
+</script>
+
+<script type="text/javascript">
+
+    function toggleTeamLeads(managerNode) {
+        const managerId = managerNode.getAttribute("data-manager-id");
+
+        const container = managerNode.parentElement;
+        if (!container) return;
+
+        const tlContainer = container.querySelector(
+            `:scope > .tl-horizontal-container[data-manager-id="${managerId}"]`
+        );
+        const connector = container.querySelector(
+            `:scope > .manager-vertical-connector[data-manager-id="${managerId}"]`
+        );
+
+        if (!tlContainer) return;
+
+        const toggleButton = managerNode.querySelector(".team-toggle-btn");
+        const isVisible = tlContainer.style.display === "flex";
+
+        if (isVisible) {
+            collapseContainer(tlContainer);
+            tlContainer.style.display = "none";
+            managerNode.classList.remove("active");
+            if (connector) connector.style.display = "none";
+            if (toggleButton) toggleButton.textContent = "+";
+        } else {
+            tlContainer.style.display = "flex";
+            managerNode.classList.add("active");
+            if (connector) connector.style.display = "block";
+             if (toggleButton) toggleButton.textContent = "-";
+        }
+    }
+
+    function toggleExecutives(teamLeadNode) {
+        const tlId = teamLeadNode.getAttribute("data-tl-id");
+
+        const column = teamLeadNode.parentElement;
+        if (!column) return;
+
+        const executiveContainer = column.querySelector(
+            `:scope > .executive-container[data-tl-id="${tlId}"]`
+        );
+        const verticalConnector = column.querySelector(
+            `:scope > .tl-vertical-connector[data-tl-id="${tlId}"]`
+        );
+
+        if (!executiveContainer) return;
+
+        const toggleButton = teamLeadNode.querySelector(".team-toggle-btn");
+        const isVisible = executiveContainer.style.display === "flex";
+
+        if (isVisible) {
+            executiveContainer.style.display = "none";
+            teamLeadNode.classList.remove("active");
+            if (verticalConnector) verticalConnector.style.display = "none";
+            if (toggleButton) toggleButton.textContent = "+";
+
+        } else {
+            executiveContainer.style.display = "flex";
+            teamLeadNode.classList.add("active");
+            if (verticalConnector) verticalConnector.style.display = "block";
+            if (toggleButton) toggleButton.textContent = "−";
+        }
+    }
+
+    function collapseContainer(container) {
+        container.querySelectorAll(".executive-container").forEach(el => {
+            el.style.display = "none";
+        });
+
+        container.querySelectorAll(".tl-horizontal-container").forEach(el => {
+            el.style.display = "none";
+        });
+
+        container.querySelectorAll(".tl-vertical-connector").forEach(el => {
+            el.style.display = "none";
+        });
+
+        container.querySelectorAll(".manager-vertical-connector").forEach(el => {
+            el.style.display = "none";
+        });
+
+        container.querySelectorAll(".node.active").forEach(el => {
+            el.classList.remove("active");
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(
+            ".manager-block > .tl-horizontal-container"
+        ).forEach(container => {
+            const row = container.querySelector(".tl-row");
+            if (!row) return;
+            const columns = row.querySelectorAll(".tl-column");
+            if (columns.length > 0) {
+                const line = container.querySelector(".tl-horizontal-line");
+                line.style.width ="100%";
+            }
+        });
+    });
+</script>
+
+<script type="text/javascript">
+    function showEmployeeInfo(button) {
+        const empCode = button.getAttribute("data-empcode");
+        if (!empCode) {
+            showToast("Employee code not found.","error");
+            return;
+        }
+        button.disabled = true;
+
+        $.ajax({
+            url: '@Url.Action("GetEmployeeInfo", "Dashboard")',
+            type: 'GET',
+            data: {empCode: empCode},
+            success: function (response) {
+                if (!response.success) {
+                    showToast(response.message || "Unable to get employee information.", "error");
+                    return;
+                }
+                const data = response.data;
+                // Employee Info
+                $("#employeeInfoModal .employee-name").text(data.employeeName);
+                $("#employeeInfoModal .employee-code").text(data.employeeCode);
+                $("#employeeInfoModal .employee-role").text(data.employeeRole ?? "");
+
+                // Company Stats
+                $("#employeeInfoModal .total-companies").text(data.totalCompanies);
+                $("#employeeInfoModal .paid-companies").text(data.paidCompanies);
+                $("#employeeInfoModal .unpaid-companies").text(data.unPaidCompanies);
+
+                // Meeting Stats
+                const fresh    = parseInt(data.fresh)    || 0;
+                const followUp = parseInt(data.followUp) || 0;
+                const service  = parseInt(data.service)  || 0;
+                const total    = parseInt(data.total)    || 0;
+
+                $("#employeeInfoModal .fresh-meetings").text(fresh);
+                $("#employeeInfoModal .followup-meetings").text(followUp);
+                $("#employeeInfoModal .service-meetings").text(service);
+                $("#employeeInfoModal .total-meetings").text(total);
+
+                // ✅ Hide meetings section if all values are 0 or null
+                const hasMeetings = fresh > 0 || followUp > 0 || service > 0 || total > 0;
+                $("#employeeInfoModal .meetings-section").toggle(hasMeetings);
+
+
+                $("#employeeInfoModal").modal("show");
+            },
+            error: function (xhr) {
+                console.error(xhr);
+                alert("Something went wrong while getting employee information.");
+            },
+            complete: function () {
+                button.disabled = false;
+            }
+        });
+    }
+</script>
+
+
 
