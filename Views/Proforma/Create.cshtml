@@ -207,6 +207,32 @@
             }
 
 </style>
+<style>
+    #tblDetails thead th {
+        text-align: center;
+        vertical-align: middle;
+        padding: 5px 4px;
+        border: 1px solid #000;
+        font-size: 12px;
+    }
+
+    #tblDetails thead tr:first-child th {
+        font-weight: bold;
+        height: 28px;
+    }
+
+    #tblDetails thead tr:nth-child(2) th {
+        font-size: 11px;
+        padding: 3px 4px;
+        height: 22px;
+    }
+
+    #tblDetails tbody td {
+        border: 1px solid #000;
+        padding: 4px;
+        vertical-align: middle;
+    }
+</style>
 <form id="WorkOrderform">
     <div id="loader" style="display:none;">
         <div class="text-center">
@@ -363,16 +389,31 @@
 
                             <thead>
                                 <tr>
-                                    <th class="col-action">Action</th>
-                                    <th class="col-desc">Service Name</th>
-                                    <th class="col-sac">SAC Code</th>
-                                    <th class="col-qty">QTY</th>
-                                    <th class="col-rate">Rate</th>
-                                    <th class="col-tax">CGST % | Amt</th>
-                                    <th class="col-tax">SGST % | Amt</th>
-                                    <th class="col-tax">IGST % | Amt</th>
-                                    <th class="col-taxable">Amount</th>
-                                    <th class="col-total">All Total</th>
+                                    <th class="col-action" rowspan="2">Action</th>
+                                    <th class="col-desc" rowspan="2">Service Name</th>
+                                    <th class="col-sac" rowspan="2">SAC Code</th>
+                                    <th class="col-qty" rowspan="2">QTY</th>
+                                    <th class="col-rate" rowspan="2">Rate</th>
+
+                                    <!-- GST GROUPS -->
+                                    <th class="col-tax" colspan="2">CGST %</th>
+                                    <th class="col-tax" colspan="2">SGST %</th>
+                                    <th class="col-tax" colspan="2">IGST %</th>
+
+                                    <th class="col-taxable" rowspan="2">Amount</th>
+                                    <th class="col-total" rowspan="2">All Total</th>
+                                </tr>
+
+                                <!-- SUB HEADER -->
+                                <tr>
+                                    <th class="col-tax">Rate</th>
+                                    <th class="col-tax">Amount</th>
+
+                                    <th class="col-tax">Rate</th>
+                                    <th class="col-tax">Amount</th>
+
+                                    <th class="col-tax">Rate</th>
+                                    <th class="col-tax">Amount</th>
                                 </tr>
                             </thead>
 

@@ -84,17 +84,19 @@
 
                     $("#ddlAgainstNo").html(html);
 
+                    // The list was just rebuilt from scratch -- re-apply the saved
+                    // selection or it silently reverts to the placeholder.
                     if (AgainstNo && AgainstNo.trim() !== "") {
                         var match = users.find(function (x) {
                             return (x.Name || "").toLowerCase().trim() === AgainstNo.toLowerCase().trim();
                         });
-
                         if (match) {
-                            // Options are keyed by Name (see html above), not ID.
-                            // Set the value only -- do NOT trigger "change" here, that would
-                            // fire GetDetailsByQuotationNo and overwrite already-loaded rows.
                             $("#ddlAgainstNo").val(match.Name);
                         }
+                    }
+
+                    if (isEditLoad) {
+                        $("#ddlAgainstNo").prop("disabled", true);
                     }
                 }
                 else {
@@ -108,7 +110,6 @@
             error: function (xhr) {
                 console.error("Get Quotation No Error:", xhr.responseText);
                 showToast("Unable to load Quotation No list.", "error");
-
                 if (typeof callback === "function") {
                     callback();
                 }
@@ -143,7 +144,7 @@
                 cache: false,
 
                 beforeSend: function () {
-                    $("#tblDetailsBody").html('<tr><td colspan="10" class="text-center">Loading...</td></tr>');
+                    $("#tblDetailsBody").html('<tr><td colspan="13" class="text-center">Loading...</td></tr>');
                 },
 
                 success: function (response) {
@@ -406,56 +407,63 @@
         var amount = item.amount || 0;
         var total = item.total || 0;
 
-        // Layout mirrors the Tax Invoice "Item Details" table: compact cells,
-        // rate + amount for each tax type combined into a single .tax-pair cell.
         var newRow =
             '<tr class="detail-row">' +
 
-            '<td class="col-action">' +
-            '<button type="button" class="btn btn-danger btn-sm delete-row" title="Delete">' +
+            '<td class="text-center">' +
+            '<button type="button" class="btn btn-danger btn-sm delete-row" title="Delete" style="width:40px;">' +
             '<i class="fa fa-trash"></i>' +
             '</button>' +
             '</td>' +
 
-            '<td class="col-desc">' +
-            '<textarea class="service-name" rows="1">' + escapeHtml(serviceName) + '</textarea>' +
+            '<td>' +
+            '<textarea class="form-control service-name" rows="1">' + escapeHtml(serviceName) + '</textarea>' +
             '</td>' +
 
-            '<td class="col-sac">' +
-            '<input type="text" class="sac-code" value="' + escapeHtml(sacCode) + '" ' +
+            '<td>' +
+            '<input type="text" class="form-control sac-code" value="' + escapeHtml(sacCode) + '" ' +
             'maxlength="8" minlength="6" inputmode="numeric" ' +
             'oninput="this.value=this.value.replace(/[^0-9]/g,\'\').slice(0,8);" />' +
             '</td>' +
 
-            '<td class="col-qty">' +
-            '<input type="number" class="qty" value="' + qty + '" min="1" step="1" />' +
+            '<td>' +
+            '<input type="number" class="form-control qty" value="' + qty + '" min="1" step="1" />' +
             '</td>' +
 
-            '<td class="col-rate">' +
-            '<input type="number" class="rate" value="' + rate + '" min="0" step="0.01" />' +
+            '<td>' +
+            '<input type="number" class="form-control rate" value="' + rate + '" min="0" step="0.01" />' +
             '</td>' +
 
-            '<td class="col-tax"><div class="tax-pair">' +
-            '<input type="number" class="cgst-rate" value="' + cgstRate + '" min="0" step="0.01" />' +
-            '<input type="text" class="cgst-amt" value="' + parseFloat(cgstAmt || 0).toFixed(2) + '" readonly />' +
-            '</div></td>' +
-
-            '<td class="col-tax"><div class="tax-pair">' +
-            '<input type="number" class="sgst-rate" value="' + sgstRate + '" min="0" step="0.01" />' +
-            '<input type="text" class="sgst-amt" value="' + parseFloat(sgstAmt || 0).toFixed(2) + '" readonly />' +
-            '</div></td>' +
-
-            '<td class="col-tax"><div class="tax-pair">' +
-            '<input type="number" class="igst-rate" value="' + igstRate + '" min="0" step="0.01" />' +
-            '<input type="text" class="igst-amt" value="' + parseFloat(igstAmt || 0).toFixed(2) + '" readonly />' +
-            '</div></td>' +
-
-            '<td class="col-taxable">' +
-            '<input type="text" class="amount" value="' + parseFloat(amount || 0).toFixed(2) + '" readonly />' +
+            '<td>' +
+            '<input type="number" class="form-control cgst-rate" value="' + cgstRate + '" min="0" step="0.01" />' +
             '</td>' +
 
-            '<td class="col-total">' +
-            '<input type="text" class="all-total" value="' + parseFloat(total || 0).toFixed(2) + '" readonly />' +
+            '<td>' +
+            '<input type="text" class="form-control cgst-amt" value="' + parseFloat(cgstAmt || 0).toFixed(2) + '" readonly />' +
+            '</td>' +
+
+            '<td>' +
+            '<input type="number" class="form-control sgst-rate" value="' + sgstRate + '" min="0" step="0.01" />' +
+            '</td>' +
+
+            '<td>' +
+            '<input type="text" class="form-control sgst-amt" value="' + parseFloat(sgstAmt || 0).toFixed(2) + '" readonly />' +
+            '</td>' +
+
+            '<td>' +
+            '<input type="number" class="form-control igst-rate" value="' + igstRate + '" min="0" step="0.01" />' +
+            '</td>' +
+
+            '<td>' +
+            '<input type="text" class="form-control igst-amt" value="' + parseFloat(igstAmt || 0).toFixed(2) + '" readonly />' +
+            '</td>' +
+
+            '<td>' +
+            '<input type="text" class="form-control amount" value="' + parseFloat(amount || 0).toFixed(2) + '" readonly />' +
+            '</td>' +
+
+            '<td>' +
+            '<input type="text" class="form-control all-total" value="' + parseFloat(total || 0).toFixed(2) + '" readonly />' +
             '</td>' +
 
             '</tr>';
@@ -736,7 +744,7 @@
 
                     $("#ID").val(hdr.id || ID);
 
-                    Companytext = hdr.companyName || "";
+                    Companytext = hdr.companyCode || "";
                     AgainstNo = hdr.againstNo || "";
 
                     $("#txtAddress").val(hdr.address || "");
@@ -744,8 +752,14 @@
 
                     $("#ddlReverseCharge").val(hdr.reverseCharge || "N").trigger("change");
                     $("#ddlAgainstBy").val(hdr.againstBy || "Direct").trigger("change");
-                    $("#ddlBillState").val(hdr.billState || "").trigger("change");
-                    $("#ddlAgainstNo").val(hdr.againstNo || "").trigger("change");
+                    BindStateList(function () {
+                        $("#ddlBillState").val(hdr.billState || "").trigger("change");
+                    });
+
+                    if ((hdr.againstBy || "Quotation") === "Quotation") {
+                        $("#ddlAgainstNo").val(hdr.againstNo || "");
+                    }
+
 
                     $("#txtProformaDate").val(formatDateToDDMMYYYY(hdr.proformaDate));
 
@@ -815,6 +829,7 @@
             else {
                 BindCompanyList();
                 BindStateList();
+                BindAgainstNumber();
 
                 var today = new Date().toISOString().split("T")[0];
                 $("#txtProformaDate").val(today);

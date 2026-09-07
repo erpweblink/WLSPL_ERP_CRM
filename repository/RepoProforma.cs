@@ -97,7 +97,7 @@ namespace WEBLINK_CRM.repository
 
                     var parameters = new DynamicParameters();
 
-                    parameters.Add("@ID", model.ID);                
+                    parameters.Add("@ID", model.ID);
                     parameters.Add("@ProformaDate", model.ProformaDate);
                     parameters.Add("@ReverseCharge", model.ReverseCharge);
                     parameters.Add("@State", model.State);
@@ -399,6 +399,8 @@ namespace WEBLINK_CRM.repository
                     string ProformaNo = vm.ProformaNo ?? "N/A";
                     string Address = vm.Address ?? "N/A";
                     string Gstno = vm.GSTNO ?? "N/A";
+                    string AgainstBy = vm.AgainstBy ?? "N/A";
+                    string AgainstNo = vm.AgainstNo ?? "N/A";
 
                     Font boldFont12White = FontFactory.GetFont("Arial", 12, Font.BOLD, BaseColor.WHITE);
                     Font boldFont10Brand = FontFactory.GetFont("Arial", 10, Font.BOLD, brand);
@@ -451,6 +453,16 @@ namespace WEBLINK_CRM.repository
                         table.AddCell(new PdfPCell(new Phrase("", Font10)) { BorderColor = borderGray, BorderWidth = 0.5f });
                         table.AddCell(new PdfPCell(new Phrase("", Font10)) { BorderColor = borderGray, BorderWidth = 0.5f });
                     }
+                    if (!string.IsNullOrWhiteSpace(AgainstBy) && AgainstBy == "Quotation")
+                    {
+                        table.AddCell(InfoLabelCell("Against By :"));
+                        table.AddCell(InfoValueCell(AgainstBy));
+
+                        table.AddCell(InfoLabelCell("Against No. :"));
+                        table.AddCell(InfoValueCell(AgainstNo));
+
+                    }
+
 
                     paragraphTable1.Add(table);
                     document.Add(paragraphTable1);
@@ -470,7 +482,8 @@ namespace WEBLINK_CRM.repository
                     });
                     document.Add(table);
 
-                    // ---- Product Details Table ----
+
+
                     double taxableTotal = 0, cgstTotal = 0, sgstTotal = 0, igstTotal = 0, grandTotal = 0;
 
                     if (vm.objtblProformaDtl != null && vm.objtblProformaDtl.Count > 0)
@@ -480,36 +493,62 @@ namespace WEBLINK_CRM.repository
                             (vm.BillState ?? "").Trim(),
                             StringComparison.OrdinalIgnoreCase);
 
-                        Paragraph paragraphTable2 = new Paragraph { SpacingBefore = 0f, SpacingAfter = 0f };
+                        Paragraph paragraphTable2 = new Paragraph
+                        {
+                            SpacingBefore = 0f,
+                            SpacingAfter = 0f
+                        };
 
                         PdfPTable prodTable;
+
                         if (isIGST)
                         {
-                            prodTable = new PdfPTable(9);
-                            prodTable.SetWidths(new float[] { 2f, 16f, 5f, 4f, 4f, 5f, 4f, 5f, 6f });
+                            // SN, Description, HSN, Qty, Rate, Taxable, IGST, Total
+                            prodTable = new PdfPTable(8);
+
+                            prodTable.SetWidths(new float[]
+                            {
+            2f, 16f, 5f, 4f, 4f, 5f, 7f, 6f
+                            });
                         }
                         else
                         {
-                            prodTable = new PdfPTable(11);
-                            prodTable.SetWidths(new float[] { 2f, 14f, 5f, 4f, 4f, 5f, 4f, 5f, 4f, 5f, 6f });
+                            // SN, Description, HSN, Qty, Rate, Taxable, CGST, SGST, Total
+                            prodTable = new PdfPTable(9);
+
+                            prodTable.SetWidths(new float[]
+                            {
+            2f, 14f, 5f, 4f, 5f, 6f, 6f, 6f, 6f
+                            });
                         }
+
                         prodTable.TotalWidth = 560f;
                         prodTable.LockedWidth = true;
                         prodTable.SpacingBefore = 0f;
                         prodTable.SpacingAfter = 0f;
 
-                        Font headerFontWhite = FontFactory.GetFont("Arial", 10, Font.BOLD, BaseColor.WHITE);
+                        Font headerFontWhite = FontFactory.GetFont(
+                            "Arial",
+                            10,
+                            Font.BOLD,
+                            BaseColor.WHITE
+                        );
 
-                        PdfPCell HeaderCell(string text) => new PdfPCell(new Phrase(text, headerFontWhite))
+                        PdfPCell HeaderCell(string text)
                         {
-                            HorizontalAlignment = Element.ALIGN_CENTER,
-                            BackgroundColor = brand,
-                            BorderColor = borderGray,
-                            BorderWidth = 0.5f,
-                            PaddingTop = 7f,
-                            PaddingBottom = 9f,
-                            MinimumHeight = 26f
-                        };
+                            return new PdfPCell(
+                                new Phrase(text, headerFontWhite))
+                            {
+                                HorizontalAlignment = Element.ALIGN_CENTER,
+                                VerticalAlignment = Element.ALIGN_MIDDLE,
+                                BackgroundColor = brand,
+                                BorderColor = borderGray,
+                                BorderWidth = 0.5f,
+                                PaddingTop = 7f,
+                                PaddingBottom = 9f,
+                                MinimumHeight = 26f
+                            };
+                        }
 
                         prodTable.AddCell(HeaderCell("SN."));
                         prodTable.AddCell(HeaderCell("Description"));
@@ -520,85 +559,234 @@ namespace WEBLINK_CRM.repository
 
                         if (isIGST)
                         {
-                            prodTable.AddCell(HeaderCell("IGST(%)"));
-                            prodTable.AddCell(HeaderCell("IGST Amt"));
+                            prodTable.AddCell(HeaderCell("IGST"));
                         }
                         else
                         {
-                            prodTable.AddCell(HeaderCell("CGST(%)"));
-                            prodTable.AddCell(HeaderCell("CGST Amt"));
-                            prodTable.AddCell(HeaderCell("SGST(%)"));
-                            prodTable.AddCell(HeaderCell("SGST Amt"));
+                            prodTable.AddCell(HeaderCell("CGST"));
+                            prodTable.AddCell(HeaderCell("SGST"));
                         }
+
                         prodTable.AddCell(HeaderCell("Total"));
 
-                        PdfPCell BodyCell(string text, bool shaded) => new PdfPCell(new Phrase(text ?? "", Font9))
+
+                        Font gstRateFont = FontFactory.GetFont(
+                            "Arial",
+                            7,
+                            Font.NORMAL,
+                            BaseColor.DARK_GRAY
+                        );
+
+                        Font gstAmountFont = FontFactory.GetFont(
+                            "Arial",
+                            9,
+                         
+                            BaseColor.DARK_GRAY
+                        );
+
+                        PdfPCell BodyCell(string text, bool shaded)
                         {
-                            HorizontalAlignment = Element.ALIGN_CENTER,
-                            BackgroundColor = shaded ? altRow : BaseColor.WHITE,
-                            BorderColor = borderGray,
-                            BorderWidth = 0.5f,
-                            PaddingTop = 7f,
-                            PaddingBottom = 9f,
-                            MinimumHeight = 26f
-                        };
+                            return new PdfPCell(
+                                new Phrase(text ?? "", Font9))
+                            {
+                                HorizontalAlignment = Element.ALIGN_CENTER,
+                                VerticalAlignment = Element.ALIGN_MIDDLE,
+                                BackgroundColor = shaded ? altRow : BaseColor.WHITE,
+                                BorderColor = borderGray,
+                                BorderWidth = 0.5f,
+                                PaddingTop = 7f,
+                                PaddingBottom = 9f,
+                                MinimumHeight = 26f
+                            };
+                        }
+
+
+                        // GST cell:
+                        // Percentage on top in ()
+                        // Amount below
+                        PdfPCell GstCell(string rate, double amount, bool shaded)
+                        {
+                            Paragraph gstParagraph = new Paragraph();
+                            gstParagraph.Alignment = Element.ALIGN_CENTER;
+                            gstParagraph.SpacingBefore = 0f;
+                            gstParagraph.SpacingAfter = 0f;
+
+                            Chunk rateChunk = new Chunk(
+                                "(" + (rate ?? "0") + "%)",
+                                gstRateFont
+                            );
+
+                            Chunk amountChunk = new Chunk(
+                                amount.ToString("#"),
+                                gstAmountFont
+                            );
+
+                            gstParagraph.Add(rateChunk);
+                            gstParagraph.Add(Chunk.NEWLINE);
+                            gstParagraph.Add(amountChunk);
+
+                            return new PdfPCell(gstParagraph)
+                            {
+                                HorizontalAlignment = Element.ALIGN_CENTER,
+                                VerticalAlignment = Element.ALIGN_MIDDLE,
+                                BackgroundColor = shaded ? altRow : BaseColor.WHITE,
+                                BorderColor = borderGray,
+                                BorderWidth = 0.5f,
+                                PaddingTop = 5f,
+                                PaddingBottom = 5f,
+                                MinimumHeight = 26f
+                            };
+                        }
+
 
                         int rowid = 1;
+
                         foreach (var d in vm.objtblProformaDtl)
                         {
                             bool shaded = rowid % 2 == 0;
+
                             double taxableVal = ParseD(d.TaxableValue);
                             double lineTotal = ParseD(d.Total);
 
-                            prodTable.AddCell(BodyCell(rowid.ToString(), shaded));
-                            prodTable.AddCell(BodyCell(d.ProductDescription, shaded));
-                            prodTable.AddCell(BodyCell(d.SACCode, shaded));
-                            prodTable.AddCell(BodyCell(d.Qty, shaded));
-                            prodTable.AddCell(BodyCell(d.Rate, shaded));
-                            prodTable.AddCell(BodyCell(taxableVal.ToString("#.00"), shaded));
+                            prodTable.AddCell(
+                                BodyCell(rowid.ToString(), shaded));
+
+                            prodTable.AddCell(
+                                BodyCell(d.ProductDescription, shaded));
+
+                            prodTable.AddCell(
+                                BodyCell(d.SACCode, shaded));
+
+                            prodTable.AddCell(
+                                BodyCell(d.Qty, shaded));
+
+                            prodTable.AddCell(
+                                BodyCell(d.Rate, shaded));
+
+                            prodTable.AddCell(
+                                BodyCell(taxableVal.ToString("#"), shaded));
+
+
+                            // =========================
+                            // GST
+                            // =========================
 
                             if (isIGST)
                             {
-                                prodTable.AddCell(BodyCell(d.IGSTRate, shaded));
-                                prodTable.AddCell(BodyCell(ParseD(d.IGSTAmt).ToString("#.00"), shaded));
-                                igstTotal += ParseD(d.IGSTAmt);
+                                double igstAmt = ParseD(d.IGSTAmt);
+
+                                prodTable.AddCell(
+                                    GstCell(d.IGSTRate, igstAmt, shaded));
+
+                                igstTotal += igstAmt;
                             }
                             else
                             {
-                                prodTable.AddCell(BodyCell(d.CGSTRate, shaded));
-                                prodTable.AddCell(BodyCell(ParseD(d.CGSTAmt).ToString("#.00"), shaded));
-                                prodTable.AddCell(BodyCell(d.SGSTRate, shaded));
-                                prodTable.AddCell(BodyCell(ParseD(d.SGSTAmt).ToString("#.00"), shaded));
-                                cgstTotal += ParseD(d.CGSTAmt);
-                                sgstTotal += ParseD(d.SGSTAmt);
+                                double cgstAmt = ParseD(d.CGSTAmt);
+                                double sgstAmt = ParseD(d.SGSTAmt);
+
+                                prodTable.AddCell(
+                                    GstCell(d.CGSTRate, cgstAmt, shaded));
+
+                                prodTable.AddCell(
+                                    GstCell(d.SGSTRate, sgstAmt, shaded));
+
+                                cgstTotal += cgstAmt;
+                                sgstTotal += sgstAmt;
                             }
 
-                            prodTable.AddCell(BodyCell(lineTotal.ToString("#.00"), shaded));
+
+                            prodTable.AddCell(
+                                BodyCell(lineTotal.ToString("#"), shaded));
 
                             taxableTotal += taxableVal;
                             grandTotal += lineTotal;
+
                             rowid++;
                         }
 
                         paragraphTable2.Add(prodTable);
                         document.Add(paragraphTable2);
 
-                        // ---- Totals ----
-                        AddTotalRow(document, "Sub Total", taxableTotal, boldFont10, Font10, lightTint, false, borderGray);
+
+                        // =========================
+                        // TOTALS
+                        // =========================
+
+                        AddTotalRow(
+                            document,
+                            "Sub Total",
+                            taxableTotal,
+                            boldFont10,
+                            Font10,
+                            lightTint,
+                            false,
+                            borderGray
+                        );
 
                         if (isIGST)
-                            AddTotalRow(document, "IGST Amount", igstTotal, boldFont10, Font10, lightTint, false, borderGray);
+                        {
+                            AddTotalRow(
+                                document,
+                                "IGST Amount",
+                                igstTotal,
+                                boldFont10,
+                                Font10,
+                                lightTint,
+                                false,
+                                borderGray
+                            );
+                        }
                         else
                         {
-                            AddTotalRow(document, "CGST Amount", cgstTotal, boldFont10, Font10, lightTint, false, borderGray);
-                            AddTotalRow(document, "SGST Amount", sgstTotal, boldFont10, Font10, lightTint, false, borderGray);
+                            AddTotalRow(
+                                document,
+                                "CGST Amount",
+                                cgstTotal,
+                                boldFont10,
+                                Font10,
+                                lightTint,
+                                false,
+                                borderGray
+                            );
+
+                            AddTotalRow(
+                                document,
+                                "SGST Amount",
+                                sgstTotal,
+                                boldFont10,
+                                Font10,
+                                lightTint,
+                                false,
+                                borderGray
+                            );
                         }
 
-                        Font grandLabelWhite = FontFactory.GetFont("Arial", 11, Font.BOLD, BaseColor.WHITE);
-                        Font grandValWhite = FontFactory.GetFont("Arial", 11, Font.BOLD, BaseColor.WHITE);
-                        AddTotalRow(document, "Grand Total", grandTotal, grandLabelWhite, grandValWhite, brand, true, borderGray);
-                    }
+                        Font grandLabelWhite = FontFactory.GetFont(
+                            "Arial",
+                            11,
+                            Font.BOLD,
+                            BaseColor.WHITE
+                        );
 
+                        Font grandValWhite = FontFactory.GetFont(
+                            "Arial",
+                            11,
+                            Font.BOLD,
+                            BaseColor.WHITE
+                        );
+
+                        AddTotalRow(
+                            document,
+                            "Grand Total",
+                            grandTotal,
+                            grandLabelWhite,
+                            grandValWhite,
+                            brand,
+                            true,
+                            borderGray
+                        );
+                    }
                     // ---- Grand Total in Words ----
                     DataTable Dts = new DataTable();
                     using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
@@ -743,14 +931,16 @@ namespace WEBLINK_CRM.repository
                 var vm = new VM_Proforma();
 
                 string query = @"
-      SELECT ID, ProformaNo, ProformaDate, ReverseCharge, State, CompanyName,
+      SELECT ID, ProformaNo, ProformaDate, ReverseCharge, State, CompanyName,Againstby,AgainstNo,
                CompanyCode, Address, cgstin as GSTNO, BillState, TotalAmtBeforeTax, TotalAmtAfterTax
         FROM [WLSPLCRM].[stswlspl].[tblProformaMain]
         WHERE ID = @ID;
 
-        SELECT ID, ProformaID, ProductDescription, SACCode, Qty, Rate, Amount, TaxableValue,
-               CGSTRate, CGSTAmt, SGSTRate, SGSTAmt, IGSTRate, IGSTAmt, Total
-        FROM [WLSPLCRM].[stswlspl].[tblProformaDetails]
+         SELECT ID, ProformaID, ProductDescription, SACCode, CAST(qty as float) as qty,
+      CAST(Rate as float) as  Rate, Amount, TaxableValue,
+               CAST(CGSTRate as float) as CGSTRate, CGSTAmt, CAST(SGSTRate as float) as SGSTRate,
+               SGSTAmt,CAST(IGSTRate as float) as  IGSTRate, IGSTAmt, Total
+        FROM [WLSPLCRM].[stswlspl].[tblProformaDetails]      
         WHERE ProformaID = @ID
         ORDER BY ID;";
 
@@ -773,6 +963,8 @@ namespace WEBLINK_CRM.repository
                             vm.CompanyCode = rdr["CompanyCode"]?.ToString();
                             vm.Address = rdr["Address"]?.ToString();
                             vm.GSTNO = rdr["GSTNO"]?.ToString();
+                            vm.AgainstBy = rdr["AgainstBy"]?.ToString();
+                            vm.AgainstNo = rdr["AgainstNo"]?.ToString();
                             vm.BillState = rdr["BillState"]?.ToString();
                             vm.TotalAmtBeforeTax = rdr["TotalAmtBeforeTax"]?.ToString();
                             vm.TotalAmtAfterTax = rdr["TotalAmtAfterTax"]?.ToString();
