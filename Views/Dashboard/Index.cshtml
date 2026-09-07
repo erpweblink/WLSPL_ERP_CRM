@@ -23,8 +23,9 @@
         --text-primary: #1A2035;
         --text-secondary: #5C6B82;
         --text-muted: #9BAABF;
-        --c-admin: #4571b3;
+        --c-admin: #e1221a;
         --c-manager: #D97706;
+        --c-assimanager: #1d3a58;
         --c-lead: #0284C7;
         --c-exec: #059669;
         --r-sm: 8px;
@@ -247,7 +248,7 @@
         min-width: 240px;
         border-radius: var(--r-lg);
         box-shadow: var(--shadow-admin);
-        background: #a6c1f159;
+        background: #e1221a05;
     }
 
         .node[data-role="admin"] .node-avatar {
@@ -265,6 +266,12 @@
         --nc: var(--c-manager);
         min-width: 215px;
         background: rgb(255 153 35 / 22%);
+    }
+
+    .node[data-role="assimanager"] {
+        --nc: var(--c-assimanager);
+        min-width: 215px;
+        background: rgb(97 151 201 / 32%);
     }
 
     .node[data-role="team-lead"] {
@@ -297,10 +304,10 @@
         }
 
     .team-toggle-btn {
-        margin-left: auto; /* pushes button to the far right */
-        width: 22px;
-        height: 22px;
-        padding: 0;
+        margin-left: auto; 
+        width: 25px;
+        height: 25px;
+        padding: 3px 3px 6px 3px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -571,6 +578,10 @@
             background: rgba(217,119,6,.07);
         }
 
+        [data-bs-theme="dark"] .node[data-role="assimanager"] {
+            background: rgba(217,119,6,.07);
+        }
+
         [data-bs-theme="dark"] .node[data-role="team-lead"] {
             background: rgba(56,189,248,.06);
         }
@@ -668,7 +679,7 @@
             "Sub Admin" => "admin",
             "Other" => "admin",   // ← ADD THIS (Vaibhav SubAdmin case)
             "Sales Manager" => "manager",
-            "Assistant Sales Manager" => "manager",
+            "Assistant Sales Manager" => "assimanager",
             "Sales TL" => "team-lead",
             "Sales Executive" => "executive",
             _ => "executive"
@@ -723,7 +734,6 @@
             html.AppendHtml($@"
             <div class='tl-column'>
                 <div class='node' data-role='{tlRole}'
-                     onclick='toggleExecutives(this)'
                      data-tl-id='{Safe(tlId)}'>
                     <div class='node-avatar'>{Safe(GetInitials(tl.Name))}</div>
                     <div>
@@ -735,7 +745,12 @@
                         <small class='employee-designation'>
                             <i class='fas fa-briefcase'></i>Team Lead
                         </small>
-                        <small class='team-count'>Team {tlExecutives.Count}</small>
+                       <div class='team-count-wrapper'>
+                            <small class='team-count'>Team {tlExecutives.Count}</small>
+                            <button type='button' class='team-toggle-btn'
+                                    onclick='event.stopPropagation(); toggleExecutives(this.closest("".node""))'
+                                    aria-label='Toggle team'>+</button>
+                       </div>
                     </div>
                 </div>
                 <div class='tl-vertical-connector' data-tl-id='{Safe(tlId)}'></div>
@@ -816,7 +831,12 @@
                         <small class='employee-designation'>
                             <i class='fas fa-briefcase'></i>{designation}
                         </small>
-                        <small class='team-count'>{midCount}</small>
+                        <div class='team-count-wrapper'>
+                            <small class='team-count'>{midCount}</small>
+                            <button type='button' class='team-toggle-btn'
+                                    onclick='event.stopPropagation(); toggleTeamLeads(this.closest("".node""))'
+                                    aria-label='Toggle team'>+</button>
+                        </div>
                     </div>
                 </div>
                 <div class='manager-vertical-connector'
@@ -1014,12 +1034,21 @@ else
 
         if (!executiveContainer) return;
 
+        const toggleButton = teamLeadNode.querySelector(".team-toggle-btn");
         const isVisible = executiveContainer.style.display === "flex";
-        executiveContainer.style.display = isVisible ? "none" : "flex";
-        teamLeadNode.classList.toggle("active", !isVisible);
 
-        if (verticalConnector)
-            verticalConnector.style.display = isVisible ? "none" : "block";
+        if (isVisible) {
+            executiveContainer.style.display = "none";
+            teamLeadNode.classList.remove("active");
+            if (verticalConnector) verticalConnector.style.display = "none";
+            if (toggleButton) toggleButton.textContent = "+";
+
+        } else {
+            executiveContainer.style.display = "flex";
+            teamLeadNode.classList.add("active");
+            if (verticalConnector) verticalConnector.style.display = "block";
+            if (toggleButton) toggleButton.textContent = "−";
+        }
     }
 
     function collapseContainer(container) {
