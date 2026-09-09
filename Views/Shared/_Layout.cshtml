@@ -13,6 +13,8 @@
     <link href="~/assets/css/icons.min.css" rel="stylesheet" type="text/css" />
     <link href="~/assets/css/app.min.css" rel="stylesheet" type="text/css" />
 
+    <link href="~/Notification/Notification.css" rel="stylesheet" type="text/css" />
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
           integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
           crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -70,8 +72,9 @@
                     </li>
                 }
 
-
             </ul>
+
+
             <ul class="topbar-item list-unstyled d-inline-flex align-items-center mb-0">
                 @{
                     var profileName = Context.Session.GetString("EmployeeName");
@@ -83,6 +86,14 @@
                         profileImage = "https://api.iconify.design/mdi/account-circle.svg?color=%23666666";
                     }
                 }
+                <li class="topbar-item">
+                    <a href="javascript:void(0);" class="nav-link nav-icon notification-icon" id="notificationBtn"
+                       title="Notifications">
+                        <i class="las la-bell" style="font-size: 30px !important;"></i> <span class="notification-dot"></span>
+                    </a>
+                </li>
+
+
                 @if (!string.IsNullOrEmpty(profileName))
                 {
                     <li class="dropdown topbar-item">
@@ -105,7 +116,7 @@
                             </div>
                             <i class="las la-angle-down profile-chevron d-none d-md-block"
                                style="font-size: 12px !important;display: inline-flex !important;
-                               align-items: center !important;justify-content: center !important;"></i>
+                                           align-items: center !important;justify-content: center !important;"></i>
                         </a>
 
                         <!-- Dropdown -->
@@ -165,6 +176,7 @@
                         </div>
                     </li>
                 }
+
             </ul>
         </nav>
     </div>
@@ -357,6 +369,9 @@
         </div>
     </div>
 
+    <div id="notificationContainer"></div>
+    <script src="~/Notification/Notification.js"></script>  
+
     <script src="~/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="~/assets/js/app.js"></script>
 
@@ -370,6 +385,7 @@
             });
         </script>
     }
+
 
     <script type="text/javascript">
            // TosterScxript

@@ -102,6 +102,47 @@ namespace WEBLINK_CRM.Controllers
                 data = result
             });
         }
+        [HttpGet]
+        public IActionResult GetInvoiceRenewals()
+        {
+            try
+            {
+                var currentEmpCode = HttpContext.Session.GetString("EmpCode");
+                var currentEmpRole = HttpContext.Session.GetString("Role");
+
+                if (string.IsNullOrWhiteSpace(currentEmpCode))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Employee session not found."
+                    });
+                }
+
+                bool isAdmin = string.Equals(
+                    currentEmpRole,
+                    "admin",
+                    StringComparison.OrdinalIgnoreCase
+                );
+
+                var data = _repo.GetInvoiceRenewals(currentEmpCode, isAdmin);
+
+                return Json(new
+                {
+                    success = true,
+                    data = data
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
 
     }
 }
