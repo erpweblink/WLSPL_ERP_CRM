@@ -27,7 +27,9 @@
             console.error("Shortcut loading error:", error);
         });
 
+
     function searchShortcuts(value) {
+
         const searchValue = value.toLowerCase().trim();
 
         if (!searchValue) {
@@ -35,34 +37,28 @@
             return;
         }
 
-        const staticResults = shortcuts.filter(item => {
+        const results = shortcuts.filter(item => {
+
             const name = (item.name || "").toLowerCase();
             const description = (item.description || "").toLowerCase();
             const keywords = Array.isArray(item.keywords) ? item.keywords : [];
 
+            const keywords = Array.isArray(item.keywords)
+                ? item.keywords
+                : [];
+
             return (
                 name.includes(searchValue) ||
                 description.includes(searchValue) ||
-                keywords.some(k => k.toLowerCase().includes(searchValue))
+                keywords.some(keyword =>
+                    keyword.toLowerCase().includes(searchValue)
+                )
             );
         });
 
-        Promise.all([
-            fetch(`/Shortcut/SearchEmployees?q=${encodeURIComponent(searchValue)}`).then(r => r.ok ? r.json() : []),
-            fetch(`/Shortcut/SearchCompanies?q=${encodeURIComponent(searchValue)}`).then(r => r.ok ? r.json() : [])
-        ])
-            .then(([employeeResults, companyResults]) => {
-                const taggedStatic = staticResults.map(i => ({ ...i, resultType: "shortcut" }));
-                const taggedEmployees = employeeResults.map(i => ({ ...i, resultType: "employee" }));
-                const taggedCompanies = companyResults.map(i => ({ ...i, resultType: "company" }));
-
-                const combined = [...taggedStatic, ...taggedEmployees, ...taggedCompanies];
-                renderResults(combined);
-            })
-            .catch(() => {
-                renderResults(staticResults); 
-            });
+        renderResults(results);
     }
+
 
     function renderResults(results) {
 
@@ -95,24 +91,36 @@
             return;
         }
 
+
         selectedIndex = 0;
+
+
         const header = document.createElement("div");
 
         header.className = "shortcut-results-header";
+
         header.innerHTML = `
             <span>Quick Navigation</span>
             <span>${results.length} result${results.length > 1 ? "s" : ""}</span>
         `;
+
         resultsContainer.appendChild(header);
+
 
         const visibleResults = results.slice(0, 8);
 
+
         visibleResults.forEach((item, index) => {
+
             const resultItem = document.createElement("a");
+
             resultItem.href = item.url || "#";
+
             resultItem.className = "shortcut-result-item";
+
             resultItem.dataset.index = index;
             resultItem.dataset.type = item.resultType || "shortcut"; // ← tag type
+
 
             resultItem.innerHTML = `
                 <div class="shortcut-result-icon">
@@ -120,14 +128,17 @@
                 </div>
 
                 <div class="shortcut-result-info">
+
                     <div class="shortcut-result-name">
                         ${escapeHtml(item.name || "")}
                         ${item.resultType === "employee" ? '<span class="shortcut-result-badge badge-employee">Employee</span>' : ""}
                         ${item.resultType === "company" ? '<span class="shortcut-result-badge badge-company">Company</span>' : ""}
                     </div>
+
                     <div class="shortcut-result-description">
                         ${escapeHtml(item.description || "")}
                     </div>
+
                 </div>
 
                 <div class="shortcut-result-action">
@@ -135,108 +146,222 @@
                 </div>
             `;
 
+
+            /*
+             * Mouse hover
+             */
             resultItem.addEventListener("mouseenter", function () {
+
                 selectedIndex = index;
+
                 updateSelection();
+
             });
+
+
+            /*
+             * Mouse click
+             */
             resultItem.addEventListener("click", function () {
+
                 hideResults();
+
             });
+
+
             resultsContainer.appendChild(resultItem);
+
         });
+
+
         resultsContainer.style.display = "block";
+
+
         updateSelection();
+
     }
 
+
     function updateSelection() {
+
         const items = resultsContainer.querySelectorAll(
             ".shortcut-result-item"
         );
+
+
         items.forEach((item, index) => {
+
             if (index === selectedIndex) {
+
                 item.classList.add(
                     "shortcut-result-selected"
                 );
+
             } else {
+
                 item.classList.remove(
                     "shortcut-result-selected"
                 );
+
             }
+
         });
+
+
         const selectedItem = items[selectedIndex];
+
+
         if (selectedItem) {
+
             selectedItem.scrollIntoView({
                 block: "nearest"
             });
+
         }
+
     }
 
+
+    /*
+     * SEARCH
+     */
     searchInput.addEventListener("input", function () {
+
         searchShortcuts(this.value);
+
     });
 
+
+    /*
+     * KEYBOARD NAVIGATION
+     */
     searchInput.addEventListener("keydown", function (event) {
+
         const items = resultsContainer.querySelectorAll(
             ".shortcut-result-item"
         );
+
 
         if (!items.length) {
             return;
         }
+
+
+        /*
+         * DOWN
+         */
         if (event.key === "ArrowDown") {
+
             event.preventDefault();
+
             selectedIndex++;
+
             if (selectedIndex >= items.length) {
                 selectedIndex = 0;
             }
+
             updateSelection();
+
             return;
         }
 
+
+        /*
+         * UP
+         */
         if (event.key === "ArrowUp") {
+
             event.preventDefault();
+
             selectedIndex--;
+
             if (selectedIndex < 0) {
                 selectedIndex = items.length - 1;
             }
+
             updateSelection();
+
             return;
         }
 
+
+        /*
+         * ENTER
+         */
         if (event.key === "Enter") {
+
             event.preventDefault();
+
             const selectedItem = items[selectedIndex];
+
             if (selectedItem) {
+
                 window.location.href =
                     selectedItem.getAttribute("href");
+
             }
+
             return;
         }
 
+
+        /*
+         * ESCAPE
+         */
         if (event.key === "Escape") {
+
             event.preventDefault();
+
             hideResults();
+
             searchInput.value = "";
+
             return;
         }
+
     });
 
+
+    /*
+     * CLOSE DROPDOWN
+     */
     document.addEventListener("click", function (event) {
-        const wrapper = document.querySelector(".shortcut-search-wrapper");
-        if (wrapper && !wrapper.contains(event.target) ) {
+
+        const wrapper =
+            document.querySelector(".shortcut-search-wrapper");
+
+
+        if (
+            wrapper &&
+            !wrapper.contains(event.target)
+        ) {
+
             hideResults();
+
         }
+
     });
+
 
     function hideResults() {
-       resultsContainer.style.display = "none";
+
+        resultsContainer.style.display = "none";
+
         resultsContainer.innerHTML = "";
+
         selectedIndex = 0;
+
     }
 
+
     function escapeHtml(value) {
+
         const div = document.createElement("div");
+
         div.textContent = value;
+
         return div.innerHTML;
+
     }
+
 });
