@@ -895,13 +895,13 @@
 
 <style type="text/css">
     /* =========================================================
-                           RENEWAL MARQUEE
-                           ========================================================= */
+                                   RENEWAL MARQUEE
+                                   ========================================================= */
 
 
     @@media (min-width: 1400px) {
         .modal-xxl {
-            max-width: 1320px !important; 
+            max-width: 1320px !important;
         }
     }
 
@@ -1302,7 +1302,7 @@
             html.AppendHtml($@"
             <div class='tl-column'>
                 <div class='node' data-role='{tlRole}'
-                     data-tl-id='{Safe(tlId)}'>
+                     data-tl-id='{Safe(tlId)}' data-empcode='{Safe(tl.EmpCode)}'>
                     <div class='node-avatar'>{Safe(GetInitials(tl.Name))}</div>
                     <div>
                         <strong>{Safe(tl.Name)}</strong>
@@ -1337,7 +1337,7 @@
                 {
                     var execRole = DataRole(exec.CustRole);
                     html.AppendHtml($@"
-                    <div class='node' data-role='{execRole}'>
+                    <div class='node' data-role='{execRole}' data-empcode='{Safe(exec.EmpCode)}'>
                         <div class='node-avatar'>{Safe(GetInitials(exec.Name))}</div>
                         <div>
                             <strong>{Safe(exec.Name)}</strong>
@@ -1394,7 +1394,7 @@
             <div class='tl-column'>
                 <div class='node' data-role='{midRole}'
                      onclick='toggleTeamLeads(this)'
-                     data-manager-id='{Safe(midId)}'>
+                     data-manager-id='{Safe(midId)}' data-empcode='{Safe(mid.EmpCode)}'>
                     <div class='node-avatar'>{Safe(GetInitials(mid.Name))}</div>
                     <div>
                         <strong>{Safe(mid.Name)}</strong>
@@ -1434,7 +1434,7 @@
             var execRole = DataRole(exec.CustRole);
             html.AppendHtml($@"
             <div class='tl-column'>
-                <div class='node' data-role='{execRole}'>
+                <div class='node' data-role='{execRole}' data-empcode='{Safe(exec.EmpCode)}'>
                     <div class='node-avatar'>{Safe(GetInitials(exec.Name))}</div>
                     <div>
                         <strong>{Safe(exec.Name)}</strong>
@@ -1576,7 +1576,7 @@ else
     <div class="tree-page">
         <div class="tree">
             <div class="level">
-                <div class="node" data-role="@rootRole">
+                <div class="node" data-role="@rootRole" data-empcode="@root.EmpCode">
                     <div class="node-avatar">@GetInitials(root.Name)</div>
                     <div>
                         <strong>@root.Name</strong>
@@ -1641,10 +1641,10 @@ else
 
        if (currentRole === "admin") return;
 
-       const currentNode = document.querySelector(
-            `.node[data-tl-id="${currentEmpCode}"],
-             .node[data-manager-id="${currentEmpCode}"]`
-        );
+            const currentNode = document.querySelector(
+                `.node[data-empcode="${CSS.escape(currentEmpCode)}"]`
+            );
+
 
         function expandAncestors(element) {
             if (!element) return;
@@ -1743,14 +1743,7 @@ else
 
         if (currentNode) {
             expandAncestors(currentNode);
-        } else {
-            const infoBtn = document.querySelector(
-                `.employee-info-btn[data-empcode="${currentEmpCode}"]`
-            );
-            if (infoBtn) {
-                expandAncestors(infoBtn.closest(".node"));
-            }
-        }
+         }
 
         const roleMapped = {
             "salesmanager"          : "manager",
@@ -1764,6 +1757,7 @@ else
 
         expandOwnChildren(currentEmpCode, mappedRole);
     });
+
 </script>
 
 <script type="text/javascript">
