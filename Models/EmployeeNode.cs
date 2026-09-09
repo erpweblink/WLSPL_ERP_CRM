@@ -14,6 +14,9 @@
         public int HierarchyLevel { get; set; }
         public string HierarchyPath { get; set; } = string.Empty;
         public List<EmployeeNode> Children { get; set; } = new List<EmployeeNode>();
+
+        // Renewal property
+        public int InvoiceRenewal { get; set; }
     }
 
     public class EmployeeNodeInfo
@@ -34,4 +37,19 @@
 
 
     }
+
+
+    public class InvoiceRenewalModel
+    {
+        public int Id { get; set; }
+        public string InvoiceNo { get; set; } = string.Empty;
+        public string CustomerName { get; set; } = string.Empty;
+        public string SalesPerson { get; set; } = string.Empty;
+        public string SessionName { get; set; } = string.Empty;
+        public string InvoiceDate { get; set; } = string.Empty;
+        public string RenewalDate { get; set; } = string.Empty;
+        public int DaysRemaining { get; set; }
+        public decimal TotalAmount { get; set; }
+    }
+
 }

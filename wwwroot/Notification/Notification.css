@@ -1,0 +1,590 @@
+﻿/* =========================================
+   Notification Bell
+========================================= */
+.notification-icon {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    color: #64748b;
+    transition: all 0.2s ease;
+}
+
+    .notification-icon i {
+        font-size: 19px;
+        transition: transform 0.2s ease, color 0.2s ease;
+    }
+
+    .notification-icon:hover {
+        background: rgba(59,130,246,0.09);
+        color: #3b82f6;
+    }
+
+        .notification-icon:hover i {
+            transform: scale(1.08);
+        }
+
+
+.notification-dot {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    background: #ef4444;
+    border: 2px solid #fff;
+    border-radius: 20px;
+    font-size: 8px;
+    font-weight: 700;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    transition: all 0.2s ease;
+}
+
+    /* When it has a number */
+    .notification-dot.notification-count-badge {
+        top: 2px;
+        right: 2px;
+    }
+
+/* =========================================
+   Bell Jingle Animation
+========================================= */
+@keyframes bellJingle {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    5% {
+        transform: rotate(18deg);
+    }
+
+    10% {
+        transform: rotate(-16deg);
+    }
+
+    15% {
+        transform: rotate(14deg);
+    }
+
+    20% {
+        transform: rotate(-12deg);
+    }
+
+    25% {
+        transform: rotate(10deg);
+    }
+
+    30% {
+        transform: rotate(-8deg);
+    }
+
+    35% {
+        transform: rotate(6deg);
+    }
+
+    40% {
+        transform: rotate(-4deg);
+    }
+
+    45% {
+        transform: rotate(2deg);
+    }
+
+    50% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.bell-jingle i {
+    display: inline-block;
+    transform-origin: top center;
+    animation: bellJingle 2s ease infinite;
+}
+
+/* =========================================
+   Container
+========================================= */
+#notificationContainer {
+    position: fixed;
+    top: 65px;
+    right: 15px;
+    z-index: 9999;
+}
+
+/* =========================================
+   Panel
+========================================= */
+.notification-panel {
+    width: 315px;
+    max-width: calc(100vw - 25px);
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 8px 32px rgba(15,23,42,0.12), 0 2px 6px rgba(15,23,42,0.05);
+    overflow: hidden;
+    animation: npShow 0.18s ease-out;
+}
+
+@keyframes npShow {
+    from {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* =========================================
+   Header
+========================================= */
+.notification-panel-header {
+    padding: 13px 15px;
+    background: linear-gradient(314deg, #0b0f14, #1a3e66);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+    .notification-panel-header h5 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 700;
+        color: #ffffff;
+        line-height: 1;
+    }
+
+    .notification-panel-header small {
+        display: block;
+        margin-top: 2px;
+        color: #94a3b8;
+        font-size: 9px;
+    }
+
+    /* Close Button */
+    .notification-panel-header .btn-close {
+        width: 20px !important;
+        height: 20px !important;
+        padding: 0 !important;
+        border-radius: 6px !important;
+        opacity: 1 !important;
+        background: #ef4444 url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath d='M.293.293a1 1 0 0 1 1.414 0L8 6.586 14.293.293a1 1 0 1 1 1.414 1.414L9.414 8l6.293 6.293a1 1 0 0 1-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 0 1-1.414-1.414L6.586 8 .293 1.707a1 1 0 0 1 0-1.414z'/%3e%3c/svg%3e") center / 7px no-repeat !important;
+        box-shadow: none !important;
+        filter: none !important;
+        transition: background 0.15s, transform 0.18s;
+    }
+
+        .notification-panel-header .btn-close:hover {
+            background-color: #dc2626 !important;
+            transform: rotate(90deg);
+        }
+
+/* =========================================
+   Category List
+========================================= */
+.notification-category-list {
+    padding: 7px;
+    max-height: 370px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #f8fafc;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+    .notification-category-list::-webkit-scrollbar {
+        width: 3px;
+    }
+
+    .notification-category-list::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 8px;
+    }
+
+/* =========================================
+   Category
+========================================= */
+.notification-category {
+    margin-bottom: 5px;
+    background: #fff;
+    border: 1px solid #e8eef5;
+    border-radius: 11px;
+    overflow: hidden;
+    transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+    .notification-category:last-child {
+        margin-bottom: 0;
+    }
+
+    .notification-category:hover {
+        border-color: #dbeafe;
+    }
+
+    .notification-category.expanded {
+        border-color: #6587b1;
+        box-shadow: 0 2px 10px rgba(59,130,246,0.07);
+    }
+
+/* =========================================
+   Category Header
+========================================= */
+.notification-category-header {
+    width: 100%;
+    padding: 8px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 0;
+    background: #fff;
+    cursor: pointer;
+    outline: none;
+    transition: background 0.15s;
+}
+
+    .notification-category-header:hover {
+        background: #f8fafc;
+    }
+
+.notification-category.expanded .notification-category-header {
+    background: #f8fafc;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.notification-category-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.notification-category-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* =========================================
+   Category Icon
+========================================= */
+.notification-category-icon {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    font-size: 13px;
+    background: #eff6ff;
+    color: #3b82f6;
+    transition: transform 0.15s;
+}
+
+.notification-category.expanded .notification-category-icon {
+    transform: scale(1.05);
+}
+
+.notification-category[data-category="Invoice"] .notification-category-icon {
+    background: rgba(16,185,129,0.10);
+    color: #059669;
+}
+
+.notification-category[data-category="Proforma"] .notification-category-icon {
+    background: rgba(245,158,11,0.10);
+    color: #d97706;
+}
+
+.notification-category[data-category="Quotation"] .notification-category-icon {
+    background: rgba(99,102,241,0.10);
+    color: #6366f1;
+}
+
+.notification-category[data-category="Call & Meeting"] .notification-category-icon {
+    background: rgba(14,165,233,0.10);
+    color: #0284c7;
+}
+
+.notification-category[data-category="Company"] .notification-category-icon {
+    background: rgba(168,85,247,0.10);
+    color: #9333ea;
+}
+
+.notification-category-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: #334155;
+    line-height: 1;
+}
+
+/* =========================================
+   Count Badge
+========================================= */
+.notification-count {
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 20px;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 9px;
+    font-weight: 600;
+    transition: background 0.18s, color 0.18s;
+}
+
+.notification-category.expanded .notification-count {
+    background: #3b82f6;
+    color: #fff;
+}
+
+/* =========================================
+   Chevron
+========================================= */
+.notification-chevron {
+    font-size: 10px;
+    color: #94a3b8;
+    transition: transform 0.2s ease;
+}
+
+.notification-category.expanded .notification-chevron {
+    transform: rotate(180deg);
+}
+
+/* =========================================
+   Category Items
+========================================= */
+.notification-category-items {
+    display: none;
+    padding: 5px 6px 6px;
+    background: #f8fafc;
+
+    /* Scroll only the notification values */
+    max-height: 220px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* Smooth scrolling */
+    scroll-behavior: smooth;
+    /* Firefox scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+/* Show items when expanded */
+.notification-category.expanded .notification-category-items {
+    display: block;
+}
+
+/* Chrome / Edge / Safari scrollbar */
+.notification-category-items::-webkit-scrollbar {
+    width: 4px;
+}
+
+.notification-category-items::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.notification-category-items::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+    .notification-category-items::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+/* =========================================
+   Notification Item
+========================================= */
+.notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 7px 8px;
+    margin-bottom: 4px;
+    background: #fff;
+    border: 1px solid #e8eef5;
+    border-radius: 8px;
+    cursor: pointer;
+    position: relative;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+
+    .notification-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .notification-item:hover {
+        border-color: #bfdbfe;
+        box-shadow: 0 2px 8px rgba(59,130,246,0.08);
+        transform: translateY(-1px);
+    }
+
+    .notification-item.unread::before {
+        content: '';
+        position: absolute;
+        left: -1px;
+        top: 8px;
+        width: 3px;
+        height: calc(100% - 16px);
+        border-radius: 0 3px 3px 0;
+        background: #3b82f6;
+    }
+
+/* =========================================
+   Item Icon
+========================================= */
+.notification-item-icon {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    font-size: 12px;
+    margin-top: 1px;
+    background: #f1f5f9;
+    color: #64748b;
+    transition: transform 0.15s;
+}
+
+.notification-item:hover .notification-item-icon {
+    transform: scale(1.06);
+}
+
+.notification-item[data-type="Invoice"] .notification-item-icon {
+    background: rgba(16,185,129,0.10);
+    color: #059669;
+}
+
+.notification-item[data-type="Proforma"] .notification-item-icon {
+    background: rgba(245,158,11,0.10);
+    color: #d97706;
+}
+
+.notification-item[data-type="Quotation"] .notification-item-icon {
+    background: rgba(99,102,241,0.10);
+    color: #6366f1;
+}
+
+.notification-item[data-type="Call & Meeting"] .notification-item-icon {
+    background: rgba(14,165,233,0.10);
+    color: #0284c7;
+}
+
+.notification-item[data-type="Company"] .notification-item-icon {
+    background: rgba(168,85,247,0.10);
+    color: #9333ea;
+}
+
+/* =========================================
+   Item Content
+========================================= */
+.notification-item-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-message {
+    font-size: 10px;
+    font-weight: 500;
+    color: #334155;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.notification-created-by {
+    font-size: 9px;
+    color: #3b82f6;
+    font-weight: 500;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+    .notification-created-by i {
+        font-size: 8px;
+    }
+
+.notification-date {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 3px;
+    font-size: 9px;
+    color: #94a3b8;
+}
+
+    .notification-date::before {
+        content: "\f017";
+        font-family: "Font Awesome 5 Free";
+        font-weight: 900;
+        font-size: 9px;
+    }
+
+/* =========================================
+   Empty State
+========================================= */
+.notification-empty {
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+}
+
+    .notification-empty i {
+        width: 38px;
+        height: 38px;
+        background: #f1f5f9;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        color: #94a3b8;
+    }
+
+    .notification-empty p {
+        margin: 0;
+        font-size: 10px;
+        font-weight: 500;
+        color: #64748b;
+    }
+
+/* =========================================
+   Mobile
+========================================= */
+@media (max-width: 576px) {
+    #notificationContainer {
+        top: 60px;
+        right: 8px;
+    }
+
+    .notification-panel {
+        width: 290px;
+    }
+
+    .notification-category-list {
+        max-height: calc(100vh - 120px);
+    }
+}

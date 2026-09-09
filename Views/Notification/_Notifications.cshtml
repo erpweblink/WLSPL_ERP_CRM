@@ -1,0 +1,111 @@
+﻿@model IEnumerable<dynamic>
+
+<div class="notification-panel" id="notificationPanel">
+    <div class="notification-panel-header">
+        <div>
+            <h5 class="mb-0">Notifications</h5>
+            <small>Recent activity</small>
+        </div>
+        <button type="button" class="btn-close" id="closeNotifications"></button>
+    </div>
+    <div class="notification-category-list">
+        @if (Model != null && Model.Any())
+        {
+            var groups = Model.GroupBy(x => (string)x.Type).ToList();
+            foreach (var group in groups)
+            {
+                var category = group.Key;
+                <div class="notification-category" data-category="@category">
+                    <div class="notification-category-header">
+                        <span class="notification-category-left">
+                            <span class="notification-category-icon">
+                                @if (category == "Invoice")
+                                {
+                                    <i class="fas fa-file-invoice"></i>
+                                }
+                                else if (category == "Proforma")
+                                {
+                                    <i class="fas fa-file-alt"></i>
+                                }
+                                else if (category == "Quotation")
+                                {
+                                    <i class="fas fa-file-contract"></i>
+                                }
+                                else if (category == "Call & Meeting")
+                                {
+                                    <i class="fas fa-phone"></i>
+                                }
+                                else if (category == "Company")
+                                {
+                                    <i class="fas fa-building"></i>
+                                }
+                                else
+                                {
+                                    <i class="fas fa-bell"></i>
+                                }
+                            </span>
+                            <span class="notification-category-name">@category</span>
+                        </span>
+                        <span class="notification-category-right">
+                            <span class="notification-count">@group.Count()</span>
+                            <i class="las la-angle-down notification-chevron"></i>
+                        </span>
+                    </div>
+
+                    <div class="notification-category-items">
+                        @foreach (var notification in group)
+                        {
+                            <div class="notification-item" data-type="@category">
+                                <div class="notification-item-icon">
+                                    @if (category == "Invoice")
+                                    {
+                                        <i class="fas fa-file-invoice"></i>
+                                    }
+                                    else if (category == "Proforma")
+                                    {
+                                        <i class="fas fa-file-alt"></i>
+                                    }
+                                    else if (category == "Quotation")
+                                    {
+                                        <i class="fas fa-file-contract"></i>
+                                    }
+                                    else if (category == "Call & Meeting")
+                                    {
+                                        <i class="fas fa-phone"></i>
+                                    }
+                                    else if (category == "Company")
+                                    {
+                                        <i class="fas fa-building"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="fas fa-bell"></i>
+                                    }
+                                </div>
+                                <div class="notification-item-content">
+                                    <div class="notification-message">@notification.Message</div>
+                                    <div class="notification-created-by">
+                                        <i class="fas fa-user"></i> @notification.CreatedBy
+                                    </div>
+                                    <div class="notification-date">
+                                        @notification.Date.ToString("dd MMM yyyy, hh:mm tt")
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                </div>
+            }
+        }
+        else
+        {
+            <div class="notification-empty">
+                <i class="las la-bell-slash"></i>
+                <p>No notifications</p>
+            </div>
+        }
+
+    </div>
+
+</div>

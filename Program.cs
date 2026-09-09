@@ -43,6 +43,7 @@ builder.Services.AddScoped<IQuotation, RepoQuotation>();
 builder.Services.AddScoped<IServicesRepo, ServicesRepo>();
 builder.Services.AddScoped<ITaxinvoiceRepo, TaxinvoiceRepo>();
 builder.Services.AddScoped<IDashboardRepo, DashboardRepo>();
+builder.Services.AddScoped<INotificationRepo, NotificationRepo>();
 
 
 // ======================================================

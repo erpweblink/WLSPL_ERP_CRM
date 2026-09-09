@@ -114,10 +114,10 @@
         align-items: center;
         justify-content: center;
         padding: 0;
-        border: 1px solid #0476eb;
         border-radius: 50%;
-        background: #0476ebad;
-        color: #ffffff;
+        background: var(--nc);
+        color: #fff;
+        border-color: var(--nc);
         font-size: 7px;
         cursor: pointer;
         z-index: 1;
@@ -210,7 +210,7 @@
         margin: 0 0 3px;
         color: var(--text-primary);
         font-family: var(--font);
-        font-size: 19px;
+        font-size: 16px;
         font-weight: 700;
         line-height: 1.3;
         white-space: normal;
@@ -296,7 +296,7 @@
         }
 
         .node[data-role="admin"] strong {
-            font-size: 20px;
+            font-size: 16px;
         }
 
     .node[data-role="manager"] {
@@ -638,7 +638,7 @@
     /* Modal Structure */
     .modal-content {
         border: none;
-        border-radius: 16px;
+        border-radius: 18px;
         overflow: hidden;
         box-shadow: 0 25px 60px rgba(0, 0, 0, 0.25);
     }
@@ -891,6 +891,342 @@
             font-weight: 700;
             color: #fff;
         }
+</style>
+
+<style type="text/css">
+    /* =========================================================
+                           RENEWAL MARQUEE
+                           ========================================================= */
+
+
+    @@media (min-width: 1400px) {
+        .modal-xxl {
+            max-width: 1320px !important; 
+        }
+    }
+
+    .renewal-marquee {
+        position: relative;
+        width: 100%;
+        height: 33px;
+        margin: 0 0 18px 0;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        border-radius: 9px;
+        box-shadow: 0 2px 6px rgba(16, 30, 54, .04);
+    }
+
+    /* Area available for scrolling message */
+    .renewal-marquee-track {
+        position: absolute;
+        left: 0;
+        right: 150px; /* reserve space for fixed button */
+
+        height: 100%;
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    /* Actual moving content */
+    .renewal-marquee-content {
+        display: inline-flex;
+        align-items: center;
+        width: max-content;
+        animation: renewalScroll 18s linear infinite;
+    }
+
+    /* Message */
+    .renewal-message {
+        display: inline-flex;
+        align-items: center;
+        padding-right: 100px;
+        color: #345374;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+        .renewal-message i {
+            margin-right: 7px;
+            color: #ea580c;
+            font-size: 12px;
+        }
+
+
+    /* Continuous movement */
+    @@keyframes renewalScroll {
+
+        from {
+            transform: translateX(100%);
+        }
+
+        to {
+            transform: translateX(-100%);
+        }
+    }
+
+    /* Pause on hover */
+    .renewal-marquee:hover .renewal-marquee-content {
+        animation-play-state: paused;
+    }
+
+    @@media (max-width: 768px) {
+
+        .renewal-marquee {
+            height: 40px;
+        }
+
+        .renewal-marquee-track {
+            right: 120px;
+        }
+
+        .renewal-message {
+            font-size: 10px;
+            padding-right: 70px;
+        }
+    }
+
+    .renewal-table-wrapper {
+        border: 1px solid #e8ecf2;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .renewal-table {
+        font-size: 11px;
+        vertical-align: middle;
+    }
+
+        .renewal-table thead th {
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            padding: 10px;
+            border-bottom: 1px solid #e8ecf2;
+            white-space: nowrap;
+        }
+
+        .renewal-table tbody td {
+            padding: 10px;
+            color: #475569;
+            border-bottom: 1px solid #f1f5f9;
+            white-space: nowrap;
+        }
+
+        .renewal-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .renewal-table tbody tr:hover {
+            background: #f8fafc;
+        }
+
+    .renewal-days-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 8px;
+        border-radius: 20px;
+        background: #fff7ed;
+        color: #ea580c;
+        font-size: 9px;
+        font-weight: 700;
+    }
+
+
+
+    .renewal-header-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .renewal-filter-btn {
+        border: 0;
+        background: transparent;
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 2px 4px;
+    }
+
+        .renewal-filter-btn:hover,
+        .renewal-filter-btn.active {
+            color: #2563eb;
+        }
+
+    .renewal-filter-dropdown {
+        background: #fff;
+        border: 1px solid #d9dee7;
+        border-radius: 8px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, .15);
+        padding: 10px;
+    }
+
+
+    .renewal-filter-select-all {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 6px 4px;
+        cursor: pointer;
+        font-size: 12px;
+    }
+
+    .renewal-filter-divider {
+        border-top: 1px solid #e5e7eb;
+        margin: 5px 0;
+    }
+
+    .renewal-filter-options {
+        max-height: 220px;
+        overflow-y: auto;
+    }
+
+    .renewal-filter-option {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 5px 4px;
+        margin: 0;
+        cursor: pointer;
+        font-size: 12px;
+        color: #475569;
+    }
+
+        .renewal-filter-option:hover {
+            background: #f1f5f9;
+        }
+
+    .renewal-filter-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+        border-top: 1px solid #e5e7eb;
+        margin-top: 8px;
+        padding-top: 8px;
+    }
+
+
+    .renewal-filter-dropdown::-webkit-scrollbar,
+    .renewal-filter-options::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .renewal-filter-dropdown::-webkit-scrollbar-thumb,
+    .renewal-filter-options::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 10px;
+    }
+
+
+
+    #commonModalBody .renewal-table-wrapper {
+        max-height: 420px;
+        overflow-y: auto;
+        overflow-x: auto;
+        border: 1px solid #e8ecf2;
+        border-radius: 10px;
+    }
+
+    #commonModalBody .renewal-table {
+        width: 100%;
+        margin: 0;
+        font-size: 12px;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+        #commonModalBody .renewal-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+            #commonModalBody .renewal-table thead th {
+                position: sticky;
+                top: 0;
+                z-index: 5;
+                background: #5e7185 !important;
+                color: whitesmoke;
+                font-size: 10px;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: .04em;
+                padding: 10px;
+                white-space: nowrap;
+                border-bottom: 1px solid #e8ecf2;
+            }
+
+        #commonModalBody .renewal-table tbody td {
+            padding: 10px;
+            color: #475569;
+            white-space: nowrap;
+            border-bottom: 1px solid #f1f5f9;
+            background: #fff;
+        }
+
+        #commonModalBody .renewal-table tbody tr:hover td {
+            background: #f8fafc;
+        }
+
+        #commonModalBody .renewal-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+    #commonModalBody .renewal-table-wrapper::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+
+    #commonModalBody .renewal-table-wrapper::-webkit-scrollbar-track {
+        background: #f1f5f9;
+    }
+
+    #commonModalBody .renewal-table-wrapper::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 10px;
+    }
+
+        #commonModalBody .renewal-table-wrapper::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+
+    .daysBadge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 72px;
+        padding: 4px 9px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+        .daysBadge.red {
+            color: #dc2626;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+        }
+
+        .daysBadge.orange {
+            color: #ea580c;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+        }
+
+        .daysBadge.green {
+            color: #059669;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+        }
+
 </style>
 
 @functions {
@@ -1214,6 +1550,27 @@
 }
 else
 {
+    @if (root.InvoiceRenewal > 0)
+    {
+        <div class="renewal-marquee">
+            <div class="renewal-marquee-track">
+                <div class="renewal-marquee-content">
+                    <span class="renewal-message">
+                        <i class="fas fa-bell"></i>
+                        Renewal (30 Days): @root.InvoiceRenewal invoice(s) requiring renewal.
+                        <a href="javascript:void(0);"
+                           class="renewal-check-link"
+                           onclick="showInvoiceRenewals();">
+                            <i class="fas fa-external-link-alt"></i>
+                            Click to Check
+                        </a>
+                    </span>
+                </div>
+            </div>
+        </div>
+    }
+
+
     <input type="hidden" id="currentEmpCode" value="@Context.Session.GetString("EmpCode")" />
     <input type="hidden" id="currentRole" value="@Context.Session.GetString("Role")" />
     <div class="tree-page">
@@ -1251,76 +1608,28 @@ else
         </div>
     </div>
 
-    <div class="modal fade" id="employeeInfoModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+    <div class="modal fade" id="commonInfoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" id="commonModalDialog">
             <div class="modal-content">
-                <div class="modal-header" style="background: linear-gradient(314deg, #0b0f14, #1a3e66) !important;">
+                <div class="modal-header" style="background:linear-gradient(314deg,#0b0f14,#1a3e66)!important;">
                     <div class="modal-header-content">
                         <div class="modal-icon-box">
-                            <i class="fas fa-user"></i>
+                            <i class="fas fa-info-circle" id="commonModalIcon"></i>
                         </div>
                         <div class="employee-info-header">
-                            <h3 class="modal-title employee-name mb-0"></h3>
-                            <small class="employee-code"></small>
+                            <h3 class="modal-title employee-name mb-0" id="commonModalTitle"></h3>
+                            <small class="employee-code" id="commonModalSubtitle"></small>
                         </div>
                     </div>
                     <button type="button" class="btn-close-custom" data-bs-dismiss="modal" aria-label="Close">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <p class="stats-label">Company Overview</p>
-                    <div class="company-stats">
-                        <div class="company-stat total">
-                            <div class="stat-icon"><i class="fas fa-building"></i></div>
-                            <span class="stat-title">Total Companies</span>
-                            <strong class="total-companies">0</strong>
-                        </div>
-                        <div class="company-stat paid">
-                            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-                            <span class="stat-title">Paid Companies</span>
-                            <strong class="paid-companies">0</strong>
-                        </div>
-                        <div class="company-stat unpaid">
-                            <div class="stat-icon"><i class="fas fa-clock"></i></div>
-                            <span class="stat-title">Unpaid Companies</span>
-                            <strong class="unpaid-companies">0</strong>
-                        </div>
-                    </div>
-
-                    <div class="meetings-section">
-                        <hr />
-                        <p class="stats-label">
-                            <i class="fas fa-calendar-day me-1"></i> This Month's Meetings
-                        </p>
-                        <div class="company-stats meetings-stats">
-                            <div class="company-stat fresh">
-                                <div class="stat-icon"><i class="fas fa-star"></i></div>
-                                <span class="stat-title">Fresh</span>
-                                <strong class="fresh-meetings">0</strong>
-                            </div>
-                            <div class="company-stat followup">
-                                <div class="stat-icon"><i class="fas fa-redo"></i></div>
-                                <span class="stat-title">Follow-up</span>
-                                <strong class="followup-meetings">0</strong>
-                            </div>
-                            <div class="company-stat service">
-                                <div class="stat-icon"><i class="fas fa-tools"></i></div>
-                                <span class="stat-title">Services</span>
-                                <strong class="service-meetings">0</strong>
-                            </div>
-                        </div>
-                        <div class="total-meetings-bar mt-3">
-                            <div class="total-meetings-info">
-                                <span><i class="fas fa-chart-bar me-1"></i> Total Meetings</span>
-                                <strong class="total-meetings">0</strong>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <div class="modal-body" id="commonModalBody"></div>
             </div>
         </div>
     </div>
+
 }
 
 
@@ -1563,59 +1872,715 @@ else
 <script type="text/javascript">
     function showEmployeeInfo(button) {
         const empCode = button.getAttribute("data-empcode");
+
         if (!empCode) {
-            showToast("Employee code not found.","error");
+            showToast("Employee code not found.", "error");
             return;
         }
+
         button.disabled = true;
+
+        $("#commonModalDialog").removeClass("modal-xxl");
+        $("#commonModalIcon").attr("class", "fas fa-user");
+        $("#commonModalTitle").text("Employee Information");
+        $("#commonModalSubtitle").text("");
 
         $.ajax({
             url: '@Url.Action("GetEmployeeInfo", "Dashboard")',
             type: 'GET',
-            data: {empCode: empCode},
+            data: { empCode: empCode },
             success: function (response) {
                 if (!response.success) {
                     showToast(response.message || "Unable to get employee information.", "error");
                     return;
                 }
+
                 const data = response.data;
-                // Employee Info
-                $("#employeeInfoModal .employee-name").text(data.employeeName);
-                $("#employeeInfoModal .employee-code").text(data.employeeCode);
-                $("#employeeInfoModal .employee-role").text(data.employeeRole ?? "");
 
-                // Company Stats
-                $("#employeeInfoModal .total-companies").text(data.totalCompanies);
-                $("#employeeInfoModal .paid-companies").text(data.paidCompanies);
-                $("#employeeInfoModal .unpaid-companies").text(data.unPaidCompanies);
+                $("#commonModalTitle").text(data.employeeName);
+                $("#commonModalSubtitle").text(data.employeeCode);
 
-                // Meeting Stats
-                const fresh    = parseInt(data.fresh)    || 0;
+                const fresh = parseInt(data.fresh) || 0;
                 const followUp = parseInt(data.followUp) || 0;
-                const service  = parseInt(data.service)  || 0;
-                const total    = parseInt(data.total)    || 0;
+                const service = parseInt(data.service) || 0;
+                const total = parseInt(data.total) || 0;
 
-                $("#employeeInfoModal .fresh-meetings").text(fresh);
-                $("#employeeInfoModal .followup-meetings").text(followUp);
-                $("#employeeInfoModal .service-meetings").text(service);
-                $("#employeeInfoModal .total-meetings").text(total);
+                $("#commonModalBody").html(`
+                    <p class="stats-label">Company Overview</p>
 
-                // ✅ Hide meetings section if all values are 0 or null
-                const hasMeetings = fresh > 0 || followUp > 0 || service > 0 || total > 0;
-                $("#employeeInfoModal .meetings-section").toggle(hasMeetings);
+                    <div class="company-stats">
+                        <div class="company-stat total">
+                            <div class="stat-icon"><i class="fas fa-building"></i></div>
+                            <span class="stat-title">Total Companies</span>
+                            <strong>${data.totalCompanies ?? 0}</strong>
+                        </div>
 
+                        <div class="company-stat paid">
+                            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                            <span class="stat-title">Paid Companies</span>
+                            <strong>${data.paidCompanies ?? 0}</strong>
+                        </div>
 
-                $("#employeeInfoModal").modal("show");
+                        <div class="company-stat unpaid">
+                            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                            <span class="stat-title">Unpaid Companies</span>
+                            <strong>${data.unPaidCompanies ?? 0}</strong>
+                        </div>
+                    </div>
+
+                    ${fresh > 0 || followUp > 0 || service > 0 || total > 0 ? `
+                        <div class="meetings-section">
+                            <hr>
+                            <p class="stats-label">
+                                <i class="fas fa-calendar-day me-1"></i> This Month's Meetings
+                            </p>
+
+                            <div class="company-stats meetings-stats">
+                                <div class="company-stat fresh">
+                                    <div class="stat-icon"><i class="fas fa-star"></i></div>
+                                    <span class="stat-title">Fresh</span>
+                                    <strong>${fresh}</strong>
+                                </div>
+
+                                <div class="company-stat followup">
+                                    <div class="stat-icon"><i class="fas fa-redo"></i></div>
+                                    <span class="stat-title">Follow-up</span>
+                                    <strong>${followUp}</strong>
+                                </div>
+
+                                <div class="company-stat service">
+                                    <div class="stat-icon"><i class="fas fa-tools"></i></div>
+                                    <span class="stat-title">Services</span>
+                                    <strong>${service}</strong>
+                                </div>
+                            </div>
+
+                            <div class="total-meetings-bar mt-3">
+                                <div class="total-meetings-info">
+                                    <span>
+                                        <i class="fas fa-chart-bar me-1"></i>
+                                        Total Meetings
+                                    </span>
+                                    <strong>${total}</strong>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ""}
+                `);
+
+                $("#commonInfoModal").modal("show");
             },
             error: function (xhr) {
                 console.error(xhr);
-                alert("Something went wrong while getting employee information.");
+                showToast("Something went wrong while getting employee information.", "error");
             },
             complete: function () {
                 button.disabled = false;
             }
         });
     }
+
+    function showInvoiceRenewals() {
+        $("#commonModalDialog").addClass("modal-xxl");
+        $("#commonModalIcon").attr("class", "fas fa-file-invoice");
+        $("#commonModalTitle").text("Invoice Renewals");
+        $("#commonModalSubtitle").text("Renewals due within 30 days");
+
+        $("#commonModalBody").html(`
+            <div class="text-center py-4">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span class="ms-2">Loading renewals...</span>
+            </div>
+        `);
+
+        $("#commonInfoModal").modal("show");
+
+        $.ajax({
+            url: '@Url.Action("GetInvoiceRenewals", "Dashboard")',
+            type: "GET",
+            success: function (response) {
+                if (!response.success) {
+                    showToast(
+                        response.message || "Unable to get invoice renewals.",
+                        "error"
+                    );
+                    return;
+                }
+
+                const data = response.data || [];
+
+                window.invoiceRenewalData = data;
+                window.renewalFilters = {};
+
+                if (!data.length) {
+                    $("#commonModalBody").html(`
+                        <div class="text-center py-5">
+                            <i class="fas fa-check-circle text-success"
+                               style="font-size:40px;"></i>
+                            <h6 class="mt-3 mb-1">No Renewals Found</h6>
+                            <p class="text-muted mb-0">
+                                There are no invoices requiring renewal
+                                within the next 30 days.
+                            </p>
+                        </div>
+                    `);
+                    return;
+                }
+
+                renderRenewalTable();
+            },
+            error: function (xhr) {
+                console.error(xhr);
+
+                $("#commonModalBody").html(`
+                    <div class="alert alert-danger mb-0">
+                        Unable to load invoice renewals.
+                    </div>
+                `);
+            }
+        });
+    }
+
+    function renderRenewalTable() {
+        const columns = [
+            ["Invoice No", "invoiceNo"],
+            ["Customer", "customerName"],
+            ["Sales Person", "salesPerson"],
+            ["Invoice Date", "invoiceDate"],
+            ["Renewal Date", "renewalDate"],
+            ["Days Left", "daysRemaining"],
+            ["Amount", "totalAmount"]
+        ];
+
+        const data = getFilteredRenewalData();
+
+        let html = `
+            <div class="renewal-filter-toolbar mb-1">
+                <button type="button"
+                        class="btn btn-sm btn-outline-secondary"
+                        onclick="clearRenewalFilters()">
+                    <i class="fas fa-filter-circle-xmark me-1"></i>
+                    Clear Filters
+                </button>
+
+                <span class="text-muted ms-2" style="color: #ed0909 !important;">
+                    <span id="renewalResultCount">${data.length}</span>
+                    record(s)
+                </span>
+            </div>
+
+            <div class="renewal-table-wrapper">
+                <table class="table table-hover align-middle renewal-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+
+                            ${columns.map(function (column) {
+                                return createFilterHeader(
+                                    column[0],
+                                    column[1]
+                                );
+                            }).join("")}
+                        </tr>
+                    </thead>
+
+                    <tbody id="renewalTableBody"></tbody>
+                </table>
+            </div>
+        `;
+
+        $("#commonModalBody").html(html);
+
+        renderRenewalRows(data);
+
+        $(".renewal-filter-btn")
+            .off("click")
+            .on("click", function (e) {
+                e.stopPropagation();
+
+                openRenewalFilter(
+                    this,
+                    $(this).data("field")
+                );
+            });
+
+        $(document)
+            .off("click.renewalFilter")
+            .on("click.renewalFilter", function () {
+                closeRenewalFilter();
+            });
+
+        $(document)
+            .off("click.renewalDropdown")
+            .on(
+                "click.renewalDropdown",
+                ".renewal-filter-dropdown",
+                function (e) {
+                    e.stopPropagation();
+                }
+            );
+    }
+
+    function createFilterHeader(title, field) {
+        const active =
+            window.renewalFilters &&
+            window.renewalFilters[field] &&
+            window.renewalFilters[field].length;
+
+        return `
+            <th>
+                <div class="renewal-header-content">
+                    <span>${title}</span>
+
+                    <button type="button"
+                            class="renewal-filter-btn ${active ? "active" : ""}"
+                            data-field="${field}"
+                            title="Filter ${title}">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                </div>
+            </th>
+        `;
+    }
+
+    function openRenewalFilter(button, field) {
+        closeRenewalFilter();
+
+        const data = getAvailableFilterData(field);
+
+        let values = data
+            .map(function (item) {
+                return getFilterValue(item[field], field);
+            })
+            .filter(function (value) {
+                return value !== "";
+            });
+
+        values = [...new Set(values)];
+
+        sortFilterValues(values, field);
+
+        const currentFilter =
+            window.renewalFilters &&
+            window.renewalFilters[field];
+
+        const selectedValues = currentFilter
+            ? [...currentFilter]
+            : [...values];
+
+        const allSelected =
+            selectedValues.length === values.length;
+
+        const optionsHtml = values.map(function (value) {
+            const checked = selectedValues.includes(value);
+
+            return `
+                <label class="renewal-filter-option">
+                    <input type="checkbox"
+                           class="renewal-value-checkbox"
+                           value="${escapeHtml(value)}"
+                           ${checked ? "checked" : ""}>
+
+                    <span>
+                        ${escapeHtml(
+                            formatFilterValue(field, value)
+                        )}
+                    </span>
+                </label>
+            `;
+        }).join("");
+
+        const dropdown = $(`
+            <div class="renewal-filter-dropdown">
+
+               <label class="renewal-filter-select-all">
+                    <input type="checkbox"
+                           id="renewalSelectAll"
+                           ${allSelected ? "checked" : ""}>
+
+                    <strong>Select All</strong>
+                </label>
+
+                <div class="renewal-filter-divider"></div>
+
+                <div class="renewal-filter-options">
+                    ${optionsHtml}
+                </div>
+
+                <div class="renewal-filter-actions">
+
+                    <button type="button"
+                            class="btn btn-sm btn-secondary"
+                            onclick="closeRenewalFilter()">
+                        Cancel
+                    </button>
+
+                    <button type="button"
+                            class="btn btn-sm btn-primary"
+                            onclick="applyRenewalFilter('${field}')">
+                        Apply
+                    </button>
+
+                </div>
+            </div>
+        `);
+
+        $("body").append(dropdown);
+
+        positionRenewalFilter(dropdown, button);
+
+        $("#renewalSelectAll").on("change", function () {
+            $(".renewal-value-checkbox:visible")
+                .prop("checked", this.checked);
+        });
+
+        $(".renewal-value-checkbox").on(
+            "change",
+            updateRenewalSelectAllState
+        );
+    }
+
+    function getAvailableFilterData(currentField) {
+        const data = window.invoiceRenewalData || [];
+        const filters = window.renewalFilters || {};
+
+        return data.filter(function (item) {
+            return Object.keys(filters)
+                .filter(function (field) {
+                    return field !== currentField;
+                })
+                .every(function (field) {
+                    const itemValue =
+                        getFilterValue(item[field], field);
+
+                    return filters[field].includes(itemValue);
+                });
+        });
+    }
+
+    function getFilteredRenewalData() {
+        const data = window.invoiceRenewalData || [];
+        const filters = window.renewalFilters || {};
+
+        return data.filter(function (item) {
+            return Object.keys(filters).every(function (field) {
+                const itemValue =
+                    getFilterValue(item[field], field);
+
+                return filters[field].includes(itemValue);
+            });
+        });
+    }
+
+    function getFilterValue(value, field) {
+        if (value === null || value === undefined)
+            return "";
+
+        if (
+            field === "invoiceDate" ||
+            field === "renewalDate"
+        ) {
+            return normalizeRenewalDate(value);
+        }
+
+        if (field === "daysRemaining") {
+            return String(
+                Number(value)
+            );
+        }
+
+        if (field === "totalAmount") {
+            return String(
+                Number(value || 0)
+            );
+        }
+
+        return String(value).trim();
+    }
+
+    function sortFilterValues(values, field) {
+        values.sort(function (a, b) {
+
+            if (
+                field === "daysRemaining" ||
+                field === "totalAmount"
+            ) {
+                return Number(a) - Number(b);
+            }
+
+            if (
+                field === "invoiceDate" ||
+                field === "renewalDate"
+            ) {
+                return normalizeRenewalDate(a)
+                    .localeCompare(
+                        normalizeRenewalDate(b)
+                    );
+            }
+
+            return a.localeCompare(
+                b,
+                undefined,
+                {
+                    numeric: true,
+                    sensitivity: "base"
+                }
+            );
+        });
+    }
+
+    function applyRenewalFilter(field) {
+        const checkedValues = $(".renewal-value-checkbox:checked")
+            .map(function () {
+                return $(this).val();
+            })
+            .get();
+
+        const totalValues =
+            $(".renewal-value-checkbox").length;
+
+        if (!window.renewalFilters) {
+            window.renewalFilters = {};
+        }
+
+        if (
+            checkedValues.length === 0
+        ) {
+            window.renewalFilters[field] = [];
+        }
+        else if (
+            checkedValues.length === totalValues
+        ) {
+            delete window.renewalFilters[field];
+        }
+        else {
+            window.renewalFilters[field] =
+                checkedValues;
+        }
+
+        closeRenewalFilter();
+
+        refreshRenewalTable();
+    }
+
+    function refreshRenewalTable() {
+        const data = getFilteredRenewalData();
+
+        renderRenewalRows(data);
+
+        updateFilterButtons();
+    }
+
+    function renderRenewalRows(data) {
+        if (!data || !data.length) {
+            $("#renewalTableBody").html(`
+                <tr>
+                    <td colspan="8"
+                        class="text-center text-muted py-4">
+                        No matching records found.
+                    </td>
+                </tr>
+            `);
+
+            $("#renewalResultCount").text("0");
+            return;
+        }
+
+        const html = data.map(function (item, index) {
+
+            const days =
+                Number(item.daysRemaining || 0);
+
+            const daysClass =
+                days <= 15
+                    ? "red"
+                    : days <= 30
+                        ? "orange"
+                        : "green";
+
+            return `
+                <tr>
+                    <td>${index + 1}</td>
+
+                    <td>
+                        <strong>
+                            ${escapeHtml(
+                                item.invoiceNo || ""
+                            )}
+                        </strong>
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            item.customerName || ""
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            item.salesPerson || ""
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            item.invoiceDate || ""
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            item.renewalDate || ""
+                        )}
+                    </td>
+
+                    <td>
+                        <span class="daysBadge ${daysClass}">
+                            ${days} Days
+                        </span>
+                    </td>
+
+                    <td class="text-end">
+                        ${Number(
+                            item.totalAmount || 0
+                        ).toLocaleString("en-IN", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2
+                        })}
+                    </td>
+                </tr>
+            `;
+        }).join("");
+
+        $("#renewalTableBody").html(html);
+        $("#renewalResultCount").text(data.length);
+    }
+
+    function updateFilterButtons() {
+        $(".renewal-filter-btn").each(function () {
+            const field = $(this).data("field");
+
+            const active =
+                window.renewalFilters &&
+                window.renewalFilters[field] &&
+                window.renewalFilters[field].length;
+
+            $(this).toggleClass(
+                "active",
+                !!active
+            );
+        });
+    }
+
+    function updateRenewalSelectAllState() {
+        const visible =
+            $(".renewal-value-checkbox:visible");
+
+        const checked =
+            visible.filter(":checked");
+
+        $("#renewalSelectAll").prop(
+            "checked",
+            visible.length > 0 &&
+            visible.length === checked.length
+        );
+    }
+
+    function clearRenewalFilters() {
+        window.renewalFilters = {};
+
+        closeRenewalFilter();
+
+        refreshRenewalTable();
+    }
+
+    function closeRenewalFilter() {
+        $(".renewal-filter-dropdown").remove();
+    }
+
+    function positionRenewalFilter(dropdown, button) {
+        const rect =
+            button.getBoundingClientRect();
+
+        const width = 260;
+        const height = 350;
+
+        let left = rect.left;
+        let top = rect.bottom + 5;
+
+        if (
+            left + width >
+            window.innerWidth
+        ) {
+            left =
+                window.innerWidth -
+                width -
+                10;
+        }
+
+        if (
+            left < 10
+        ) {
+            left = 10;
+        }
+
+        if (
+            top + height >
+            window.innerHeight
+        ) {
+            top =
+                rect.top -
+                height -
+                5;
+        }
+
+        if (top < 10) {
+            top = 10;
+        }
+
+        dropdown.css({
+            position: "fixed",
+            top: top + "px",
+            left: left + "px",
+            width: width + "px",
+            zIndex: 99999
+        });
+    }
+
+    function formatFilterValue(field, value) {
+        if (field === "daysRemaining") {
+            return `${value} Days`;
+        }
+
+        if (field === "totalAmount") {
+            return Number(value || 0)
+                .toLocaleString("en-IN", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+        }
+
+        if (field === "invoiceDate" || field === "renewalDate") {
+             return value;
+        }
+
+        return value;
+    }
+
+    function normalizeRenewalDate(value) {
+      if (value === null || value === undefined) {
+            return "";
+        }
+
+        return String(value).trim().replace(/\//g, "-");
+    }
+
+    function escapeHtml(value) {
+        return $("<div>")
+            .text(value ?? "")
+            .html();
+    }
+
 </script>
 
 
