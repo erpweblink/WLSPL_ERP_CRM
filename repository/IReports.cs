@@ -4,6 +4,6 @@ namespace WLSPL_ERP_CRM.repository
 {
     public interface IReports
     {
-        Task<List<VM_Reports>> GetTopInvoiceList();
+        Task<List<object>> GetTopInvoiceList();
     }
 }
