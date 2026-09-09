@@ -1,0 +1,41 @@
+﻿@model List<WEBLINK_CRM.Models.VM_Reports>
+@{
+    ViewData["Title"] = "Top Salesperson - Year & Month Wise";
+}
+
+<h2 class="mb-4">Top Salesperson — Year &amp; Month Wise</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">No sales data found.</div>
+}
+else
+{
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th>Year</th>
+                <th>Month</th>
+                <th>Top Salesperson</th>
+                <th class="text-end">Total Sales</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int? lastYear = null;
+            }
+            @foreach (var row in Model)
+            {
+                bool newYear = lastYear != row.Year;
+                lastYear = row.Year;
+
+                <tr class="@(newYear ? "border-top border-3" : "")">
+                    <td>@(newYear? row.Year.ToString() : "")</td>
+                    <td>@row.MonthName</td>
+                    <td>🏆 @row.Name</td>
+                    <td class="text-end">@row.TotalAmount.ToString("C2")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
