@@ -17,6 +17,13 @@ builder.Services.AddScoped(resolver =>
         .GetSection("GovKey")
         .Get<GovKeySettings>());
 
+// ======================================================
+// SEARCH BUTTON CONFIGURATION
+// ======================================================
+builder.Services.Configure<List<ShortcutItem>>(
+    builder.Configuration.GetSection("Shortcuts"));
+
+
 
 // ======================================================
 // MVC
