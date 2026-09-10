@@ -241,12 +241,14 @@
                             if (!data) {
                                 return;
                             }
+                            debugger;
                             $("#Ccode").val(data.cCode);
                             $("#PersonName").val(data.oName).prop("readonly", true);
                             $("#ContactNo").val(data.mobile).prop("readonly", true);
                             $("#ClientMail").val(data.email).prop("readonly", true);
                             $("#Area").val(data.area).prop("readonly", true);
                             $("#Address").val(data.address).prop("readonly", true);
+                            $("#GSTNo").val(data.gstNo);
                         },
                         error: function () {
                             console.log("Unable to get company details.");

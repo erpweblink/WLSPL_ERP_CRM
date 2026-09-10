@@ -27,7 +27,7 @@
 
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
+    <link href="~/notification/searchshortcut.css" rel="stylesheet" />
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
 </head>
 
@@ -76,6 +76,31 @@
 
 
             <ul class="topbar-item list-unstyled d-inline-flex align-items-center mb-0">
+
+                <li class="topbar-search-item mx-2">
+                    <div class="shortcut-search-wrapper">
+                        <div class="shortcut-search-box">
+                            <i class="las la-search shortcut-search-icon"></i>
+
+                            <input type="text"
+                                   id="shortcutSearch"
+                                   class="shortcut-search-input"
+                                   placeholder="Search shortcuts..."
+                                   autocomplete="off" />
+                        </div>
+
+                        <div id="shortcutResults" class="shortcut-results"></div>
+                    </div>
+                </li>
+
+                <li class="topbar-item">
+                    <a href="javascript:void(0);" class="nav-link nav-icon notification-icon" id="notificationBtn"
+                       title="Notifications">
+                        <i class="las la-bell" style="font-size: 30px !important;"></i> <span class="notification-dot"></span>
+                    </a>
+                </li>
+
+
                 @{
                     var profileName = Context.Session.GetString("EmployeeName");
                     var profileUserName = Context.Session.GetString("UserName");
@@ -86,13 +111,6 @@
                         profileImage = "https://api.iconify.design/mdi/account-circle.svg?color=%23666666";
                     }
                 }
-                <li class="topbar-item">
-                    <a href="javascript:void(0);" class="nav-link nav-icon notification-icon" id="notificationBtn"
-                       title="Notifications">
-                        <i class="las la-bell" style="font-size: 30px !important;"></i> <span class="notification-dot"></span>
-                    </a>
-                </li>
-
 
                 @if (!string.IsNullOrEmpty(profileName))
                 {
@@ -116,7 +134,7 @@
                             </div>
                             <i class="las la-angle-down profile-chevron d-none d-md-block"
                                style="font-size: 12px !important;display: inline-flex !important;
-                                           align-items: center !important;justify-content: center !important;"></i>
+                                               align-items: center !important;justify-content: center !important;"></i>
                         </a>
 
                         <!-- Dropdown -->
@@ -370,11 +388,11 @@
     </div>
 
     <div id="notificationContainer"></div>
-    <script src="~/Notification/Notification.js"></script>  
+    <script src="~/Notification/Notification.js"></script>
+    <script src="~/notification/searchshortcut.js"></script>
 
     <script src="~/assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="~/assets/js/app.js"></script>
-
     @if (TempData["ToastMessage"] != null)
     {
         <script type="text/javascript">
@@ -385,7 +403,6 @@
             });
         </script>
     }
-
 
     <script type="text/javascript">
            // TosterScxript

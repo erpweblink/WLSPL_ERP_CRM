@@ -1,0 +1,408 @@
+﻿/* =========================================
+   Search Wrapper
+========================================= */
+.topbar-search-item {
+    position: relative;
+}
+
+.shortcut-search-wrapper {
+    position: relative;
+    width: 340px;
+}
+
+/* =========================================
+   Search Box
+========================================= */
+.shortcut-search-box {
+    height: 42px;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    background: #f8fafc;
+    border: 1px solid #a4a2e9;
+    border-radius: 10px;
+    transition: all .2s ease;
+}
+
+    .shortcut-search-box:focus-within {
+        background: #f1f5f9;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, .1);
+    }
+
+.shortcut-search-icon {
+    flex-shrink: 0;
+    margin-right: 9px;
+    color: #94a3b8;
+    font-size: 18px;
+}
+
+.shortcut-search-input {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    color: #1e293b;
+    background: transparent;
+    border: 0;
+    outline: 0;
+    font-size: 14px;
+}
+
+    .shortcut-search-input::placeholder {
+        color: #94a3b8;
+    }
+
+/* =========================================
+   Keyboard Shortcut Hint
+========================================= */
+.shortcut-search-kbd {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.shortcut-search-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 18px;
+    min-width: 18px;
+    padding: 0 4px;
+    border-radius: 4px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1;
+}
+
+/* =========================================
+   Results Dropdown
+========================================= */
+.shortcut-results {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 99999;
+    display: none;
+    width: 100%;
+    max-height: 430px;
+    padding: 6px;
+    overflow-y: auto;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(15,23,42,0.13), 0 4px 12px rgba(15,23,42,0.06);
+}
+
+    .shortcut-results::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .shortcut-results::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .shortcut-results::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+
+/* =========================================
+   Results Header
+========================================= */
+.shortcut-results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px 9px;
+    margin-bottom: 3px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+    .shortcut-results-header span:first-child {
+        font-size: 9px;
+        font-weight: 700;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+    }
+
+    .shortcut-results-header span:last-child {
+        font-size: 9px;
+        font-weight: 600;
+        color: #f8fafc;
+        background: #6366f1;
+        padding: 2px 7px;
+        border-radius: 20px;
+    }
+
+/* =========================================
+   Result Item — Base
+========================================= */
+.shortcut-result-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    margin-bottom: 2px;
+    color: inherit;
+    text-decoration: none;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    min-height: 52px;
+    background: #f1f5f9;
+}
+
+    .shortcut-result-item:last-child {
+        margin-bottom: 0;
+    }
+
+/* =========================================
+   Shortcut (static) — Indigo
+========================================= */
+[data-type="shortcut"] .shortcut-result-icon {
+    background: #e0e7ff;
+    color: #4f46e5;
+}
+
+[data-type="shortcut"]:hover {
+    background: #e0e7ff;
+    border-color: #c7d2fe;
+}
+
+[data-type="shortcut"].shortcut-result-selected {
+    background: #eef2ff !important;
+    border-color: #c7d2fe !important;
+}
+
+    [data-type="shortcut"].shortcut-result-selected .shortcut-result-icon {
+        background: #c7d2fe;
+        color: #4338ca;
+    }
+
+    [data-type="shortcut"].shortcut-result-selected .shortcut-result-name {
+        color: #4338ca;
+    }
+
+    [data-type="shortcut"].shortcut-result-selected .shortcut-result-action {
+        color: #6366f1;
+        transform: translateX(3px);
+    }
+
+/* =========================================
+   Employee — Blue
+========================================= */
+[data-type="employee"] .shortcut-result-icon {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+[data-type="employee"]:hover {
+    background: #dbeafe;
+    border-color: #bfdbfe;
+}
+
+[data-type="employee"].shortcut-result-selected {
+    background: #e8f4fd !important;
+    border-color: #93c5fd !important;
+}
+
+    [data-type="employee"].shortcut-result-selected .shortcut-result-icon {
+        background: #bfdbfe;
+        color: #1e40af;
+    }
+
+    [data-type="employee"].shortcut-result-selected .shortcut-result-name {
+        color: #1e40af;
+    }
+
+    [data-type="employee"].shortcut-result-selected .shortcut-result-action {
+        color: #1d4ed8;
+        transform: translateX(3px);
+    }
+
+/* =========================================
+   Company — Emerald
+========================================= */
+[data-type="company"] .shortcut-result-icon {
+    background: #d1fae5;
+    color: #059669;
+}
+
+[data-type="company"]:hover {
+    background: #d1fae5;
+    border-color: #a7f3d0;
+}
+
+[data-type="company"].shortcut-result-selected {
+    background: #e8faf0 !important;
+    border-color: #6ee7b7 !important;
+}
+
+    [data-type="company"].shortcut-result-selected .shortcut-result-icon {
+        background: #a7f3d0;
+        color: #047857;
+    }
+
+    [data-type="company"].shortcut-result-selected .shortcut-result-name {
+        color: #047857;
+    }
+
+    [data-type="company"].shortcut-result-selected .shortcut-result-action {
+        color: #059669;
+        transform: translateX(3px);
+    }
+
+/* =========================================
+   Shared hover action arrow
+========================================= */
+.shortcut-result-item:hover .shortcut-result-action {
+    background: #e2e8f0;
+    color: #64748b;
+}
+
+/* =========================================
+   Result Icon — base
+========================================= */
+.shortcut-result-icon {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    font-size: 17px;
+    transition: all 0.15s ease;
+}
+
+/* =========================================
+   Result Info
+========================================= */
+.shortcut-result-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.shortcut-result-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #1e293b;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.15s;
+}
+
+.shortcut-result-description {
+    font-size: 10px;
+    color: #64748b;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =========================================
+   Result Action Arrow
+========================================= */
+.shortcut-result-action {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    color: #94a3b8;
+    font-size: 13px;
+    background: #e2e8f0;
+    transition: all 0.15s ease;
+}
+
+/* =========================================
+   Badges
+========================================= */
+.shortcut-result-badge {
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-left: 6px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.badge-employee {
+    color: #1d4ed8;
+    background: #dbeafe;
+}
+
+.badge-company {
+    color: #059669;
+    background: #d1fae5;
+}
+
+/* =========================================
+   No Results
+========================================= */
+.shortcut-no-result {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 12px;
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.shortcut-no-result-icon {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e2e8f0;
+    border-radius: 10px;
+    color: #94a3b8;
+    font-size: 18px;
+}
+
+.shortcut-no-result-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.shortcut-no-result-text {
+    font-size: 10px;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+/* =========================================
+   Mobile
+========================================= */
+@media (max-width: 768px) {
+    .shortcut-search-wrapper {
+        width: 250px;
+    }
+
+    .shortcut-search-kbd {
+        display: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .shortcut-search-wrapper {
+        width: 180px;
+    }
+}
