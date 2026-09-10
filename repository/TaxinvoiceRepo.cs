@@ -721,6 +721,65 @@ namespace WLSPL_ERP_CRM.repository
         }
 
 
+        public async Task<List<TaxInvoiceCreate>> GetApprovelList()
+        {
+            using var connection = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg"));
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@Action", "GetApprovelList");
+
+            var invoices = await connection.QueryAsync<TaxInvoiceCreate>(
+                "SP_TaxInvoice",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
+
+            return invoices.ToList();
+
+        }
+
+        public async Task<bool> Approve(int id, string user)
+        {
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
+            {
+                using (SqlCommand cmd = new SqlCommand("SP_TaxInvoice", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Action", "Approve");
+                    cmd.Parameters.AddWithValue("@ID", id);
+                    cmd.Parameters.AddWithValue("@Createdby", user);
+
+                    await con.OpenAsync();
+
+                    int result = await cmd.ExecuteNonQueryAsync();
+
+                    return result > 0;
+                }
+            }
+        }
+
+        public async Task<bool> Reject(int id, string user)
+        {
+            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
+            {
+                using (SqlCommand cmd = new SqlCommand("SP_TaxInvoice", con))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    cmd.Parameters.AddWithValue("@Action", "Reject");
+                    cmd.Parameters.AddWithValue("@ID", id);
+                    cmd.Parameters.AddWithValue("@Createdby", user);
+
+                    await con.OpenAsync();
+
+                    int result = await cmd.ExecuteNonQueryAsync();
+
+                    return result > 0;
+                }
+            }
+        }
     }
 }
 

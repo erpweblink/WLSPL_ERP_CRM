@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using iTextSharp.text;
+using Microsoft.AspNetCore.Mvc;
 using WLSPL_ERP_CRM.Models;
 using WLSPL_ERP_CRM.repository;
 using static WLSPL_ERP_CRM.Models.Taxinvoice;
@@ -205,6 +206,93 @@ namespace WLSPL_ERP_CRM.Controllers
             return Json(new { success = true, invoiceNo = model.main.invoiceno });
         }
 
+
+        public async Task<IActionResult> ApprovalList()
+        {
+            var list = await _TaxinvoiceRepo.GetApprovelList();
+            return View(list);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Approve(int ID)
+        {
+            try
+            {
+                if (ID <= 0)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Invalid  ID."
+                    });
+                }
+                var EmpCode = HttpContext.Session.GetString("EmpCode")?.ToString();
+                var result = await _TaxinvoiceRepo.Approve(ID, EmpCode);
+
+                if (result)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Approved successfully."
+                    });
+                }
+
+                return Json(new
+                {
+                    success = false,
+                    message = "Invoice could not be Approve."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> Reject(int ID)
+        {
+            try
+            {
+                if (ID <= 0)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Invalid Tax Invoice."
+                    });
+                }
+                var EmpCode = HttpContext.Session.GetString("EmpCode")?.ToString();
+                var result = await _TaxinvoiceRepo.Reject(ID, EmpCode);
+
+                if (result)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        message = " Rejected successfully."
+                    });
+                }
+
+                return Json(new
+                {
+                    success = false,
+                    message = "Tax-Invoice could not be Reject."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
     }
 
 }

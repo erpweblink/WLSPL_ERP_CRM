@@ -45,6 +45,7 @@ builder.Services.AddScoped<ITaxinvoiceRepo, TaxinvoiceRepo>();
 builder.Services.AddScoped<IDashboardRepo, DashboardRepo>();
 builder.Services.AddScoped<INotificationRepo, NotificationRepo>();
 builder.Services.AddScoped<IShortcutRepo, ShortcutRepo>();
+builder.Services.AddScoped<IReports, RepoReports>();
 
 
 // ======================================================
