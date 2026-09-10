@@ -1349,6 +1349,12 @@
                                 <i class='fas fa-briefcase'></i>Executive
                             </small>
                         </div>
+                         <button type='button' class='employee-info-btn'
+                                data-empcode={Safe(exec.EmpCode)}
+                                onclick='event.stopPropagation(); showEmployeeInfo(this);'
+                                title='Employee Information'>
+                                <i class='fas fa-info'></i>
+                         </button>
                     </div>
                 ");
                 }
@@ -1640,7 +1646,6 @@ else
        const currentRole  = document.getElementById("currentRole")?.value?.trim()?.toLowerCase();
 
        if (currentRole === "admin") return;
-
             const currentNode = document.querySelector(
                 `.node[data-empcode="${CSS.escape(currentEmpCode)}"]`
             );
