@@ -27,9 +27,7 @@
             console.error("Shortcut loading error:", error);
         });
 
-
     function searchShortcuts(value) {
-
         const searchValue = value.toLowerCase().trim();
 
         if (!searchValue) {
@@ -37,27 +35,34 @@
             return;
         }
 
-        const results = shortcuts.filter(item => {
-
+        const staticResults = shortcuts.filter(item => {
             const name = (item.name || "").toLowerCase();
             const description = (item.description || "").toLowerCase();
-
-            const keywords = Array.isArray(item.keywords)
-                ? item.keywords
-                : [];
+            const keywords = Array.isArray(item.keywords) ? item.keywords : [];
 
             return (
                 name.includes(searchValue) ||
                 description.includes(searchValue) ||
-                keywords.some(keyword =>
-                    keyword.toLowerCase().includes(searchValue)
-                )
+                keywords.some(k => k.toLowerCase().includes(searchValue))
             );
         });
 
-        renderResults(results);
-    }
+        Promise.all([
+            fetch(`/Shortcut/SearchEmployees?q=${encodeURIComponent(searchValue)}`).then(r => r.ok ? r.json() : []),
+            fetch(`/Shortcut/SearchCompanies?q=${encodeURIComponent(searchValue)}`).then(r => r.ok ? r.json() : [])
+        ])
+            .then(([employeeResults, companyResults]) => {
+                const taggedStatic = staticResults.map(i => ({ ...i, resultType: "shortcut" }));
+                const taggedEmployees = employeeResults.map(i => ({ ...i, resultType: "employee" }));
+                const taggedCompanies = companyResults.map(i => ({ ...i, resultType: "company" }));
 
+                const combined = [...taggedStatic, ...taggedEmployees, ...taggedCompanies];
+                renderResults(combined);
+            })
+            .catch(() => {
+                renderResults(staticResults); 
+            });
+    }
 
     function renderResults(results) {
 
@@ -103,32 +108,33 @@
         const visibleResults = results.slice(0, 8);
 
         visibleResults.forEach((item, index) => {
-           const resultItem = document.createElement("a");
-           resultItem.href = item.url || "#";
-           resultItem.className = "shortcut-result-item";
-           resultItem.dataset.index = index;
+            const resultItem = document.createElement("a");
+            resultItem.href = item.url || "#";
+            resultItem.className = "shortcut-result-item";
+            resultItem.dataset.index = index;
+            resultItem.dataset.type = item.resultType || "shortcut"; // ← tag type
 
-           resultItem.innerHTML = `
+            resultItem.innerHTML = `
                 <div class="shortcut-result-icon">
                     <i class="${item.icon || "las la-link"}"></i>
                 </div>
 
                 <div class="shortcut-result-info">
-
                     <div class="shortcut-result-name">
                         ${escapeHtml(item.name || "")}
+                        ${item.resultType === "employee" ? '<span class="shortcut-result-badge badge-employee">Employee</span>' : ""}
+                        ${item.resultType === "company" ? '<span class="shortcut-result-badge badge-company">Company</span>' : ""}
                     </div>
-
                     <div class="shortcut-result-description">
                         ${escapeHtml(item.description || "")}
                     </div>
-
                 </div>
 
                 <div class="shortcut-result-action">
                     <i class="las la-arrow-right"></i>
                 </div>
             `;
+
             resultItem.addEventListener("mouseenter", function () {
                 selectedIndex = index;
                 updateSelection();
@@ -141,7 +147,6 @@
         resultsContainer.style.display = "block";
         updateSelection();
     }
-
 
     function updateSelection() {
         const items = resultsContainer.querySelectorAll(
@@ -228,7 +233,6 @@
         resultsContainer.innerHTML = "";
         selectedIndex = 0;
     }
-
 
     function escapeHtml(value) {
         const div = document.createElement("div");

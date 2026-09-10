@@ -17,13 +17,6 @@ builder.Services.AddScoped(resolver =>
         .GetSection("GovKey")
         .Get<GovKeySettings>());
 
-// ======================================================
-// SEARCH BUTTON CONFIGURATION
-// ======================================================
-builder.Services.Configure<List<ShortcutItem>>(
-    builder.Configuration.GetSection("Shortcuts"));
-
-
 
 // ======================================================
 // MVC
@@ -51,6 +44,7 @@ builder.Services.AddScoped<IServicesRepo, ServicesRepo>();
 builder.Services.AddScoped<ITaxinvoiceRepo, TaxinvoiceRepo>();
 builder.Services.AddScoped<IDashboardRepo, DashboardRepo>();
 builder.Services.AddScoped<INotificationRepo, NotificationRepo>();
+builder.Services.AddScoped<IShortcutRepo, ShortcutRepo>();
 
 
 // ======================================================
