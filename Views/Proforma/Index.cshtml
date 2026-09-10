@@ -25,6 +25,97 @@
         display: inline-block;
     }
 </style>
+<style>
+    /* =========================================
+           MAIN PROFORMA TABLE
+           ========================================= */
+
+    .proforma-main-table-wrapper {
+        height: 600px;
+        overflow-y: auto;
+        overflow-x: auto;
+        position: relative;
+    }
+
+    #tblProforma {
+        width: 100%;
+        margin-bottom: 0 !important;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+        #tblProforma thead th {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background-color: #f8f9fa !important;
+            color: #212529;
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.12);
+            white-space: nowrap;
+        }
+
+        #tblProforma tbody td {
+            white-space: nowrap;
+        }
+
+    /* Main table scrollbar */
+    .proforma-main-table-wrapper::-webkit-scrollbar {
+        width: 7px;
+        height: 7px;
+    }
+
+    .proforma-main-table-wrapper::-webkit-scrollbar-thumb {
+        background: #aaa;
+        border-radius: 10px;
+    }
+
+    .proforma-main-table-wrapper::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+
+    /* =========================================
+           PROFORMA DETAILS MODAL
+           ========================================= */
+
+    #ProformaModal .proforma-table-wrapper {
+        max-height: 500px;
+        overflow-y: auto;
+        overflow-x: auto;
+        position: relative;
+    }
+
+    #ProformaModal #tblProformaList {
+        width: 100%;
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+        #ProformaModal #tblProformaList thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: #f8f9fa !important;
+            color: #212529;
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.08);
+            white-space: nowrap;
+        }
+
+    #ProformaModal .proforma-table-wrapper::-webkit-scrollbar {
+        width: 7px;
+        height: 7px;
+    }
+
+    #ProformaModal .proforma-table-wrapper::-webkit-scrollbar-thumb {
+        background: #aaa;
+        border-radius: 10px;
+    }
+
+    #ProformaModal .proforma-table-wrapper::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+</style>
 <!-- Loader -->
 <div id="loader" style="display:none;">
     <div class="text-center">
@@ -96,7 +187,7 @@
 
 
         <!-- ================= TABLE ================= -->
-        <div class="table-responsive">
+        <div class="proforma-main-table-wrapper">
 
             <table id="tblProforma"
                    class="table table-bordered table-hover align-middle"
@@ -235,7 +326,6 @@
         </div>
 
         <nav>
-
             <ul class="pagination justify-content-center mt-3"
                 id="pagination">
             </ul>
@@ -273,7 +363,7 @@
 
             <div class="modal-body">
 
-                <div class="table-responsive">
+                <div class="proforma-table-wrapper">
 
                     <table id="tblProformaList"
                            class="table table-bordered table-striped"
@@ -282,15 +372,12 @@
                         <thead class="table-light">
 
                             <tr>
-
-                                <th>Service </th>
+                                <th>Service</th>
                                 <th>Sac Code.</th>
                                 <th>Qty</th>
                                 <th>Rate</th>
                                 <th>Amount</th>
                                 <th>Total</th>
-
-
                             </tr>
 
                         </thead>
