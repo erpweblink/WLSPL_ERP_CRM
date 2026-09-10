@@ -25,6 +25,53 @@
         display: inline-block;
     }
 </style>
+<style>
+    /* Work Order Main Table */
+    .workorder-main-table-wrapper {
+        height: 600px;
+        overflow-y: auto;
+        overflow-x: auto;
+        position: relative;
+    }
+
+    #tblWorkOrder {
+        width: 100%;
+        margin-bottom: 0 !important;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+        /* Fixed Header */
+        #tblWorkOrder thead th {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background-color: #f8f9fa !important;
+            color: #212529;
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.12);
+            white-space: nowrap;
+        }
+
+        /* Prevent text wrapping */
+        #tblWorkOrder tbody td {
+            white-space: nowrap;
+        }
+
+    /* Scrollbar */
+    .workorder-main-table-wrapper::-webkit-scrollbar {
+        width: 7px;
+        height: 7px;
+    }
+
+    .workorder-main-table-wrapper::-webkit-scrollbar-thumb {
+        background: #aaa;
+        border-radius: 10px;
+    }
+
+    .workorder-main-table-wrapper::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+</style>
 <!-- Loader -->
 <div id="loader" style="display:none;">
     <div class="text-center">
@@ -96,7 +143,7 @@
 
 
         <!-- ================= TABLE ================= -->
-        <div class="table-responsive">
+        <div class="workorder-main-table-wrapper">
 
             <table id="tblWorkOrder"
                    class="table table-bordered table-hover align-middle"
