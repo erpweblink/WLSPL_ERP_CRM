@@ -424,7 +424,47 @@
 
 </style>
 
+<style>
+    /* Modal fixed height */
+    .sales-table-modal .modal-content {
+        height: 600px;
+    }
 
+    /* Scroll only table area */
+    .sales-table-wrapper {
+        height: 450px;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    /* Fixed table header */
+    .sales-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #1f2937;
+        color: #fff;
+    }
+
+    /* Keep header aligned */
+    .sales-table {
+        margin-bottom: 0 !important;
+    }
+
+    /* Optional scrollbar */
+    .sales-table-wrapper::-webkit-scrollbar {
+        width: 7px;
+    }
+
+    .sales-table-wrapper::-webkit-scrollbar-thumb {
+        background: #aaa;
+        border-radius: 10px;
+    }
+
+    .sales-table-wrapper::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+</style>
 <div class="container-fluid sp-report">
 
     <!-- HEADER -->
@@ -526,8 +566,9 @@
 
                             <div class="modal-dialog modal-lg modal-dialog-centered">
 
-                                <div class="modal-content">
+                                <div class="modal-content sales-table-modal">
 
+                                    <!-- HEADER -->
                                     <div class="modal-header">
 
                                         <div>
@@ -548,99 +589,88 @@
                                     </div>
 
 
-                                    <!-- MODAL BODY -->
+                                    <!-- BODY -->
                                     <div class="modal-body p-0">
-                                        <div style="overflow-x: auto; max-height: 600px; overflow-y: auto; border: 1px solid #ccc;">
-                                            <div class="table-responsive">
 
-                                                <table class="table table-hover align-middle mb-0 sales-table">
+                                        <div class="sales-table-wrapper">
 
-                                                    <thead class="tablehead">
+                                            <table class="table table-hover align-middle mb-0 sales-table">
+
+                                                <thead class="tablehead">
+                                                    <tr>
+                                                        <th>Rank</th>
+                                                        <th>Salesperson</th>
+                                                        <th>Share of top</th>
+                                                        <th class="text-end">Total sales</th>
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody>
+
+                                                    @{
+                                                        int rank = 1;
+                                                    }
+
+                                                    @foreach (var person in monthData)
+                                                    {
+                                                        var rankClass = rank <= 3
+                                                        ? $"rank-{rank}"
+                                                        : "";
+
+                                                        var sharePct =
+                                                        (topPerson != null && topPerson.TotalAmount > 0)
+                                                        ? (double)(person.TotalAmount / topPerson.TotalAmount * 100)
+                                                        : 0;
 
                                                         <tr>
 
-                                                            <th>
-                                                                Rank
-                                                            </th>
+                                                            <!-- RANK -->
+                                                            <td>
+                                                                <span class="rank-number @rankClass">
+                                                                    @rank
+                                                                </span>
+                                                            </td>
 
-                                                            <th>
-                                                                Salesperson
-                                                            </th>
+                                                            <!-- SALESPERSON -->
+                                                            <td>
+                                                                <strong>
+                                                                    @person.Name
+                                                                </strong>
+                                                            </td>
 
-                                                            <th>
-                                                                Share of top
-                                                            </th>
+                                                            <!-- SHARE -->
+                                                            <td class="share-cell">
 
-                                                            <th>
-                                                                Total sales
-                                                            </th>
+                                                                <div class="share-track">
+                                                                    <div class="share-fill @rankClass"
+                                                                         style="width:@(sharePct.ToString("0.#"))%;">
+                                                                    </div>
+                                                                </div>
+
+                                                            </td>
+
+                                                            <!-- AMOUNT -->
+                                                            <td class="text-end pe-4">
+                                                                <strong class="amount tnum">
+                                                                    ₹@person.TotalAmount.ToString("N2")
+                                                                </strong>
+                                                            </td>
 
                                                         </tr>
 
-                                                    </thead>
+                                                        rank++;
+                                                    }
 
+                                                </tbody>
 
-                                                    <tbody>
+                                            </table>
 
-                                                        @{
-                                                            int rank = 1;
-                                                        }
-
-                                                        @foreach (var person in monthData)
-                                                        {
-                                                            var rankClass = rank <= 3 ? $"rank-{rank}" : "";
-                                                            var sharePct = (topPerson != null && topPerson.TotalAmount > 0)
-                                                            ? (double)(person.TotalAmount / topPerson.TotalAmount * 100)
-                                                            : 0;
-
-                                                            <tr>
-
-                                                                <!-- RANK -->
-                                                                <td class="tablehead">
-                                                                    <span class="rank-number @rankClass">
-                                                                        @rank
-                                                                    </span>
-                                                                </td>
-
-
-                                                                <!-- SALESPERSON -->
-                                                                <td>
-                                                                    <strong>
-                                                                        @person.Name
-                                                                    </strong>
-                                                                </td>
-
-
-                                                                <!-- SHARE -->
-                                                                <td class="share-cell">
-                                                                    <div class="share-track">
-                                                                        <div class="share-fill @rankClass" style="width:@(sharePct.ToString("0.#"))%;"></div>
-                                                                    </div>
-                                                                </td>
-
-
-                                                                <!-- AMOUNT -->
-                                                                <td class="text-end pe-4">
-                                                                    <strong class="amount tnum">
-                                                                        ₹@person.TotalAmount.ToString("N2")
-                                                                    </strong>
-                                                                </td>
-
-                                                            </tr>
-
-                                                            rank++;
-                                                        }
-
-                                                    </tbody>
-
-                                                </table>
-
-                                            </div>
                                         </div>
+
                                     </div>
 
 
-                                    <!-- MODAL FOOTER -->
+                                    <!-- FOOTER -->
                                     <div class="modal-footer">
 
                                         <div class="me-auto text-muted">
@@ -650,9 +680,7 @@
                                         <button type="button"
                                                 class="btn btn-secondary"
                                                 data-bs-dismiss="modal">
-
                                             Close
-
                                         </button>
 
                                     </div>
