@@ -25,6 +25,46 @@
         display: inline-block;
     }
 </style>
+<style>
+    /* Fixed header inside quotation details modal */
+    #QuotationModal .quotation-table-wrapper {
+        max-height: 500px;
+        overflow-y: auto;
+        overflow-x: auto;
+    }
+
+    /* Sticky table header */
+    #QuotationModal #tblQuotationList thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: #f8f9fa !important;
+        color: #212529;
+        box-shadow: 0 2px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Keep table layout stable */
+    #QuotationModal #tblQuotationList {
+        margin-bottom: 0;
+        width: 100%;
+    }
+
+    /* Scrollbar */
+    #QuotationModal .quotation-table-wrapper::-webkit-scrollbar {
+        width: 7px;
+        height: 7px;
+    }
+
+    #QuotationModal .quotation-table-wrapper::-webkit-scrollbar-thumb {
+        background: #aaa;
+        border-radius: 10px;
+    }
+
+    #QuotationModal .quotation-table-wrapper::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+</style>
+
 <!-- Loader -->
 <div id="loader" style="display:none;">
     <div class="text-center">
@@ -96,7 +136,7 @@
 
 
         <!-- ================= TABLE ================= -->
-        <div class="table-responsive">
+        <div class="quotation-table-wrapper">
 
             <table id="tblQuotation"
                    class="table table-bordered table-hover align-middle"
@@ -209,7 +249,7 @@
 
                             </tr>
 
-                            count++;
+                                        count++;
                         }
                     }
                     else
@@ -482,10 +522,10 @@
 
                         $.each(details, function (i, item) {
                             html += `
-                                <tr>                          
+                                <tr>
                                     <td>${item.productDescription ?? ""}</td>
                                     <td>${item.sacCode ?? ""}</td>
-                                    <td class="text-end">${item.qty ?? 0}</td>                           
+                                    <td class="text-end">${item.qty ?? 0}</td>
                                     <td class="text-end">${item.rate ?? 0}</td>
                                     <td class="text-end">${item.taxableValue ?? 0}</td>
                                     <td class="text-end">${item.total ?? 0}</td>
@@ -577,7 +617,7 @@
                 }
                 const byteArray = new Uint8Array(byteNumbers);
                 const blob = new Blob([byteArray], { type: 'application/pdf' });
-                const url = window.URL.createObjectURL(blob);              
+                const url = window.URL.createObjectURL(blob);
                 window.open(url);
                 setTimeout(() => window.URL.revokeObjectURL(url), 10000);
                 } else {
