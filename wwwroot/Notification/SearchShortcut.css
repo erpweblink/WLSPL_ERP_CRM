@@ -25,7 +25,7 @@
 }
 
     .shortcut-search-box:focus-within {
-        background: #fff;
+        background: #f1f5f9;
         border-color: #6366f1;
         box-shadow: 0 0 0 3px rgba(99, 102, 241, .1);
     }
@@ -92,8 +92,8 @@
     max-height: 430px;
     padding: 6px;
     overflow-y: auto;
-    background: #ffffff;
-    border: 1px solid #e8eef5;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     border-radius: 16px;
     box-shadow: 0 20px 50px rgba(15,23,42,0.13), 0 4px 12px rgba(15,23,42,0.06);
 }
@@ -120,7 +120,7 @@
     justify-content: space-between;
     padding: 6px 10px 9px;
     margin-bottom: 3px;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid #e2e8f0;
 }
 
     .shortcut-results-header span:first-child {
@@ -134,14 +134,14 @@
     .shortcut-results-header span:last-child {
         font-size: 9px;
         font-weight: 600;
-        color: #fff;
+        color: #f8fafc;
         background: #6366f1;
         padding: 2px 7px;
         border-radius: 20px;
     }
 
 /* =========================================
-   Result Item
+   Result Item — Base
 ========================================= */
 .shortcut-result-item {
     display: flex;
@@ -156,41 +156,119 @@
     cursor: pointer;
     transition: all 0.15s ease;
     min-height: 52px;
+    background: #f1f5f9;
 }
 
     .shortcut-result-item:last-child {
         margin-bottom: 0;
     }
 
-    .shortcut-result-item:hover {
-        background: #f8fafc;
-        border-color: #e8eef5;
+/* =========================================
+   Shortcut (static) — Indigo
+========================================= */
+[data-type="shortcut"] .shortcut-result-icon {
+    background: #e0e7ff;
+    color: #4f46e5;
+}
+
+[data-type="shortcut"]:hover {
+    background: #e0e7ff;
+    border-color: #c7d2fe;
+}
+
+[data-type="shortcut"].shortcut-result-selected {
+    background: #eef2ff !important;
+    border-color: #c7d2fe !important;
+}
+
+    [data-type="shortcut"].shortcut-result-selected .shortcut-result-icon {
+        background: #c7d2fe;
+        color: #4338ca;
     }
 
-    .shortcut-result-item.shortcut-result-selected {
-        background: #eef2ff !important;
-        border-color: #c7d2fe !important;
+    [data-type="shortcut"].shortcut-result-selected .shortcut-result-name {
+        color: #4338ca;
     }
 
-        .shortcut-result-item.shortcut-result-selected
-        .shortcut-result-icon {
-            background: #e0e7ff;
-            color: #4f46e5;
-        }
-
-        .shortcut-result-item.shortcut-result-selected
-        .shortcut-result-name {
-            color: #4338ca;
-        }
-
-        .shortcut-result-item.shortcut-result-selected
-        .shortcut-result-action {
-            color: #6366f1;
-            transform: translateX(3px);
-        }
+    [data-type="shortcut"].shortcut-result-selected .shortcut-result-action {
+        color: #6366f1;
+        transform: translateX(3px);
+    }
 
 /* =========================================
-   Result Icon
+   Employee — Blue
+========================================= */
+[data-type="employee"] .shortcut-result-icon {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+[data-type="employee"]:hover {
+    background: #dbeafe;
+    border-color: #bfdbfe;
+}
+
+[data-type="employee"].shortcut-result-selected {
+    background: #e8f4fd !important;
+    border-color: #93c5fd !important;
+}
+
+    [data-type="employee"].shortcut-result-selected .shortcut-result-icon {
+        background: #bfdbfe;
+        color: #1e40af;
+    }
+
+    [data-type="employee"].shortcut-result-selected .shortcut-result-name {
+        color: #1e40af;
+    }
+
+    [data-type="employee"].shortcut-result-selected .shortcut-result-action {
+        color: #1d4ed8;
+        transform: translateX(3px);
+    }
+
+/* =========================================
+   Company — Emerald
+========================================= */
+[data-type="company"] .shortcut-result-icon {
+    background: #d1fae5;
+    color: #059669;
+}
+
+[data-type="company"]:hover {
+    background: #d1fae5;
+    border-color: #a7f3d0;
+}
+
+[data-type="company"].shortcut-result-selected {
+    background: #e8faf0 !important;
+    border-color: #6ee7b7 !important;
+}
+
+    [data-type="company"].shortcut-result-selected .shortcut-result-icon {
+        background: #a7f3d0;
+        color: #047857;
+    }
+
+    [data-type="company"].shortcut-result-selected .shortcut-result-name {
+        color: #047857;
+    }
+
+    [data-type="company"].shortcut-result-selected .shortcut-result-action {
+        color: #059669;
+        transform: translateX(3px);
+    }
+
+/* =========================================
+   Shared hover action arrow
+========================================= */
+.shortcut-result-item:hover .shortcut-result-action {
+    background: #e2e8f0;
+    color: #64748b;
+}
+
+/* =========================================
+   Result Icon — base
 ========================================= */
 .shortcut-result-icon {
     width: 36px;
@@ -200,8 +278,6 @@
     align-items: center;
     justify-content: center;
     border-radius: 9px;
-    background: #f1f5f9;
-    color: #6366f1;
     font-size: 17px;
     transition: all 0.15s ease;
 }
@@ -227,7 +303,7 @@
 
 .shortcut-result-description {
     font-size: 10px;
-    color: #94a3b8;
+    color: #64748b;
     margin-top: 2px;
     white-space: nowrap;
     overflow: hidden;
@@ -245,15 +321,34 @@
     align-items: center;
     justify-content: center;
     border-radius: 6px;
-    color: #cbd5e1;
+    color: #94a3b8;
     font-size: 13px;
-    background: #f8fafc;
+    background: #e2e8f0;
     transition: all 0.15s ease;
 }
 
-.shortcut-result-item:hover .shortcut-result-action {
-    background: #e2e8f0;
-    color: #64748b;
+/* =========================================
+   Badges
+========================================= */
+.shortcut-result-badge {
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-left: 6px;
+    vertical-align: middle;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.badge-employee {
+    color: #1d4ed8;
+    background: #dbeafe;
+}
+
+.badge-company {
+    color: #059669;
+    background: #d1fae5;
 }
 
 /* =========================================
@@ -264,6 +359,8 @@
     align-items: center;
     gap: 12px;
     padding: 20px 12px;
+    background: #f1f5f9;
+    border-radius: 10px;
 }
 
 .shortcut-no-result-icon {
@@ -273,7 +370,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #f1f5f9;
+    background: #e2e8f0;
     border-radius: 10px;
     color: #94a3b8;
     font-size: 18px;
