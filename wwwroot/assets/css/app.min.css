@@ -1911,7 +1911,7 @@ html[data-bs-theme=dark] .logo-dark, html[data-startbar=dark] .logo-dark {
         }
 
             .topbar .topbar-custom .nav-link.mobile-menu-btn {
-                margin-left: 0;
+                margin-left: 10px;
                 -webkit-transition: .3s;
                 transition: .3s
             }
@@ -1929,7 +1929,7 @@ html[data-bs-theme=dark] .logo-dark, html[data-startbar=dark] .logo-dark {
                 -ms-flex-align: center;
                 align-items: center;
                 /*border-radius: 50%;*/
-                background-color: var(--bs-topbar-bg);
+                /*background-color: var(--bs-topbar-bg);*/
                 -webkit-box-shadow: 0 3px 16px rgba(142,134,171,.05);
                 box-shadow: 0 3px 16px rgba(142,134,171,.05)
             }
