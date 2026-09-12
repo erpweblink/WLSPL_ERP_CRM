@@ -44,8 +44,10 @@ namespace WEBLINK_CRM.Models
         [Required(ErrorMessage = "Please select Sales TL Manager")]
         public bool Sales_TL_Manager { get; set; }
 
-        [Required(ErrorMessage = "Designation is required")]
         public string? Designation { get; set; }
+
+        [Required(ErrorMessage = "Department is required")]
+        public string? Department { get; set; }
 
         public bool isdeleted { get; set; }
 
