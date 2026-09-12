@@ -26,7 +26,7 @@ namespace WEBLINK_CRM.Controllers
             var users = _repository.GetAllUsers();
 
             var managers = users
-                .Where(u => u.Sales_TL_Manager == true && u.status == true)
+                .Where(u => u.status == true)
                 .Select(u => new { UserCode = u.empcode, FullName = u.name })
                 .ToList();
 
