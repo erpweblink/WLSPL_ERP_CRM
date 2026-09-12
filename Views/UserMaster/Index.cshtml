@@ -607,18 +607,7 @@
 
                 <div class="col-xl-3 col-lg-3 col-md-6">
                     <label class="modern-label">
-                        <i class="fa-solid fa-magnifying-glass"></i> Search
-                    </label>
-                    <div class="search-wrapper">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                        <input type="text" id="searchInput" class="search-input"
-                               placeholder="Search name or username…" />
-                    </div>
-                </div>
-
-                <div class="col-xl-3 col-lg-3 col-md-6">
-                    <label class="modern-label">
-                        <i class="fa-solid fa-user-tie"></i> Sales Manager / TL
+                        <i class="fa-solid fa-user-tie"></i> Search
                     </label>
                     <select id="ddlTeamuser" class="form-control modern-control">
                         <option value="">— All Managers —</option>
@@ -937,8 +926,7 @@
     function getFilterPayload() {
         return {
             ManagerEmpCode: document.getElementById('ddlTeamuser').value,
-            Status:         document.getElementById('ddlStatus').value,
-            Search:         document.getElementById('searchInput').value
+            Status:         document.getElementById('ddlStatus').value
         };
     }
 
@@ -961,15 +949,10 @@
         });
     }
 
-    document.getElementById('searchInput').addEventListener('keyup', function () {
-        clearTimeout(searchTimer);
-        searchTimer = setTimeout(triggerSearch, 300);
-    });
-
     document.getElementById('ddlStatus').addEventListener('change', triggerSearch);
 
     document.getElementById('btnresetfilter').addEventListener('click', function () {
-        document.getElementById('searchInput').value = '';
+        
         document.getElementById('ddlStatus').value   = '';
         if (window.$ && $('#ddlTeamuser').data('select2')) {
             $('#ddlTeamuser').val('').trigger('change.select2');
