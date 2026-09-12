@@ -89,39 +89,7 @@ namespace WEBLINK_CRM.repository
             using SqlConnection con = new SqlConnection(
                 _configuration.GetConnectionString("Conn_Stringg"));
 
-            // If no manager selected, flat list with optional filters
-            string query = string.IsNullOrWhiteSpace(managerEmpCode)
-                ? @"SELECT *, 0 AS level, '|' + empcode + '|' AS path
-            FROM employees
-            WHERE isdeleted = 0
-              AND (@Search IS NULL OR name LIKE '%' + @Search + '%')
-              AND (@Status IS NULL OR 
-                   CASE WHEN @Status = 'Active' THEN 1 ELSE 0 END = status)
-            ORDER BY id ASC"
-                : @"WITH OrgHierarchy AS (
-                SELECT id, empcode, name, email, mobile, role, status,
-                       UserName, Designation, TL_Manager, Sales_TL_Manager,
-                       0 AS level,
-                       CAST('|' + empcode + '|' AS NVARCHAR(MAX)) AS path
-                FROM employees
-                WHERE isdeleted = 0 AND empcode = @ManagerEmpCode
-
-                UNION ALL
-
-                SELECT e.id, e.empcode, e.name, e.email, e.mobile, e.role, e.status,
-                       e.UserName, e.Designation, e.TL_Manager, e.Sales_TL_Manager,
-                       h.level + 1,
-                       CAST(h.path + e.empcode + '|' AS NVARCHAR(MAX))
-                FROM employees e
-                INNER JOIN OrgHierarchy h ON e.TL_Manager = h.empcode
-                WHERE e.isdeleted = 0
-            )
-            SELECT * FROM OrgHierarchy
-            WHERE (@Search IS NULL OR name LIKE '%' + @Search + '%')
-              AND (@Status IS NULL OR 
-                   CASE WHEN @Status = 'Active' THEN 1 ELSE 0 END = status)
-            ORDER BY path ASC";
-
+            string query = @" SELECT id, empcode, name, email, emailpsw, panelpsw, mobile, role, status, isdeleted, regdate, TL_Manager, UserName, Designation, ProfileImagePath, Department, level, path FROM dbo.FN_EmployeeHierarchy(@ManagerEmpCode) WHERE (@Search IS NULL OR name LIKE '%' + @Search + '%' OR empcode LIKE '%' + @Search + '%' OR UserName LIKE '%' + @Search + '%' OR email LIKE '%' + @Search + '%') AND ( @Status IS NULL OR (@Status = 'Active' AND status = 1) OR (@Status = 'Inactive' AND status = 0) ) ORDER BY path ASC;";
             SqlCommand cmd = new SqlCommand(query, con);
             cmd.Parameters.AddWithValue("@Search",
                 string.IsNullOrWhiteSpace(search) ? (object)DBNull.Value : search.Trim());
@@ -145,11 +113,9 @@ namespace WEBLINK_CRM.repository
                     role = dr["role"]?.ToString(),
                     status = Convert.ToBoolean(dr["status"]),
                     UserName = dr["UserName"]?.ToString(),
-                    Designation = dr["Designation"]?.ToString(),
+                    Department = dr["Department"]?.ToString(),
                     TL_Manager = dr["TL_Manager"] == DBNull.Value
-                                      ? null : dr["TL_Manager"].ToString(),
-                    Sales_TL_Manager = dr["Sales_TL_Manager"] != DBNull.Value
-                                         && Convert.ToBoolean(dr["Sales_TL_Manager"]),
+                                      ? null : dr["TL_Manager"].ToString(),                
                     Level = Convert.ToInt32(dr["level"]),   
                     Path = dr["path"]?.ToString()          
                 });
@@ -208,14 +174,13 @@ namespace WEBLINK_CRM.repository
 
                     UserName = dr["UserName"]?.ToString(),
 
-                    Designation = dr["Designation"]?.ToString(),
+                    Department = dr["Department"]?.ToString(),
 
                     TL_Manager = dr["TL_Manager"] == DBNull.Value
                             ? null
                             : dr["TL_Manager"].ToString(),
 
-                    Sales_TL_Manager = dr["Sales_TL_Manager"] != DBNull.Value
-                            && Convert.ToBoolean(dr["Sales_TL_Manager"]),
+                 
 
                     ProfileImagePath = dr["ProfileImagePath"] == DBNull.Value
                             ? null
@@ -289,9 +254,8 @@ namespace WEBLINK_CRM.repository
                 isdeleted,
                 regdate,
                 TL_Manager,
-                UserName,
-                Sales_TL_Manager,
-                Designation
+                UserName,           
+                Department
             )
             VALUES
             (
@@ -306,9 +270,8 @@ namespace WEBLINK_CRM.repository
                 0,
                 GETDATE(),
                 @TL_Manager,
-                @UserName,
-                @Sales_TL_Manager,
-                @Designation
+                @UserName,              
+                @Department
             )";
 
 
@@ -337,11 +300,9 @@ namespace WEBLINK_CRM.repository
 
             cmd.Parameters.AddWithValue("@UserName", model.UserName ?? "");
 
-            cmd.Parameters.AddWithValue("@Sales_TL_Manager",
-     model.Sales_TL_Manager);
 
-            cmd.Parameters.AddWithValue("@Designation",
-                model.Designation ?? "");
+            cmd.Parameters.AddWithValue("@Department",
+                model.Department ?? "");
 
 
 
@@ -369,9 +330,8 @@ namespace WEBLINK_CRM.repository
                     role = @role,
                     status = @status,
                     TL_Manager = @TL_Manager,
-                    UserName = @UserName,
-                    Sales_TL_Manager = @Sales_TL_Manager,
-                    Designation = @Designation
+                    UserName = @UserName,        
+                    Department = @Department
 
                 WHERE id = @id";
 
@@ -405,14 +365,8 @@ namespace WEBLINK_CRM.repository
             cmd.Parameters.AddWithValue("@UserName",
                 model.UserName ?? "");
 
-
-            // Stores 1 or 0
-            cmd.Parameters.AddWithValue("@Sales_TL_Manager",
-                model.Sales_TL_Manager);
-
-
-            cmd.Parameters.AddWithValue("@Designation",
-                model.Designation ?? "");
+            cmd.Parameters.AddWithValue("@Department",
+                model.Department ?? "");
 
 
             con.Open();
