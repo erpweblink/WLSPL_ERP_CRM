@@ -9,9 +9,9 @@ namespace WEBLINK_CRM.repository
 {
     public interface IWorkOrder
     {
-        Task<List<VM_WorkOrder>> GetWorkOrderList(string size);
+        Task<List<VM_WorkOrder>> GetWorkOrderList(string size, string sessionname);
         Task<List<WorkOrderDetailVM>> GetWorkOrderDEtailsByID(string wono);
-        Task<List<object>> GetCompanyList(string Status);
+        Task<List<object>> GetCompanyList(string Status, string sessionname);
         Task<List<object>> GetDepartmentlist(string Status);
 
         Task<List<object>> GetCompanyDataByCode(string Code);
