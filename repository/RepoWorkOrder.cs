@@ -80,7 +80,7 @@ namespace WEBLINK_CRM.repository
             }
         }
 
-        public async Task<List<object>> GetCompanyList(string Status)
+        public async Task<List<object>> GetCompanyList(string Status, string sessionname)
         {
             using (var connection = new SqlConnection(
                _configuration.GetConnectionString("Conn_Stringg")))
@@ -91,6 +91,7 @@ namespace WEBLINK_CRM.repository
 
                 parameters.Add("@Action", "GetCompanyList");
                 parameters.Add("@Status", Status);
+                parameters.Add("@SessionName", sessionname);
 
                 var result = await connection.QueryAsync<object>(
                     "SP_WorkOrder",
@@ -313,7 +314,7 @@ namespace WEBLINK_CRM.repository
 
         }
 
-        public async Task<List<VM_WorkOrder>> GetWorkOrderList(string size)
+        public async Task<List<VM_WorkOrder>> GetWorkOrderList(string size, string sessionname)
         {
             using (var connection = new SqlConnection(
               _configuration.GetConnectionString("Conn_Stringg")))
@@ -324,6 +325,7 @@ namespace WEBLINK_CRM.repository
 
                 parameters.Add("@Action", "GetWorkOrderList");
                 parameters.Add("@PageSize", size);
+                parameters.Add("@SessionName", sessionname);
 
                 var result = await connection.QueryAsync<VM_WorkOrder>(
      "SP_WorkOrder",

@@ -20,8 +20,9 @@ namespace WEBLINK_CRM.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
+            var loginId = HttpContext.Session.GetString("EmpCode");
             string pageSize = "10";
-            var list = await objWorkOrder.GetWorkOrderList(pageSize);
+            var list = await objWorkOrder.GetWorkOrderList(pageSize, loginId);
             return View(list);
 
         }
@@ -101,7 +102,7 @@ namespace WEBLINK_CRM.Controllers
                         Message = "Invalid request."
                     });
                 }
-                DataList.CreatedBy = HttpContext.Session.GetString("EmployeeId");
+                DataList.CreatedBy = HttpContext.Session.GetString("EmpCode");
                 int workOrderID = await objWorkOrder.SaveWorkOrder(DataList);
 
                 return Json(new
@@ -125,12 +126,12 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-                if (HttpContext.Session.GetString("EmployeeId") != null)
+                if (HttpContext.Session.GetString("EmpCode") != null)
                 {
-                    var loginId = HttpContext.Session.GetString("EmployeeId");
+                    var loginId = HttpContext.Session.GetString("EmpCode");
                     if (loginId != null)
                     {
-                        var list = await objWorkOrder.GetCompanyList(Status);
+                        var list = await objWorkOrder.GetCompanyList(Status, loginId);
                         if (list != null)
                         {
                             return Json(new { Success = true, Data = list });
@@ -160,9 +161,9 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-                if (HttpContext.Session.GetString("EmployeeId") != null)
+                if (HttpContext.Session.GetString("EmpCode") != null)
                 {
-                    var loginId = HttpContext.Session.GetString("EmployeeId");
+                    var loginId = HttpContext.Session.GetString("EmpCode");
                     if (loginId != null)
                     {
                         var list = await objWorkOrder.GetCompanyDataByCode(ID);
@@ -194,9 +195,9 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-                if (HttpContext.Session.GetString("EmployeeId") != null)
+                if (HttpContext.Session.GetString("EmpCode") != null)
                 {
-                    var loginId = HttpContext.Session.GetString("EmployeeId");
+                    var loginId = HttpContext.Session.GetString("EmpCode");
                     if (loginId != null)
                     {
                         var list = await objWorkOrder.GetServices(Dept);
@@ -229,9 +230,9 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-                if (HttpContext.Session.GetString("EmployeeId") != null)
+                if (HttpContext.Session.GetString("EmpCode") != null)
                 {
-                    var loginId = HttpContext.Session.GetString("EmployeeId");
+                    var loginId = HttpContext.Session.GetString("EmpCode");
                     if (loginId != null)
                     {
                         var list = await objWorkOrder.GetServiceByID(ID);
@@ -263,9 +264,9 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-                if (HttpContext.Session.GetString("EmployeeId") != null)
+                if (HttpContext.Session.GetString("EmpCode") != null)
                 {
-                    var loginId = HttpContext.Session.GetString("EmployeeId");
+                    var loginId = HttpContext.Session.GetString("EmpCode");
                     if (loginId != null)
                     {
                         var list = await objWorkOrder.GetDepartmentlist(Status);
@@ -298,12 +299,12 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-                if (HttpContext.Session.GetString("EmployeeId") == null)
+                if (HttpContext.Session.GetString("EmpCode") == null)
                 {
                     return RedirectToAction("Login", "Login");
                 }
 
-                var loginId = HttpContext.Session.GetString("EmployeeId");
+                var loginId = HttpContext.Session.GetString("EmpCode");
 
                 if (string.IsNullOrEmpty(loginId))
                 {

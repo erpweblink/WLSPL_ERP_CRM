@@ -21,7 +21,7 @@ namespace WEBLINK_CRM.repository
             _env = env;
         }
 
-        public async Task<List<object>> GetCompanyList(string Status)
+        public async Task<List<object>> GetCompanyList(string Status, string Session)
         {
             using (var connection = new SqlConnection(
                _configuration.GetConnectionString("Conn_Stringg")))
@@ -32,6 +32,7 @@ namespace WEBLINK_CRM.repository
 
                 parameters.Add("@Action", "GetCompanyList");
                 parameters.Add("@Status", Status);
+                parameters.Add("@SessionName", Session);
 
                 var result = await connection.QueryAsync<object>(
                     "SP_Quotation",
@@ -148,7 +149,7 @@ namespace WEBLINK_CRM.repository
 
         }
 
-        public async Task<List<VM_Quotation>> GetList(string size)
+        public async Task<List<VM_Quotation>> GetList(string size, string Session)
         {
             using (var connection = new SqlConnection(
               _configuration.GetConnectionString("Conn_Stringg")))
@@ -159,6 +160,7 @@ namespace WEBLINK_CRM.repository
 
                 parameters.Add("@Action", "GetList");
                 parameters.Add("@PageSize", size);
+                parameters.Add("@SessionName", Session);
 
                 var result = await connection.QueryAsync<VM_Quotation>(
      "SP_Quotation",

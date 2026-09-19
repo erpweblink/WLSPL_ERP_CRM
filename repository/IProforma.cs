@@ -9,9 +9,9 @@ namespace WEBLINK_CRM.repository
 {
     public interface IProforma
     {
-        Task<List<VM_Proforma>> GetProformaList(string size);
+        Task<List<VM_Proforma>> GetProformaList(string size,string sessionname);
         Task<List<ProformaDetailVM>> GetDetailsById(string wono);
-        Task<List<object>> GetCompanyList(string Status);
+        Task<List<object>> GetCompanyList(string Status, string sessionname);
         Task<List<object>> GetStateList(string Status);
         Task<List<object>> GetQuotationNoList(string Companyname);
         Task<List<object>> GetCompanyByCode(string Code);

@@ -18,8 +18,9 @@ namespace WEBLINK_CRM.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
+            var loginId = HttpContext.Session.GetString("EmpCode");
             string pageSize = "10";
-            var list = await objProforma.GetProformaList(pageSize);
+            var list = await objProforma.GetProformaList(pageSize, loginId);
             return View(list);
 
         }
@@ -100,7 +101,7 @@ namespace WEBLINK_CRM.Controllers
                         Message = "Invalid request."
                     });
                 }
-                DataList.CreatedBy = HttpContext.Session.GetString("EmployeeId");
+                DataList.CreatedBy = HttpContext.Session.GetString("EmpCode");
                 int ID = await objProforma.Save(DataList);
 
                 return Json(new
@@ -126,12 +127,12 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-                if (HttpContext.Session.GetString("EmployeeId") != null)
+                if (HttpContext.Session.GetString("EmpCode") != null)
                 {
-                    var loginId = HttpContext.Session.GetString("EmployeeId");
+                    var loginId = HttpContext.Session.GetString("EmpCode");
                     if (loginId != null)
                     {
-                        var list = await objProforma.GetCompanyList(Status);
+                        var list = await objProforma.GetCompanyList(Status, loginId);
                         if (list != null)
                         {
                             return Json(new { Success = true, Data = list });
@@ -161,9 +162,9 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-                if (HttpContext.Session.GetString("EmployeeId") != null)
+                if (HttpContext.Session.GetString("EmpCode") != null)
                 {
-                    var loginId = HttpContext.Session.GetString("EmployeeId");
+                    var loginId = HttpContext.Session.GetString("EmpCode");
                     if (loginId != null)
                     {
                         var list = await objProforma.GetCompanyByCode(ID);
@@ -196,12 +197,12 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-                if (HttpContext.Session.GetString("EmployeeId") == null)
+                if (HttpContext.Session.GetString("EmpCode") == null)
                 {
                     return RedirectToAction("Login", "Login");
                 }
 
-                var loginId = HttpContext.Session.GetString("EmployeeId");
+                var loginId = HttpContext.Session.GetString("EmpCode");
 
                 if (string.IsNullOrEmpty(loginId))
                 {
@@ -246,9 +247,9 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-                if (HttpContext.Session.GetString("EmployeeId") != null)
+                if (HttpContext.Session.GetString("EmpCode") != null)
                 {
-                    var loginId = HttpContext.Session.GetString("EmployeeId");
+                    var loginId = HttpContext.Session.GetString("EmpCode");
                     if (loginId != null)
                     {
                         var list = await objProforma.GetStateList(Status);
@@ -301,9 +302,9 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-                if (HttpContext.Session.GetString("EmployeeId") != null)
+                if (HttpContext.Session.GetString("EmpCode") != null)
                 {
-                    var loginId = HttpContext.Session.GetString("EmployeeId");
+                    var loginId = HttpContext.Session.GetString("EmpCode");
                     if (loginId != null)
                     {
                         var list = await objProforma.GetQuotationNoList(Companyname);
@@ -336,9 +337,9 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-                if (HttpContext.Session.GetString("EmployeeId") != null)
+                if (HttpContext.Session.GetString("EmpCode") != null)
                 {
-                    var loginId = HttpContext.Session.GetString("EmployeeId");
+                    var loginId = HttpContext.Session.GetString("EmpCode");
                     if (loginId != null)
                     {
                         var list = await objProforma.GetDetailsByQuotationNo(AgainstNo);

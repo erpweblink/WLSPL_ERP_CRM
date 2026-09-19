@@ -13,7 +13,8 @@ namespace WLSPL_ERP_CRM.Controllers
         }
         public async Task<IActionResult> GetTopInvoiceList()
         {
-            var list = await objreports.GetTopInvoiceList();
+            var loginId = HttpContext.Session.GetString("EmpCode");
+            var list = await objreports.GetTopInvoiceList(loginId);
             return View(list);
         }
     }
