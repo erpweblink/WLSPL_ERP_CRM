@@ -14,7 +14,7 @@ namespace WLSPL_ERP_CRM.repository
         {
             _configuration = configuration;
         }
-        public async Task<List<VM_Reports>> GetTopInvoiceList()
+        public async Task<List<VM_Reports>> GetTopInvoiceList(string sessionname)
         {
             using (var connection = new SqlConnection(
                  _configuration.GetConnectionString("Conn_Stringg")))
@@ -23,7 +23,7 @@ namespace WLSPL_ERP_CRM.repository
 
                 var parameters = new DynamicParameters();
 
-                parameters.Add("@Action", "GetTopInvoiceList");               
+                parameters.Add("@Action", "GetTopInvoiceList");
                 parameters.Add("@SessionName", sessionname);
 
                 var result = await connection.QueryAsync<VM_Reports>(
