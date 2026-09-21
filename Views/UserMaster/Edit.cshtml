@@ -3,24 +3,76 @@
 @{
     ViewData["Title"] = "Edit User";
 }
+
 <style>
-    .form-label {
-        font-weight: 600;
+    .user-page {
+        background: #f5f7fa;
+        padding: 20px;
+        min-height: calc(100vh - 80px);
     }
 
+    .user-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 18px rgba(0,0,0,.08);
+        overflow: hidden;
+        background: #fff;
+    }
+
+    .user-header {
+        background: linear-gradient(314deg, #0b0f14, #1a3e66);
+        color: #fff;
+        padding: 16px 20px;
+    }
+
+        .user-header h3 {
+            margin: 0;
+            font-size: 21px;
+            font-weight: 600;
+        }
+
+    .user-body {
+        padding: 25px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #344054;
+        margin-bottom: 6px;
+    }
 
     .form-control,
     .form-select {
-        height: 45px;
-        border-radius: 10px;
+        height: 44px;
+        border: 1px solid #d0d5dd;
+        border-radius: 8px;
+        font-size: 14px;
     }
 
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 .15rem rgba(13,110,253,.12);
+        }
+
+    .field-group {
+        margin-bottom: 18px;
+    }
+
+    .section-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #1a3e66;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 8px;
+        margin: 5px 0 20px;
+    }
 
     .btn {
+        height: 42px;
         border-radius: 8px;
-        height: 43px;
         font-weight: 600;
-        transition: .3s;
+        padding: 0 20px;
     }
 
     .btn-success {
@@ -30,7 +82,6 @@
 
         .btn-success:hover {
             background: #157347;
-            transform: translateY(-2px);
         }
 
     .btn-danger {
@@ -40,377 +91,405 @@
 
         .btn-danger:hover {
             background: #bb2d3b;
-            transform: translateY(-2px);
         }
 
+    .validation-message {
+        font-size: 12px;
+    }
+
+    .required {
+        color: #dc3545;
+    }
 </style>
+<div class="user-page">
 
-<div class="card">
-    <div class="card-header" style="background: linear-gradient(314deg, #0b0f14, #1a3e66);color: whitesmoke;">
-        <h3>
-            <i class="fa fa-user-edit"></i>
-            Edit User
-        </h3>
-    </div>
+    <div class="user-card">
 
-    <div class="card-body p-4">
-        <form asp-action="Edit" method="post">
+        <!-- Header -->
+        <div class="user-header">
+            <h3>
+                <i class="fa fa-user-plus me-2"></i>
+                Edit User
+            </h3>
+        </div>
 
-            @Html.AntiForgeryToken()
-            <input asp-for="id" type="hidden" />
-            <div asp-validation-summary="ModelOnly"
-                 class="text-danger">
-            </div>
+        <!-- Body -->
+        <div class="user-body">
 
-            <div class="row">
-                <!-- Employee Code Hidden -->
-                <div class="col-md-4 mb-3 d-none">
+            <form asp-action="Edit" method="post" enctype="multipart/form-data">
 
-                    <label class="form-label">
-                        Employee Code
-                    </label>
+                @Html.AntiForgeryToken()
 
-                    <input asp-for="empcode"
-                           class="form-control" />
-
-                    <span asp-validation-for="empcode"
-                          class="text-danger">
-                    </span>
-
+                <div asp-validation-summary="ModelOnly"
+                     class="text-danger mb-3">
                 </div>
 
+                <!-- Hidden Fields -->
+                <input asp-for="empcode" type="hidden" />
+                <input asp-for="isdeleted" type="hidden" />
+                <input asp-for="regdate" type="hidden" />
+                <input asp-for="ProfileImagePath" type="hidden" />
+                <input asp-for="id" type="hidden" />
 
+                <!-- ================= ACCOUNT DETAILS ================= -->
 
-                <!-- Username -->
-                <div class="col-md-4 mb-3">
-
-                    <label class="form-label">
-                        Username
-                    </label>
-
-                    <input asp-for="UserName"
-                           class="form-control"
-                           placeholder="Enter username" />
-
-                    <span asp-validation-for="UserName"
-                          class="text-danger">
-                    </span>
-
+                <div class="section-title">
+                    <i class="fa fa-user me-2"></i>
+                    Account Details
                 </div>
 
+                <div class="row">
 
 
 
-                <!-- Name -->
-                <div class="col-md-4 mb-3">
+                    <!-- Name -->
+                    <div class="col-md-4 field-group">
 
-                    <label class="form-label">
-                        Name
-                    </label>
+                        <label class="form-label">
+                            Name <span class="required">*</span>
+                        </label>
 
-                    <input asp-for="name"
-                           class="form-control"
-                           placeholder="Enter name" />
-
-                    <span asp-validation-for="name"
-                          class="text-danger">
-                    </span>
-
-                </div>
-
-
-
-
-                <!-- Email -->
-                <div class="col-md-4 mb-3">
-
-                    <label class="form-label">
-                        Email
-                    </label>
-
-                    <input asp-for="email"
-                           class="form-control"
-                           placeholder="Enter email" />
-
-                    <span asp-validation-for="email"
-                          class="text-danger">
-                    </span>
-
-                </div>
-
-
-
-
-                <!-- Email Password -->
-                <div class="col-md-4 mb-3">
-
-                    <label class="form-label">
-                        Email Password
-                    </label>
-
-                    <input asp-for="emailpsw"                     
-                           class="form-control"
-                           placeholder="Enter email password" />
-
-                    <span asp-validation-for="emailpsw"
-                          class="text-danger">
-                    </span>
-
-                </div>
-
-
-
-
-                <!-- Panel Password -->
-                <div class="col-md-4 mb-3">
-
-                    <label class="form-label">
-                        Panel Password
-                    </label>
-
-                    <div class="input-group">
-
-                        <input asp-for="panelpsw"
-                               type="password"
+                        <input asp-for="name"
                                class="form-control"
-                               placeholder="Enter panel password"
-                               id="panelpsw" />
+                               placeholder="Enter full name" />
 
-                        <button type="button"
-                                class="btn btn-outline-secondary"
-                                id="togglePassword">
-
-                            <i class="fa fa-eye" id="toggleIcon"></i>
-
-                        </button>
+                        <span asp-validation-for="name"
+                              class="text-danger validation-message">
+                        </span>
 
                     </div>
 
-                    <span asp-validation-for="panelpsw"
-                          class="text-danger">
-                    </span>
 
+                    <!-- Mobile -->
+                    <div class="col-md-4 field-group">
+
+                        <label class="form-label">
+                            Mobile
+                        </label>
+
+                        <input asp-for="mobile"
+                               type="tel"
+                               class="form-control"
+                               placeholder="Enter mobile number" />
+
+                        <span asp-validation-for="mobile"
+                              class="text-danger validation-message">
+                        </span>
+
+                    </div>
+
+
+                    <!-- Registration Date -->
+                    <div class="col-md-4 field-group">
+
+                        <label class="form-label">
+                            Registration Date
+                        </label>
+
+                        <input asp-for="regdate"
+                               type="datetime-local"
+                               class="form-control" />
+
+                        <span asp-validation-for="regdate"
+                              class="text-danger validation-message">
+                        </span>
+
+                    </div>
+
+
+                    <!-- Profile Image -->
+                    <div class="col-md-4 field-group">
+
+                        <label class="form-label">
+                            Profile Image
+                        </label>
+
+                        <input type="file"
+                               name="ProfileImage"
+                               class="form-control"
+                               accept="image/*" />
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ================= PASSWORD DETAILS ================= -->
+
+                <div class="section-title mt-3">
+                    <i class="fa fa-lock me-2"></i>
+                    Password Details
+                </div>
+
+                <div class="row">
+
+                    <!-- Email -->
+                    <div class="col-md-4 field-group">
+
+                        <label class="form-label">
+                            Email <span class="required">*</span>
+                        </label>
+
+                        <input asp-for="email"
+                               type="email"
+                               class="form-control"
+                               placeholder="Enter email address" />
+
+                        <span asp-validation-for="email"
+                              class="text-danger validation-message">
+                        </span>
+
+                    </div>
+                    <!-- Email Password -->
+                    <div class="col-md-4 field-group">
+
+                        <label class="form-label">
+                            Email Password
+                        </label>
+
+                        <input asp-for="emailpsw"
+                               type="text"
+                               class="form-control"
+                               placeholder="Enter email password" />
+
+                        <span asp-validation-for="emailpsw"
+                              class="text-danger validation-message">
+                        </span>
+
+                    </div>
+
+                </div>
+                <div class="row">
+                    <!-- Username -->
+                    <div class="col-md-4 field-group">
+
+                        <label class="form-label">
+                            Username <span class="required">*</span>
+                        </label>
+
+                        <input asp-for="UserName"
+                               class="form-control"
+                               placeholder="Enter username"
+                               autocomplete="off" />
+
+                        <span asp-validation-for="UserName"
+                              class="text-danger validation-message">
+                        </span>
+
+                    </div>
+                    <!-- Panel Password -->
+                    <div class="col-md-4 field-group">
+
+                        <label class="form-label">
+                            Panel Password
+                        </label>
+
+                        <input asp-for="panelpsw"
+                               type="text"
+                               class="form-control"
+                               placeholder="Enter panel password" />
+
+                        <span asp-validation-for="panelpsw"
+                              class="text-danger validation-message">
+                        </span>
+
+                    </div>
                 </div>
 
 
 
 
-                <!-- Mobile -->
-                <div class="col-md-4 mb-3">
 
-                    <label class="form-label">
-                        Mobile
-                    </label>
+                <!-- ================= ROLE & ACCESS ================= -->
 
-                    <input asp-for="mobile"
-                           class="form-control"
-                           placeholder="Enter mobile number" />
+                <div class="section-title mt-3">
+                    <i class="fa fa-shield me-2"></i>
+                    Role & Access
+                </div>
 
-                    <span asp-validation-for="mobile"
-                          class="text-danger">
-                    </span>
+                <div class="row">
+
+                    <!-- Department -->
+                    <div class="col-md-4 field-group">
+
+                        <label class="form-label">
+                            Department
+                        </label>
+
+                        <select asp-for="Department"
+                                class="form-select">
+
+                            <option value="">
+                                Select Department
+                            </option>
+
+                            <option value="Sales">
+                                Sales
+                            </option>
+
+                            <option value="HR">
+                                HR
+                            </option>
+
+                            <option value="Purchase">
+                                Software
+                            </option>
+
+                            <option value="Production">
+                                Testing
+                            </option>
+
+                            <option value="Service">
+                                Social Media
+                            </option>
+
+                            <option value="Store">
+                                Web Developer
+                            </option>
+
+                            <option value="Management">
+                                SEO
+                            </option>
+
+
+                        </select>
+
+                        <span asp-validation-for="Department"
+                              class="text-danger validation-message">
+                        </span>
+
+                    </div>
+
+                    <!-- Role -->
+                    <div class="col-md-4 field-group">
+
+                        <label class="form-label">
+                            Role <span class="required">*</span>
+                        </label>
+
+                        <select asp-for="role"
+                                class="form-select">
+
+                            <option value="">
+                                Select Role
+                            </option>
+
+                            <option value="Admin">
+                                CEO
+                            </option>
+
+                            <option value="Sub Admin">
+                                Cluster Manager
+                            </option>
+
+                            <option value="Sales">
+                                Branch Manager
+                            </option>
+
+                            <option value="HR">
+                                Manager
+                            </option>
+
+                            <option value="BDE">
+                                Team Leader
+                            </option>
+                            <option value="User">
+                                Executive
+                            </option>
+                            <option value="User">
+                                User
+                            </option>
+
+                        </select>
+
+                        <span asp-validation-for="role"
+                              class="text-danger validation-message">
+                        </span>
+
+                    </div>
+
+
+                    <!-- Team Leader -->
+                    <div class="col-md-4 field-group">
+
+                        <label class="form-label">
+                            Team Leader
+                        </label>
+
+                        <select asp-for="TL_Manager"
+                                asp-items="Model.SalesTLList"
+                                class="form-select">
+
+                            <option value="">
+                                Select Team Leader
+                            </option>
+
+                        </select>
+
+                        <span asp-validation-for="TL_Manager"
+                              class="text-danger validation-message">
+                        </span>
+
+                    </div>
+
+                    <!-- Status -->
+                    <div class="col-md-4 field-group">
+
+                        <label class="form-label">
+                            Status
+                        </label>
+
+                        <select asp-for="status"
+                                class="form-select">
+
+                            <option value="true">
+                                Active
+                            </option>
+
+                            <option value="false">
+                                Inactive
+                            </option>
+
+                        </select>
+
+                        <span asp-validation-for="status"
+                              class="text-danger validation-message">
+                        </span>
+
+                    </div>
 
                 </div>
 
 
+                <!-- ================= BUTTONS ================= -->
 
+                <div class="row mt-4">
 
+                    <div class="col-12 d-flex justify-content-center gap-2">
 
-                <!-- Role -->
-                <div class="col-md-4 mb-3">
+                        <button type="submit"
+                                class="btn btn-success">
 
-                    <label class="form-label">
-                        Role
-                    </label>
+                            <i class="fa fa-save me-1"></i>
+                            Save User
 
+                        </button>
 
-                    <select asp-for="role"
-                            class="form-select">
+                        <a asp-action="Index"
+                           class="btn btn-danger">
 
-                        <option value="">
-                            Select Role
-                        </option>
+                            <i class="fa fa-arrow-left me-1"></i>
+                            Back
 
-                        <option value="Admin">
-                            Admin
-                        </option>
+                        </a>
 
-                        <option value="Sub Admin">
-                            Sub Admin
-                        </option>
-
-                        <option value="Sales">
-                            Sales
-                        </option>
-
-                        <option value="HR">
-                            HR
-                        </option>
-
-                        <option value="BDE">
-                            BDE
-                        </option>
-
-                        <option value="User">
-                            User
-                        </option>
-
-                    </select>
-
-
-                    <span asp-validation-for="role"
-                          class="text-danger">
-                    </span>
+                    </div>
 
                 </div>
 
+            </form>
 
-
-
-
-                <!-- Status -->
-                <div class="col-md-4 mb-3">
-
-                    <label class="form-label">
-                        Status
-                    </label>
-
-
-                    <select asp-for="status"
-                            class="form-select">
-
-                        <option value="true">
-                            Active
-                        </option>
-
-                        <option value="false">
-                            Inactive
-                        </option>
-
-                    </select>
-
-
-                    <span asp-validation-for="status"
-                          class="text-danger">
-                    </span>
-
-                </div>
-
-
-
-
-
-                <!-- Designation -->
-                <div class="col-md-4 mb-3">
-
-                    <label class="form-label">
-                        Designation
-                    </label>
-
-
-                    <input asp-for="Designation"
-                           class="form-control"
-                           placeholder="Enter designation" />
-
-
-                    <span asp-validation-for="Designation"
-                          class="text-danger">
-                    </span>
-
-                </div>
-                <!-- Team Leader -->
-                <div class="col-md-4 mb-3">
-
-                    <label class="form-label">
-                        Team Leader
-                    </label>
-
-                    <select asp-for="TL_Manager"
-                            asp-items="Model.SalesTLList"
-                            class="form-select">
-
-                        <option value="">
-                            Select Team Leader
-                        </option>
-
-                    </select>
-
-                    <span asp-validation-for="TL_Manager"
-                          class="text-danger">
-                    </span>
-
-                </div>
-
-
-                <!-- Is Sales TL -->
-                <div class="col-md-4 mb-3">
-
-                    <label class="form-label">
-                        Is Sales TL
-                    </label>
-
-                    <select asp-for="Sales_TL_Manager"
-                            class="form-select">
-
-                        <option value="false">
-                            No
-                        </option>
-
-                        <option value="true">
-                            Yes
-                        </option>
-
-                    </select>
-
-                </div>
-
-            </div>
-
-
-            <div class="row justify-content-center mt-3">
-                <div class="col-md-3 text-end">
-                    <button type="submit" class="btn btn-success">
-                        <i class="fa fa-save"></i>
-                        Update User
-                    </button>
-                </div>
-
-                <div class="col-md-3 text-start">
-                    <a asp-action="Index"
-                       class="btn btn-danger">
-                        <i class="fa fa-arrow-left me-1"></i>
-                        Back
-                    </a>
-                </div>
-
-            </div>
-        </form>
+        </div>
     </div>
 </div>
-<script>
-        $("#togglePassword").on("click", function () {
-
-        var passwordInput = $("#panelpsw");
-        var icon = $("#toggleIcon");
-
-        if (passwordInput.attr("type") === "password") {
-
-            passwordInput.attr("type", "text");
-
-            icon
-                .removeClass("fa-eye")
-                .addClass("fa-eye-slash");
-
-        }
-        else {
-
-            passwordInput.attr("type", "password");
-
-            icon
-                .removeClass("fa-eye-slash")
-                .addClass("fa-eye");
-
-        }
-
-    });
-</script>

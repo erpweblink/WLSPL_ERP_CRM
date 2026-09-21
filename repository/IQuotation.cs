@@ -9,9 +9,9 @@ namespace WEBLINK_CRM.repository
 {
     public interface IQuotation
     {
-        Task<List<VM_Quotation>> GetList(string size);
+        Task<List<VM_Quotation>> GetList(string size, string Session);
         Task<List<QuotationDetailVM>> GetDetailsById(string wono);
-        Task<List<object>> GetCompanyList(string Status);
+        Task<List<object>> GetCompanyList(string Status, string Session);
         Task<List<object>> GetStateList(string Status);
         Task<List<object>> GetCompanyByCode(string Code);
  
