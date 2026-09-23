@@ -524,6 +524,7 @@
                         $.each(details, function (i, item) {
                             html += `
                                 <tr>
+                                    <td>${item.serviceName ?? ""}</td>
                                     <td>${item.productDescription ?? ""}</td>
                                     <td>${item.sacCode ?? ""}</td>
                                     <td class="text-end">${item.qty ?? 0}</td>
