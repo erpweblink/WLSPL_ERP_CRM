@@ -41,6 +41,8 @@ namespace WEBLINK_CRM.Models
 
             public int? ProformaID { get; set; }
 
+            public string? ServiceID { get; set; }
+            public string? ServiceName { get; set; }
             public string? ProductDescription { get; set; }
 
             public string? SACCode { get; set; }

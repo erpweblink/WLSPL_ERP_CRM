@@ -373,6 +373,7 @@
 
                             <tr>
                                 <th>Service</th>
+                                <th>Description</th>
                                 <th>Sac Code.</th>
                                 <th>Qty</th>
                                 <th>Rate</th>
@@ -570,6 +571,7 @@
                         $.each(details, function (i, item) {
                             html += `
                                 <tr>                          
+                                    <td>${item.serviceName ?? ""}</td>
                                     <td>${item.productDescription ?? ""}</td>
                                     <td>${item.sacCode ?? ""}</td>
                                     <td class="text-end">${item.qty ?? 0}</td>                           

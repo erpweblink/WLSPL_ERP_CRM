@@ -11,6 +11,7 @@
 
     var Companytext = "";
     var AgainstNo = "";
+    var Servicetext = ""; // ADD: Track selected service
 
     // Default GST rates applied to newly added rows (set after company/state is known)
     var defaultCGST = "0";
@@ -18,6 +19,101 @@
     var defaultIGST = "0";
 
     var isEditLoad = false;
+
+    // =====================================================================
+    // BIND SERVICE LIST (GLOBAL)
+    // =====================================================================
+    var BindServiceList = function () {
+        var Dept = "";
+
+        $.ajax({
+            url: "/WorkOrder/BindServiceList",
+            data: { Dept: Dept },
+            type: "POST",
+            cache: false,
+            success: function (response) {
+                if (response.success === true) {
+                    var users = response.data || [];
+                    var html = "<option value=''>-- Select Service Name --</option>";
+
+                    $.each(users, function (key, data) {
+                        html += "<option value='" + escapeHtml(data.ID || data.Name) + "'>" + escapeHtml(data.Name) + "</option>";
+                    });
+
+                    // Update all service dropdowns
+                    $(".ddlservice").html(html);
+
+                    // Set selected service AFTER options are loaded
+                    if (Servicetext) {
+                        $(".ddlservice").val(Servicetext).trigger("change");
+                    }
+                }
+            },
+            error: function (xhr) {
+                console.error("BindServiceList Error:", xhr.responseText);
+            }
+        });
+    };
+
+    // =====================================================================
+    // SERVICE DROPDOWN CHANGE - POPULATE ROW DETAILS
+    // =====================================================================
+    $(document)
+        .off("change", ".ddlservice")
+        .on("change", ".ddlservice", function () {
+            var selectedServiceID = $(this).val();
+            var currentRow = $(this).closest("tr");
+
+            if (!selectedServiceID || selectedServiceID.trim() === "") {
+                // Clear fields if no selection
+                currentRow.find(".service-name").val("");
+                currentRow.find(".sac-code").val("00440013");
+                return;
+            }
+
+            // AJAX call to fetch service details
+            $.ajax({
+                url: "/WorkOrder/GetServiceByID",
+                data: { "ID": selectedServiceID },
+                type: "POST",
+                cache: false,
+                dataType: "json",
+                success: function (response) {
+                    if (response.success === true && response.data && response.data.length > 0) {
+                        var result = response.data[0];
+
+                        // Populate description (handle both cases)
+                        if (result.Description || result.description) {
+                            currentRow.find(".service-name").val(result.Description || result.description);
+                        }
+
+                        // Populate SAC Code (handle both cases)
+                        if (result.ServiceCode || result.serviceCode) {
+                            currentRow.find(".sac-code").val(result.ServiceCode || result.serviceCode);
+                        } else {
+                            currentRow.find(".sac-code").val("00440013");
+                        }
+
+                        // Populate rate/price if available (handle both cases)
+                        if (result.Price || result.price) {
+                            currentRow.find(".rate").val(result.Price || result.price);
+                        }
+
+                        // Trigger calculations
+                        calculateDetailRow(currentRow);
+                        calculateGrandTotals();
+                    }
+                    else {
+                        console.error("Service not found:", response);
+                        showToast("Unable to load Service details.", "error");
+                    }
+                },
+                error: function (xhr) {
+                    console.error("Error loading Service:", xhr.responseText);
+                    showToast("Error loading Service details.", "error");
+                }
+            });
+        });
 
     // =====================================================================
     // STATE LIST
@@ -144,7 +240,7 @@
                 cache: false,
 
                 beforeSend: function () {
-                    $("#tblDetailsBody").html('<tr><td colspan="13" class="text-center">Loading...</td></tr>');
+                    $("#tblDetailsBody").html('<tr><td colspan="14" class="text-center">Loading...</td></tr>');
                 },
 
                 success: function (response) {
@@ -390,78 +486,101 @@
 
         item = item || {};
 
-        var serviceName = item.productDescription || "";
-        var sacCode = item.sacCode || "00440013";
-        var qty = item.qty || 1;
-        var rate = item.rate || 0;
+        // MODIFIED: Handle both direct text entry and service dropdown selection
+        var serviceName = item.productDescription || item.ProductDescription || "";
+        var serviceID = item.serviceID || item.ServiceID || "";
+        Servicetext = serviceID;
+        BindServiceList();
+        var sacCode = item.sacCode || item.SACCode || "00440013";
+        var qty = item.qty || item.Qty || 1;
+        var rate = item.rate || item.Rate || 0;
 
-        var cgstRate = item.cgstRate || 0;
-        var cgstAmt = item.cgstAmt || 0;
+        var cgstRate = item.cgstRate || item.CGSTRate || defaultCGST;
+        var cgstAmt = item.cgstAmt || item.CGSTAmt || 0;
 
-        var sgstRate = item.sgstRate || 0;
-        var sgstAmt = item.sgstAmt || 0;
+        var sgstRate = item.sgstRate || item.SGSTRate || defaultSGST;
+        var sgstAmt = item.sgstAmt || item.SGSTAmt || 0;
 
-        var igstRate = item.igstRate || 0;
-        var igstAmt = item.igstAmt || 0;
+        var igstRate = item.igstRate || item.IGSTRate || defaultIGST;
+        var igstAmt = item.igstAmt || item.IGSTAmt || 0;
 
-        var amount = item.amount || 0;
-        var total = item.total || 0;
+        var amount = item.amount || item.Amount || 0;
+        var total = item.total || item.Total || 0;
 
+        // MODIFIED: Added service dropdown column
         var newRow =
             '<tr class="detail-row">' +
 
+            // ACTION: DELETE
             '<td class="text-center">' +
             '<button type="button" class="btn btn-danger btn-sm delete-row" title="Delete" style="width:40px;">' +
             '<i class="fa fa-trash"></i>' +
             '</button>' +
             '</td>' +
 
+            // SERVICE DROPDOWN - NEW
+            '<td class="text-center">' +
+            '<select class="form-control ddlservice" name="ddlService" style="width:100%;"></select>' +
+            '</td>' +
+
+            // DESCRIPTION/SERVICE NAME
             '<td>' +
             '<textarea class="form-control service-name" rows="1">' + escapeHtml(serviceName) + '</textarea>' +
             '</td>' +
 
+            // SAC CODE
             '<td>' +
             '<input type="text" class="form-control sac-code" value="' + escapeHtml(sacCode) + '" ' +
             'maxlength="8" minlength="6" inputmode="numeric" ' +
             'oninput="this.value=this.value.replace(/[^0-9]/g,\'\').slice(0,8);" />' +
             '</td>' +
 
+            // QUANTITY
             '<td>' +
             '<input type="number" class="form-control qty" value="' + qty + '" min="1" step="1" />' +
             '</td>' +
 
+            // RATE
             '<td>' +
             '<input type="number" class="form-control rate" value="' + rate + '" min="0" step="0.01" />' +
             '</td>' +
 
+            // CGST %
             '<td>' +
             '<input type="number" class="form-control cgst-rate" value="' + cgstRate + '" min="0" step="0.01" />' +
             '</td>' +
 
+            // CGST AMOUNT
             '<td>' +
             '<input type="text" class="form-control cgst-amt" value="' + parseFloat(cgstAmt || 0).toFixed(2) + '" readonly />' +
             '</td>' +
 
+            // SGST %
             '<td>' +
             '<input type="number" class="form-control sgst-rate" value="' + sgstRate + '" min="0" step="0.01" />' +
             '</td>' +
 
+            // SGST AMOUNT
             '<td>' +
             '<input type="text" class="form-control sgst-amt" value="' + parseFloat(sgstAmt || 0).toFixed(2) + '" readonly />' +
             '</td>' +
 
+            // IGST %
             '<td>' +
             '<input type="number" class="form-control igst-rate" value="' + igstRate + '" min="0" step="0.01" />' +
             '</td>' +
 
+            // IGST AMOUNT
             '<td>' +
             '<input type="text" class="form-control igst-amt" value="' + parseFloat(igstAmt || 0).toFixed(2) + '" readonly />' +
             '</td>' +
 
+            // TAXABLE VALUE / AMOUNT
             '<td>' +
             '<input type="text" class="form-control amount" value="' + parseFloat(amount || 0).toFixed(2) + '" readonly />' +
             '</td>' +
 
+            // TOTAL AMOUNT
             '<td>' +
             '<input type="text" class="form-control all-total" value="' + parseFloat(total || 0).toFixed(2) + '" readonly />' +
             '</td>' +
@@ -469,6 +588,39 @@
             '</tr>';
 
         $("#tblDetailsBody").append(newRow);
+
+        // Initialize the service dropdown for this row
+        var newDropdown = $("#tblDetailsBody .detail-row").last().find(".ddlservice");
+        if (newDropdown.length) {
+            $.ajax({
+                url: "/WorkOrder/BindServiceList",
+                data: { Dept: "" },
+                type: "POST",
+                cache: false,
+                success: function (response) {
+                    if (response.success === true) {
+                        var users = response.data || [];
+                        var html = "<option value=''>-- Select Service Name --</option>";
+
+                        $.each(users, function (key, data) {
+                            html += "<option value='" + escapeHtml(data.ID || data.Name) + "'>" + escapeHtml(data.Name) + "</option>";
+                        });
+
+                        newDropdown.html(html);
+
+                        // If editing and item has service ID, set it
+                        if (serviceID) {
+                            newDropdown.val(serviceID).trigger("change");
+                        }
+
+                        // Initialize select2 if available
+                        if (typeof newDropdown.select2 === 'function') {
+                            newDropdown.select2({ selectOnClose: true, width: '100%' });
+                        }
+                    }
+                }
+            });
+        }
 
         var row = $("#tblDetailsBody .detail-row").last();
         calculateDetailRow(row);
@@ -636,9 +788,12 @@
                 $rows.each(function () {
                     var $row = $(this);
 
+                    // MODIFIED: Include service ID
                     ServiceDescriptionList.push({
                         ID: 0,
                         ProformaID: parseInt($("#ID").val()) || 0,
+                        ServiceID: $row.find(".ddlservice").val() || null,
+                        ServiceName: $row.find(".ddlservice option:selected").text() || null,
                         ProductDescription: $row.find(".service-name").val() || null,
                         SACCode: $row.find(".sac-code").val() || null,
                         Qty: (parseFloat($row.find(".qty").val()) || 0).toString(),
@@ -791,6 +946,8 @@
                         }
 
                     });
+
+                    isEditLoad = false;
                 },
                 error: function (xhr, ajaxOptions, thrownError) {
                     console.error("Error loading Proforma:", thrownError);
@@ -840,6 +997,7 @@
 
 
             }
+            BindServiceList();
             calculateGrandTotals();
         }
     };
