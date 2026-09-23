@@ -46,7 +46,6 @@ builder.Services.AddScoped<IDashboardRepo, DashboardRepo>();
 builder.Services.AddScoped<INotificationRepo, NotificationRepo>();
 builder.Services.AddScoped<IReports, RepoReports>();
 builder.Services.AddScoped<IShortcutRepo, ShortcutRepo>();
-builder.Services.AddScoped<IReports, RepoReports>();
 
 
 // ======================================================
