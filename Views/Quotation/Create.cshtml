@@ -2,40 +2,136 @@
     ViewBag.Title = "Create";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 <style>
+    /* Table Validation Highlight */
     .table-invalid {
         border: 2px solid #dc3545 !important;
         border-radius: 4px;
         box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.25);
     }
+
+    /* Light Blue Theme Table Styling (Matching Reference Design) */
+    .custom-table {
+        border-collapse: collapse !important;
+        width: 100%;
+        font-family: Arial, sans-serif;
+        font-size: 13px;
+        border: 1px solid #9bb7d4 !important;
+    }
+
+        .custom-table thead th {
+            color: black;
+            text-align: center;
+            vertical-align: middle;
+            padding: 5px 4px;
+            border: 1px solid #9bb7d4 !important;
+            font-weight: bold;
+            font-size: 12px;
+            background-color: #dce6f0;
+        }
+
+        .custom-table thead tr:nth-child(2) th {
+            font-size: 11px;
+            font-weight: normal;
+            padding: 3px 4px;
+            background-color: #e8eef7;
+        }
+
+        .custom-table tbody td {
+            border: 1px solid #b0c4de !important;
+            padding: 6px 4px;
+            vertical-align: middle;
+            background-color: #ffffff;
+            text-align: center;
+        }
+
+            .custom-table tbody td.text-start {
+                text-align: left;
+            }
+
+            /* Inputs inside table matching the reference style */
+            .custom-table tbody td input[type="text"],
+            .custom-table tbody td input[type="number"],
+            .custom-table tbody td textarea,
+            .custom-table tbody td select {
+                width: 100%;
+                border: 1px solid #a2b9d3;
+                border-radius: 2px;
+                padding: 3px 5px;
+                font-size: 12px;
+                color: #333;
+                background-color: #fcfdfe;
+                box-shadow: inset 0 1px 2px rgba(0,0,0,0.06);
+                outline: none;
+                box-sizing: border-box;
+            }
+
+                .custom-table tbody td input:focus,
+                .custom-table tbody td textarea:focus,
+                .custom-table tbody td select:focus {
+                    border-color: #5c93c4;
+                    background-color: #ffffff;
+                    box-shadow: 0 0 3px rgba(92, 147, 196, 0.5);
+                }
+
+    /* Column Width Hints */
+    .col-action {
+        width: 55px;
+    }
+
+    .col-service {
+        min-width: 140px;
+    }
+
+    .col-desc {
+        min-width: 180px;
+    }
+
+    .col-sac {
+        width: 85px;
+    }
+
+    .col-qty {
+        width: 60px;
+    }
+
+    .col-rate {
+        width: 85px;
+    }
+
+    .col-tax {
+        width: 55px;
+    }
+
+    .col-taxable {
+        width: 95px;
+    }
+
+    .col-total {
+        width: 100px;
+    }
+
+    /* Select2 styling */
+    .select2-container--default .select2-selection--single {
+        border: 1px solid #a2b9d3 !important;
+        border-radius: 2px !important;
+        background-color: #fcfdfe !important;
+    }
+
+    .select2-container--default.select2-container--focus .select2-selection--single {
+        border-color: #5c93c4 !important;
+    }
+
+    .select2-dropdown {
+        border-color: #a2b9d3 !important;
+    }
+
+    .select2-results__option--highlighted {
+        background-color: #5c93c4 !important;
+    }
 </style>
 
-<style>
-    #tblDetails thead th {
-        text-align: center;
-        vertical-align: middle;
-        padding: 5px 4px;
-        border: 1px solid #000;
-        font-size: 12px;
-    }
-
-    #tblDetails thead tr:first-child th {
-        font-weight: bold;
-        height: 28px;
-    }
-
-    #tblDetails thead tr:nth-child(2) th {
-        font-size: 11px;
-        padding: 3px 4px;
-        height: 22px;
-    }
-
-    #tblDetails tbody td {
-        border: 1px solid #000;
-        padding: 4px;
-        vertical-align: middle;
-    }
-</style>
 <form id="WorkOrderform">
     <div id="loader" style="display:none;">
         <div class="text-center">
@@ -44,7 +140,9 @@
                  alt="Loading..." />
         </div>
     </div>
-    <div class="card">
+
+    <!-- QUOTATION HEADER CARD -->
+    <div class="card mb-3">
         <div class="card-header d-flex align-items-center justify-content-between">
             <h3 style="color:black; margin:0;" id="lblHeader">
                 Create Quotation
@@ -55,10 +153,10 @@
                     onclick="window.history.back();">
                 <i class="fa fa-arrow-left"></i> Back
             </button>
-
         </div>
-        <div class="card-body">
 
+        <div class="card-body">
+            <!-- Row 1: Quotation Date & Reverse Charge -->
             <div class="row mb-3">
                 <!-- Quotation Date -->
                 <div class="col-md-6">
@@ -92,6 +190,7 @@
                 </div>
             </div>
 
+            <!-- Row 2: Company Name & Bill State -->
             <div class="row mb-3">
                 <!-- Company Name -->
                 <div class="col-md-6">
@@ -121,6 +220,7 @@
                 </div>
             </div>
 
+            <!-- Row 3: GSTIN -->
             <div class="row mb-3">
                 <!-- GSTIN -->
                 <div class="col-md-6">
@@ -139,6 +239,7 @@
                 </div>
             </div>
 
+            <!-- Row 4: Address -->
             <div class="row mb-3">
                 <!-- Address -->
                 <div class="col-md-12">
@@ -157,140 +258,126 @@
                 </div>
             </div>
 
+            <!-- Hidden ID Field -->
             <input type="hidden" id="ID" name="ID" />
-
         </div>
-
     </div>
 
+    <!-- SERVICES CARD -->
     <div class="card">
         <div class="card-header text-uppercase">
-            <h3 style="color:black">Add Services</h3>
+            <h3 style="color:black; margin:0;">Add Services</h3>
         </div>
 
-        <div class="row">
-            <div class="col-md-12">
+        <div class="card-body">
+            <input type="hidden" id="rowID" value="" />
 
-                <div class="card-body">
+            <!-- Service Details Table -->
+            <div class="table-responsive">
+                <!-- Clean Light Blue Styled Table -->
+                <table id="tbldetails" class="table custom-table">
+                    <thead>
+                        <tr>
+                            <th class="col-action" rowspan="2">Action</th>
+                            <th class="col-service" rowspan="2">Service Name</th>
+                            <th class="col-desc" rowspan="2">Description</th>
+                            <th class="col-sac" rowspan="2">SAC Code</th>
+                            <th class="col-qty" rowspan="2">Qty</th>
+                            <th class="col-rate" rowspan="2">Rate</th>
+                            <th class="col-taxable" rowspan="2">Taxable Value</th>
 
+                            <!-- GST GROUPS -->
+                            <th colspan="2">CGST</th>
+                            <th colspan="2">SGST</th>
+                            <th colspan="2">IGST</th>
 
-                    <input type="hidden" id="rowID" value="" />
+                            <th class="col-total" rowspan="2">Total</th>
+                        </tr>
+
+                        <!-- SUB HEADER -->
+                        <tr>
+                            <th class="col-tax">%</th>
+                            <th class="col-taxable">Amount</th>
+
+                            <th class="col-tax">%</th>
+                            <th class="col-taxable">Amount</th>
+
+                            <th class="col-tax">%</th>
+                            <th class="col-taxable">Amount</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="tblDetailsBody">
+                        <!-- Dynamic rows appended via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Add Service Button -->
+            <div class="col-md-12 text-center mt-3">
+                <input type="button"
+                       class="btn btn-primary btn-sm btnAddRow"
+                       value="Add Service"
+                       id="btnAddRow" />
+            </div>
+
+            <!-- Summary Totals -->
+            <div class="row mt-4">
+                <div class="col-md-7"></div>
+                <div class="col-md-5">
                     <div class="table-responsive">
-                        <!-- Service Entry Table -->
-                        <table id="tbldetails"
-                               class="table table-striped table-bordered dt-responsive nowrap"
-                               style="width:100%;">
-
-                            <thead class="clsthed">
+                        <table id="tblAccountDetails" class="table custom-table">
+                            <tbody>
                                 <tr>
-                                    <th class="col-action" rowspan="2">Action</th>
-                                    <th class="col-desc" rowspan="2">Service Name</th>
-                                    <th class="col-sac" rowspan="2">SAC Code</th>
-                                    <th class="col-qty" rowspan="2">QTY</th>
-                                    <th class="col-rate" rowspan="2">Rate</th>
-
-                                    <!-- GST GROUPS -->
-                                    <th class="col-tax" colspan="2">CGST %</th>
-                                    <th class="col-tax" colspan="2">SGST %</th>
-                                    <th class="col-tax" colspan="2">IGST %</th>
-
-                                    <th class="col-taxable" rowspan="2">Amount</th>
-                                    <th class="col-total" rowspan="2">All Total</th>
+                                    <td class="text-end font-weight-bold" id="lblTotalDealBasicAmount">Basic Amount</td>
+                                    <td><input class="form-control numeric" value="0" id="txtTotalDealBasicAmount" name="txtTotalDealBasicAmount" /></td>
                                 </tr>
-
-                                <!-- SUB HEADER -->
+                                <tr id="trTotalDealGSTAmount">
+                                    <td class="text-end font-weight-bold">GST Amount</td>
+                                    <td><input class="form-control" value="0" id="txtTotalDealGSTAmount" name="txtTotalDealGSTAmount" readonly /></td>
+                                </tr>
                                 <tr>
-                                    <th class="col-tax">Rate</th>
-                                    <th class="col-tax">Amount</th>
-
-                                    <th class="col-tax">Rate</th>
-                                    <th class="col-tax">Amount</th>
-
-                                    <th class="col-tax">Rate</th>
-                                    <th class="col-tax">Amount</th>
+                                    <td class="text-end font-weight-bold">Total Amount</td>
+                                    <td><input class="form-control" id="txtTotalAmountBalance" name="txtTotalAmountBalance" readonly /></td>
                                 </tr>
-                            </thead>
-
-                            <tbody id="tblDetailsBody">
-                                <!-- rows added by JS -->
                             </tbody>
-
                         </table>
                     </div>
-                    <div class="col-md-12 text-center">
-                        <input type="button"
-                               class="btn btn-primary btn-sm btnAddRow"
-                               value="Add Service"
-                               id="btnAddRow" />
-                    </div>
                 </div>
-
             </div>
-        </div>
 
-
-        <div class="row">
-            <div class="col-md-8">
-            </div>
-            <div class="col-md-4">
-                <div class="table-responsive">
-                    <table style="width:100%!important" id="tblAccountDetails" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0">
-                        <thead class="clsthead">
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td id="lblTotalDealBasicAmount">Basic Amount</td>
-                                <td><input class="form-control numeric" value="0" id="txtTotalDealBasicAmount" name="txtTotalDealBasicAmount" /></td>
-                            </tr>
-                            <tr id="trTotalDealGSTAmount">
-                                <td> GST Amount</td>
-                                <td><input class="form-control" value="0" id="txtTotalDealGSTAmount" name="txtTotalDealGSTAmount" readonly /></td>
-                            </tr>
-                            <tr>
-                                <td>Total Amount</td>
-                                <td><input class="form-control" id="txtTotalAmountBalance" name="txtTotalAmountBalance" readonly /></td>
-                            </tr>
-                        </tbody>
-                    </table>
+            <!-- Form Buttons -->
+            <div class="row justify-content-center mt-4">
+                <div class="col-md-3 text-end">
+                    <button type="submit" id="btnSubmit" class="btn btn-primary">Save</button>
+                </div>
+                <div class="col-md-3 text-start">
+                    <a href="~/Quotation/Index">
+                        <input type="button" id="btnCancel" value="Cancel" class="btn btn-warning" />
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="row justify-content-center mt-3">
-            <div class="col-md-3 text-end">
-                <button type="submit" id="btnSubmit" class="btn btn-primary">Save</button>
-            </div>
-
-            <div class="col-md-3 text-start">
-                <a href="~/Quotation/Index">
-                    <input type="button" id="btnCancel" value="Cancel" class="btn btn-warning" />
-                </a>
-            </div>
-
-        </div>
-        <br />
     </div>
-
 </form>
+
+<!-- Select2 Initialization -->
 <script>
     $(document).ready(function () {
-
-          $('.ddlselect').select2({
-              selectOnClose: true,
-              width: '100%'
-          });
-
-      });
+        // Initialize Select2 for company and state dropdowns
+        $('#ddlCompanyname, #ddlBillState').select2({
+            selectOnClose: true,
+            width: '100%',
+            allowClear: false
+        });
+    });
 </script>
-@section Scripts {
 
+@section Scripts {
     <script src="~/js/Quotation.js"></script>
     <script type="text/javascript">
-
         $(document).ready(function ($) {
-
             GetQuotationForm.init();
         });
     </script>
-
 }
-
