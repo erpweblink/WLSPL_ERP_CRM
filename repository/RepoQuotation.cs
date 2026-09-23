@@ -92,6 +92,8 @@ namespace WEBLINK_CRM.repository
                     parameters.Add("@CreatedBy", model.CreatedBy);
 
                     DataTable dtDetails = new DataTable();
+                    dtDetails.Columns.Add("ServiceID", typeof(string));
+                    dtDetails.Columns.Add("ServiceName", typeof(string));                  
                     dtDetails.Columns.Add("ProductDescription", typeof(string));
                     dtDetails.Columns.Add("SACCode", typeof(string));
                     dtDetails.Columns.Add("Qty", typeof(decimal));
@@ -111,6 +113,8 @@ namespace WEBLINK_CRM.repository
                         foreach (var item in model.objtblQuotationDtl)
                         {
                             dtDetails.Rows.Add(
+                                           item.ServiceID,
+                                item.ServiceName,                     
         item.ProductDescription,
         item.SACCode,
         item.Qty,
