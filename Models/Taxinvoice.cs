@@ -11,6 +11,8 @@
             public string? invoiceno { get; set; }
             public string? reversecharge { get; set; }
             public string? InvoiceType { get; set; }
+            public string? AgainstBy { get; set; }
+            public string? AgainstByValue { get; set; }
             public DateTime? invoicedate { get; set; }
 
             // Company Information
@@ -126,6 +128,10 @@
             public int id { get; set; }
 
             public int invoiceid { get; set; }
+
+            public string? serviceName { get; set; }
+
+            public string? serviceId { get; set; }
 
             public string? productdescription { get; set; }
 

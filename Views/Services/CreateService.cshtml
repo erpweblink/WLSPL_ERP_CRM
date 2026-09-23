@@ -1,0 +1,131 @@
+﻿@model WEBLINK_CRM.Models.Services
+
+@{
+    ViewData["Title"] = "Create Service";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+    .section-title {
+        color: #425d7e;
+        font-size: 17px;
+        font-weight: 600;
+        margin: 5px 0 15px;
+    }
+
+        .section-title i {
+            margin-right: 7px;
+        }
+
+    .form-label {
+        font-weight: 600;
+        color: #344054;
+    }
+
+    .req {
+        color: red;
+    }
+
+    .form-control {
+        min-height: 45px;
+        border-radius: 10px;
+        border: 1px solid #d8dee9;
+    }
+
+        .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 .15rem rgba(13,110,253,.12);
+        }
+</style>
+
+<div class="card">
+    <div class="card-header" style="background: linear-gradient(314deg, #0b0f14, #1a3e66);color: whitesmoke;">
+        <div>
+            <h3><i class="fa fa-cogs"></i> Create New Service</h3>
+            <small>Configure service according to department and service type</small>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <form asp-action="Submit" method="post" onsubmit="return validateServiceForm();">
+            @Html.AntiForgeryToken()
+            <h5 class="section-title">
+                <i class="fa fa-info-circle"></i>
+                Basic Service Information
+            </h5>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Service Name <span class="req">*</span></label>
+                    <input asp-for="ServiceName" id="ServiceName"
+                           class="form-control" placeholder="Enter Service Name" />
+                    <span asp-validation-for="ServiceName" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">SAC Code <span class="req">*</span></label>
+                    <input asp-for="ServiceCode" id="ServiceCode"
+                           class="form-control" placeholder="Example: 998314" />
+                    <span asp-validation-for="ServiceCode" class="text-danger"></span>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Price</label>
+                    <input asp-for="Price" id="Price" class="form-control" />
+                </div>
+            </div>
+
+            <div class="row justify-content-center mt-3">
+                <div class="col-md-3 text-end">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fa fa-save"></i>
+                        Save Service
+                    </button>
+                </div>
+                <div class="col-md-3 text-start">
+                    <a asp-action="Index" class="btn btn-danger">
+                        <i class="fa fa-arrow-left"></i>
+                        Back
+                    </a>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript">
+         function validateServiceForm() {
+        let isValid = true;
+
+        // Clear previous errors
+        $(".text-danger").text("");
+        $(".form-control").removeClass("is-invalid");
+
+        // --- Service Name ---
+        let serviceName = $("#ServiceName").val().trim();
+        if (serviceName === "") {
+            $("#ServiceName").addClass("is-invalid");
+            $("[data-valmsg-for='ServiceName']").text("Service Name is required");
+            isValid = false;
+        }
+
+        // --- SAC Code ---
+        let serviceCode = $("#ServiceCode").val().trim();
+        if (serviceCode === "") {
+            $("#ServiceCode").addClass("is-invalid");
+            $("[data-valmsg-for='ServiceCode']").text("SAC Code is required");
+            isValid = false;
+        } else if (serviceCode.length < 2) {
+            $("#ServiceCode").addClass("is-invalid");
+            $("[data-valmsg-for='ServiceCode']").text("SAC Code must contain at least 2 characters");
+            isValid = false;
+        } else if (!/^\d+$/.test(serviceCode)) {
+            $("#ServiceCode").addClass("is-invalid");
+            $("[data-valmsg-for='ServiceCode']").text("SAC Code must contain only digits");
+            isValid = false;
+        }
+
+        return isValid;
+    }
+</script>

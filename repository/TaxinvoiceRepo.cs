@@ -35,7 +35,6 @@ namespace WLSPL_ERP_CRM.repository
             return result;
         }
 
-
         public async Task<List<TaxInvoiceCreate>> Getcompany()
         {
             using var connection = new SqlConnection(
@@ -81,8 +80,7 @@ namespace WLSPL_ERP_CRM.repository
             }
         }
 
-        public async Task<List<Taxinvoice.TaxInvoiceCreate>> GetFinancialYearSummary(
-           string financialYear)
+        public async Task<List<Taxinvoice.TaxInvoiceCreate>> GetFinancialYearSummary(string financialYear)
         {
             var result = new List<Taxinvoice.TaxInvoiceCreate>();
 
@@ -204,10 +202,7 @@ namespace WLSPL_ERP_CRM.repository
             return result;
         }
 
-
-        public async Task<List<Taxinvoice.TaxInvoiceCreate>> GetInfo(
-         string financialYear,
-         int? month)
+        public async Task<List<Taxinvoice.TaxInvoiceCreate>> GetInfo(string financialYear,int? month)
         {
             using var connection = new SqlConnection(
                 _configuration.GetConnectionString("Conn_Stringg"));
@@ -226,8 +221,6 @@ namespace WLSPL_ERP_CRM.repository
 
             return result.ToList();
         }
-
-
 
         public async Task<dynamic> Getinvoicebyid(int ID)
         {
@@ -447,8 +440,7 @@ namespace WLSPL_ERP_CRM.repository
         {
             try
             {
-                using var connection = new SqlConnection(
-                    _configuration.GetConnectionString("Conn_Stringg"));
+                using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
 
                 await connection.OpenAsync();
 
@@ -510,6 +502,9 @@ namespace WLSPL_ERP_CRM.repository
                 parameters.Add("@amtinwords", model.main.amtinwords);
                 parameters.Add("@sessionname", model.main.sessionname);
 
+                parameters.Add("@AgainstBy", model.main.AgainstBy);
+                parameters.Add("@AgainstByValue", model.main.AgainstByValue);
+
                 // =====================================================
                 // BILLING
                 // =====================================================
@@ -553,9 +548,7 @@ namespace WLSPL_ERP_CRM.repository
                 int myInvoice = parameters.Get<int>("@myinvoice");
 
                 // If UPDATE, use existing invoice ID
-                if (Action.Equals(
-                        "updateOldData",
-                        StringComparison.OrdinalIgnoreCase))
+                if (Action.Equals("updateOldData",StringComparison.OrdinalIgnoreCase))
                 {
                     myInvoice = model.main.Id;
 
@@ -573,9 +566,7 @@ namespace WLSPL_ERP_CRM.repository
                 // INSERT NEW DETAILS
                 // =====================================================
 
-                if (model.details != null &&
-                    model.details.Count > 0 &&
-                    myInvoice > 0)
+                if (model.details != null && model.details.Count > 0 && myInvoice > 0)
                 {
                     foreach (var detail in model.details)
                     {
@@ -655,38 +646,38 @@ namespace WLSPL_ERP_CRM.repository
                         // =================================================
 
                         const string invoicedetailsSql = @"
-                    INSERT INTO [InvoiceDetails]
-                    (
-                        [invoiceid],
-                        [productdescription],
-                        [saccode],
-                        [qty],
-                        [rate],
-                        [taxablevalue],
-                        [cgstrate],
-                        [cgstamt],
-                        [sgstrate],
-                        [sgstamt],
-                        [igstrate],
-                        [igstamt],
-                        [total]
-                    )
-                    VALUES
-                    (
-                        @invoiceid,
-                        @productdescription,
-                        @saccode,
-                        @qty,
-                        @rate,
-                        @taxablevalue,
-                        @cgstrate,
-                        @cgstamt,
-                        @sgstrate,
-                        @sgstamt,
-                        @igstrate,
-                        @igstamt,
-                        @total
-                    );";
+                                INSERT INTO [InvoiceDetails]
+                                (
+                                    [invoiceid],
+                                    [productdescription],
+                                    [saccode],
+                                    [qty],
+                                    [rate],
+                                    [taxablevalue],
+                                    [cgstrate],
+                                    [cgstamt],
+                                    [sgstrate],
+                                    [sgstamt],
+                                    [igstrate],
+                                    [igstamt],
+                                    [total]
+                                )
+                                VALUES
+                                (
+                                    @invoiceid,
+                                    @productdescription,
+                                    @saccode,
+                                    @qty,
+                                    @rate,
+                                    @taxablevalue,
+                                    @cgstrate,
+                                    @cgstamt,
+                                    @sgstrate,
+                                    @sgstamt,
+                                    @igstrate,
+                                    @igstamt,
+                                    @total
+                                );";
 
                         await connection.ExecuteAsync(
                             invoicedetailsSql,
@@ -779,6 +770,40 @@ namespace WLSPL_ERP_CRM.repository
                     return result > 0;
                 }
             }
+        }
+
+        public async Task<List<InvoiceDetails>> SearchServices(string q)
+        {
+            var results = new List<InvoiceDetails>();
+
+            using var con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")
+                ?? throw new Exception("Connection string 'Conn_Stringg' not found."));
+
+            string query = @"
+                        SELECT ID,ServiceName, ServiceCode, Price 
+                        FROM Tbl_servicemaster 
+                        WHERE ServiceName LIKE @Search ";
+
+            using var cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@Search", $"%{q}%");
+
+            await con.OpenAsync();
+            using var reader = await cmd.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                results.Add(new InvoiceDetails
+                {
+                    serviceId = reader["ID"]?.ToString() ?? "",
+                    serviceName = reader["ServiceName"]?.ToString() ?? "",
+                    saccode = reader["ServiceCode"]?.ToString() ?? "",
+                    rate = reader["Price"] != DBNull.Value
+                                  ? Convert.ToDecimal(reader["Price"])
+                                  : 0
+                });
+            }
+
+            return results;
         }
     }
 }

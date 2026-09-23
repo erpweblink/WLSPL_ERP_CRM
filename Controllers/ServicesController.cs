@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
+using WEBLINK_CRM.Helpers;
 using WEBLINK_CRM.Models;
 using WEBLINK_CRM.repository;
 
@@ -26,13 +27,9 @@ namespace WEBLINK_CRM.Controllers
 
             return View(servicesList);
         }
-        [HttpGet]
-        public async Task<IActionResult> GetDepratments()
-        {
-            return View();
 
-        }
 
+        // Old create method 
         [HttpGet]
         public async Task<IActionResult> Create()
         {
@@ -46,53 +43,6 @@ namespace WEBLINK_CRM.Controllers
             ViewBag.Departments = departments;
 
             return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Submit(Services model)
-        {
-            try
-            {
-                string userName = HttpContext.Session.GetString("userName");
-
-                model.CreatedBy = userName;
-
-
-                var result = await _services.SubmitServices(model, "Insert");
-
-
-                if (result == -1)
-                {
-                    TempData["ToastMessage"] = "Service already exists.";
-                    TempData["ToastType"] = "warning";
-          
-
-                    return RedirectToAction("Index", "Services");
-                }
-
-
-                if (result > 0)
-                {
-                    TempData["ToastMessage"] = "Service created successfully.";
-                    TempData["ToastType"] = "success";
-              
-                    return RedirectToAction("Index", "Services");
-                }
-
-                TempData["ToastMessage"] = "Unable to create service.";
-                TempData["ToastType"] = "error";
-             
-
-                return View("Create", model);
-            }
-            catch (Exception ex)
-            {
-                TempData["ToastMessage"] = "Something went wrong while creating the service.";
-                TempData["ToastType"] = "error";            
-
-                return View("Create", model);
-            }
         }
 
         [HttpGet]
@@ -123,14 +73,134 @@ namespace WEBLINK_CRM.Controllers
             }
         }
 
-        public async Task<IActionResult> Delete(int id)
+
+        // Newcreate method  by Nikhil
+        [HttpGet]
+        public IActionResult CreateService()
+        {
+            return View();
+        }
+  
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Submit(Services model)
         {
             try
             {
-                string userName = HttpContext.Session.GetString("userName");
+                string userName = HttpContext.Session.GetString("EmpCode");
+                model.CreatedBy = userName;
+
+                var result = await _services.SubmitServices(model, "Insert");
+
+                if (result == -1)
+                {
+                    TempData["ToastMessage"] = "Service already exists.";
+                    TempData["ToastType"] = "warning";
+
+
+                    return RedirectToAction("Index", "Services");
+                }
+
+
+                if (result > 0)
+                {
+                    TempData["ToastMessage"] = "Service created successfully.";
+                    TempData["ToastType"] = "success";
+
+                    return RedirectToAction("Index", "Services");
+                }
+
+                TempData["ToastMessage"] = "Unable to create service.";
+                TempData["ToastType"] = "error";
+
+
+                return View("CreateService", model);
+            }
+            catch (Exception)
+            {
+                TempData["ToastMessage"] = "Something went wrong while creating the service.";
+                TempData["ToastType"] = "error";
+
+                return View("CreateService", model);
+            }
+        }
+
+        [HttpGet]
+        public async Task<ActionResult> EditService(string ID)
+        {
+            try
+            {            
+                var services = await _services.GetServicesById(EncryptionHelper.Decrypt(ID));
+
+                if (services == null)
+                {
+                    return View("Error", new { message = "service not found" });
+                }
+
+                return View(services);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Update(Services model)
+        {
+            try
+            {
+                string userName = HttpContext.Session.GetString("EmpCode");
+
+                model.CreatedBy = userName;
+                model.ID = EncryptionHelper.Decrypt(model.ID);
+
+                var result = await _services.SubmitServices(model, "Update");
+
+
+                if (result == -1)
+                {
+                    TempData["ToastMessage"] = "Service Updated exists.";
+                    TempData["ToastType"] = "warning";
+
+                    return RedirectToAction("Index", "Services");
+                }
+
+
+                if (result > 0)
+                {
+                    TempData["ToastMessage"] = "Service Updated successfully.";
+                    TempData["ToastType"] = "success";
+
+
+                    return RedirectToAction("Index", "Services");
+                }
+
+                TempData["ToastMessage"] = "Unable to Update service.";
+                TempData["ToastType"] = "error";
+
+
+                return View("EditService", model);
+            }
+            catch (Exception)
+            {
+                TempData["ToastMessage"] = "Something went wrong while Updating the service.";
+                TempData["ToastType"] = "error";
+
+                return View("EditService", model);
+            }
+        }
+
+        public async Task<IActionResult> Delete(string id)
+        {
+            try
+            {
+                string userName = HttpContext.Session.GetString("EmpCode");
 
                 var result = await _services.DeleteServices(
-                    id.ToString(),
+                    EncryptionHelper.Decrypt(id).ToString(),
                     userName
                 );
 
@@ -156,56 +226,7 @@ namespace WEBLINK_CRM.Controllers
 
                 return RedirectToAction("Index");
             }
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Update(Services model)
-        {
-            try
-            {
-
-                string userName = HttpContext.Session.GetString("userName");
-
-                model.CreatedBy = userName;
-
-
-                var result = await _services.SubmitServices(model, "Update");
-
-
-                if (result == -1)
-                {
-                    TempData["ToastMessage"] = "Service Updated exists.";
-                    TempData["ToastType"] = "warning";
-             
-                    return RedirectToAction("Index", "Services");
-                }
-
-
-                if (result > 0)
-                {
-                    TempData["ToastMessage"] = "Service Updated successfully.";
-                    TempData["ToastType"] = "success";
-                   
-
-                    return RedirectToAction("Index", "Services");
-                }
-
-                TempData["ToastMessage"] = "Unable to Update service.";
-                TempData["ToastType"] = "error";
-         
-
-                return View("Create", model);
-            }
-            catch (Exception ex)
-            {
-                TempData["ToastMessage"] = "Something went wrong while Updating the service.";
-                TempData["ToastType"] = "error";           
-
-                return View("Create", model);
-            }
-        }
-
+        }   
 
     }
 }

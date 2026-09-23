@@ -4,6 +4,11 @@ using WLSPL_ERP_CRM.Models;
 using WLSPL_ERP_CRM.repository;
 using static WLSPL_ERP_CRM.Models.Taxinvoice;
 
+/* Things to do when creating invoice 
+   1.Alter table InvoiceMain add columns AgainstBy Nvarchar(500) null and AgainstByValue Nvarchar(500) null
+   2.Alter table invoicedetails add column ServiceName Nvarchar(500) null and ServiceId nvarchar(500) null and ValidateTill nvarchar(500) null 
+   3. ADD parameters in [dbo].[SP_AddInvoice] for InvoiceMain
+ */
 namespace WLSPL_ERP_CRM.Controllers
 {
     public class TaxinvoiceController : Controller
@@ -132,6 +137,24 @@ namespace WLSPL_ERP_CRM.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> GetQuotationsByCompany(string cname, string type)
+        {
+            if (string.IsNullOrWhiteSpace(cname))
+            {
+                return BadRequest("Company name is required.");
+            }
+
+            var result = await _TaxinvoiceRepo.Getcompanybycname(cname);
+                
+            if (result == null)
+            {
+                return NotFound("Company not found.");
+            }
+
+            return Json(result);
+        }
+
+        [HttpGet]
         public async Task<IActionResult> Getcomapnybycname(string cname)
         {
             if (string.IsNullOrWhiteSpace(cname))
@@ -149,6 +172,24 @@ namespace WLSPL_ERP_CRM.Controllers
             return Json(result);
         }
 
+
+        [HttpGet]
+        public async Task<IActionResult> SearchServices(string q)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(q))
+                    return BadRequest("Search query is required.");
+
+                var result = await _TaxinvoiceRepo.SearchServices(q);
+
+                return Json(result); 
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message, inner = ex.InnerException?.Message });
+            }
+        }
 
         [HttpGet]
         public async Task<IActionResult> Deleteinvoice(int id)

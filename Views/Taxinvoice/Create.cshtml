@@ -58,6 +58,7 @@
     /* ── Table ── */
     .invoice-table {
         width: 100%;
+        height: 170px;
         border-collapse: collapse;
         table-layout: fixed;
     }
@@ -79,6 +80,7 @@
         }
 
         .invoice-table td input,
+        .invoice-table td select,
         .invoice-table td textarea {
             width: 100%;
             font-size: 11px;
@@ -97,29 +99,21 @@
             }
 
         .invoice-table td textarea {
-            min-height: 38px;
+            min-height: 60px;
             resize: vertical;
         }
 
     /* column widths */
     .col-sn {
-        width: 42px;
-    }
-
-    .col-desc {
-        width: 175px;
-    }
-
-    .col-sac {
-        width: 75px;
+        width: 30px;
     }
 
     .col-qty {
-        width: 60px;
+        width: 100px;
     }
 
     .col-rate {
-        width: 80px;
+        width: 90px;
     }
 
     .col-taxable {
@@ -273,6 +267,50 @@
     }
 </style>
 
+<style type="text/css">
+    .sd-top {
+        display: grid;
+        grid-template-columns: 1fr 100px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .sd-service {
+        padding: 6px 8px;
+        border-right: 1px solid #dee2e6;
+    }
+
+    .sd-sac {
+        padding: 6px 8px;
+    }
+
+    .sd-bottom {
+        padding: 6px 8px;
+    }
+
+
+
+    .service-wrapper {
+        position: relative;
+    }
+
+    .service-dropdown {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        max-height: 200px;
+        overflow-y: auto;
+        list-style: none;
+        margin: 2px 0 0;
+        padding: 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,.12);
+    }
+</style>
 
 <form id="frmTaxInvoice">
     <!-- ══════════════ INVOICE HEADER ══════════════ -->
@@ -318,14 +356,6 @@
                                 <option value="N">N</option>
                                 <option value="Y">Y</option>
                             </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group row">
-                        <label class="col-md-4 col-form-label font-weight-bold">AgainsBy</label>
-                        <div class="col-md-8">
-                            <input asp-for="main.InvoiceType" type="text" class="form-control" id="InvoiceType" placeholder="Against By" />
                         </div>
                     </div>
                 </div>
@@ -450,6 +480,7 @@
                     </div>
                 </div>
             </div>
+
             <div class="row form-row-item">
                 <div class="col-md-6">
                     <div class="form-group row">
@@ -470,37 +501,70 @@
                     </div>
                 </div>
             </div>
+
+            <div class="row form-row-item">
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold">Against By</label>
+                        <div class="col-md-8">
+                            <select asp-for="main.AgainstBy" type="text" class="form-control" id="AgainstBy">
+                                <option value="Direct">Direct</option>
+                                <option value="Quotation">Quotation</option>
+                                <option value="Proforma">Proforma</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold">Against By Value</label>
+                        <div class="col-md-8">
+                            <select asp-for="main.AgainstByValue" type="text" class="form-control" id="AgainstByValue">
+                               
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <!-- ══════════════ ITEM DETAILS ══════════════ -->
     <div class="card mt-3">
         <div class="card-header" style="background:  linear-gradient(314deg, #0b0f14, #1a3e66);">
-            <h5 style="margin:0; color:#fff;">Item Details</h5>
+            <h5 style="margin:0; color:#fff;">Service Details</h5>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="invoice-table" id="invoiceTable">
                     <thead>
                         <tr>
-                            <th class="col-sn">S.No</th>
-                            <th class="col-desc">Description</th>
-                            <th class="col-sac">SAC Code</th>
-                            <th class="col-qty">Qty</th>
-                            <th class="col-rate">Rate</th>
-                            <th class="col-taxable">Taxable Value</th>
-                            <th class="col-tax">CGST % | Amt</th>
-                            <th class="col-tax">SGST % | Amt</th>
-                            <th class="col-tax">IGST % | Amt</th>
-                            <th class="col-total">Total</th>
-                            <th class="col-action">#</th>
+                            <th class="col-sn" rowspan="3">S.No</th>
+                            <th colspan="2" style="width:280px;"></th>
+                            <th class="col-qty" rowspan="3">Service Till</th>
+                            <th class="col-rate" rowspan="3">Rate</th>
+                            <th class="col-taxable" rowspan="3">Taxable Value</th>
+                            <th class="col-tax" rowspan="3">CGST % | Amt</th>
+                            <th class="col-tax" rowspan="3">SGST % | Amt</th>
+                            <th class="col-tax" rowspan="3">IGST % | Amt</th>
+                            <th class="col-total" rowspan="3">Total</th>
+                            <th class="col-action" rowspan="3">#</th>
+                        </tr>
+                        <tr>
+                            <th style="width:160px; border-right:1px solid rgba(255,255,255,0.2); border-bottom:1px solid rgba(255,255,255,0.2); font-size:10px; letter-spacing:.5px;">SERVICE</th>
+                            <th style="width:100px; border-bottom:1px solid rgba(255,255,255,0.2); font-size:10px; letter-spacing:.5px;">SAC CODE</th>
+                        </tr>
+                        <tr>
+                            <th colspan="2" style="font-size:10px; letter-spacing:.5px;">SERVICE DESCRIPTION</th>
                         </tr>
                     </thead>
                     <tbody id="invoiceItems"></tbody>
                     <tfoot>
                         <tr class="tfoot-row">
+                            <td></td>
                             <td colspan="3" style="text-align:right; padding-right:10px; font-weight:700;">TOTAL</td>
-                            <td><input type="text" id="totalQty" readonly class="form-control form-control-sm text-right" /></td>
                             <td></td>
                             <td><input type="text" id="totalTaxable" readonly class="form-control form-control-sm text-right" /></td>
                             <td><input type="text" id="totalCGST" readonly class="form-control form-control-sm text-right" /></td>
@@ -620,6 +684,52 @@
             if (!cname) { clearCompanyDetails(); return; }
             getCompanyDetails(cname);
         });
+
+         // AgainstByValue — initially disabled
+    $('#AgainstByValue').prop('disabled', true)
+        .html('<option value="">-- Select First --</option>');
+
+    $('#AgainstBy').on('change', function () {
+        const selected    = $(this).val();
+        const companyName = $('#companyName').val();
+
+        $('#AgainstByValue').html('<option value="">-- Select --</option>').prop('disabled', true);
+
+        if (selected === 'Quotation' || selected === 'Proforma') {
+            if (!companyName) {
+                alert('Please select a Company first.');
+                $(this).val('Direct');
+                return;
+            }
+
+            $('#AgainstByValue').html('<option value="">Loading...</option>');
+
+            $.ajax({
+                url: '@Url.Action("GetQuotationsByCompany", "Taxinvoice")',
+                type: 'GET',
+                data: { companyName: companyName, type: selected },
+                success: function (response) {
+                    $('#AgainstByValue').html('<option value="">-- Select --</option>');
+                    if (!response || response.length === 0) {
+                        $('#AgainstByValue').html('<option value="">No records found</option>');
+                        return;
+                    }
+                    response.forEach(function (item) {
+                        $('#AgainstByValue').append(
+                            $('<option>').val(item.id).text(item.displayText)
+                        );
+                    });
+                    $('#AgainstByValue').prop('disabled', false);
+                },
+                error: function () {
+                    $('#AgainstByValue').html('<option value="">Error loading data</option>');
+                }
+            });
+        } else {
+            $('#AgainstByValue').html('<option value="">N/A</option>').prop('disabled', true);
+        }
+    });
+
         setTodayDate();
         addInvoiceRow();
        applyGSTBasedOnCompany();
@@ -663,32 +773,64 @@
         row.className = 'invoice-item-row';
         row.innerHTML = `
             <td><input type="text" value="${rowCounter}" readonly class="serial-number" /></td>
-            <td><textarea class="description" placeholder="Description"></textarea></td>
-            <td><input type="text" class="sac-code" placeholder="SAC Code"  value="998314"/></td>
-            <td><input type="number" class="qty" min="0"  value="1" oninput="calculateRow(this); updateAmountInWords();"
-                  onblur="updateAmountInWords();" /></td>
-            <td><input type="number" class="rate" min="0" value="0" oninput="calculateRow(this); updateAmountInWords();"
-                  onblur="updateAmountInWords();"/></td>
+            <td class="service-desc-cell" colspan="2">
+                <div class="sd-top">
+                    <div class="sd-service">
+                        <div class="service-wrapper" style="position:relative;">
+                            <input type="text" placeholder="Search service..." class="service"
+                                   autocomplete="off"
+                                   oninput="searchService(this)"
+                                   onkeydown="handleServiceKeydown(event,this)" />
+                            <input type="hidden" class="service-id" />
+                            <input type="hidden" class="service-name-hidden" />
+                            <ul class="service-dropdown"></ul>
+                        </div>
+                    </div>
+                    <div class="sd-sac">
+                        <input type="text" class="sac-code" value="" placeholder="SAC Code" />
+                    </div>
+                </div>
+                <div class="sd-bottom">
+                    <textarea class="description" placeholder="Enter service description..."></textarea>
+                </div>
+            </td>
+            <td>
+                <select class="validTill">
+                    <option value="1 Year">1 Year</option>
+                    <option value="2 Year">2 Year</option>
+                    <option value="3 Year">3 Year</option>
+                    <option value="4 Year">4 Year</option>
+                    <option value="5 Year">5 Year</option>
+                </select>
+            </td>
+            <td><input type="number" class="rate" min="0" value="0"
+                       oninput="calculateRow(this);updateAmountInWords();"
+                       onblur="updateAmountInWords();" /></td>
             <td><input type="number" class="taxable-value" value="0" readonly /></td>
             <td><div class="tax-pair">
-                <input type="number" class="cgst-rate" min="0" value="0" placeholder="%" oninput="taxChanged(this,'CGST'); updateAmountInWords();"
-                   onblur="updateAmountInWords();"/>
-                <input type="number" class="cgst-amount" value="0" readonly />
+                <input type="number" class="cgst-rate" min="0" value="0" placeholder="%"
+                       oninput="taxChanged(this,'CGST');updateAmountInWords();"
+                       onblur="updateAmountInWords();" />
+                <input type="text" class="cgst-amount" value="0" readonly />
             </div></td>
             <td><div class="tax-pair">
-                <input type="number" class="sgst-rate" min="0" value="0" placeholder="%" oninput="taxChanged(this,'SGST'); updateAmountInWords();"
-                  onblur="updateAmountInWords();" />
-                <input type="number" class="sgst-amount" value="0" readonly />
+                <input type="number" class="sgst-rate" min="0" value="0" placeholder="%"
+                       oninput="taxChanged(this,'SGST');updateAmountInWords();"
+                       onblur="updateAmountInWords();" />
+                <input type="text" class="sgst-amount" value="0" readonly />
             </div></td>
             <td><div class="tax-pair">
-                <input type="number" class="igst-rate" min="0" value="0" placeholder="%" oninput="taxChanged(this,'IGST'); updateAmountInWords();"
-                  onblur="updateAmountInWords();" />
-                <input type="number" class="igst-amount" value="0" readonly />
+                <input type="number" class="igst-rate" min="0" value="0" placeholder="%"
+                       oninput="taxChanged(this,'IGST');updateAmountInWords();"
+                       onblur="updateAmountInWords();" />
+                <input type="text" class="igst-amount" value="0" readonly />
             </div></td>
             <td><input type="number" class="row-total" value="0" readonly /></td>
-            <td><button type="button" class="btn btn-danger btn-sm remove-row" onclick="removeRow(this);" style="padding:1px 6px;">×</button></td>`;
+            <td><button type="button" class="btn btn-danger btn-sm remove-row"
+                        onclick="removeRow(this);" style="padding:1px 6px;">×</button></td>`;
+
         document.getElementById('invoiceItems').appendChild(row);
-          applyGSTBasedOnCompany();
+        applyGSTBasedOnCompany();
         refreshSerialNumbers();
         calculateAll();
         updateAmountInWords();
@@ -732,9 +874,8 @@
     function calculateRow(el) {
         const row = el.closest('tr');
         if (!row) return;
-        const qty = parseFloat(row.querySelector('.qty').value) || 0;
         const rate = parseFloat(row.querySelector('.rate').value) || 0;
-        const taxable = qty * rate;
+        const taxable = rate;
         row.querySelector('.taxable-value').value = taxable.toFixed(2);
         const cgst = taxable * (parseFloat(row.querySelector('.cgst-rate').value)||0) / 100;
         const sgst = taxable * (parseFloat(row.querySelector('.sgst-rate').value)||0) / 100;
@@ -749,7 +890,6 @@
     function calculateAll() {
         let totalQty=0, totalTaxable=0, totalCGST=0, totalSGST=0, totalIGST=0, grand=0;
         document.querySelectorAll('.invoice-item-row').forEach(row => {
-            totalQty     += parseFloat(row.querySelector('.qty').value)||0;
             totalTaxable += parseFloat(row.querySelector('.taxable-value').value)||0;
             totalCGST    += parseFloat(row.querySelector('.cgst-amount').value)||0;
             totalSGST    += parseFloat(row.querySelector('.sgst-amount').value)||0;
@@ -757,7 +897,6 @@
             grand        += parseFloat(row.querySelector('.row-total').value)||0;
         });
         const totalTax = totalCGST + totalSGST + totalIGST;
-        $('#totalQty').val(totalQty);
         $('#totalTaxable').val(totalTaxable.toFixed(2));
         $('#totalCGST').val(totalCGST.toFixed(2));
         $('#totalSGST').val(totalSGST.toFixed(2));
@@ -779,15 +918,15 @@
         document.querySelectorAll('.err-msg').forEach(el => el.textContent = '');
 
         const requiredFields = [
-            { id: 'invoiceDate',    errId: 'err-invoiceDate',    label: 'Invoice Date' },
-            { id: 'companyName',    errId: 'err-companyName',    label: 'Company Name' },
-            { id: 'amountInWords',  errId: 'err-amountInWords',  label: 'Amount in Words' },
+            { id: 'invoiceDate',   errId: 'err-invoiceDate',   label: 'Invoice Date'   },
+            { id: 'companyName',   errId: 'err-companyName',   label: 'Company Name'   },
+            { id: 'amountInWords', errId: 'err-amountInWords', label: 'Amount in Words' },
         ];
 
         requiredFields.forEach(f => {
             const el = document.getElementById(f.id);
-            if (!el.value.trim()) {
-                el.classList.add('field-error');
+            if (!el || !el.value.trim()) {
+                if (el) el.classList.add('field-error');
                 document.getElementById(f.errId).textContent = `${f.label} is required.`;
                 valid = false;
             }
@@ -795,23 +934,25 @@
 
         let itemsValid = true;
         document.querySelectorAll('.invoice-item-row').forEach(row => {
-            if (!row.querySelector('.description').value.trim()) {
-                row.querySelector('.description').classList.add('field-error'); itemsValid = false;
+            const service = row.querySelector('.service');
+            const rate    = row.querySelector('.rate');
+
+            if (!service.value.trim()) {
+                service.classList.add('field-error');
+                itemsValid = false;
             }
-            if ((parseFloat(row.querySelector('.qty').value)||0) <= 0) {
-                row.querySelector('.qty').classList.add('field-error'); itemsValid = false;
-            }
-            if ((parseFloat(row.querySelector('.rate').value)||0) <= 0) {
-                row.querySelector('.rate').classList.add('field-error'); itemsValid = false;
+            if ((parseFloat(rate.value) || 0) <= 0) {
+                rate.classList.add('field-error');
+                itemsValid = false;
             }
         });
 
         if (!itemsValid) {
-            document.getElementById('err-items').textContent = 'All rows need a description, qty > 0, and rate > 0.';
+            document.getElementById('err-items').textContent = 'All rows need a service name and rate > 0.';
             valid = false;
         }
 
-        if ((parseFloat(document.getElementById('summaryGrandTotal').value)||0) <= 0) {
+        if ((parseFloat(document.getElementById('summaryGrandTotal').value) || 0) <= 0) {
             document.getElementById('err-items').textContent = 'Grand total must be greater than zero.';
             valid = false;
         }
@@ -1097,6 +1238,164 @@
     }
 
 
+</script>
 
+<script>
+    let searchTimer = null;
 
+    function searchService(input) {
+        const query = input.value.trim();
+        const dropdown = input.closest('.service-wrapper').querySelector('.service-dropdown');
+
+        // Clear previous hidden id when user types again
+        input.closest('.service-wrapper').querySelector('.service-id').value = '';
+
+        if (query.length < 2) {
+            dropdown.style.display = 'none';
+            dropdown.innerHTML = '';
+            return;
+        }
+
+        // Show loading state
+        dropdown.style.display = 'block';
+        dropdown.innerHTML = '<li style="padding:8px 12px; color:#999;">Searching...</li>';
+
+        // Debounce: wait 300ms after user stops typing
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+            fetchServices(query, input, dropdown);
+        }, 100);
+    }
+
+    // ─── AJAX call ────────────────────────────────────────────────────────────────
+    function fetchServices(query, input, dropdown) {
+        $.ajax({
+            url: '@Url.Action("SearchServices", "Taxinvoice")',   // 🔁 Change to your endpoint
+            type: 'GET',
+            data: { q: query },
+            success: function (response) {
+                renderServiceDropdown(response, input, dropdown);
+            },
+            error: function () {
+                dropdown.innerHTML = '<li style="padding:8px 12px; color:red;">Error fetching services.</li>';
+            }
+        });
+    }
+
+    // ─── Render dropdown list ─────────────────────────────────────────────────────
+    function renderServiceDropdown(services, input, dropdown) {
+        dropdown.innerHTML = '';
+
+        if (!services || services.length === 0) {
+            dropdown.innerHTML = '<li style="padding:8px 12px; color:#999;">No services found.</li>';
+            return;
+        }
+
+        services.forEach((svc, index) => {
+            const li = document.createElement('li');
+            li.style.cssText = 'padding:8px 12px; cursor:pointer; border-bottom:1px solid #f0f0f0; font-size:11px;';
+            li.setAttribute('data-index', index);
+
+            // Highlight matched text
+            const regex = new RegExp(`(${input.value.trim()})`, 'gi');
+            const highlighted = svc.serviceName.replace(regex, '<strong>$1</strong>');
+
+            li.innerHTML = `
+                <div style="font-weight:500;">${highlighted}</div>
+                ${svc.saccode ? `<div style="font-size:9px; color:#888;">SAC: ${svc.saccode}</div>` : ''}
+            `;
+
+            li.addEventListener('mouseenter', () => {
+                clearHighlight(dropdown);
+                li.style.background = '#f0f7ff';
+                li.classList.add('highlighted');
+            });
+            li.addEventListener('mouseleave', () => {
+                li.style.background = '';
+                li.classList.remove('highlighted');
+            });
+            li.addEventListener('mousedown', (e) => {
+                e.preventDefault(); // prevent input blur before click fires
+                selectService(svc, input);
+            });
+
+            dropdown.appendChild(li);
+        });
+
+        dropdown.style.display = 'block';
+    }
+
+    function selectService(svc, input) {
+        const row     = input.closest('tr');
+        const wrapper = input.closest('.service-wrapper');
+
+        input.value = svc.serviceName ?? '';
+        wrapper.querySelector('.service-id').value          = svc.serviceId  ?? '';
+        wrapper.querySelector('.service-name-hidden').value = svc.serviceName ?? '';
+
+        row.querySelector('.sac-code').value  = svc.saccode ?? '998314';
+        row.querySelector('.rate').value      = svc.rate    ?? 0;
+
+        wrapper.querySelector('.service-dropdown').style.display = 'none';
+        wrapper.querySelector('.service-dropdown').innerHTML     = '';
+
+        calculateRow(row.querySelector('.rate'));
+        applyGSTBasedOnCompany();
+        calculateAll();
+        updateAmountInWords();
+    }
+
+    // ─── Keyboard navigation (↑ ↓ Enter Escape) ───────────────────────────────────
+    function handleServiceKeydown(e, input) {
+        const dropdown = input.closest('.service-wrapper').querySelector('.service-dropdown');
+        const items    = dropdown.querySelectorAll('li[data-index]');
+
+        if (!items.length) return;
+
+        let current = dropdown.querySelector('.highlighted');
+        let idx     = current ? parseInt(current.getAttribute('data-index')) : -1;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            idx = Math.min(idx + 1, items.length - 1);
+            setHighlight(items, idx);
+
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            idx = Math.max(idx - 1, 0);
+            setHighlight(items, idx);
+
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (current) current.dispatchEvent(new Event('mousedown'));
+
+        } else if (e.key === 'Escape') {
+            dropdown.style.display = 'none';
+        }
+    }
+
+    function setHighlight(items, idx) {
+        items.forEach(li => {
+            li.style.background = '';
+            li.classList.remove('highlighted');
+        });
+        items[idx].style.background = '#f0f7ff';
+        items[idx].classList.add('highlighted');
+        items[idx].scrollIntoView({ block: 'nearest' });
+    }
+
+    function clearHighlight(dropdown) {
+        dropdown.querySelectorAll('li').forEach(li => {
+            li.style.background = '';
+            li.classList.remove('highlighted');
+        });
+    }
+
+    function closeAllServiceDropdowns(e) {
+        if (!e.target.closest('.service-wrapper')) {
+            document.querySelectorAll('.service-dropdown').forEach(d => {
+                d.style.display = 'none';
+            });
+        }
+    }
 </script>

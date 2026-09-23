@@ -21,6 +21,8 @@ namespace WLSPL_ERP_CRM.repository
         Task<List<TaxInvoiceCreate>>Getcompany();
         Task<TaxInvoiceCreate> Getcompanybycname(string cname);
 
+        Task<List<InvoiceDetails>> SearchServices(string cname);
+
         Task<bool> UpdateSave(TaxInvoiceCreateVM model, string Action);
 
         Task<bool>Deletereords(int ID);
