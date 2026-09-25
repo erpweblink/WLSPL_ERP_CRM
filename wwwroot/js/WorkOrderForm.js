@@ -171,7 +171,16 @@
                         if (!ID) {
                             $('#ddlType').val(result.RegisterType).trigger('change');
                         }
-                       
+                        if (result.IsInHierarchy != "Yes") {
+                            $("#ddlCompanyname").val("").trigger("change");
+                            showToast(
+                                "The current Sales Manager for this company is " +
+                                result.IsInHierarchy +
+                                ". Please connect with the Sales Manager.",
+                                "warning"
+                            );
+                            return;
+                        }
                         $('#txtOwnerName').val(result.oname);
                         $('#txtAddress').val(result.address);
                         $('#txtGSTNo').val(result.gstno == null ? "NA" : result.gstno);
