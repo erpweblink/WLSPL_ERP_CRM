@@ -8,6 +8,7 @@ namespace WEBLINK_CRM.Models
         public List<SelectListItem>? SalesTLList { get; set; }
 
         public int id { get; set; }
+        public string? encryptedId { get; set; }
 
         public string? empcode { get; set; }
 

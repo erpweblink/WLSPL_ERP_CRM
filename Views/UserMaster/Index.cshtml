@@ -1,3 +1,4 @@
+@using WEBLINK_CRM.Helpers
 @model IEnumerable<WEBLINK_CRM.Models.RegisterUserr>
 @{
     ViewData["Title"] = "User Management";
@@ -712,11 +713,11 @@
                                 <td style="font-size:12px">@item.UserName</td>
                                 <td>
                                     <div class="d-flex gap-1">
-                                        <a asp-action="Edit" asp-route-id="@item.id"
+                                        <a asp-action="Edit" asp-route-id="@EncryptionHelper.Encrypt(item.encryptedId)"
                                            class="btn btn-warning btn-sm action-btn edit-btn" title="Edit">
                                             <i class="fa fa-edit"></i>
                                         </a>
-                                        <a asp-action="Delete" asp-route-id="@item.id"
+                                        <a asp-action="Delete" asp-route-id="@EncryptionHelper.Encrypt(item.encryptedId)"
                                            onclick="return confirm('Are you sure you want to delete this user?')"
                                            class="btn btn-danger btn-sm action-btn delete-btn" title="Delete">
                                             <i class="fa fa-trash"></i>
@@ -893,11 +894,11 @@
                 <td style="font-size:12px">${item.userName ?? ''}</td>
                 <td>
                     <div class="d-flex gap-1">
-                        <a href="/UserMaster/Edit/${item.id}"
+                        <a href="/UserMaster/Edit/${item.encryptedId}"
                            class="btn btn-warning btn-sm action-btn edit-btn" title="Edit">
                             <i class="fa fa-edit"></i>
                         </a>
-                        <a href="/UserMaster/Delete/${item.id}"
+                        <a href="/UserMaster/Delete/${item.encryptedId}"
                            class="btn btn-danger btn-sm action-btn delete-btn" title="Delete"
                            onclick="return confirm('Are you sure you want to delete this user?');">
                             <i class="fa fa-trash"></i>
@@ -938,6 +939,7 @@
             contentType: 'application/json',
             data:        JSON.stringify(getFilterPayload()),
             success: function (res) {
+                
                 overlay.classList.remove('show');
                 if (!res.success) { console.error(res.message); return; }
                 renderTable(res.data);

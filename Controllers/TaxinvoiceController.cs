@@ -1,5 +1,6 @@
 ﻿using iTextSharp.text;
 using Microsoft.AspNetCore.Mvc;
+using WEBLINK_CRM.Helpers;
 using WLSPL_ERP_CRM.Models;
 using WLSPL_ERP_CRM.repository;
 using static WLSPL_ERP_CRM.Models.Taxinvoice;
@@ -88,12 +89,12 @@ namespace WLSPL_ERP_CRM.Controllers
             }
         }
 
-        public async Task<IActionResult> GetPdf(int id)
+        public async Task<IActionResult> GetPdf(string id)
         {
-            if (id <= 0)
+            if (Convert.ToInt32(EncryptionHelper.Decrypt(id)) <= 0)
                 return BadRequest("Invalid invoice ID.");
 
-            var invoice = await _TaxinvoiceRepo.GetInvoiceForPdfAsync(id);
+            var invoice = await _TaxinvoiceRepo.GetInvoiceForPdfAsync(Convert.ToInt32(EncryptionHelper.Decrypt(id)));
 
             if (invoice == null)
                 return NotFound("Invoice not found.");
@@ -205,9 +206,9 @@ namespace WLSPL_ERP_CRM.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Deleteinvoice(int id)
+        public async Task<IActionResult> Deleteinvoice(string id)
         {
-            var result = await _TaxinvoiceRepo.Deletereords(id);
+            var result = await _TaxinvoiceRepo.Deletereords(Convert.ToInt32(EncryptionHelper.Decrypt(id)));
 
             if (result)
             {
@@ -226,9 +227,9 @@ namespace WLSPL_ERP_CRM.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(string id)
         {
-            var result = await _TaxinvoiceRepo.Getinvoicebyid(id);
+            var result = await _TaxinvoiceRepo.Getinvoicebyid(Convert.ToInt32(EncryptionHelper.Decrypt(id)));
 
             if (result == null || result.main == null)
             {

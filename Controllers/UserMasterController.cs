@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WEBLINK_CRM.Helpers;
 using WEBLINK_CRM.Models;
 using WEBLINK_CRM.repository;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -44,6 +45,7 @@ namespace WEBLINK_CRM.Controllers
 
                 var result = data.Select(u => new {
                     u.id,
+                    u.encryptedId,
                     u.empcode,
                     u.name,
                     u.email,
@@ -68,10 +70,10 @@ namespace WEBLINK_CRM.Controllers
         [HttpGet]
         public IActionResult Create()
         {
-
             RegisterUserr model = new RegisterUserr();
-
             BindSalesTLList(model);
+
+            model.regdate =  DateTime.Now;
 
             return View(model);
         }
@@ -114,15 +116,14 @@ namespace WEBLINK_CRM.Controllers
         }
 
         [HttpGet]
-        public IActionResult Edit(int id)
+        public IActionResult Edit(string id)
         {
-            var user = _repository.GetUserById(id);
+            var user = _repository.GetUserById(EncryptionHelper.Decrypt(id));
 
             if (user == null)
                 return NotFound();
 
             user.SalesTLList = _repository.GetSalesTLManagers();
-
             return View(user);
         }
 
@@ -130,6 +131,8 @@ namespace WEBLINK_CRM.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Edit(RegisterUserr model)
         {
+            ModelState.Remove("id");
+            model.id = Convert.ToInt32(EncryptionHelper.Decrypt(model.encryptedId));
             if (ModelState.IsValid)
             {
                 bool result = _repository.UpdateUser(model);
@@ -150,9 +153,10 @@ namespace WEBLINK_CRM.Controllers
         }
 
         [HttpGet]
-        public IActionResult Delete(int id)
+        public IActionResult Delete(string id)
         {
-            bool result = _repository.DeleteUser(id);
+            int userId = Convert.ToInt32(EncryptionHelper.Decrypt(id));
+            bool result = _repository.DeleteUser(userId);
 
             if (result)
             {
@@ -175,7 +179,7 @@ namespace WEBLINK_CRM.Controllers
         [HttpGet]
         public IActionResult UserProfile()
         {
-            int userId = HttpContext.Session.GetInt32("EmployeeId") ?? 0;
+            string userId = HttpContext.Session.GetInt32("EmployeeId").ToString() ?? "0";
             var user = _repository.GetUserById(userId);
 
             if (user == null)

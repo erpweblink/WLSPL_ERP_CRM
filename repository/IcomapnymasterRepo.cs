@@ -17,6 +17,7 @@ namespace WEBLINK_CRM.repository
         Task<List<Companymaster>> GetcompanyList(Companymaster Model, string Action);
 
         Task<List<Companymaster>> GetFilteredcompanyList(Companymaster model);
+
         //Task<dynamic> GetcompanybyId(string Id);
         Task<Companymaster> GetcompanybyId(string Id);
         Task<List<dynamic>> GetcompanyName(string Name);

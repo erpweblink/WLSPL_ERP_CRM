@@ -318,7 +318,7 @@
                 fpEmail.addEventListener('input', function () { emailIsRegistered = false; });
 
                 btnSendOtp.addEventListener('click', async function () {
-                    debugger;
+                    
                     var email = fpEmail.value.trim();
                     if (!emailIsRegistered) { showToast('This email is not registered with us.', 'warning'); return; }
 

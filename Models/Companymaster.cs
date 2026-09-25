@@ -4,7 +4,8 @@ namespace WEBLINK_CRM.Models
 {
     public class Companymaster
     {
-        public int? Id { get; set; }
+        public string? Id { get; set; }
+
         [Required(ErrorMessage = "Company Code is required")]
         public string? CCode { get; set; }
         [Required(ErrorMessage = "Company Name is required")]

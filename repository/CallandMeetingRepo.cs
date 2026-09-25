@@ -401,7 +401,7 @@ namespace WEBLINK_CRM.repository
 
                     var mapped = rawResult.Select(r => new CallandMeeting
                     {
-                        Id = r.ID_CommentHistory,
+                        Id = r.Id,
                         CompanyName = r.Cname,
                         PersonName = r.Oname,
                         ContactNo = r.Mobile,
@@ -459,7 +459,12 @@ namespace WEBLINK_CRM.repository
                 using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
                 {
                     await connection.OpenAsync();
-                    string query = @"SELECT * FROM [stswlspl].[VW_FollowUpRpt] WHERE id = @CommentId";
+                    //string query = @"SELECT * FROM [stswlspl].[VW_FollowUpRpt] WHERE id = @CommentId";
+                    string query = @"SELECT A.id,A.[ccode],A.[cname],A.[oname],A.[email],A.[mobile],A.[visitingcard],A.[type]
+                        ,A.[BDE],A.[address],format(A.[visitdate],'dd-MMM-yyyy') as visitdate,A.[website],format(A.[regdate]
+                        ,'dd-MMM-yyyy hh:mm tt') as [regdate],A.[sessionname],B.name,B.email as Empemail 
+                        FROM [Company] A 
+                        LEFT JOIN employees B on A.sessionname=B.empcode where A.id= @CommentId";
 
                     var parameters = new DynamicParameters();
                     parameters.Add("@CommentId", Id);

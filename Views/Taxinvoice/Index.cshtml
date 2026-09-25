@@ -1,4 +1,5 @@
 ﻿@model IEnumerable<WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreate>
+@using WEBLINK_CRM.Helpers
 @{
     ViewData["Title"] = "Tax Invoice List";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -884,6 +885,110 @@
     }
 </style>
 
+<style type="text/css">
+    .btn-filter-toggle {
+        background: #fff;
+        border: 1px solid #d0d5dd;
+        color: #344054;
+        padding: 6px 14px;
+        border-radius: 7px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+        .btn-filter-toggle:hover {
+            background: #f9fafb;
+            border-color: #98a2b3;
+        }
+
+    #filterCard {
+        overflow: hidden;
+        max-height: 1000px;
+        opacity: 1;
+        transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.35s ease;
+    }
+
+        #filterCard.filter-collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            border-bottom: none !important;
+        }
+
+    #summaryCard {
+        overflow: hidden;
+        max-height: 1000px;
+        opacity: 1;
+        transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.35s ease;
+    }
+
+        #summaryCard.filter-collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+    #fyCard {
+        overflow: hidden;
+        max-height: 1000px;
+        opacity: 1;
+        transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.35s ease;
+    }
+
+        #fyCard.filter-collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+    .section-toggle-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 18px;
+        background: #f8fafc;
+        border-top: 1px solid #edf0f5;
+        border-bottom: 1px solid #edf0f5;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.2s ease;
+    }
+
+        .section-toggle-bar:hover {
+            background: #f0f4f8;
+        }
+
+    .section-toggle-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #475467;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+        .section-toggle-label i {
+            font-size: 13px;
+            color: #0d6efd;
+        }
+
+    .section-toggle-icon {
+        font-size: 12px;
+        color: #98a2b3;
+        transition: transform 0.3s ease;
+    }
+
+    .section-toggle-bar.open .section-toggle-icon {
+        transform: rotate(180deg);
+    }
+</style>
+
 <div class="invoice-page">
     <div class="invoice-card">
         <div class="invoice-header">
@@ -892,15 +997,20 @@
                     <i class="fa fa-file-invoice"></i>
                     Tax Invoice List
                 </h3>
-                <a asp-action="Create"
-                   class="btn btn-primary add-btn btn-sm">
-                    <i class="fa fa-plus"></i>
-                    Create Invoice
-                </a>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" id="btnToggleFilter" class="btn-filter-toggle">
+                        <i class="fa fa-filter"></i>
+                        <span>Show Filters</span>
+                    </button>
+                    <a asp-action="Create" class="btn btn-primary add-btn btn-sm">
+                        <i class="fa fa-plus"></i>
+                        Create Invoice
+                    </a>
+                </div>
             </div>
         </div>
 
-        <div class="filter-section">
+        <div id="filterCard" class="filter-section filter-collapsed">
             <div class="row align-items-end">
                 <div class="col-lg-4 col-md-6 mb-2">
                     <label class="filter-label">Search</label>
@@ -958,7 +1068,16 @@
             </div>
         </div>
 
-        <div class="summary-section">
+        <!-- ── Summary Cards Toggle Bar ── -->
+        <div class="section-toggle-bar open" id="summaryToggleBar" onclick="toggleSection('summaryCard','summaryToggleBar','Summary Cards')">
+            <span class="section-toggle-label">
+                <i class="fa fa-chart-pie"></i>
+                Summary Cards
+            </span>
+            <i class="fa fa-chevron-up section-toggle-icon"></i>
+        </div>
+
+        <div id="summaryCard" class="summary-section filter-collapsed">
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-2">
                     <div class="summary-card summary-fy">
@@ -1000,7 +1119,16 @@
             </div>
         </div>
 
-        <div class="fy-summary-section">
+        <!-- ── FY Month Breakdown Toggle Bar ── -->
+        <div class="section-toggle-bar open" id="fyToggleBar" onclick="toggleSection('fyCard','fyToggleBar','Month Breakdown')">
+            <span class="section-toggle-label">
+                <i class="fa fa-calendar-days"></i>
+                Month Breakdown — FY @selectedFinancialYear
+            </span>
+            <i class="fa fa-chevron-up section-toggle-icon"></i>
+        </div>
+
+        <div id="fyCard" class="fy-summary-section filter-collapsed" style="border-radius:0; border-left:0; border-right:0; margin:3px !important;">
             <div class="fy-summary-header">
                 <div class="d-flex justify-content-between align-items-center">
                     <h6 class="fy-summary-title">
@@ -1129,13 +1257,13 @@
                                 </td>
 
                                 <td class="action-column" data-label="Action">
-                                    <a href="@Url.Action("GetPdf", "Taxinvoice", new { id = item.Id })" class="invoice-action-btn invoice-pdf-btn" title="Download PDF">
+                                    <a href="@Url.Action("GetPdf", "Taxinvoice", new { id = EncryptionHelper.Encrypt(item.Id) })" class="invoice-action-btn invoice-pdf-btn" title="Download PDF">
                                         <i class="fa fa-file-pdf"></i>
                                     </a>
-                                    <a href="@Url.Action("Edit", "Taxinvoice", new { id = item.Id })" class="invoice-action-btn invoice-edit-btn" title="Edit Invoice">
+                                    <a href="@Url.Action("Edit", "Taxinvoice", new { id = EncryptionHelper.Encrypt(item.Id) })" class="invoice-action-btn invoice-edit-btn" title="Edit Invoice">
                                         <i class="fa fa-edit"></i>
                                     </a>
-                                    <a href="@Url.Action("Deleteinvoice", "Taxinvoice", new { id = item.Id })" class="invoice-action-btn invoice-delete-btn" title="Delete Invoice" onclick="return deleteInvoice(event, this);">
+                                    <a href="@Url.Action("Deleteinvoice", "Taxinvoice", new { id = EncryptionHelper.Encrypt(item.Id) })" class="invoice-action-btn invoice-delete-btn" title="Delete Invoice" onclick="return deleteInvoice(event, this);">
                                         <i class="fa fa-trash"></i>
                                     </a>
                                 </td>
@@ -1176,6 +1304,18 @@
     let allRows = [];
     let filteredRows = [];
 
+        // ── Filter toggle ──
+    document.getElementById('btnToggleFilter').addEventListener('click', function () {
+        const card = document.getElementById('filterCard');
+        card.classList.toggle('filter-collapsed');
+
+        const collapsed = card.classList.contains('filter-collapsed');
+        this.querySelector('span').textContent = collapsed ? 'Show Filters' : 'Hide Filters';
+
+        const icon = this.querySelector('i');
+        icon.className = collapsed ? 'fa fa-filter' : 'fa fa-filter-circle-xmark';
+    });
+
     document.addEventListener("DOMContentLoaded", function () {
         allRows = Array.from(document.querySelectorAll("#invoiceTableBody .invoice-row"));
         filteredRows = [...allRows];
@@ -1201,6 +1341,14 @@
         currentPage = 1;
         loadServerData();
     });
+
+  function toggleSection(cardId, barId, label) {
+        const card = document.getElementById(cardId);
+        const bar  = document.getElementById(barId);
+
+        const isCollapsed = card.classList.toggle('filter-collapsed');
+        bar.classList.toggle('open', !isCollapsed);
+    }
 
     function selectMonth(month) {
         document.getElementById("monthFilter").value = month;

@@ -4,7 +4,7 @@
     ViewData["Title"] = "Edit User";
 }
 
-<style>
+<style type="text/css">
     .user-page {
         background: #f5f7fa;
         padding: 20px;
@@ -68,31 +68,6 @@
         margin: 5px 0 20px;
     }
 
-    .btn {
-        height: 42px;
-        border-radius: 8px;
-        font-weight: 600;
-        padding: 0 20px;
-    }
-
-    .btn-success {
-        background: #198754;
-        border: none;
-    }
-
-        .btn-success:hover {
-            background: #157347;
-        }
-
-    .btn-danger {
-        background: #dc3545;
-        border: none;
-    }
-
-        .btn-danger:hover {
-            background: #bb2d3b;
-        }
-
     .validation-message {
         font-size: 12px;
     }
@@ -101,6 +76,7 @@
         color: #dc3545;
     }
 </style>
+
 <div class="user-page">
 
     <div class="user-card">
@@ -127,9 +103,8 @@
                 <!-- Hidden Fields -->
                 <input asp-for="empcode" type="hidden" />
                 <input asp-for="isdeleted" type="hidden" />
-                <input asp-for="regdate" type="hidden" />
                 <input asp-for="ProfileImagePath" type="hidden" />
-                <input asp-for="id" type="hidden" />
+                <input asp-for="encryptedId" type="hidden" />
 
                 <!-- ================= ACCOUNT DETAILS ================= -->
 
@@ -139,8 +114,6 @@
                 </div>
 
                 <div class="row">
-
-
 
                     <!-- Name -->
                     <div class="col-md-4 field-group">
@@ -187,7 +160,7 @@
                         </label>
 
                         <input asp-for="regdate"
-                               type="datetime-local"
+                               type="date"
                                class="form-control" />
 
                         <span asp-validation-for="regdate"
@@ -464,9 +437,8 @@
 
                 <!-- ================= BUTTONS ================= -->
 
-                <div class="row mt-4">
-
-                    <div class="col-12 d-flex justify-content-center gap-2">
+                <div class="row justify-content-center mt-3">
+                    <div class="col-md-3 text-end">
 
                         <button type="submit"
                                 class="btn btn-success">
@@ -475,7 +447,8 @@
                             Save User
 
                         </button>
-
+                    </div>
+                    <div class="col-md-3 text-start">
                         <a asp-action="Index"
                            class="btn btn-danger">
 
@@ -485,11 +458,9 @@
                         </a>
 
                     </div>
-
                 </div>
-
             </form>
-
         </div>
+
     </div>
 </div>
