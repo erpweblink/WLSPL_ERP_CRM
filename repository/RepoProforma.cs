@@ -476,7 +476,7 @@ namespace WEBLINK_CRM.repository
                     // ---- Section title bar ----
                     table = new PdfPTable(1) { TotalWidth = 560f, LockedWidth = true, SpacingBefore = 0f, SpacingAfter = 0f };
                     table.SetWidths(new float[] { 560f });
-                    table.AddCell(new PdfPCell(new Phrase("PRODUCT DETAILS", boldFont12White))
+                    table.AddCell(new PdfPCell(new Phrase("SERVICE DETAILS", boldFont12White))
                     {
                         HorizontalAlignment = Element.ALIGN_CENTER,
                         BackgroundColor = brand,

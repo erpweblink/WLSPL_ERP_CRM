@@ -1,11 +1,11 @@
 ﻿var GetQuotationForm = function () {
 
     // =====================================================
-    // VARIABLES
+    // VARIABLES - IMPORTANT: Declare serviceListCache here!
     // =====================================================
     var ID = window.location.pathname.split('/').pop();
     var IsCreate = $("#hdnCreate").val();
-    var Companytext = "";
+    var serviceListCache = null;  // ✅ MUST DECLARE THIS!
 
     // =====================================================
     // CHECK AUTHORIZATION
@@ -20,30 +20,31 @@
     // =====================================================
     // BIND STATE LIST
     // =====================================================
-    var BindStateList = function () {
+    var BindStateList = function (callback) {
         $.ajax({
-            url: "/Quotation/GetState",
-            data: { Status: "1" },
-            type: "POST",
+            url: "/Proforma/GetState",
+            data: { "Status": "1" },
+            type: "post",
             cache: false,
             success: function (response) {
-                if (response.success === true) {
-                    var html = "<option value=''>-- Select State --</option>";
+                if (response.success == true) {
+                    var html = "<option value='' selected='selected'>-- Select State --</option>";
                     var users = response.data || [];
-
                     $.each(users, function (key, data) {
-                        html += "<option value='" + (data.Name || "") + "'>" + (data.Name || "") + "</option>";
+                        html += "<option value='" + data.Name + "'>" + data.Name + "</option>";
                     });
-
                     $("#ddlBillState").html(html);
                 }
-                else {
-                    showToast(response.message || "State data not found.", "error");
+
+                if (typeof callback === "function") {
+                    callback();
                 }
             },
-            error: function (xhr) {
-                console.error("Get State Error:", xhr.responseText);
-                showToast("Unable to load State list.", "error");
+            error: function (xhr, ajaxOptions, thrownError) {
+                console.error(xhr.responseText);
+                if (typeof callback === "function") {
+                    callback();
+                }
             }
         });
     };
@@ -52,7 +53,7 @@
     // BIND COMPANY LIST
     // =====================================================
     var BindCompanyList = function () {
-        $.ajax({
+        return $.ajax({
             url: "/Quotation/GetCompany",
             data: { Status: "1" },
             type: "POST",
@@ -67,17 +68,6 @@
                     });
 
                     $("#ddlCompanyname").html(html);
-
-                    // SELECT COMPANY DURING EDIT
-                    if (Companytext && Companytext.trim() !== "") {
-                        var company = users.find(function (x) {
-                            return ((x.Name || "").toLowerCase().trim()) === Companytext.toLowerCase().trim();
-                        });
-
-                        if (company) {
-                            $("#ddlCompanyname").val(company.ID).trigger("change");
-                        }
-                    }
                 }
                 else {
                     showToast(response.message || "Company data not found.", "error");
@@ -343,33 +333,33 @@
     }
 
     // =====================================================
-    // BIND SERVICE LIST (GLOBAL)
+    // GET SERVICE OPTIONS FROM CACHE
     // =====================================================
-    var Servicetext = "";
-    var BindServiceList = function () {
-        var Dept = "";
+    function getServiceOptions() {
+        var html = "<option value=''>-- Select Service Name --</option>";
 
-        $.ajax({
+        if (serviceListCache && serviceListCache.length > 0) {
+            $.each(serviceListCache, function (key, data) {
+                html += "<option value='" + escapeHtml(data.ID || data.Name) + "'>"
+                    + escapeHtml(data.Name) + "</option>";
+            });
+        }
+
+        return html;
+    }
+
+    // =====================================================
+    // BIND SERVICE LIST (GLOBAL) - CACHE DATA
+    // =====================================================
+    var BindServiceList = function () {
+        return $.ajax({
             url: "/WorkOrder/BindServiceList",
-            data: { Dept: Dept },
+            data: { Dept: "" },
             type: "POST",
             cache: false,
             success: function (response) {
                 if (response.success === true) {
-                    var users = response.data || [];
-                    var html = "<option value=''>-- Select Service Name --</option>";
-
-                    $.each(users, function (key, data) {
-                        html += "<option value='" + escapeHtml(data.ID || data.Name) + "'>" + escapeHtml(data.Name) + "</option>";
-                    });
-
-                    // Update all service dropdowns
-                    $(".ddlservice").html(html);
-
-                    // Set selected service AFTER options are loaded
-                    if (Servicetext) {
-                        $(".ddlservice").val(Servicetext).trigger("change");
-                    }
+                    serviceListCache = response.data || [];  // ✅ Cache it here
                 }
             },
             error: function (xhr) {
@@ -439,14 +429,14 @@
         });
 
     // =====================================================
-    // ADD DETAIL ROW
+    // ADD DETAIL ROW - FIXED (No call to BindServiceList)
     // =====================================================
     function addDetailRow(item) {
         item = item || {};
 
-        var serviceName = item.ServiceName || item.serviceName || "";
-        Servicetext = serviceName;
-        BindServiceList();
+        var serviceID = item.serviceID || item.ServiceID || "";
+        // ✅ REMOVED: BindServiceList() call that was refreshing all dropdowns
+
         var description = item.ProductDescription || item.productDescription || "";
         var sacCode = item.SACCode || item.sacCode || "00440013";
         var qty = item.Qty || item.qty || 1;
@@ -460,7 +450,6 @@
 
         // Determine GST based on GST Number
         if (gstNo !== "NA" && gstNo.length >= 2) {
-
             var stateCode = gstNo.substring(0, 2);
 
             // Maharashtra
@@ -624,33 +613,27 @@
         // Append row to table
         $("#tblDetailsBody").append(newRow);
 
-        // Initialize the service dropdown for this row
-        var newDropdown = $("#tblDetailsBody .detail-row").last().find(".ddlservice");
-        if (newDropdown.length) {
-            $.ajax({
-                url: "/WorkOrder/BindServiceList",
-                data: { Dept: "" },
-                type: "POST",
-                cache: false,
-                success: function (response) {
-                    if (response.success === true) {
-                        var users = response.data || [];
-                        var html = "<option value=''>-- Select Service Name --</option>";
+        // Initialize the service dropdown for THIS ROW ONLY - use cached data
+        var newRowElement = $("#tblDetailsBody .detail-row").last();
+        var newDropdown = newRowElement.find(".ddlservice");
 
-                        $.each(users, function (key, data) {
-                            html += "<option value='" + escapeHtml(data.ID || data.Name) + "'>" + escapeHtml(data.Name) + "</option>";
-                        });
+        if (newDropdown.length && serviceListCache) {
+            // Populate from cache - only this dropdown
+            newDropdown.html(getServiceOptions());
 
-                        newDropdown.html(html);
-                        newDropdown.select2({ selectOnClose: true, width: '100%' });
-                    }
-                }
-            });
+            // Set the service value if editing
+            if (serviceID) {
+                newDropdown.val(serviceID).trigger("change");
+            }
+
+            // Initialize select2 if available
+            if ($.fn.select2) {
+                newDropdown.select2({ selectOnClose: true, width: '100%' });
+            }
         }
 
         // Calculate newly added row
-        var row = $("#tblDetailsBody .detail-row").last();
-        calculateDetailRow(row);
+        calculateDetailRow(newRowElement);
         calculateGrandTotals();
     }
 
@@ -873,49 +856,48 @@
                 $("#lblHeader").html("UPDATE Quotation");
                 $("#ID").val(hdr.id || ID);
 
-                // SET COMPANY
-                Companytext = hdr.companyName || "";
-                BindCompanyList();
-
                 // SET OTHER HEADER VALUES
                 $("#txtAddress").val(hdr.address || "");
                 $("#txtGSTNo").val(hdr.gstno || "");
                 $("#ddlReverseCharge").val(hdr.reverseCharge || "N").trigger("change");
-                $("#ddlBillState").val(hdr.billState || "").trigger("change");
+                BindStateList(function () {
+                    $("#ddlBillState").val(hdr.billState || "").trigger("change");
+                });
                 $("#txtQuotationDate").val(formatDateToDDMMYYYY(hdr.quotationDate));
 
                 $("#txtTotalDealBasicAmount").val(parseFloat(hdr.totalAmtBeforeTax || 0).toFixed(2));
                 $("#txtTotalDealGSTAmount").val(parseFloat(hdr.totalAmtAfterTax || 0).toFixed(2));
 
-                // SELECT COMPANY AFTER LIST LOADS
-                setTimeout(function () {
-                    if (hdr.companyCode) {
-                        $("#ddlCompanyname").val(hdr.companyCode).trigger("change");
-                    }
-                }, 300);
-
                 // CLEAR TABLE
                 $("#tblDetailsBody").empty();
 
-                // LOAD DETAIL ROWS
-                if (details.length > 0) {
-                    $.each(details, function (i, item) {
-                        addDetailRow(item);
+                // BIND COMPANY LIST AND SET SELECTED VALUE
+                BindCompanyList().done(function () {
+                    // After company list is loaded, set the selected company
+                    if (hdr.companyCode) {
+                        $("#ddlCompanyname").val(hdr.companyCode).trigger("change");
+                    }
+
+                    // LOAD DETAIL ROWS after everything is ready
+                    if (details.length > 0) {
+                        $.each(details, function (i, item) {
+                            addDetailRow(item);
+                        });
+                    }
+                    else {
+                        addDetailRow(null);
+                    }
+
+                    // REINDEX
+                    reIndexRows();
+
+                    // CALCULATE TOTALS
+                    $("#tblDetailsBody .detail-row").each(function () {
+                        calculateDetailRow($(this));
                     });
-                }
-                else {
-                    addDetailRow(null);
-                }
 
-                // REINDEX
-                reIndexRows();
-
-                // CALCULATE TOTALS
-                $("#tblDetailsBody .detail-row").each(function () {
-                    calculateDetailRow($(this));
+                    calculateGrandTotals();
                 });
-
-                calculateGrandTotals();
             },
             error: function (xhr, ajaxOptions, thrownError) {
                 console.error("Error loading Quotation:", thrownError);
@@ -930,31 +912,34 @@
     // =====================================================
     return {
         init: function () {
-            // Load Company and State lists
-      
-
-            // Load existing data or create new
-            if (ID != null && ID != undefined && ID != "Create") {
-                loadQuotationData();
-            }
-            else {
-                // Create mode - set today's date
-                const today = new Date().toISOString().split("T")[0];
-                $("#txtQuotationDate").val(today);
-
-                // Add one empty row
-                if ($("#tblDetailsBody tr").length === 0) {
-                    addDetailRow(null);
-                }
-            }
-            BindCompanyList();
-            BindStateList();
-            BindServiceList();
             // Initialize form validation
             formValidator();
 
-            // Initial calculation
-            calculateGrandTotals();
+            // Load service list cache first
+            BindServiceList().done(function () {
+                // After service list is loaded, proceed with other initialization
+                if (ID != null && ID != undefined && ID != "Create") {
+                    // EDIT MODE
+                    loadQuotationData();
+                }
+                else {
+                    // CREATE MODE
+                    BindCompanyList();
+                    BindStateList();
+
+                    // Create mode - set today's date
+                    const today = new Date().toISOString().split("T")[0];
+                    $("#txtQuotationDate").val(today);
+
+                    // Add one empty row
+                    if ($("#tblDetailsBody tr").length === 0) {
+                        addDetailRow(null);
+                    }
+                }
+
+                // Initial calculation
+                calculateGrandTotals();
+            });
         }
     };
 }();
