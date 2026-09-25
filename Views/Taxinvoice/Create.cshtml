@@ -105,7 +105,7 @@
 
     /* column widths */
     .col-sn {
-        width: 30px;
+        width: 35px;
     }
 
     .col-qty {
@@ -622,7 +622,7 @@
     </div>
 
     <!-- ══════════════ BANK + SIGNATURE ══════════════ -->
-    <div class="card mt-3">
+    <div class="card mt-3 d-none">
         <div class="card-body p-0">
             <div class="bottom-grid">
 
@@ -686,54 +686,143 @@
         });
 
          // AgainstByValue — initially disabled
-    $('#AgainstByValue').prop('disabled', true)
-        .html('<option value="">-- Select First --</option>');
+        $('#AgainstByValue').prop('disabled', true)
+            .html('<option value="">-- Select First --</option>');
 
-    $('#AgainstBy').on('change', function () {
-        const selected    = $(this).val();
-        const companyName = $('#companyName').val();
+        $('#AgainstBy').on('change', function () {
+            const selected    = $(this).val();
+            const companyName = $('#companyName').val();
 
-        $('#AgainstByValue').html('<option value="">-- Select --</option>').prop('disabled', true);
+            $('#AgainstByValue').html('<option value="">-- Select --</option>').prop('disabled', true);
 
-        if (selected === 'Quotation' || selected === 'Proforma') {
-            if (!companyName) {
-                alert('Please select a Company first.');
-                $(this).val('Direct');
-                return;
+            if (selected === 'Quotation' || selected === 'Proforma') {
+                if (!companyName) {
+                        showToast('Please select a Company first.', 'warning');
+                        $(this).val('Direct');
+                        return;
+                }
+
+                $('#AgainstByValue').html('<option value="">Loading...</option>');
+
+                $.ajax({
+                    url: '@Url.Action("GetQuotationsByCompany", "Taxinvoice")',
+                    type: 'GET',
+                    data: { companyName: companyName, type: selected },
+                    success: function (response) {
+                        $('#AgainstByValue').html('<option value="">-- Select --</option>');
+                        if (!response || response.length === 0) {
+                            $('#AgainstByValue').html('<option value="">No records found</option>');
+                            return;
+                        }
+                        response.forEach(function (item) {
+                            $('#AgainstByValue').append(
+                                $('<option>').val(item.id).text(item.displayText)
+                            );
+                        });
+                        $('#AgainstByValue').prop('disabled', false);
+                    },
+                    error: function () {
+                        $('#AgainstByValue').html('<option value="">No data</option>');
+                    }
+                });
+            } else {
+                $('#AgainstByValue').html('<option value="">N/A</option>').prop('disabled', true);
             }
+        });
 
-            $('#AgainstByValue').html('<option value="">Loading...</option>');
+            setTodayDate();
+            addInvoiceRow();
+           applyGSTBasedOnCompany();
+        });
+
+        $('#AgainstByValue').on('change', function () {
+            const selectedId = $(this).val();
+            const type       = $('#AgainstBy').val();
+
+            if (!selectedId || selectedId === '') return;
 
             $.ajax({
-                url: '@Url.Action("GetQuotationsByCompany", "Taxinvoice")',
+                url: '@Url.Action("GetQuotationProformaDetails", "Taxinvoice")',
                 type: 'GET',
-                data: { companyName: companyName, type: selected },
+                data: { id: selectedId, type: type },
+                beforeSend: function () {
+                    $('#AgainstByValue').prop('disabled', true);
+                },
                 success: function (response) {
-                    $('#AgainstByValue').html('<option value="">-- Select --</option>');
-                    if (!response || response.length === 0) {
-                        $('#AgainstByValue').html('<option value="">No records found</option>');
+                    if (!response) {
+                        showToast('No data found.', 'warning');
                         return;
                     }
-                    response.forEach(function (item) {
-                        $('#AgainstByValue').append(
-                            $('<option>').val(item.id).text(item.displayText)
-                        );
-                    });
-                    $('#AgainstByValue').prop('disabled', false);
+                    bindQuotationProformaData(response);
                 },
                 error: function () {
-                    $('#AgainstByValue').html('<option value="">Error loading data</option>');
+                    showToast('Error loading details.', 'error');
+                },
+                complete: function () {
+                    $('#AgainstByValue').prop('disabled', false);
+                }
+            });
+        });
+
+    function bindQuotationProformaData(data) {
+        // ── Clear existing rows ──
+        document.getElementById('invoiceItems').innerHTML = '';
+        rowCounter = 0;
+
+        if (data.details && data.details.length > 0) {
+            data.details.forEach(function (item) {
+                addInvoiceRow();
+
+                const rows = document.querySelectorAll('.invoice-item-row');
+                const row  = rows[rows.length - 1];
+
+                // ── Service ──
+                row.querySelector('.service').value             = item.serviceName        || '';
+                row.querySelector('.service-name-hidden').value = item.serviceName        || '';
+                row.querySelector('.service-id').value          = item.serviceId          || '';
+                row.querySelector('.sac-code').value            = item.sacCode            || '';
+                row.querySelector('.description').value         = item.productdescription || '';
+
+                // ── Amounts ──
+                row.querySelector('.rate').value          = parseInt(item.rate)         || 0;
+                row.querySelector('.taxable-value').value = parseInt(item.taxablevalue) || 0;
+
+                // ── CGST ──
+                row.querySelector('.cgst-rate').value   = parseInt(item.cgstrate) || 0;
+                row.querySelector('.cgst-amount').value = parseInt(item.cgstamt)  || 0;
+
+                // ── SGST ──
+                row.querySelector('.sgst-rate').value   = parseInt(item.sgstrate) || 0;
+                row.querySelector('.sgst-amount').value = parseInt(item.sgstamt)  || 0;
+
+                // ── IGST ──
+                row.querySelector('.igst-rate').value   = parseInt(item.igstrate) || 0;
+                row.querySelector('.igst-amount').value = parseInt(item.igstamt)  || 0;
+
+                // ── Row Total ──
+                row.querySelector('.row-total').value = parseInt(item.total) || 0;
+
+                // ── Lock/unlock tax fields based on which tax is applied ──
+                const cgst = parseInt(item.cgstrate) || 0;
+                const igst = parseInt(item.igstrate) || 0;
+
+                if (igst > 0) {
+                    row.querySelector('.cgst-rate').disabled = true;
+                    row.querySelector('.sgst-rate').disabled = true;
+                    row.querySelector('.igst-rate').disabled = false;
+                } else if (cgst > 0) {
+                    row.querySelector('.cgst-rate').disabled = false;
+                    row.querySelector('.sgst-rate').disabled = false;
+                    row.querySelector('.igst-rate').disabled = true;
                 }
             });
         } else {
-            $('#AgainstByValue').html('<option value="">N/A</option>').prop('disabled', true);
+            addInvoiceRow();
         }
-    });
 
-        setTodayDate();
-        addInvoiceRow();
-       applyGSTBasedOnCompany();
-    });
+        calculateAll();
+        updateAmountInWords();
+    }
 
     function getCompanyDetails(cname) {
         $.ajax({
@@ -742,8 +831,11 @@
             data: { cname: cname },
             beforeSend: function () { $('#companyName').prop('disabled', true); },
             success: function (data) {
-                debugger;
-                if (!data) { alert("Company details not found."); clearCompanyDetails(); return; }
+               if (!data) {
+                    showToast('Company details not found.', 'warning');
+                    clearCompanyDetails();
+                    return;
+               }
                 $('#gstin').val(data.gstIn || '');
                 $('#address').val(data.address || '');
                 $('#Location').val(data.location ||  '');
@@ -839,12 +931,14 @@
 
     function removeRow(btn) {
         if (document.querySelectorAll('.invoice-item-row').length <= 1) {
-            alert('At least one item row is required.');
+            showToast('At least one item row is required.', 'warning');
             return;
         }
-        btn.closest('tr').remove();
-        refreshSerialNumbers();
-        calculateAll();
+        showConfirmToast('Remove this row?', function () {
+            btn.closest('tr').remove();
+            refreshSerialNumbers();
+            calculateAll();
+        });
     }
 
     function refreshSerialNumbers() {
@@ -968,69 +1062,84 @@
         calculateAll();
         if (!validateInvoice()) return;
 
+        // ── Helper: parse summary field safely ──
+        function sumVal(id) {
+            const v = parseFloat($('#' + id).val());
+            return isNaN(v) ? 0 : v;
+        }
+
+        const totalCGST = sumVal('summaryCGST');
+        const totalSGST = sumVal('summarySGST');
+        const totalIGST = sumVal('summaryIGST');
+
+
         const main = {
 
-            // ── Invoice Header ──────────────────────────────────
-            invoiceno:          $('#invoiceNo').val()            || null,
-            invoicedate:        $('#invoiceDate').val()          || null,
-            reversecharge:      $('#reverseCharge').val()        || null,
-            InvoiceType:        $('#InvoiceType').val()          || null,
+            // ── Invoice Header ──
+            invoiceno:         $('#invoiceNo').val()      || null,
+            invoicedate:       $('#invoiceDate').val()    || null,
+            reversecharge:     $('#reverseCharge').val()  || null,
+            InvoiceType:        null,
 
-            // ── Bill To ─────────────────────────────────────────
+            AgainstBy:         $('#AgainstBy').val()      || null,
+            AgainstByValue:    $('#AgainstByValue').val()?.toString() || null,
 
-            companyName:       $('#companyName').val()          || null,
-            gstIn:             $('#gstin').val()                || null,
-            Address:           $('#address').val()              || null,
-            Location:          $('#Location').val()             || null,
-            PinCode:           $('#billingPincode').val()       || null,
-            state:             $('#billingState').val()                || null,
-            statecode:         $('#billingStateCode').val()     || null,
+            // ── Bill To ──
+            companyName:       $('#companyName').val()        || null,
+            gstIn:             $('#gstin').val()              || null,
+            Address:           $('#address').val()            || null,
+            Location:          $('#Location').val()           || null,
+            PinCode:           $('#billingPincode').val()     || null,
+            state:             $('#billingState').val()       || null,
+            statecode:         $('#billingStateCode').val()   || null,
 
-            // ── Transaction ─────────────────────────────────────
-            TransMode:          $('#Transaction').val()          || null,
-            TransNo:            $('#transNo').val()              || null,
-            TransDate:          $('#transDate').val()            || null,
-            TransAmt:           $('#TransAmt').val()             || null,
+            // ── Transaction ──
+            TransMode:         $('#Transaction').val()  || null,
+            TransNo:           $('#transNo').val()       || null,
+            TransDate:         $('#transDate').val()     || null,
+            TransAmt:          $('#TransAmt').val()      || null,
 
-            // ── Amount ──────────────────────────────────
-            amtinwords:         $('#amountInWords').val()        || null,
-            cgst:               $('#summaryCGST').val() == null  || $('#summaryCGST').val() == '0.00' ? 0 : 9,
-            cgstamt:            $('#summaryCGST').val() == null  || $('#summaryCGST').val() == '0.00' ? 0 : $('#summaryCGST').val(),
-            sgst:               $('#summarySGST').val() == null  || $('#summarySGST').val() == '0.00' ? 0 : 9,
-            sgstamt:            $('#summarySGST').val() == null  || $('#summarySGST').val() == '0.00' ? 0 : $('#summarySGST').val(),
-            igst:               $('#summaryIGST').val() == null  || $('#summaryIGST').val() == '0.00' ? 0 : 18,
-            igstamt:            $('#summaryIGST').val() == null  || $('#summaryIGST').val() == '0.00' ? 0 : $('#summaryIGST').val(),
-            totalqty:           $('#totalQty').val() == null     || $('#totalQty').val() == '0.00' ? 0 : $('#totalQty').val(),
-            totalrate:          $('#summaryBeforeTax').val() == null || $('#summaryBeforeTax').val() == '0.00' ? 0 : $('#summaryBeforeTax').val(),
-            taxablevalue:       $('#summaryBeforeTax').val() == null || $('#summaryBeforeTax').val() == '0.00' ? 0 : $('#summaryBeforeTax').val(),
-            totalamtbeforetax:  $('#summaryBeforeTax').val() == null || $('#summaryBeforeTax').val() == '0.00' ? 0 : $('#summaryBeforeTax').val(),
-            totalamtaftertax:   $('#summaryGrandTotal').val() == null || $('#summaryGrandTotal').val() == '0.00' ? 0 : $('#summaryGrandTotal').val(),
-            total_tax_amount:   $('#summaryTax').val() == null   || $('#summaryTax').val() == '0.00' ? 0 : $('#summaryTax').val(),
-            amtinwords:         $('#amountInWords').val()        || null
+            // ── Tax Summary ──
+            cgst:              totalCGST > 0 ? 9  : 0,
+            cgstamt:           totalCGST,
+            sgst:              totalSGST > 0 ? 9  : 0,
+            sgstamt:           totalSGST,
+            igst:              totalIGST > 0 ? 18 : 0,
+            igstamt:           totalIGST,
+
+            totalqty:          document.querySelectorAll('.invoice-item-row').length,
+            taxablevalue:      sumVal('summaryBeforeTax'),
+            totalrate:         sumVal('summaryBeforeTax'),
+            totalamtbeforetax: sumVal('summaryBeforeTax'),
+            total_tax_amount:  sumVal('summaryTax').toString(),
+            totalamtaftertax:  sumVal('summaryGrandTotal'),
+
+            amtinwords:        $('#amountInWords').val() || null
         };
 
-        // ── Build InvoiceDetails rows ─────────────────────────
+        // ── Build details rows ──
         const details = [];
         document.querySelectorAll('.invoice-item-row').forEach(row => {
             details.push({
-                productdescription: row.querySelector('.description').value.trim()        || null,
-                saccode:            row.querySelector('.sac-code').value.trim()           || null,
-                qty:                parseFloat(row.querySelector('.qty').value)           || 0,
-                rate:               parseFloat(row.querySelector('.rate').value)          || 0,
-                taxablevalue:       parseFloat(row.querySelector('.taxable-value').value) || 0,
-                cgstrate:           parseFloat(row.querySelector('.cgst-rate').value)     || 0,
-                cgstamt:            parseFloat(row.querySelector('.cgst-amount').value)   || 0,
-                sgstrate:           parseFloat(row.querySelector('.sgst-rate').value)     || 0,
-                sgstamt:            parseFloat(row.querySelector('.sgst-amount').value)   || 0,
-                igstrate:           parseFloat(row.querySelector('.igst-rate').value)     || 0,
-                igstamt:            parseFloat(row.querySelector('.igst-amount').value)   || 0,
-                total:              parseFloat(row.querySelector('.row-total').value)     || 0
+                serviceId:          row.querySelector('.service-id').value.trim()          || null,
+                serviceName:        row.querySelector('.service-name-hidden').value.trim() || null,
+                productdescription: row.querySelector('.description').value.trim()         || null,
+                saccode:            row.querySelector('.sac-code').value.trim()            || null,
+                serviceTill:        row.querySelector('.validTill').value.trim()            || null,
+                qty:                1,
+                rate:               parseFloat(row.querySelector('.rate').value)           || 0,
+                taxablevalue:       parseFloat(row.querySelector('.taxable-value').value)  || 0,
+                cgstrate:           parseFloat(row.querySelector('.cgst-rate').value)      || 0,
+                cgstamt:            parseFloat(row.querySelector('.cgst-amount').value)    || 0,
+                sgstrate:           parseFloat(row.querySelector('.sgst-rate').value)      || 0,
+                sgstamt:            parseFloat(row.querySelector('.sgst-amount').value)    || 0,
+                igstrate:           parseFloat(row.querySelector('.igst-rate').value)      || 0,
+                igstamt:            parseFloat(row.querySelector('.igst-amount').value)    || 0,
+                total:              parseFloat(row.querySelector('.row-total').value)      || 0
             });
         });
 
-        // ── POST ──────────────────────────────────────────────
-        const payload = { Main: main, Details: details };
-
+        const payload  = { main: main, details: details };
         const $saveBtn = $('button[onclick="saveInvoice()"]');
         $saveBtn.prop('disabled', true).text('Saving...');
 
@@ -1039,16 +1148,14 @@
             type:        'POST',
             contentType: 'application/json',
             data:        JSON.stringify(payload),
-            headers: {
-                'RequestVerificationToken':
-                    $('input[name="__RequestVerificationToken"]').val() || ''
-            },
             success: function (response) {
                 if (response && response.success) {
-                    alert('Invoice saved successfully! Invoice No: ' + (response.invoiceNo || ''));
-                    // window.location.href = '@Url.Action("Index", "Taxinvoice")';
+                    showToast('Invoice saved successfully! Invoice No: ' + (response.invoiceNo || ''), 'success');
+                    setTimeout(function () {
+                        window.location.href = '/Taxinvoice/Index';
+                    }, 4000);
                 } else {
-                    alert('Save failed: ' + (response?.message || 'Unknown error.'));
+                    showToast('Save failed: ' + (response?.message || 'Unknown error.'), 'error');
                 }
             },
             error: function (xhr) {
@@ -1056,8 +1163,8 @@
                 try {
                     const err = JSON.parse(xhr.responseText);
                     if (err.message) msg = err.message;
-                } catch (e) { /* ignore */ }
-                alert(msg);
+                } catch (e) { }
+                showToast(msg, 'error');
             },
             complete: function () {
                 $saveBtn.prop('disabled', false).text('Save');
@@ -1066,26 +1173,25 @@
     }
 
     function clearInvoice() {
-        if (!confirm('Are you sure you want to clear the invoice?')) return;
-        $('#companyName').val('').trigger('change');
-        $('#reverseCharge').val('N');
-        $('#Transaction').val('');
-        ['#gstin','#address','#Location','#billingState',
-         '#billingPincode','#billingStateCode','#transNo','#transDate','#TransAmt','#amountInWords']
-            .forEach(id => $(id).val(''));
-        document.getElementById('invoiceItems').innerHTML = '';
-        rowCounter = 0;
-        addInvoiceRow();
-        setTodayDate();
-        document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
-        document.querySelectorAll('.err-msg').forEach(el => el.textContent = '');
+        showConfirmToast('Are you sure you want to clear the invoice?', function () {
+            $('#companyName').val('').trigger('change');
+            $('#reverseCharge').val('N');
+            $('#Transaction').val('');
+            ['#gstin','#address','#Location','#billingState',
+             '#billingPincode','#billingStateCode','#transNo','#transDate','#TransAmt','#amountInWords']
+                .forEach(id => $(id).val(''));
+            document.getElementById('invoiceItems').innerHTML = '';
+            rowCounter = 0;
+            addInvoiceRow();
+            setTodayDate();
+            document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+            document.querySelectorAll('.err-msg').forEach(el => el.textContent = '');
+        });
     }
 </script>
 
 <script type="text/javascript">
-    // ============================================================
-    // NUMBER TO WORDS - INDIAN CURRENCY FORMAT
-    // ============================================================
+
     function numberToWordsIndian(amount) {
 
         amount = parseFloat(amount) || 0;
@@ -1171,10 +1277,6 @@
         return result;
     }
 
-
-    // ============================================================
-    // UPDATE AMOUNT IN WORDS
-    // ============================================================
     function updateAmountInWords() {
         const grandTotal =
             parseFloat($('#summaryGrandTotal').val()) || 0;
@@ -1183,7 +1285,8 @@
 
         $('#amountInWords').val(amountWords);
     }
-        function applyGSTBasedOnCompany() {
+
+    function applyGSTBasedOnCompany() {
 
         var gstin = $('#gstin').val() || '';
         gstin = gstin.trim();
@@ -1237,10 +1340,9 @@
         updateAmountInWords();
     }
 
-
 </script>
 
-<script>
+<script type="text/javascript">
     let searchTimer = null;
 
     function searchService(input) {

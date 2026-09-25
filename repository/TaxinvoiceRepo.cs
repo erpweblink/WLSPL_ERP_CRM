@@ -40,17 +40,62 @@ namespace WLSPL_ERP_CRM.repository
             using var connection = new SqlConnection(
                 _configuration.GetConnectionString("Conn_Stringg"));
 
-            var parameters = new DynamicParameters();
-            parameters.Add("@Action", "Getcompany");
 
-            var companies = await connection.QueryAsync<TaxInvoiceCreate>(
-                "SP_TaxInvoice",
-                parameters,
-                commandType: CommandType.StoredProcedure
-            );
+            const string companySql = @"select  cname As companyName from Company  where isdeleted = 0  and status =1 and type='paid';";
+
+            var companies = await connection.QueryAsync<TaxInvoiceCreate>(companySql);
 
             return companies.ToList();
 
+        }
+
+        public async Task<List<dynamic>> GetCompanyByType(string cname, string type)
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+
+            const string companySql = @"
+                IF @type = 'Quotation'
+                    SELECT id, Quotationno AS displayText 
+                    FROM stswlspl.tblQuotationMain 
+                    WHERE companyname = @cname 
+                    ORDER BY id DESC
+                ELSE
+                    SELECT id, proformano AS displayText 
+                    FROM stswlspl.tblProformaMain 
+                    WHERE companyname = @cname 
+                    ORDER BY id DESC";
+
+            var result = await connection.QueryAsync<dynamic>(companySql, new { cname, type });
+
+            return result.ToList();
+        }
+
+        public async Task<object> GetQuotationProformaDetails(int id, string type)
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+
+            const string detailSql = @"
+                         IF @type = 'Quotation'
+                            SELECT 
+                                serviceId, serviceName, sacCode, productdescription,rate,
+                                taxablevalue,cgstrate,cgstamt,sgstrate,sgstamt,igstrate,igstamt,total
+                            FROM stswlspl.tblQuotationDetails 
+                            WHERE Quotationid = @id
+                        ELSE
+                            SELECT  
+                                serviceId, serviceName, sacCode, productdescription,rate,
+                                taxablevalue,cgstrate,cgstamt,sgstrate,sgstamt,igstrate,igstamt,total
+                            FROM stswlspl.tblProformaDetails 
+                            WHERE proformaid = @id";
+
+            var param = new { id, type };
+
+            var details = await connection.QueryAsync<dynamic>(detailSql, param);
+
+            return new
+            {
+                details = details.ToList()
+            };
         }
 
         public async Task<TaxInvoiceCreate> Getcompanybycname(string cname)
@@ -62,20 +107,16 @@ namespace WLSPL_ERP_CRM.repository
 
                 var parameters = new DynamicParameters();
 
-                parameters.Add("@Action", "Getcompanybycname");
                 parameters.Add("@cname", cname);
 
-                var result = await connection.QueryFirstOrDefaultAsync<TaxInvoiceCreate>(
-                    "SP_TaxInvoice",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
+                const string companySql = @"select gstno As gstIn,address As Address, Billing_location As Location ,Billing_pincode As PinCode, State As state,Billing_statecode As statecode   from Company  where isdeleted = 0  and status =1 and type='paid' and cname = @cname;";
 
-                return result;
+                var result = await connection.QueryFirstOrDefaultAsync<TaxInvoiceCreate>(companySql, parameters);
+
+                return result ?? new TaxInvoiceCreate();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-
                 throw;
             }
         }
@@ -202,7 +243,7 @@ namespace WLSPL_ERP_CRM.repository
             return result;
         }
 
-        public async Task<List<Taxinvoice.TaxInvoiceCreate>> GetInfo(string financialYear,int? month)
+        public async Task<List<Taxinvoice.TaxInvoiceCreate>> GetInfo(string financialYear, int? month)
         {
             using var connection = new SqlConnection(
                 _configuration.GetConnectionString("Conn_Stringg"));
@@ -229,15 +270,24 @@ namespace WLSPL_ERP_CRM.repository
 
             await con.OpenAsync();
 
-            using var multi = await con.QueryMultipleAsync(
-                "SP_TaxInvoice",
-                new
-                {
-                    id = ID,
-                    Action = "GetInvoiceById"
-                },
-                commandType: CommandType.StoredProcedure
-            );
+            var parameters = new DynamicParameters();
+
+            parameters.Add("@id", ID);
+
+            const string companySql = @"SELECT id, invoiceno, reversecharge, InvoiceType, invoicedate,
+                companyname AS companyName, cgstin AS gstIn, address AS Address, '' As Location, BillingPincode AS PinCode,
+                state, BillingStatecode As statecode, BillingLocation, TransMode, TransNo, TransDate, TransAmt, cgst, cgstamt, sgst,
+                sgstamt, igst, igstamt, gstonreversecharge, totalqty, totalrate, taxablevalue, totalamtbeforetax, totalamtaftertax,
+                amtinwords, servicedescription, sessionname, createddate, IsApprove, IsReject, ApprovedRejectedBy, Remarks, Remarkss,
+                ExportInvoiceNo, BillingAddress, BillingGST, BillingPincode, BillingStatecode, AgainstBy, AgainstByValue FROM InvoiceMain
+                WHERE id = @id;
+               
+                SELECT id, invoiceid, productdescription, saccode, qty, rate, amount, taxablevalue, cgstrate,
+                cgstamt, sgstrate, sgstamt, igstrate, igstamt, total, ServiceName, ServiceId, ValidateTill as serviceTill 
+                FROM InvoiceDetails WHERE invoiceid = @id ORDER BY id;
+            ";
+
+            using var multi = await con.QueryMultipleAsync(companySql, parameters);
 
             var main = await multi.ReadFirstOrDefaultAsync<Taxinvoice.TaxInvoiceCreate>();
 
@@ -383,24 +433,15 @@ namespace WLSPL_ERP_CRM.repository
             return model;
         }
 
-
         public async Task<Taxinvoice.TaxInvoiceCreateVM?> Getinvoiceno()
         {
             try
             {
-                using var connection = new SqlConnection(
-                    _configuration.GetConnectionString("Conn_Stringg"));
+                using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
 
-                var parameters = new DynamicParameters();
+                const string companySql = @" SELECT [WLSPL].[FN_GenerateTaxInvoiceNo]() AS InvoiceNo";
 
-                parameters.Add("@Action", "GetInvoiceNo");
-                //parameters.Add("@id", id);
-
-                var result = await connection.QueryFirstOrDefaultAsync<Taxinvoice.TaxInvoiceCreateVM>(
-                    "SP_TaxInvoice",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
+                var result = await connection.QueryFirstOrDefaultAsync<Taxinvoice.TaxInvoiceCreateVM>(companySql);
 
                 return result;
             }
@@ -548,7 +589,7 @@ namespace WLSPL_ERP_CRM.repository
                 int myInvoice = parameters.Get<int>("@myinvoice");
 
                 // If UPDATE, use existing invoice ID
-                if (Action.Equals("updateOldData",StringComparison.OrdinalIgnoreCase))
+                if (Action.Equals("updateOldData", StringComparison.OrdinalIgnoreCase))
                 {
                     myInvoice = model.main.Id;
 
@@ -572,74 +613,24 @@ namespace WLSPL_ERP_CRM.repository
                     {
                         var parametersd = new DynamicParameters();
 
-                        parametersd.Add(
-                            "@invoiceid",
-                            myInvoice
-                        );
-
-                        parametersd.Add(
-                            "@productdescription",
-                            detail.productdescription
-                        );
-
-                        parametersd.Add(
-                            "@saccode",
-                            detail.saccode
-                        );
-
-                        parametersd.Add(
-                            "@qty",
-                            detail.qty
-                        );
-
-                        parametersd.Add(
-                            "@rate",
-                            detail.rate
-                        );
-
-                        parametersd.Add(
-                            "@taxablevalue",
-                            detail.taxablevalue
-                        );
-
-                        // CGST
-                        parametersd.Add(
-                            "@cgstrate",
-                            detail.cgstrate
-                        );
-
-                        parametersd.Add(
-                            "@cgstamt",
-                            detail.cgstamt
-                        );
-
-                        // SGST
-                        parametersd.Add(
-                            "@sgstrate",
-                            detail.sgstrate
-                        );
-
-                        parametersd.Add(
-                            "@sgstamt",
-                            detail.sgstamt
-                        );
-
-                        // IGST
-                        parametersd.Add(
-                            "@igstrate",
-                            detail.igstrate
-                        );
-
-                        parametersd.Add(
-                            "@igstamt",
-                            detail.igstamt
-                        );
-
-                        // Total
-                        parametersd.Add(
-                            "@total",
-                            detail.total
-                        );
+                        parametersd.Add("@invoiceid", myInvoice);
+                        parametersd.Add("@serviceId", detail.serviceId);
+                        parametersd.Add("@serviceName", detail.serviceName);
+                        parametersd.Add("@productdescription", detail.productdescription);
+                        parametersd.Add("@saccode", detail.saccode);
+                        parametersd.Add("@qty", detail.qty);
+                        parametersd.Add("@rate", detail.rate);
+                        parametersd.Add("@taxablevalue", detail.taxablevalue);
+                        parametersd.Add("@cgstrate", detail.cgstrate);
+                        parametersd.Add("@cgstamt", detail.cgstamt);
+                        parametersd.Add("@sgstrate", detail.sgstrate);
+                        parametersd.Add("@sgstamt", detail.sgstamt);
+                        parametersd.Add("@igstrate", detail.igstrate);
+                        parametersd.Add("@igstamt", detail.igstamt);
+                        parametersd.Add("@total", detail.total);
+                        parametersd.Add("@ServiceId", detail.serviceId);
+                        parametersd.Add("@ServiceName", detail.serviceName);
+                        parametersd.Add("@ValidateTill", detail.serviceTill);
 
                         // =================================================
                         // INSERT DETAIL
@@ -660,7 +651,10 @@ namespace WLSPL_ERP_CRM.repository
                                     [sgstamt],
                                     [igstrate],
                                     [igstamt],
-                                    [total]
+                                    [total],
+                                    [ServiceName],
+                                    [ServiceId],
+                                    [ValidateTill]
                                 )
                                 VALUES
                                 (
@@ -676,7 +670,10 @@ namespace WLSPL_ERP_CRM.repository
                                     @sgstamt,
                                     @igstrate,
                                     @igstamt,
-                                    @total
+                                    @total,
+                                    @ServiceName,
+                                    @ServiceId,
+                                    @ValidateTill
                                 );";
 
                         await connection.ExecuteAsync(
@@ -694,13 +691,12 @@ namespace WLSPL_ERP_CRM.repository
             }
         }
 
-
         private async Task DeleteInvoiceDetails(int invoiceId, SqlConnection connection)
         {
             const string sql = @"
-        DELETE FROM [InvoiceDetails]
-        WHERE [invoiceid] = @invoiceId;
-    ";
+                    DELETE FROM [InvoiceDetails]
+                    WHERE [invoiceid] = @invoiceId;
+                ";
 
             await connection.ExecuteAsync(
                 sql,
@@ -711,22 +707,15 @@ namespace WLSPL_ERP_CRM.repository
             );
         }
 
-
         public async Task<List<TaxInvoiceCreate>> GetApprovelList()
         {
-            using var connection = new SqlConnection(
-                _configuration.GetConnectionString("Conn_Stringg"));
+            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
 
-            var parameters = new DynamicParameters();
-            parameters.Add("@Action", "GetApprovelList");
+            const string companySql = @" SELECT [WLSPL].[FN_GenerateTaxInvoiceNo]() AS InvoiceNo";
 
-            var invoices = await connection.QueryAsync<TaxInvoiceCreate>(
-                "SP_TaxInvoice",
-                parameters,
-                commandType: CommandType.StoredProcedure
-            );
+            var result = await connection.QueryAsync<TaxInvoiceCreate>(companySql);
 
-            return invoices.ToList();
+            return result.ToList();
 
         }
 
@@ -734,11 +723,13 @@ namespace WLSPL_ERP_CRM.repository
         {
             using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
             {
-                using (SqlCommand cmd = new SqlCommand("SP_TaxInvoice", con))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
+                string query = @"UPDATE InvoiceMain
+                         SET IsApprove = 1,
+                             ApprovedRejectedBy = @Createdby
+                         WHERE ID = @ID";
 
-                    cmd.Parameters.AddWithValue("@Action", "Approve");
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
                     cmd.Parameters.AddWithValue("@ID", id);
                     cmd.Parameters.AddWithValue("@Createdby", user);
 
@@ -755,11 +746,13 @@ namespace WLSPL_ERP_CRM.repository
         {
             using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
             {
-                using (SqlCommand cmd = new SqlCommand("SP_TaxInvoice", con))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
+                string query = @"UPDATE InvoiceMain
+                         SET IsReject = 1,
+                             ApprovedRejectedBy = @Createdby
+                         WHERE ID = @ID";
 
-                    cmd.Parameters.AddWithValue("@Action", "Reject");
+                using (SqlCommand cmd = new SqlCommand(query, con))
+                {
                     cmd.Parameters.AddWithValue("@ID", id);
                     cmd.Parameters.AddWithValue("@Createdby", user);
 

@@ -124,6 +124,7 @@ namespace WLSPL_ERP_CRM.Controllers
         }
 
         [HttpPost]
+        [IgnoreAntiforgeryToken]
         public IActionResult SaveInvoice([FromBody] TaxInvoiceCreateVM model)
         {
             model.main.sessionname = HttpContext.Session.GetString("EmpCode")?.ToString();
@@ -137,19 +138,32 @@ namespace WLSPL_ERP_CRM.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetQuotationsByCompany(string cname, string type)
+        public async Task<IActionResult> GetQuotationsByCompany(string companyName, string type)
         {
-            if (string.IsNullOrWhiteSpace(cname))
-            {
+            if (string.IsNullOrWhiteSpace(companyName))
                 return BadRequest("Company name is required.");
-            }
 
-            var result = await _TaxinvoiceRepo.Getcompanybycname(cname);
-                
+            if (string.IsNullOrWhiteSpace(type))
+                return BadRequest("Type is required.");
+
+            var result = await _TaxinvoiceRepo.GetCompanyByType(companyName, type);
+
+            if (result.Count == 0)
+                return NotFound("No records found.");
+
+            return Json(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetQuotationProformaDetails(int id, string type)
+        {
+            if (id <= 0 || string.IsNullOrWhiteSpace(type))
+                return BadRequest("Invalid request.");
+
+            var result = await _TaxinvoiceRepo.GetQuotationProformaDetails(id, type);
+
             if (result == null)
-            {
-                return NotFound("Company not found.");
-            }
+                return NotFound("No details found.");
 
             return Json(result);
         }
@@ -171,7 +185,6 @@ namespace WLSPL_ERP_CRM.Controllers
 
             return Json(result);
         }
-
 
         [HttpGet]
         public async Task<IActionResult> SearchServices(string q)
@@ -247,7 +260,6 @@ namespace WLSPL_ERP_CRM.Controllers
             return Json(new { success = true, invoiceNo = model.main.invoiceno });
         }
 
-
         public async Task<IActionResult> ApprovalList()
         {
             var list = await _TaxinvoiceRepo.GetApprovelList();
@@ -294,6 +306,7 @@ namespace WLSPL_ERP_CRM.Controllers
                 });
             }
         }
+
         [HttpPost]
         public async Task<IActionResult> Reject(int ID)
         {

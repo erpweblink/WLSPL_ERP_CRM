@@ -12,13 +12,13 @@
         ?? new List<WLSPL_ERP_CRM.Models.Taxinvoice.InvoiceDetails>();
 }
 
-<style>
-
+<style type="text/css">
     .required::after {
         content: " *";
         color: red;
     }
 
+    /* ── All form inputs / selects / textareas — light grey like screenshot ── */
     .form-control {
         border: 1px solid gray !important;
     }
@@ -38,6 +38,7 @@
                 cursor: default;
             }
 
+    /* Select2 match */
     .select2-container .select2-selection--single {
         background-color: #f4f5f6 !important;
         border: 1px solid #343434 !important;
@@ -45,23 +46,28 @@
         height: 38px !important;
     }
 
-        .select2-container .select2-selection--single
-        .select2-selection__rendered {
+        .select2-container .select2-selection--single .select2-selection__rendered {
             line-height: 36px !important;
             color: #444 !important;
         }
 
-        .select2-container .select2-selection--single
-        .select2-selection__arrow {
+        .select2-container .select2-selection--single .select2-selection__arrow {
             height: 36px !important;
         }
 
+    /* ── Consistent card-body row spacing ── */
     .card-body .row.form-row-item {
         margin-bottom: 16px;
     }
 
+        .card-body .row.form-row-item:last-child {
+            margin-bottom: 0;
+        }
+
+    /* ── Table ── */
     .invoice-table {
         width: 100%;
+        height: 170px;
         border-collapse: collapse;
         table-layout: fixed;
     }
@@ -79,9 +85,11 @@
             color: #fff;
             font-size: 11px;
             font-weight: 600;
+            white-space: normal;
         }
 
         .invoice-table td input,
+        .invoice-table td select,
         .invoice-table td textarea {
             width: 100%;
             font-size: 11px;
@@ -100,28 +108,21 @@
             }
 
         .invoice-table td textarea {
-            min-height: 38px;
+            min-height: 60px;
             resize: vertical;
         }
 
+    /* column widths */
     .col-sn {
-        width: 42px;
-    }
-
-    .col-desc {
-        width: 175px;
-    }
-
-    .col-sac {
-        width: 75px;
+        width: 35px;
     }
 
     .col-qty {
-        width: 60px;
+        width: 100px;
     }
 
     .col-rate {
-        width: 80px;
+        width: 90px;
     }
 
     .col-taxable {
@@ -151,6 +152,7 @@
         font-weight: 600;
     }
 
+    /* ── Summary grid ── */
     .summary-grid {
         display: grid;
         grid-template-columns: 60% 40%;
@@ -195,6 +197,59 @@
             color: #444;
         }
 
+    /* ── Bank / Signature ── */
+    .bottom-grid {
+        display: grid;
+        grid-template-columns: 60% 40%;
+    }
+
+    .bank-info p {
+        margin: 0;
+        font-size: 12px;
+        padding: 6px 14px;
+        border-bottom: 1px solid #343434;
+    }
+
+    .signature-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .seal-box,
+    .sig-box {
+        min-height: 120px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        font-size: 11px;
+    }
+
+    .seal {
+        width: 72px;
+        height: 72px;
+        border: 2px solid #7186a2;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #7186a2;
+        transform: rotate(-15deg);
+        text-align: center;
+        font-size: 9px;
+    }
+
+    .seal-inner {
+        width: 52px;
+        height: 52px;
+        border: 1px solid #7186a2;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* ── Validation ── */
     .field-error {
         border-color: #dc3545 !important;
         background-color: #fff5f5 !important;
@@ -208,11 +263,9 @@
         margin-top: 2px;
     }
 
+    /* ── Print ── */
     @@media print {
-
-        .add-row-btn,
-        .remove-row,
-        .action-btns {
+        .add-row-btn, .remove-row, .action-btns {
             display: none !important;
         }
 
@@ -221,7 +274,50 @@
             margin: 8mm;
         }
     }
+</style>
 
+
+<style type="text/css">
+    .sd-top {
+        display: grid;
+        grid-template-columns: 1fr 100px;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .sd-service {
+        padding: 6px 8px;
+        border-right: 1px solid #dee2e6;
+    }
+
+    .sd-sac {
+        padding: 6px 8px;
+    }
+
+    .sd-bottom {
+        padding: 6px 8px;
+    }
+
+    .service-wrapper {
+        position: relative;
+    }
+
+    .service-dropdown {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        max-height: 200px;
+        overflow-y: auto;
+        list-style: none;
+        margin: 2px 0 0;
+        padding: 0;
+        box-shadow: 0 4px 12px rgba(0,0,0,.12);
+    }
 </style>
 
 <form id="frmTaxInvoice">
@@ -328,35 +424,12 @@
                     </div>
 
                 </div>
-
-                <div class="col-md-6">
-
-                    <div class="form-group row">
-
-                        <label class="col-md-4 col-form-label font-weight-bold">
-                            Against By
-                        </label>
-
-                        <div class="col-md-8">
-
-                            <input asp-for="main.InvoiceType"
-                                   type="text"
-                                   class="form-control"
-                                   id="InvoiceType"
-                                   placeholder="Against By" />
-
-                        </div>
-
-                    </div>
-
-                </div>
-
+                
             </div>
 
         </div>
 
     </div>
-
 
     <!-- =====================================================
          BILL TO
@@ -389,7 +462,7 @@
 
                             <select asp-for="main.companyName"
                                     class="form-control ddlselect"
-                                    id="companyName">
+                                    id="companyName" disabled>
 
                                 <option value="">
                                     Select Company
@@ -403,6 +476,7 @@
                                 }
 
                             </select>
+                            <input type="hidden" id="companyNameHidden" value="@(Model?.main?.companyName ?? "")" />
 
                             <span class="err-msg"
                                   id="err-companyName"></span>
@@ -426,7 +500,7 @@
                             <input asp-for="main.gstIn"
                                    type="text"
                                    class="form-control"
-                                   id="gstin" />
+                                   id="gstin" readonly />
 
                         </div>
 
@@ -451,7 +525,7 @@
                             <textarea asp-for="main.Address"
                                       class="form-control"
                                       id="address"
-                                      rows="2"></textarea>
+                                      rows="2" readonly></textarea>
 
                         </div>
 
@@ -472,7 +546,7 @@
                             <input asp-for="main.BillingLocation"
                                    type="text"
                                    class="form-control"
-                                   id="Location" />
+                                   id="Location" readonly />
 
                         </div>
 
@@ -497,7 +571,7 @@
                             <input asp-for="main.PinCode"
                                    type="text"
                                    class="form-control"
-                                   id="billingPincode" />
+                                   id="billingPincode" readonly />
 
                         </div>
 
@@ -518,7 +592,7 @@
                             <input asp-for="main.state"
                                    type="text"
                                    class="form-control"
-                                   id="billingState" />
+                                   id="billingState" readonly />
 
                         </div>
 
@@ -543,7 +617,7 @@
                             <input asp-for="main.statecode"
                                    type="text"
                                    class="form-control"
-                                   id="billingStateCode" />
+                                   id="billingStateCode" readonly />
 
                         </div>
 
@@ -662,6 +736,33 @@
 
             </div>
 
+            <div class="row form-row-item">
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold">Against By</label>
+                        <div class="col-md-8">
+                            <select asp-for="main.AgainstBy" type="text" class="form-control" id="AgainstBy" disabled>
+                                <option value="Direct">Direct</option>
+                                <option value="Quotation">Quotation</option>
+                                <option value="Proforma">Proforma</option>
+                            </select>
+                            <input type="hidden" id="AgainstByHidden" value="@(Model?.main?.AgainstBy ?? "Direct")" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold">Against By Value</label>
+                        <div class="col-md-8">
+                            <select asp-for="main.AgainstByValue" type="text" class="form-control" id="AgainstByValue" disabled>
+                            </select>
+                            <input type="hidden" id="AgainstByValueHidden" value="@(Model?.main?.AgainstByValue ?? "")" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
     </div>
@@ -685,92 +786,42 @@
         <div class="card-body p-0">
 
             <div class="table-responsive">
-
-                <table class="invoice-table"
-                       id="invoiceTable">
-
+                <table class="invoice-table" id="invoiceTable">
                     <thead>
-
                         <tr>
-
-                            <th class="col-sn">S.No</th>
-                            <th class="col-desc">Description</th>
-                            <th class="col-sac">SAC Code</th>
-                            <th class="col-qty">Qty</th>
-                            <th class="col-rate">Rate</th>
-                            <th class="col-taxable">Taxable Value</th>
-                            <th class="col-tax">CGST % | Amt</th>
-                            <th class="col-tax">SGST % | Amt</th>
-                            <th class="col-tax">IGST % | Amt</th>
-                            <th class="col-total">Total</th>
-                            <th class="col-action">#</th>
-
+                            <th class="col-sn" rowspan="3">S.No</th>
+                            <th colspan="2" style="width:280px;"></th>
+                            <th class="col-qty" rowspan="3">Service Till</th>
+                            <th class="col-rate" rowspan="3">Rate</th>
+                            <th class="col-taxable" rowspan="3">Taxable Value</th>
+                            <th class="col-tax" rowspan="3">CGST % | Amt</th>
+                            <th class="col-tax" rowspan="3">SGST % | Amt</th>
+                            <th class="col-tax" rowspan="3">IGST % | Amt</th>
+                            <th class="col-total" rowspan="3">Total</th>
+                            <th class="col-action" rowspan="3">#</th>
                         </tr>
-
+                        <tr>
+                            <th style="width:160px; border-right:1px solid rgba(255,255,255,0.2); border-bottom:1px solid rgba(255,255,255,0.2); font-size:10px; letter-spacing:.5px;">SERVICE</th>
+                            <th style="width:100px; border-bottom:1px solid rgba(255,255,255,0.2); font-size:10px; letter-spacing:.5px;">SAC CODE</th>
+                        </tr>
+                        <tr>
+                            <th colspan="2" style="font-size:10px; letter-spacing:.5px;">SERVICE DESCRIPTION</th>
+                        </tr>
                     </thead>
-
-                    <tbody id="invoiceItems">
-                    </tbody>
-
+                    <tbody id="invoiceItems"></tbody>
                     <tfoot>
-
                         <tr class="tfoot-row">
-
-                            <td colspan="3"
-                                style="text-align:right;padding-right:10px;">
-                                TOTAL
-                            </td>
-
-                            <td>
-                                <input type="text"
-                                       id="totalQty"
-                                       readonly
-                                       class="form-control form-control-sm text-right" />
-                            </td>
-
                             <td></td>
-
-                            <td>
-                                <input type="text"
-                                       id="totalTaxable"
-                                       readonly
-                                       class="form-control form-control-sm text-right" />
-                            </td>
-
-                            <td>
-                                <input type="text"
-                                       id="totalCGST"
-                                       readonly
-                                       class="form-control form-control-sm text-right" />
-                            </td>
-
-                            <td>
-                                <input type="text"
-                                       id="totalSGST"
-                                       readonly
-                                       class="form-control form-control-sm text-right" />
-                            </td>
-
-                            <td>
-                                <input type="text"
-                                       id="totalIGST"
-                                       readonly
-                                       class="form-control form-control-sm text-right" />
-                            </td>
-
-                            <td>
-                                <input type="text"
-                                       id="grandTotalTable"
-                                       readonly
-                                       class="form-control form-control-sm text-right" />
-                            </td>
-
+                            <td colspan="3" style="text-align:right; padding-right:10px; font-weight:700;">TOTAL</td>
                             <td></td>
-
+                            <td><input type="text" id="totalTaxable" readonly class="form-control form-control-sm text-right" /></td>
+                            <td><input type="text" id="totalCGST" readonly class="form-control form-control-sm text-right" /></td>
+                            <td><input type="text" id="totalSGST" readonly class="form-control form-control-sm text-right" /></td>
+                            <td><input type="text" id="totalIGST" readonly class="form-control form-control-sm text-right" /></td>
+                            <td><input type="text" id="grandTotalTable" readonly class="form-control form-control-sm text-right" /></td>
+                            <td></td>
                         </tr>
-
                     </tfoot>
-
                 </table>
 
             </div>
@@ -929,18 +980,16 @@
 </form>
 
 
-<script>
+<script type="text/javascript">
 
     let rowCounter = 0;
 
     const isEdit = @(isEdit ? "true" : "false");
     const invoiceId = @(isEdit ? Model.main.Id : 0);
 
-    const existingDetails =
-        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(invoiceDetails));
+    const existingDetails = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(invoiceDetails));
 
-    const existingCompany =
-        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model?.main?.companyName ?? ""));
+    const existingCompany = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model?.main?.companyName ?? ""));
 
  
     // =========================================================
@@ -955,6 +1004,86 @@
         });
 
         loadExistingInvoice();
+
+      // ── Set today if new, else keep server date ──
+        if (!isEdit) setTodayDate();
+
+      
+        // ── AgainstBy: disable AgainstByValue initially if Direct ──
+        const initAgainst = $('#AgainstBy').val();
+        if (initAgainst === 'Direct' || !initAgainst) {
+            $('#AgainstByValue').prop('disabled', true)
+                .html('<option value="">N/A</option>');
+        }
+
+        // ── If edit mode and AgainstBy is Quotation/Proforma, load the options then re-select ──
+        if (isEdit && (initAgainst === 'Quotation' || initAgainst === 'Proforma')) {
+            const savedAgainstByValue = '@Html.Raw(Model?.main?.AgainstByValue ?? "")';
+            const companyName = $('#companyName').val();
+
+            $.ajax({
+                url: '@Url.Action("GetQuotationsByCompany", "Taxinvoice")',
+                type: 'GET',
+                data: { companyName: companyName, type: initAgainst },
+                success: function (response) {
+                    $('#AgainstByValue').html('<option value="">-- Select --</option>');
+                    if (response && response.length > 0) {
+                        response.forEach(function (item) {
+                            $('#AgainstByValue').append(
+                                $('<option>').val(item.id).text(item.displayText)
+                            );
+                        });
+                        if (savedAgainstByValue) {
+                            $('#AgainstByValue').val(savedAgainstByValue);
+                        }
+                    }
+                    $('#AgainstByValue').prop('disabled', true);
+                }
+            });
+        }
+
+        // ── AgainstBy change ──
+        $('#AgainstBy').on('change', function () {
+            const selected    = $(this).val();
+            const companyName = $('#companyName').val();
+
+            $('#AgainstByValue').html('<option value="">-- Select --</option>').prop('disabled', true);
+
+            if (selected === 'Quotation' || selected === 'Proforma') {
+                if (!companyName) {
+                    showToast('Please select a Company first.', 'warning');
+                    $(this).val('Direct');
+                    $('#AgainstByValue').html('<option value="">N/A</option>').prop('disabled', true);
+                    return;
+                }
+
+                $('#AgainstByValue').html('<option value="">Loading...</option>');
+
+                $.ajax({
+                    url: '@Url.Action("GetQuotationsByCompany", "Taxinvoice")',
+                    type: 'GET',
+                    data: { companyName: companyName, type: selected },
+                    success: function (response) {
+                        $('#AgainstByValue').html('<option value="">-- Select --</option>');
+                        if (!response || response.length === 0) {
+                            $('#AgainstByValue').html('<option value="">No records found</option>');
+                            return;
+                        }
+                        response.forEach(function (item) {
+                            $('#AgainstByValue').append(
+                                $('<option>').val(item.id).text(item.displayText)
+                            );
+                        });
+                        $('#AgainstByValue').prop('disabled', false);
+                    },
+                    error: function () {
+                        $('#AgainstByValue').html('<option value="">No data</option>');
+                    }
+                });
+            } else {
+                $('#AgainstByValue').html('<option value="">N/A</option>').prop('disabled', true);
+            }
+        });
     });
 
     // =========================================================
@@ -962,6 +1091,7 @@
     // =========================================================
 
     function loadExistingInvoice() {
+
         const tbody = document.getElementById('invoiceItems');
         if (!tbody) return;
 
@@ -971,39 +1101,55 @@
         if (!existingDetails || !Array.isArray(existingDetails) || existingDetails.length === 0) {
             addInvoiceRow();
             calculateAll();
+            updateAmountInWords();
             return;
         }
 
         existingDetails.forEach(function (item) {
+            debugger;
             const row = addInvoiceRow();
             if (!row) return;
 
             row.dataset.detailId = item.id ?? item.Id ?? 0;
 
+            // ── Service name & hidden fields ──
+            const serviceName = item.serviceName ?? item.ServiceName ?? '';
+            row.querySelector('.service').value             = serviceName;
+            row.querySelector('.service-name-hidden').value = serviceName;
+            row.querySelector('.service-id').value          = item.serviceId ?? item.ServiceId ?? '';
+
+            // ── SAC / Description ──
+            row.querySelector('.sac-code').value    = item.saccode    ?? item.SacCode    ?? '';
             row.querySelector('.description').value = item.productdescription ?? item.ProductDescription ?? '';
-            row.querySelector('.sac-code').value = item.saccode ?? item.SacCode ?? '';
-            row.querySelector('.qty').value = item.qty ?? item.Qty ?? 0;
-            row.querySelector('.rate').value = item.rate ?? item.Rate ?? 0;
 
-            row.querySelector('.taxable-value').value =
-                Number(item.taxablevalue ?? item.TaxableValue ?? item.amount ?? item.Amount ?? 0).toFixed(2);
+            // ── Service Till ──
+            const validTillSel = row.querySelector('.validTill');
+            const serviceTill  = item.serviceTill ?? item.ServiceTill ?? '1 Year';
+            if (validTillSel) {
+                const opt = [...validTillSel.options].find(o => o.value === serviceTill);
+                validTillSel.value = opt ? serviceTill : validTillSel.options[0].value;
+            }
 
+            // ── Rate ──
+            row.querySelector('.rate').value = item.rate ?? item.rate ?? 0;
+
+            // ── Tax rates (set BEFORE calculateRow so amounts compute correctly) ──
             row.querySelector('.cgst-rate').value = item.cgstrate ?? item.CgstRate ?? 0;
-            row.querySelector('.cgst-amount').value = Number(item.cgstamt ?? item.CgstAmt ?? 0).toFixed(2);
-
             row.querySelector('.sgst-rate').value = item.sgstrate ?? item.SgstRate ?? 0;
-            row.querySelector('.sgst-amount').value = Number(item.sgstamt ?? item.SgstAmt ?? 0).toFixed(2);
-
             row.querySelector('.igst-rate').value = item.igstrate ?? item.IgstRate ?? 0;
-            row.querySelector('.igst-amount').value = Number(item.igstamt ?? item.IgstAmt ?? 0).toFixed(2);
 
-            row.querySelector('.row-total').value = Number(item.total ?? item.Total ?? 0).toFixed(2);
-
+            // ── Apply disabled state based on which tax is active ──
             applyTaxState(row);
+
+            // ── NOW recalculate this row so taxable, amounts, total are computed fresh ──
+            calculateRow(row.querySelector('.rate'));
         });
 
         refreshSerialNumbers();
+
+        // ── Final pass: recalculate all summary totals and words ──
         calculateAll();
+        updateAmountInWords();
     }
 
     // =========================================================
@@ -1053,35 +1199,64 @@
 
         row.innerHTML = `
             <td><input type="text" value="${rowCounter}" readonly class="serial-number" /></td>
-            <td><textarea class="description" placeholder="Description"></textarea></td>
-            <td><input type="text" class="sac-code" placeholder="SAC Code" /></td>
-            <td><input type="number" class="qty" min="0" value="1" oninput="calculateRow(this)" /></td>
-            <td><input type="number" class="rate" min="0" value="0" oninput="calculateRow(this)" /></td>
+            <td class="service-desc-cell" colspan="2">
+                <div class="sd-top">
+                    <div class="sd-service">
+                        <div class="service-wrapper" style="position:relative;">
+                            <input type="text" placeholder="Search service..." class="service"
+                                   autocomplete="off"
+                                   oninput="searchService(this)"
+                                   onkeydown="handleServiceKeydown(event,this)" />
+                            <input type="hidden" class="service-id" />
+                            <input type="hidden" class="service-name-hidden" />
+                            <ul class="service-dropdown"></ul>
+                        </div>
+                    </div>
+                    <div class="sd-sac">
+                        <input type="text" class="sac-code" placeholder="SAC Code" />
+                    </div>
+                </div>
+                <div class="sd-bottom">
+                    <textarea class="description" placeholder="Enter service description..."></textarea>
+                </div>
+            </td>
+            <td>
+                <select class="validTill">
+                    <option value="1 Year">1 Year</option>
+                    <option value="2 Year">2 Year</option>
+                    <option value="3 Year">3 Year</option>
+                    <option value="4 Year">4 Year</option>
+                    <option value="5 Year">5 Year</option>
+                </select>
+            </td>
+            <td><input type="number" class="rate" min="0" value="0"
+                       oninput="calculateRow(this);updateAmountInWords();" /></td>
             <td><input type="number" class="taxable-value" value="0" readonly /></td>
-            <td>
-                <div class="tax-pair">
-                    <input type="number" class="cgst-rate" min="0" value="0" placeholder="%" oninput="taxChanged(this,'CGST')" />
-                    <input type="number" class="cgst-amount" value="0" readonly />
-                </div>
-            </td>
-            <td>
-                <div class="tax-pair">
-                    <input type="number" class="sgst-rate" min="0" value="0" placeholder="%" oninput="taxChanged(this,'SGST')" />
-                    <input type="number" class="sgst-amount" value="0" readonly />
-                </div>
-            </td>
-            <td>
-                <div class="tax-pair">
-                    <input type="number" class="igst-rate" min="0" value="0" placeholder="%" oninput="taxChanged(this,'IGST')" />
-                    <input type="number" class="igst-amount" value="0" readonly />
-                </div>
-            </td>
+            <td><div class="tax-pair">
+                <input type="number" class="cgst-rate" min="0" value="0" placeholder="%"
+                       oninput="taxChanged(this,'CGST');updateAmountInWords();" />
+                <input type="text" class="cgst-amount" value="0" readonly />
+            </div></td>
+            <td><div class="tax-pair">
+                <input type="number" class="sgst-rate" min="0" value="0" placeholder="%"
+                       oninput="taxChanged(this,'SGST');updateAmountInWords();" />
+                <input type="text" class="sgst-amount" value="0" readonly />
+            </div></td>
+            <td><div class="tax-pair">
+                <input type="number" class="igst-rate" min="0" value="0" placeholder="%"
+                       oninput="taxChanged(this,'IGST');updateAmountInWords();" />
+                <input type="text" class="igst-amount" value="0" readonly />
+            </div></td>
             <td><input type="number" class="row-total" value="0" readonly /></td>
-            <td><button type="button" class="btn btn-danger btn-sm remove-row" onclick="removeRow(this)" style="padding:1px 6px;">×</button></td>
+            <td><button type="button" class="btn btn-danger btn-sm remove-row"
+                        onclick="removeRow(this)" style="padding:1px 6px;">×</button></td>
         `;
 
         document.getElementById('invoiceItems').appendChild(row);
         refreshSerialNumbers();
+         calculateAll();
+         applyGSTBasedOnCompany();
+           updateAmountInWords();
         return row;
     }
 
@@ -1189,9 +1364,8 @@
         const row = el.closest('tr');
         if (!row) return;
 
-        const qty = parseFloat(row.querySelector('.qty').value) || 0;
         const rate = parseFloat(row.querySelector('.rate').value) || 0;
-        const taxable = qty * rate;
+        const taxable =   rate;
 
         row.querySelector('.taxable-value').value = taxable.toFixed(2);
 
@@ -1216,10 +1390,9 @@
     // =========================================================
 
     function calculateAll() {
-        let totalQty = 0, totalTaxable = 0, totalCGST = 0, totalSGST = 0, totalIGST = 0, grand = 0;
+        let totalTaxable = 0, totalCGST = 0, totalSGST = 0, totalIGST = 0, grand = 0;
 
         document.querySelectorAll('.invoice-item-row').forEach(function (row) {
-            totalQty += parseFloat(row.querySelector('.qty').value) || 0;
             totalTaxable += parseFloat(row.querySelector('.taxable-value').value) || 0;
             totalCGST += parseFloat(row.querySelector('.cgst-amount').value) || 0;
             totalSGST += parseFloat(row.querySelector('.sgst-amount').value) || 0;
@@ -1229,7 +1402,6 @@
 
         const totalTax = totalCGST + totalSGST + totalIGST;
 
-        $('#totalQty').val(totalQty);
         $('#totalTaxable').val(totalTaxable.toFixed(2));
         $('#totalCGST').val(totalCGST.toFixed(2));
         $('#totalSGST').val(totalSGST.toFixed(2));
@@ -1242,6 +1414,8 @@
         $('#summaryIGST').val(totalIGST.toFixed(2));
         $('#summaryTax').val(totalTax.toFixed(2));
         $('#summaryGrandTotal').val(grand.toFixed(2));
+
+        $('#TransAmt').val(grand.toFixed(2));
 
         updateAmountInWords();
     }
@@ -1318,7 +1492,7 @@
             valid = false;
         }
 
-        if (!$('#companyName').val()) {
+        if (!$('#companyNameHidden').val() && !$('#companyName').val()) {
             $('#companyName').addClass('field-error');
             $('#err-companyName').text('Company Name is required.');
             valid = false;
@@ -1332,17 +1506,13 @@
 
         rows.forEach(function (row) {
             const description = row.querySelector('.description');
-            const qty = row.querySelector('.qty');
             const rate = row.querySelector('.rate');
 
             if (!description.value.trim()) {
                 description.classList.add('field-error');
                 valid = false;
             }
-            if ((parseFloat(qty.value) || 0) <= 0) {
-                qty.classList.add('field-error');
-                valid = false;
-            }
+
             if ((parseFloat(rate.value) || 0) <= 0) {
                 rate.classList.add('field-error');
                 valid = false;
@@ -1375,7 +1545,9 @@
             invoicedate: $('#invoiceDate').val() || null,
             reversecharge: $('#reverseCharge').val() || null,
             InvoiceType: $('#InvoiceType').val() || null,
-            companyName: $('#companyName').val() || null,
+            companyName: $('#companyNameHidden').val() || $('#companyName').val() || null,
+            AgainstBy:      $('#AgainstByHidden').val()      || $('#AgainstBy').val()      || null,
+            AgainstByValue: $('#AgainstByValueHidden').val() || $('#AgainstByValue').val() || null,
             gstIn: $('#gstin').val() || null,
             Address: $('#address').val() || null,
             Location: $('#Location').val() || null,
@@ -1411,9 +1583,12 @@
             details.push({
                 id: parseInt(row.dataset.detailId || 0),
                 invoiceid: invoiceId,
+                serviceId:row.querySelector('.service-id').value.trim()          || null,
+                serviceName:row.querySelector('.service-name-hidden').value.trim() || null,
+                serviceTill:row.querySelector('.validTill').value.trim()            || null,
                 productdescription: row.querySelector('.description').value.trim() || null,
                 saccode: row.querySelector('.sac-code').value.trim() || null,
-                qty: parseFloat(row.querySelector('.qty').value) || 0,
+                qty: 1,
                 rate: parseFloat(row.querySelector('.rate').value) || 0,
                 amount: parseFloat(row.querySelector('.taxable-value').value) || 0,
                 taxablevalue: parseFloat(row.querySelector('.taxable-value').value) || 0,
@@ -1490,4 +1665,221 @@
         });
     }
 
+     // =========================================================
+    // Apply GST
+    // =========================================================
+    function applyGSTBasedOnCompany() {
+
+        var gstin = $('#gstin').val() || '';
+        gstin = gstin.trim();
+
+        if (gstin.length < 2) {
+            return;
+        }
+
+        // First 2 digits of GSTIN = State Code
+        var customerStateCode = gstin.substring(0, 2);
+
+        // Your company state code
+        // Maharashtra = 27
+        var companyStateCode = '27';
+
+        $('.invoice-item-row').each(function () {
+
+            var row = this;
+
+            var cgstRate = row.querySelector('.cgst-rate');
+            var sgstRate = row.querySelector('.sgst-rate');
+            var igstRate = row.querySelector('.igst-rate');
+
+            if (customerStateCode === companyStateCode) {
+
+                // Same state
+                cgstRate.value = '9';
+                sgstRate.value = '9';
+                igstRate.value = '0';
+
+                cgstRate.disabled = false;
+                sgstRate.disabled = false;
+                igstRate.disabled = true;
+
+            } else {
+
+                // Other state
+                cgstRate.value = '0';
+                sgstRate.value = '0';
+                igstRate.value = '18';
+
+                cgstRate.disabled = true;
+                sgstRate.disabled = true;
+                igstRate.disabled = false;
+            }
+
+            calculateRow(cgstRate);
+        });
+
+        calculateAll();
+        updateAmountInWords();
+    }
+
+</script>
+
+<script type="text/javascript">
+    let searchTimer = null;
+
+    function searchService(input) {
+        const query = input.value.trim();
+        const dropdown = input.closest('.service-wrapper').querySelector('.service-dropdown');
+
+        // Clear previous hidden id when user types again
+        input.closest('.service-wrapper').querySelector('.service-id').value = '';
+
+        if (query.length < 2) {
+            dropdown.style.display = 'none';
+            dropdown.innerHTML = '';
+            return;
+        }
+
+        // Show loading state
+        dropdown.style.display = 'block';
+        dropdown.innerHTML = '<li style="padding:8px 12px; color:#999;">Searching...</li>';
+
+        // Debounce: wait 300ms after user stops typing
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(() => {
+            fetchServices(query, input, dropdown);
+        }, 100);
+    }
+
+    // ─── AJAX call ────────────────────────────────────────────────────────────────
+    function fetchServices(query, input, dropdown) {
+        $.ajax({
+            url: '@Url.Action("SearchServices", "Taxinvoice")',   // 🔁 Change to your endpoint
+            type: 'GET',
+            data: { q: query },
+            success: function (response) {
+                renderServiceDropdown(response, input, dropdown);
+            },
+            error: function () {
+                dropdown.innerHTML = '<li style="padding:8px 12px; color:red;">Error fetching services.</li>';
+            }
+        });
+    }
+
+    // ─── Render dropdown list ─────────────────────────────────────────────────────
+    function renderServiceDropdown(services, input, dropdown) {
+        dropdown.innerHTML = '';
+
+        if (!services || services.length === 0) {
+            dropdown.innerHTML = '<li style="padding:8px 12px; color:#999;">No services found.</li>';
+            return;
+        }
+
+        services.forEach((svc, index) => {
+            const li = document.createElement('li');
+            li.style.cssText = 'padding:8px 12px; cursor:pointer; border-bottom:1px solid #f0f0f0; font-size:11px;';
+            li.setAttribute('data-index', index);
+
+            // Highlight matched text
+            const regex = new RegExp(`(${input.value.trim()})`, 'gi');
+            const highlighted = svc.serviceName.replace(regex, '<strong>$1</strong>');
+
+            li.innerHTML = `
+                <div style="font-weight:500;">${highlighted}</div>
+                ${svc.saccode ? `<div style="font-size:9px; color:#888;">SAC: ${svc.saccode}</div>` : ''}
+            `;
+
+            li.addEventListener('mouseenter', () => {
+                clearHighlight(dropdown);
+                li.style.background = '#f0f7ff';
+                li.classList.add('highlighted');
+            });
+            li.addEventListener('mouseleave', () => {
+                li.style.background = '';
+                li.classList.remove('highlighted');
+            });
+            li.addEventListener('mousedown', (e) => {
+                e.preventDefault(); // prevent input blur before click fires
+                selectService(svc, input);
+            });
+
+            dropdown.appendChild(li);
+        });
+
+        dropdown.style.display = 'block';
+    }
+
+    function selectService(svc, input) {
+        const row     = input.closest('tr');
+        const wrapper = input.closest('.service-wrapper');
+
+        input.value = svc.serviceName ?? '';
+        wrapper.querySelector('.service-id').value          = svc.serviceId  ?? '';
+        wrapper.querySelector('.service-name-hidden').value = svc.serviceName ?? '';
+
+        row.querySelector('.sac-code').value  = svc.saccode ?? '998314';
+        row.querySelector('.rate').value      = svc.rate    ?? 0;
+
+        wrapper.querySelector('.service-dropdown').style.display = 'none';
+        wrapper.querySelector('.service-dropdown').innerHTML     = '';
+
+        calculateRow(row.querySelector('.rate'));
+        applyGSTBasedOnCompany();
+        calculateAll();
+        updateAmountInWords();
+    }
+
+    // ─── Keyboard navigation (↑ ↓ Enter Escape) ───────────────────────────────────
+    function handleServiceKeydown(e, input) {
+        const dropdown = input.closest('.service-wrapper').querySelector('.service-dropdown');
+        const items    = dropdown.querySelectorAll('li[data-index]');
+
+        if (!items.length) return;
+
+        let current = dropdown.querySelector('.highlighted');
+        let idx     = current ? parseInt(current.getAttribute('data-index')) : -1;
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            idx = Math.min(idx + 1, items.length - 1);
+            setHighlight(items, idx);
+
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            idx = Math.max(idx - 1, 0);
+            setHighlight(items, idx);
+
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (current) current.dispatchEvent(new Event('mousedown'));
+
+        } else if (e.key === 'Escape') {
+            dropdown.style.display = 'none';
+        }
+    }
+
+    function setHighlight(items, idx) {
+        items.forEach(li => {
+            li.style.background = '';
+            li.classList.remove('highlighted');
+        });
+        items[idx].style.background = '#f0f7ff';
+        items[idx].classList.add('highlighted');
+        items[idx].scrollIntoView({ block: 'nearest' });
+    }
+
+    function clearHighlight(dropdown) {
+        dropdown.querySelectorAll('li').forEach(li => {
+            li.style.background = '';
+            li.classList.remove('highlighted');
+        });
+    }
+
+    function closeAllServiceDropdowns(e) {
+        if (!e.target.closest('.service-wrapper')) {
+            document.querySelectorAll('.service-dropdown').forEach(d => {
+                d.style.display = 'none';
+            });
+        }
+    }
 </script>
