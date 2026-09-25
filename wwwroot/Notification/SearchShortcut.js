@@ -4,7 +4,7 @@
     const resultsContainer = document.getElementById("shortcutResults");
 
     if (!searchInput || !resultsContainer) {
-        console.error("Shortcut search elements not found.");
+        showToast("Shortcut search elements not found.", "error");
         return;
     }
 
@@ -21,10 +21,9 @@
         })
         .then(data => {
             shortcuts = data || [];
-            console.log("Shortcuts loaded:", shortcuts);
         })
         .catch(error => {
-            console.error("Shortcut loading error:", error);
+            showToast(error.message || "Unable to load shortcuts.","error");
         });
 
     function searchShortcuts(value) {
@@ -60,6 +59,7 @@
                 renderResults(combined);
             })
             .catch(() => {
+                showToast("Unable to search employees or companies.","error");
                 renderResults(staticResults); 
             });
     }

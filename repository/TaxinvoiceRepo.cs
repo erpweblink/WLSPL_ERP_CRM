@@ -591,7 +591,7 @@ namespace WLSPL_ERP_CRM.repository
                 // If UPDATE, use existing invoice ID
                 if (Action.Equals("updateOldData", StringComparison.OrdinalIgnoreCase))
                 {
-                    myInvoice = model.main.Id;
+                    myInvoice = Convert.ToInt32(model.main.Id);
 
                     // =================================================
                     // DELETE OLD DETAILS

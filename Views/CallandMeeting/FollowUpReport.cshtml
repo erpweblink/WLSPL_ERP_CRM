@@ -375,7 +375,6 @@
         display: flex;
         align-items: center;
         gap: 10px;
-        padding-top: 16px;
         border-top: 1px solid #edf0f4;
     }
 
@@ -383,6 +382,7 @@
         position: relative;
         flex: 1;
         max-width: 320px;
+        margin-top: 24px;
     }
 
         .search-wrapper > i {
@@ -419,6 +419,7 @@
     .filter-actions {
         display: flex;
         gap: 7px;
+        margin-top: 24px;
     }
 
         .filter-actions .btn {
@@ -721,7 +722,7 @@
         border-radius: 7px !important;
         padding: 0 12px;
         font-size: 12.5px;
-    }   
+    }
 
     /* History panel inside the single modal */
 
@@ -854,7 +855,7 @@
                 </div>
 
                 <!-- Follow-Up Date -->
-                <div class="col-xl-3 col-lg-3 col-md-6">
+                <div class="col-xl-3 col-lg-3 col-md-6 d-none">
                     <label class="modern-label">
                         <i class="fa-solid fa-calendar-check"></i> Follow-Up Date
                     </label>
@@ -865,7 +866,7 @@
                 </div>
 
                 <!-- Area -->
-                <div class="col-xl-3 col-lg-3 col-md-6">
+                <div class="col-xl-3 col-lg-3 col-md-6  d-none">
                     <label class="modern-label">
                         <i class="fa-solid fa-location-dot"></i> Area
                     </label>
@@ -876,39 +877,41 @@
                            placeholder="Enter area" />
                 </div>
 
+                <div class="col-xl-3 col-lg-3 col-md-6 mt-3">
+                    <!-- Search -->
+                    <div class="search-wrapper">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+
+                        <input type="text"
+                               id="searchInput"
+                               class="search-input"
+                               placeholder="Search company name..." />
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-lg-3 col-md-6">
+                    <!-- Actions -->
+                    <div class="filter-actions">
+
+                        <button type="button"
+                                id="btnSearchData"
+                                class="btn btn-search"
+                                title="Search">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+
+                        <button type="button"
+                                id="btnresetfilter"
+                                class="btn btn-reset"
+                                title="Reset Filters">
+                            <i class="fa-solid fa-arrow-rotate-left"></i>
+                        </button>
+
+                    </div>
+                </div>
             </div>
             <br />
             <div class="filter-footer">
-
-                <!-- Search -->
-                <div class="search-wrapper">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-
-                    <input type="text"
-                           id="searchInput"
-                           class="search-input"
-                           placeholder="Search company name..." />
-                </div>
-
-                <!-- Actions -->
-                <div class="filter-actions">
-
-                    <button type="button"
-                            id="btnSearchData"
-                            class="btn btn-search"
-                            title="Search">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </button>
-
-                    <button type="button"
-                            id="btnresetfilter"
-                            class="btn btn-reset"
-                            title="Reset Filters">
-                        <i class="fa-solid fa-arrow-rotate-left"></i>
-                    </button>
-
-                </div>
-
                 <!-- Record Count -->
                 <div class="record-info">
                     <span>
@@ -1234,6 +1237,7 @@
 
     /* ── Table rendering ── */
     function renderTable(data) {
+       
         allRows = data;
         const tbody = $("#companyTableBody");
         tbody.empty();
@@ -1321,7 +1325,7 @@
         $("#ddlfollowupStatus").prop("disabled", true);
         $("#txtfromdate, #txttodate, #txtfollowupdate, #txtarea, #searchInput").val("");
         $("#btnSearchData").trigger("click");
-        //window.location.href = window.location.href;
+        window.location.href = window.location.href;
     });
 
     /* ── Expand row (feedback + remarks) ── */
@@ -1434,10 +1438,11 @@
             type: "GET",
             data: { id: companyId },
             success: function (res) {
+               
                 if (!res.success) { showToast(res.message, "error"); return; }
 
-                $("#commenthistoryId").text(res.commentId[0].ID_CommentHistory);
-                $("#companyid").text(res.commentId[0].id);
+                $("#commenthistoryId").val(res.commentId[0].ID_CommentHistory ?? 0);
+                $("#companyid").val(res.commentId[0].id);
                 $("#lblccode").text(res.commentId[0].ccode);
                 $("#lblcname").text(res.commentId[0].cname);
                 $("#lbloname").text(res.commentId[0].oname);

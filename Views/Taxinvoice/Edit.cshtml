@@ -3,7 +3,7 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
 
-    bool isEdit = Model?.main != null && Model.main.Id > 0;
+    bool isEdit = Model?.main != null;
 
     var companyList = Model?.companies
         ?? new List<WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreate>();
@@ -985,7 +985,7 @@
     let rowCounter = 0;
 
     const isEdit = @(isEdit ? "true" : "false");
-    const invoiceId = @(isEdit ? Model.main.Id : 0);
+    const invoiceId = @(isEdit ? Model.main.Id : "0");
 
     const existingDetails = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(invoiceDetails));
 
@@ -1106,7 +1106,7 @@
         }
 
         existingDetails.forEach(function (item) {
-            debugger;
+            
             const row = addInvoiceRow();
             if (!row) return;
 
@@ -1536,11 +1536,11 @@
 
     function saveInvoice() {
         calculateAll();
-
+        
         if (!validateInvoice()) return;
 
         const main = {
-            Id: invoiceId,
+            Id: invoiceId.toString(),
             invoiceno: $('#invoiceNo').val() || null,
             invoicedate: $('#invoiceDate').val() || null,
             reversecharge: $('#reverseCharge').val() || null,

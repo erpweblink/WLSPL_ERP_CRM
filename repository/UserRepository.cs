@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
+using WEBLINK_CRM.Helpers;
 using WEBLINK_CRM.Models;
+using static iTextSharp.text.pdf.AcroFields;
 
 namespace WEBLINK_CRM.repository
 {
@@ -50,6 +52,8 @@ namespace WEBLINK_CRM.repository
                 {
 
                     id = Convert.ToInt32(dr["id"]),
+
+                    encryptedId = dr["id"].ToString(),
 
                     empcode = dr["empcode"]?.ToString(),
 
@@ -106,6 +110,7 @@ namespace WEBLINK_CRM.repository
                 list.Add(new RegisterUserr
                 {
                     id = Convert.ToInt32(dr["id"]),
+                    encryptedId = EncryptionHelper.Encrypt(dr["id"].ToString()),
                     empcode = dr["empcode"]?.ToString(),
                     name = dr["name"]?.ToString(),
                     email = dr["email"]?.ToString(),
@@ -126,7 +131,7 @@ namespace WEBLINK_CRM.repository
         // ================= GET USER BY ID =================
 
 
-        public RegisterUserr GetUserById(int id)
+        public RegisterUserr GetUserById(string id)
         {
 
             RegisterUserr user = null;
@@ -153,8 +158,9 @@ namespace WEBLINK_CRM.repository
 
                 user = new RegisterUserr
                 {
-
                     id = Convert.ToInt32(dr["id"]),
+
+                    encryptedId = EncryptionHelper.Encrypt(dr["id"].ToString()),
 
                     empcode = dr["empcode"]?.ToString(),
 
@@ -165,6 +171,11 @@ namespace WEBLINK_CRM.repository
                     mobile = dr["mobile"]?.ToString(),
 
                     role = dr["role"]?.ToString(),
+
+                    regdate = dr["regdate"] == DBNull.Value
+                        ? DateTime.MinValue
+                        : Convert.ToDateTime(dr["regdate"]),
+
 
                     emailpsw = dr["emailpsw"]?.ToString(),
 

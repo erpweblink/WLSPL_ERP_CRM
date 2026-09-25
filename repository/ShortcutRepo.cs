@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using WEBLINK_CRM.Helpers;
 using WEBLINK_CRM.Models;
 
 namespace WLSPL_ERP_CRM.repository
@@ -168,7 +169,7 @@ namespace WLSPL_ERP_CRM.repository
                 {
                     Name = "Edit: " + reader["EmpName"].ToString(),
                     Description = "Emp Code: " + reader["EmpCode"].ToString(),
-                    Url = "/UserMaster/Edit/" + reader["Id"].ToString(),
+                    Url = "/UserMaster/Edit/" + EncryptionHelper.Encrypt(reader["Id"].ToString()),
                     Icon = "las la-user-edit",
                     Keywords = new List<string>()
                 });
@@ -254,7 +255,7 @@ namespace WLSPL_ERP_CRM.repository
                 {
                     Name = "Edit: " + reader["company_name"].ToString(),
                     Description = "Emp Name: " + reader["empname"] + " (" + reader["empcode"] + ")",
-                    Url = "/Companymaster/Edit/" + reader["id"].ToString(),
+                    Url = "/Companymaster/Edit/" + EncryptionHelper.Encrypt(reader["id"].ToString()),
                     Icon = "las la-building",
                     Keywords = new List<string>()
                 });

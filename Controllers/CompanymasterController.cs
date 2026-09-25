@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using System.Text.Json;
+using WEBLINK_CRM.Helpers;
 using WEBLINK_CRM.Models;
 using WEBLINK_CRM.repository;
 
@@ -53,7 +54,7 @@ namespace WEBLINK_CRM.Controllers
                 var companyList = await _companymaster.GetFilteredcompanyList(companymaster);
 
                 var data = companyList.Select(c => new {
-                    id = c.Id,
+                    id = EncryptionHelper.Encrypt(c.Id),
                     cCode = c.CCode,
                     cName = c.CName,
                     email = c.Email,
@@ -71,11 +72,11 @@ namespace WEBLINK_CRM.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> CloseFollowUpClick(int id)
+        public async Task<IActionResult> CloseFollowUpClick(string id)
         {
             try
             {
-                var data = await _companymaster.GetCommentHistoryById(id);
+                var data = await _companymaster.GetCommentHistoryById(Convert.ToInt32(EncryptionHelper.Decrypt(id)));
                 var res = await _companymaster.GetActiveEmployeeList();
 
                 if (data == null)
@@ -213,7 +214,6 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-
                 string userName = HttpContext.Session.GetString("UserName");
 
                 model.CreatedBy = userName;
@@ -282,14 +282,14 @@ namespace WEBLINK_CRM.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(string id)
         {
             try
             {
                 string userName = HttpContext.Session.GetString("UserName");
 
                 var result = await _companymaster.DeleteReord(
-                    id.ToString(),
+                    EncryptionHelper.Decrypt(id),
                     userName
                 );
 
@@ -320,7 +320,7 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-                var companymaster = await _companymaster.GetcompanybyId(ID);
+                var companymaster = await _companymaster.GetcompanybyId(EncryptionHelper.Decrypt(ID));
 
                 if (companymaster == null)
                 {
@@ -349,6 +349,7 @@ namespace WEBLINK_CRM.Controllers
                 string userName = HttpContext.Session.GetString("UserName");
 
                 model.CreatedBy = userName;
+                model.Id = EncryptionHelper.Decrypt(model.Id);
 
 
                 var result = await _companymaster.SubmitDetails(model, "UpdateCompany");

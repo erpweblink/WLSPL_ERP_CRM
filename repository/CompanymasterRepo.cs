@@ -70,8 +70,7 @@ namespace WEBLINK_CRM.repository
 
                 var company = new Companymaster
                 {
-                    Id = Convert.ToInt32(data.id),
-
+                    Id = data.id.ToString(),
                     CCode = data.ccode,
                     CName = data.cname,
                     OName = data.oname,
