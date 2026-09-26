@@ -249,6 +249,15 @@
                             $("#Area").val(data.area).prop("readonly", true);
                             $("#Address").val(data.address).prop("readonly", true);
                             $("#GSTNo").val(data.gstNo);
+
+                            // Bind Registration Category and For
+                            $("#RegistrationCategory").val(data.registrationCategory);
+                            $("#RegistrationFor").val(data.registrationFor);
+
+                            // Trigger show/hide GST logic based on the loaded category
+                            CheckRegistrationCategory();
+
+
                         },
                         error: function () {
                             console.log("Unable to get company details.");
@@ -292,8 +301,7 @@
     }
 </script>
 
-<form asp-action="SaveCallAndMeeting" method="post"
-      onsubmit="return validateForm();">
+<form asp-action="SaveCallAndMeeting" method="post" onsubmit="return validateForm();">
     <div class="card">
         <div class="card-header" style="background: linear-gradient(314deg, #0b0f14, #1a3e66);color: whitesmoke;">
             <h3>
@@ -1514,7 +1522,6 @@
 
         return isValid;
     }
-
 
     $(document).ready(function () {
         hideAll();

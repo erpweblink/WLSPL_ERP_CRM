@@ -77,7 +77,9 @@ namespace WEBLINK_CRM.repository
                     Mobile = data.mobile,
                     Address = data.address,
                     Area = data.area,
-                    GSTNo = data.gstno
+                    GSTNo = data.gstno,
+                    RegistrationCategory = data.Category,
+                    RegistrationFor = data.RegisterType
                 };
 
                 return company;

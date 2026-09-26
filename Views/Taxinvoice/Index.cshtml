@@ -1002,10 +1002,13 @@
                         <i class="fa fa-filter"></i>
                         <span>Show Filters</span>
                     </button>
-                    <a asp-action="Create" class="btn btn-primary add-btn btn-sm">
-                        <i class="fa fa-plus"></i>
-                        Create Invoice
-                    </a>
+                    @if (Context.Session.GetString("Role")?.ToString() == "Admin")
+                    {
+                        <a asp-action="Create" class="btn btn-primary add-btn btn-sm">
+                            <i class="fa fa-plus"></i>
+                            Create Invoice
+                        </a>
+                    }
                 </div>
             </div>
         </div>
@@ -1299,342 +1302,342 @@
 </div>
 
 <script type="text/javascript">
-    const rowsPerPage = 20;
-    let currentPage = 1;
-    let allRows = [];
-    let filteredRows = [];
+      const rowsPerPage = 20;
+      let currentPage = 1;
+      let allRows = [];
+      let filteredRows = [];
 
-        // ── Filter toggle ──
-    document.getElementById('btnToggleFilter').addEventListener('click', function () {
-        const card = document.getElementById('filterCard');
-        card.classList.toggle('filter-collapsed');
+          // ── Filter toggle ──
+      document.getElementById('btnToggleFilter').addEventListener('click', function () {
+          const card = document.getElementById('filterCard');
+          card.classList.toggle('filter-collapsed');
 
-        const collapsed = card.classList.contains('filter-collapsed');
-        this.querySelector('span').textContent = collapsed ? 'Show Filters' : 'Hide Filters';
+          const collapsed = card.classList.contains('filter-collapsed');
+          this.querySelector('span').textContent = collapsed ? 'Show Filters' : 'Hide Filters';
 
-        const icon = this.querySelector('i');
-        icon.className = collapsed ? 'fa fa-filter' : 'fa fa-filter-circle-xmark';
-    });
+          const icon = this.querySelector('i');
+          icon.className = collapsed ? 'fa fa-filter' : 'fa fa-filter-circle-xmark';
+      });
 
-    document.addEventListener("DOMContentLoaded", function () {
-        allRows = Array.from(document.querySelectorAll("#invoiceTableBody .invoice-row"));
-        filteredRows = [...allRows];
+      document.addEventListener("DOMContentLoaded", function () {
+          allRows = Array.from(document.querySelectorAll("#invoiceTableBody .invoice-row"));
+          filteredRows = [...allRows];
 
-        document.getElementById("financialYearFilter").value = "@selectedFinancialYear";
-        document.getElementById("monthFilter").value = "@selectedMonth";
+          document.getElementById("financialYearFilter").value = "@selectedFinancialYear";
+          document.getElementById("monthFilter").value = "@selectedMonth";
 
-        updateFilterText();
-        applyFilters();
-    });
+          updateFilterText();
+          applyFilters();
+      });
 
-    document.getElementById("searchInput").addEventListener("input", function () {
-        currentPage = 1;
-        applyFilters();
-    });
+      document.getElementById("searchInput").addEventListener("input", function () {
+          currentPage = 1;
+          applyFilters();
+      });
 
-    document.getElementById("financialYearFilter").addEventListener("change", function () {
-        currentPage = 1;
-        loadServerData();
-    });
+      document.getElementById("financialYearFilter").addEventListener("change", function () {
+          currentPage = 1;
+          loadServerData();
+      });
 
-    document.getElementById("monthFilter").addEventListener("change", function () {
-        currentPage = 1;
-        loadServerData();
-    });
+      document.getElementById("monthFilter").addEventListener("change", function () {
+          currentPage = 1;
+          loadServerData();
+      });
 
-  function toggleSection(cardId, barId, label) {
-        const card = document.getElementById(cardId);
-        const bar  = document.getElementById(barId);
+    function toggleSection(cardId, barId, label) {
+          const card = document.getElementById(cardId);
+          const bar  = document.getElementById(barId);
 
-        const isCollapsed = card.classList.toggle('filter-collapsed');
-        bar.classList.toggle('open', !isCollapsed);
-    }
+          const isCollapsed = card.classList.toggle('filter-collapsed');
+          bar.classList.toggle('open', !isCollapsed);
+      }
 
-    function selectMonth(month) {
-        document.getElementById("monthFilter").value = month;
-        currentPage = 1;
-        loadServerData();
-    }
+      function selectMonth(month) {
+          document.getElementById("monthFilter").value = month;
+          currentPage = 1;
+          loadServerData();
+      }
 
-    function loadServerData() {
-        const financialYear = document.getElementById("financialYearFilter").value;
-        const month = document.getElementById("monthFilter").value;
-        let url = '@Url.Action("Index", "Taxinvoice")';
-        const params = new URLSearchParams();
+      function loadServerData() {
+          const financialYear = document.getElementById("financialYearFilter").value;
+          const month = document.getElementById("monthFilter").value;
+          let url = '@Url.Action("Index", "Taxinvoice")';
+          const params = new URLSearchParams();
 
-        if (financialYear) {
-            params.append("financialYear", financialYear);
-        }
+          if (financialYear) {
+              params.append("financialYear", financialYear);
+          }
 
-        if (month === "all" || month === "0") {
-            params.append("month", "0");
-        } else if (month) {
-            params.append("month", month);
-        }
+          if (month === "all" || month === "0") {
+              params.append("month", "0");
+          } else if (month) {
+              params.append("month", month);
+          }
 
-        window.location.href = url + "?" + params.toString();
-    }
+          window.location.href = url + "?" + params.toString();
+      }
 
-    document.getElementById("clearFilter").addEventListener("click", function () {
-        document.getElementById("searchInput").value = "";
-        document.getElementById("financialYearFilter").value = "@currentFinancialYear";
-        document.getElementById("monthFilter").value = "@currentMonth";
-        toastr.info("Filters have been reset.");
-        loadServerData();
-    });
+      document.getElementById("clearFilter").addEventListener("click", function () {
+          document.getElementById("searchInput").value = "";
+          document.getElementById("financialYearFilter").value = "@currentFinancialYear";
+          document.getElementById("monthFilter").value = "@currentMonth";
+          toastr.info("Filters have been reset.");
+          loadServerData();
+      });
 
-    function applyFilters() {
-        const searchValue = document.getElementById("searchInput").value.toLowerCase().trim();
-        const selectedMonth = document.getElementById("monthFilter").value;
-        const selectedFinancialYear = document.getElementById("financialYearFilter").value;
+      function applyFilters() {
+          const searchValue = document.getElementById("searchInput").value.toLowerCase().trim();
+          const selectedMonth = document.getElementById("monthFilter").value;
+          const selectedFinancialYear = document.getElementById("financialYearFilter").value;
 
-        filteredRows = allRows.filter(function (row) {
-            const rowText = row.innerText.toLowerCase();
-            const matchesSearch = searchValue === "" || rowText.includes(searchValue);
+          filteredRows = allRows.filter(function (row) {
+              const rowText = row.innerText.toLowerCase();
+              const matchesSearch = searchValue === "" || rowText.includes(searchValue);
 
-            const rowMonth = row.getAttribute("data-month");
-            const matchesMonth = selectedMonth === "all" || selectedMonth === "0" || rowMonth === selectedMonth;
+              const rowMonth = row.getAttribute("data-month");
+              const matchesMonth = selectedMonth === "all" || selectedMonth === "0" || rowMonth === selectedMonth;
 
-            const rowFY = row.getAttribute("data-financial-year");
-            const matchesFY = selectedFinancialYear === "all" || rowFY === selectedFinancialYear;
+              const rowFY = row.getAttribute("data-financial-year");
+              const matchesFY = selectedFinancialYear === "all" || rowFY === selectedFinancialYear;
 
-            return matchesSearch && matchesMonth && matchesFY;
-        });
+              return matchesSearch && matchesMonth && matchesFY;
+          });
 
-        updateSummary();
-        updateFilterText();
-        renderTable();
-    }
+          updateSummary();
+          updateFilterText();
+          renderTable();
+      }
 
-    function updateSummary() {
-        const fyGrandTotal = @financialYearTotal.ToString(System.Globalization.CultureInfo.InvariantCulture);
-        const fyInvoiceCount = @financialYearInvoiceCount;
+      function updateSummary() {
+          const fyGrandTotal = @financialYearTotal.ToString(System.Globalization.CultureInfo.InvariantCulture);
+          const fyInvoiceCount = @financialYearInvoiceCount;
 
-        let filteredGrandTotal = 0;
-        let filteredTaxTotal = 0;
+          let filteredGrandTotal = 0;
+          let filteredTaxTotal = 0;
 
-        filteredRows.forEach(function (row) {
-            filteredGrandTotal += parseFloat(row.getAttribute("data-grandtotal")) || 0;
-            filteredTaxTotal += parseFloat(row.getAttribute("data-tax")) || 0;
-        });
+          filteredRows.forEach(function (row) {
+              filteredGrandTotal += parseFloat(row.getAttribute("data-grandtotal")) || 0;
+              filteredTaxTotal += parseFloat(row.getAttribute("data-tax")) || 0;
+          });
 
-        const searchValue = document.getElementById("searchInput").value.trim();
-        const selectedMonth = document.getElementById("monthFilter").value;
+          const searchValue = document.getElementById("searchInput").value.trim();
+          const selectedMonth = document.getElementById("monthFilter").value;
 
-        if (searchValue === "" && selectedMonth !== "all" && selectedMonth !== "0") {
-            filteredGrandTotal = @selectedMonthGrandTotal.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            filteredTaxTotal = @selectedMonthTaxTotal.ToString(System.Globalization.CultureInfo.InvariantCulture);
-        }
+          if (searchValue === "" && selectedMonth !== "all" && selectedMonth !== "0") {
+              filteredGrandTotal = @selectedMonthGrandTotal.ToString(System.Globalization.CultureInfo.InvariantCulture);
+              filteredTaxTotal = @selectedMonthTaxTotal.ToString(System.Globalization.CultureInfo.InvariantCulture);
+          }
 
-        if (searchValue === "" && (selectedMonth === "all" || selectedMonth === "0")) {
-            filteredGrandTotal = fyGrandTotal;
-            filteredTaxTotal = @financialYearTaxTotal.ToString(System.Globalization.CultureInfo.InvariantCulture);
-        }
+          if (searchValue === "" && (selectedMonth === "all" || selectedMonth === "0")) {
+              filteredGrandTotal = fyGrandTotal;
+              filteredTaxTotal = @financialYearTaxTotal.ToString(System.Globalization.CultureInfo.InvariantCulture);
+          }
 
-        document.getElementById("fyGrandTotal").innerText = formatCurrency(fyGrandTotal);
-        document.getElementById("filteredGrandTotal").innerText = formatCurrency(filteredGrandTotal);
-        document.getElementById("filteredTaxTotal").innerText = formatCurrency(filteredTaxTotal);
-        document.getElementById("fyInvoiceCount").innerText = fyInvoiceCount;
-    }
+          document.getElementById("fyGrandTotal").innerText = formatCurrency(fyGrandTotal);
+          document.getElementById("filteredGrandTotal").innerText = formatCurrency(filteredGrandTotal);
+          document.getElementById("filteredTaxTotal").innerText = formatCurrency(filteredTaxTotal);
+          document.getElementById("fyInvoiceCount").innerText = fyInvoiceCount;
+      }
 
-    function formatCurrency(value) {
-        return "₹ " + Number(value || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
+      function formatCurrency(value) {
+          return "₹ " + Number(value || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
 
-    function updateFilterText() {
-        const fy = document.getElementById("financialYearFilter").value;
-        const month = document.getElementById("monthFilter").value;
+      function updateFilterText() {
+          const fy = document.getElementById("financialYearFilter").value;
+          const month = document.getElementById("monthFilter").value;
 
-        const monthNames = {
-            "01": "January", "02": "February", "03": "March", "04": "April",
-            "05": "May", "06": "June", "07": "July", "08": "August",
-            "09": "September", "10": "October", "11": "November", "12": "December"
-        };
+          const monthNames = {
+              "01": "January", "02": "February", "03": "March", "04": "April",
+              "05": "May", "06": "June", "07": "July", "08": "August",
+              "09": "September", "10": "October", "11": "November", "12": "December"
+          };
 
-        let monthText = "All Months";
-        if (month && month !== "all" && month !== "0" && monthNames[month]) {
-            monthText = monthNames[month];
-        }
+          let monthText = "All Months";
+          if (month && month !== "all" && month !== "0" && monthNames[month]) {
+              monthText = monthNames[month];
+          }
 
-        document.getElementById("currentFilterText").innerText = monthText + " | FY " + fy;
-        document.getElementById("filteredSubtitle").innerText = monthText;
-    }
+          document.getElementById("currentFilterText").innerText = monthText + " | FY " + fy;
+          document.getElementById("filteredSubtitle").innerText = monthText;
+      }
 
-    function updateTotalRecords() {
-        document.getElementById("totalRecords").innerText = allRows.length;
-        document.getElementById("filteredRecords").innerText = filteredRows.length;
-    }
+      function updateTotalRecords() {
+          document.getElementById("totalRecords").innerText = allRows.length;
+          document.getElementById("filteredRecords").innerText = filteredRows.length;
+      }
 
-    function renderTable() {
-        removeDynamicEmptyRow();
-        allRows.forEach(function (row) { row.style.display = "none"; });
+      function renderTable() {
+          removeDynamicEmptyRow();
+          allRows.forEach(function (row) { row.style.display = "none"; });
 
-        if (filteredRows.length === 0) {
-            showEmptyRow();
-            updateShowingInfo(0, 0, 0);
-            createPagination();
-            updateTotalRecords();
-            return;
-        }
+          if (filteredRows.length === 0) {
+              showEmptyRow();
+              updateShowingInfo(0, 0, 0);
+              createPagination();
+              updateTotalRecords();
+              return;
+          }
 
-        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-        if (currentPage > totalPages) {
-            currentPage = totalPages;
-        }
+          const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+          if (currentPage > totalPages) {
+              currentPage = totalPages;
+          }
 
-        const startIndex = (currentPage - 1) * rowsPerPage;
-        const endIndex = Math.min(startIndex + rowsPerPage, filteredRows.length);
-        const pageRows = filteredRows.slice(startIndex, endIndex);
+          const startIndex = (currentPage - 1) * rowsPerPage;
+          const endIndex = Math.min(startIndex + rowsPerPage, filteredRows.length);
+          const pageRows = filteredRows.slice(startIndex, endIndex);
 
-        pageRows.forEach(function (row) { row.style.display = ""; });
-        pageRows.forEach(function (row, index) {
-            const numberCell = row.querySelector(".row-number");
-            if (numberCell) {
-                numberCell.innerText = startIndex + index + 1;
-            }
-        });
+          pageRows.forEach(function (row) { row.style.display = ""; });
+          pageRows.forEach(function (row, index) {
+              const numberCell = row.querySelector(".row-number");
+              if (numberCell) {
+                  numberCell.innerText = startIndex + index + 1;
+              }
+          });
 
-        updateShowingInfo(startIndex + 1, endIndex, filteredRows.length);
-        createPagination();
-        updateTotalRecords();
-    }
+          updateShowingInfo(startIndex + 1, endIndex, filteredRows.length);
+          createPagination();
+          updateTotalRecords();
+      }
 
-    function updateShowingInfo(from, to, total) {
-        document.getElementById("showingFrom").innerText = from;
-        document.getElementById("showingTo").innerText = to;
-        document.getElementById("showingTotal").innerText = total;
-    }
+      function updateShowingInfo(from, to, total) {
+          document.getElementById("showingFrom").innerText = from;
+          document.getElementById("showingTo").innerText = to;
+          document.getElementById("showingTotal").innerText = total;
+      }
 
-    function createPagination() {
-        const pagination = document.getElementById("pagination");
-        pagination.innerHTML = "";
+      function createPagination() {
+          const pagination = document.getElementById("pagination");
+          pagination.innerHTML = "";
 
-        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-        if (totalPages <= 1) {
-            return;
-        }
+          const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+          if (totalPages <= 1) {
+              return;
+          }
 
-        const previous = document.createElement("li");
-        previous.className = "page-item " + (currentPage === 1 ? "disabled" : "");
-        previous.innerHTML = `<a class="page-link" href="javascript:void(0)"><i class="fa fa-chevron-left"></i> Previous</a>`;
-        previous.onclick = function () {
-            if (currentPage > 1) {
-                currentPage--;
-                renderTable();
-                window.scrollTo({ top: 0, behavior: "smooth" });
-            }
-        };
-        pagination.appendChild(previous);
+          const previous = document.createElement("li");
+          previous.className = "page-item " + (currentPage === 1 ? "disabled" : "");
+          previous.innerHTML = `<a class="page-link" href="javascript:void(0)"><i class="fa fa-chevron-left"></i> Previous</a>`;
+          previous.onclick = function () {
+              if (currentPage > 1) {
+                  currentPage--;
+                  renderTable();
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+          };
+          pagination.appendChild(previous);
 
-        const maxVisiblePages = 5;
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-        if (endPage - startPage + 1 < maxVisiblePages) {
-            startPage = Math.max(1, endPage - maxVisiblePages + 1);
-        }
+          const maxVisiblePages = 5;
+          let startPage = Math.max(1, currentPage - 2);
+          let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+          if (endPage - startPage + 1 < maxVisiblePages) {
+              startPage = Math.max(1, endPage - maxVisiblePages + 1);
+          }
 
-        if (startPage > 1) {
-            addPageButton(1, pagination);
-            if (startPage > 2) {
-                addDots(pagination);
-            }
-        }
+          if (startPage > 1) {
+              addPageButton(1, pagination);
+              if (startPage > 2) {
+                  addDots(pagination);
+              }
+          }
 
-        for (let i = startPage; i <= endPage; i++) {
-            addPageButton(i, pagination);
-        }
+          for (let i = startPage; i <= endPage; i++) {
+              addPageButton(i, pagination);
+          }
 
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                addDots(pagination);
-            }
-            addPageButton(totalPages, pagination);
-        }
+          if (endPage < totalPages) {
+              if (endPage < totalPages - 1) {
+                  addDots(pagination);
+              }
+              addPageButton(totalPages, pagination);
+          }
 
-        const next = document.createElement("li");
-        next.className = "page-item " + (currentPage === totalPages ? "disabled" : "");
-        next.innerHTML = `<a class="page-link" href="javascript:void(0)">Next <i class="fa fa-chevron-right"></i></a>`;
-        next.onclick = function () {
-            if (currentPage < totalPages) {
-                currentPage++;
-                renderTable();
-                window.scrollTo({ top: 0, behavior: "smooth" });
-            }
-        };
-        pagination.appendChild(next);
-    }
+          const next = document.createElement("li");
+          next.className = "page-item " + (currentPage === totalPages ? "disabled" : "");
+          next.innerHTML = `<a class="page-link" href="javascript:void(0)">Next <i class="fa fa-chevron-right"></i></a>`;
+          next.onclick = function () {
+              if (currentPage < totalPages) {
+                  currentPage++;
+                  renderTable();
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+          };
+          pagination.appendChild(next);
+      }
 
-    function addPageButton(pageNumber, pagination) {
-        const li = document.createElement("li");
-        li.className = "page-item " + (pageNumber === currentPage ? "active" : "");
-        li.innerHTML = `<a class="page-link" href="javascript:void(0)">${pageNumber}</a>`;
-        li.onclick = function () {
-            currentPage = pageNumber;
-            renderTable();
-            window.scrollTo({ top: 0, behavior: "smooth" });
-        };
-        pagination.appendChild(li);
-    }
+      function addPageButton(pageNumber, pagination) {
+          const li = document.createElement("li");
+          li.className = "page-item " + (pageNumber === currentPage ? "active" : "");
+          li.innerHTML = `<a class="page-link" href="javascript:void(0)">${pageNumber}</a>`;
+          li.onclick = function () {
+              currentPage = pageNumber;
+              renderTable();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+          };
+          pagination.appendChild(li);
+      }
 
-    function addDots(pagination) {
-        const li = document.createElement("li");
-        li.className = "page-item disabled";
-        li.innerHTML = `<span class="page-link">...</span>`;
-        pagination.appendChild(li);
-    }
+      function addDots(pagination) {
+          const li = document.createElement("li");
+          li.className = "page-item disabled";
+          li.innerHTML = `<span class="page-link">...</span>`;
+          pagination.appendChild(li);
+      }
 
-    function showEmptyRow() {
-        const tbody = document.getElementById("invoiceTableBody");
-        const emptyRow = document.createElement("tr");
-        emptyRow.id = "dynamicEmptyRow";
-        emptyRow.innerHTML = `
-            <td colspan="11" class="no-record">
-                <i class="fa fa-search fa-2x"></i>
-                <div class="no-record-title">No matching invoices found.</div>
-                <div class="no-record-text">Try changing the financial year, month or search criteria.</div>
-            </td>`;
-        tbody.appendChild(emptyRow);
-    }
+      function showEmptyRow() {
+          const tbody = document.getElementById("invoiceTableBody");
+          const emptyRow = document.createElement("tr");
+          emptyRow.id = "dynamicEmptyRow";
+          emptyRow.innerHTML = `
+              <td colspan="11" class="no-record">
+                  <i class="fa fa-search fa-2x"></i>
+                  <div class="no-record-title">No matching invoices found.</div>
+                  <div class="no-record-text">Try changing the financial year, month or search criteria.</div>
+              </td>`;
+          tbody.appendChild(emptyRow);
+      }
 
-    function removeDynamicEmptyRow() {
-        const emptyRow = document.getElementById("dynamicEmptyRow");
-        if (emptyRow) {
-            emptyRow.remove();
-        }
-    }
+      function removeDynamicEmptyRow() {
+          const emptyRow = document.getElementById("dynamicEmptyRow");
+          if (emptyRow) {
+              emptyRow.remove();
+          }
+      }
 
 
-    function deleteInvoice(event, element) {
-        event.preventDefault();
+      function deleteInvoice(event, element) {
+          event.preventDefault();
 
-        var url = element.href;
+          var url = element.href;
 
-        showConfirmToast(
-            "Are you sure you want to delete this invoice?",
-            function () {
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function (response) {
-                        if (response.success) {
-                            showToast("Invoice deleted successfully..", "success");
-                            $(element).closest('tr').fadeOut(500, function () {
-                                $(this).remove();
-                            });
-                        } else {
-                            showToast(response.message, "error");
-                        }
-                    },
-                    error: function () {
-                        showToast("Something went wrong while deleting the invoice.", "error");
-                    }
-                });
-            },
-            function () {
-                showToast("Delete cancelled.", "warning");
-            }
-        );
+          showConfirmToast(
+              "Are you sure you want to delete this invoice?",
+              function () {
+                  $.ajax({
+                      url: url,
+                      type: 'GET',
+                      success: function (response) {
+                          if (response.success) {
+                              showToast("Invoice deleted successfully..", "success");
+                              $(element).closest('tr').fadeOut(500, function () {
+                                  $(this).remove();
+                              });
+                          } else {
+                              showToast(response.message, "error");
+                          }
+                      },
+                      error: function () {
+                          showToast("Something went wrong while deleting the invoice.", "error");
+                      }
+                  });
+              },
+              function () {
+                  showToast("Delete cancelled.", "warning");
+              }
+          );
 
-        return false;
-    }
+          return false;
+      }
 </script>

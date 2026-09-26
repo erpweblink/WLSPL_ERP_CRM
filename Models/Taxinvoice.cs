@@ -5,7 +5,7 @@
 
         public class TaxInvoiceCreate
         {
-            public string Id { get; set; }
+            public string? Id { get; set; }
 
             // Invoice Information
             public string? invoiceno { get; set; }
@@ -52,6 +52,13 @@
             public decimal? totalamtaftertax { get; set; }
 
             public string? total_tax_amount { get; set; }
+
+
+            //TDS Amount and payable
+            public string? TdsPer { get; set; }
+            public string? TdsAmt { get; set; }
+            public string? TotalPayable { get; set; }
+
 
             public string? amtinwords { get; set; }
 

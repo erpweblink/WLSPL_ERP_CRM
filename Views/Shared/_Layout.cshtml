@@ -32,6 +32,16 @@
 </head>
 
 <body>
+    @{
+        var profileName = Context.Session.GetString("EmployeeName");
+        var profileUserName = Context.Session.GetString("UserName");
+        var profileRole = Context.Session.GetString("Role");
+        var profileImage = Context.Session.GetString("Profile");
+        if (string.IsNullOrEmpty(profileImage))
+        {
+            profileImage = "https://api.iconify.design/mdi/account-circle.svg?color=%23666666";
+        }
+    }
     <div class="topbar d-print-none">
         <nav class="topbar-custom d-flex justify-content-between" id="topbar-custom">
             <ul class="topbar-item list-unstyled d-inline-flex align-items-center mb-0">
@@ -100,18 +110,6 @@
                     </a>
                 </li>
 
-
-                @{
-                    var profileName = Context.Session.GetString("EmployeeName");
-                    var profileUserName = Context.Session.GetString("UserName");
-                    var profileRole = Context.Session.GetString("Role");
-                    var profileImage = Context.Session.GetString("Profile");
-                    if (string.IsNullOrEmpty(profileImage))
-                    {
-                        profileImage = "https://api.iconify.design/mdi/account-circle.svg?color=%23666666";
-                    }
-                }
-
                 @if (!string.IsNullOrEmpty(profileName))
                 {
                     <li class="dropdown topbar-item">
@@ -134,7 +132,7 @@
                             </div>
                             <i class="las la-angle-down profile-chevron d-none d-md-block"
                                style="font-size: 12px !important;display: inline-flex !important;
-                                               align-items: center !important;justify-content: center !important;"></i>
+                                                               align-items: center !important;justify-content: center !important;"></i>
                         </a>
 
                         <!-- Dropdown -->
@@ -233,29 +231,32 @@
                             </a>
                             <div class="collapse " id="sidebarDashboards">
                                 <ul class="nav flex-column">
-                                    <li class="nav-item">
-                                        <a class="nav-link" asp-controller="UserMaster" asp-action="index">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text">User's</span></div>
-                                        </a>
-                                    </li>
+                                    @if (profileRole == "Admin")
+                                    {
+                                        <li class="nav-item">
+                                            <a class="nav-link" asp-controller="UserMaster" asp-action="index">
+                                                <div class="d-flex align-items-center"><span class="nav-link-text">User's</span></div>
+                                            </a>
+                                        </li>
 
-                                    <li class="nav-item">
-                                        <a class="nav-link" asp-controller="Services" asp-action="Index">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text">Services</span></div>
-                                        </a>
-                                    </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" asp-controller="Services" asp-action="Index">
+                                                <div class="d-flex align-items-center"><span class="nav-link-text">Services</span></div>
+                                            </a>
+                                        </li>
 
-                                    <li class="nav-item">
-                                        <a class="nav-link" asp-controller="Lead" asp-action="InquiryList">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text">Web Site Inquiry</span></div>
-                                        </a>
-                                    </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" asp-controller="Lead" asp-action="InquiryList">
+                                                <div class="d-flex align-items-center"><span class="nav-link-text">Web Site Inquiry</span></div>
+                                            </a>
+                                        </li>
 
-                                    <li class="nav-item">
-                                        <a class="nav-link" asp-controller="Lead" asp-action="WhatsappInquiry">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text">What'sapp Inquiry</span></div>
-                                        </a>
-                                    </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link" asp-controller="Lead" asp-action="WhatsappInquiry">
+                                                <div class="d-flex align-items-center"><span class="nav-link-text">What'sapp Inquiry</span></div>
+                                            </a>
+                                        </li>
+                                    }
 
                                     <li class="nav-item">
                                         <a class="nav-link" asp-controller="Lead" asp-action="index">
@@ -313,13 +314,13 @@
                                         </a>
                                     </li>
 
-                                    <li class="nav-item">
+                                    <li class="nav-item d-none">
                                         <a class="nav-link" asp-controller="WorkOrder" asp-action="Index">
                                             <div class="d-flex align-items-center"><span class="nav-link-text">Work-Order</span></div>
                                         </a>
                                     </li>
 
-                                    <li class="nav-item">
+                                    <li class="nav-item d-none">
                                         <a class="nav-link" asp-controller="TaxInvoice" asp-action="BalancePayment">
                                             <div class="d-flex align-items-center"><span class="nav-link-text">Balance Payment List</span></div>
                                         </a>
@@ -328,6 +329,7 @@
                                 </ul>
                             </div>
                         </li>
+
                         <li class="nav-item">
                             <a class="nav-link" href="#sidebarApplicationss" data-bs-toggle="collapse" role="button"
                                aria-expanded="false" aria-controls="sidebarApplicationss">
@@ -341,9 +343,29 @@
                                             <div class="d-flex align-items-center"><span class="nav-link-text">Top Sales Person</span></div>
                                         </a>
                                     </li>
+
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#">
+                                            <div class="d-flex align-items-center"><span class="nav-link-text">Sales Outstanding</span></div>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#">
+                                            <div class="d-flex align-items-center"><span class="nav-link-text">Party Ledger</span></div>
+                                        </a>
+                                    </li>
+
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="#">
+                                            <div class="d-flex align-items-center"><span class="nav-link-text">Sales Report</span></div>
+                                        </a>
+                                    </li>
+
                                 </ul>
                             </div>
                         </li>
+
                         <li class="nav-item d-none">
                             <a class="nav-link" href="#sidebarApplicationss" data-bs-toggle="collapse" role="button"
                                aria-expanded="false" aria-controls="sidebarApplicationss">

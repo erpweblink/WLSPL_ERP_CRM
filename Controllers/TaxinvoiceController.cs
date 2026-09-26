@@ -8,8 +8,10 @@ using static WLSPL_ERP_CRM.Models.Taxinvoice;
 /* Things to do when creating invoice 
    1.Alter table InvoiceMain add columns AgainstBy Nvarchar(500) null and AgainstByValue Nvarchar(500) null
    2.Alter table invoicedetails add column ServiceName Nvarchar(500) null and ServiceId nvarchar(500) null and ValidateTill nvarchar(500) null 
-   3. ADD parameters in [dbo].[SP_AddInvoice] for InvoiceMain
+   3.ADD parameters in [dbo].[SP_AddInvoice] for InvoiceMain  @AgainstBy nvarchar(MAX) = null, @AgainstByValue nvarchar(MAX) = null, @TotalPayable nvarchar(MAX) = null, @TdsPer nvarchar(MAX) = null, @TdsAmt nvarchar(MAX) = null
+   4.Alter table InvoiceMain add TotalPayable nvarchar(max) null, TdsPer nvarchar(max) null, TdsAmt nvarchar(max) null
  */
+
 namespace WLSPL_ERP_CRM.Controllers
 {
     public class TaxinvoiceController : Controller
