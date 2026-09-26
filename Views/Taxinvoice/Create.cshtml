@@ -745,552 +745,552 @@
 
 
 <script type="text/javascript">
-    // Razor writes this once — all JS can read it
-    const isAdmin = @(Context.Session.GetString("Role").ToString() == "Admin" ? "true" : "false");
-    let rowCounter = 0;
+     // Razor writes this once — all JS can read it
+     const isAdmin = @(Context.Session.GetString("Role").ToString() == "Admin" ? "true" : "false");
+     let rowCounter = 0;
 
-    $(document).ready(function () {
-        $('#companyName').select2({ placeholder: 'Select Company', allowClear: true, width: '100%' });
-        $('#companyName').on('change', function () {
-            const cname = $(this).val();
-            if (!cname) { clearCompanyDetails(); return; }
-            getCompanyDetails(cname);
-        });
+     $(document).ready(function () {
+         $('#companyName').select2({ placeholder: 'Select Company', allowClear: true, width: '100%' });
+         $('#companyName').on('change', function () {
+             const cname = $(this).val();
+             if (!cname) { clearCompanyDetails(); return; }
+             getCompanyDetails(cname);
+         });
 
-         // AgainstByValue — initially disabled
-        $('#AgainstByValue').prop('disabled', true)
-            .html('<option value="">-- Select First --</option>');
+          // AgainstByValue — initially disabled
+         $('#AgainstByValue').prop('disabled', true)
+             .html('<option value="">-- Select First --</option>');
 
-        $('#AgainstBy').on('change', function () {
-            const selected    = $(this).val();
-            const companyName = $('#companyName').val();
+         $('#AgainstBy').on('change', function () {
+             const selected    = $(this).val();
+             const companyName = $('#companyName').val();
 
-            $('#AgainstByValue').html('<option value="">-- Select --</option>').prop('disabled', true);
+             $('#AgainstByValue').html('<option value="">-- Select --</option>').prop('disabled', true);
 
-            if (selected === 'Quotation' || selected === 'Proforma') {
-                if (!companyName) {
-                        showToast('Please select a Company first.', 'warning');
-                        $(this).val('Direct');
-                        return;
+             if (selected === 'Quotation' || selected === 'Proforma') {
+                   $('.add-row-btn').hide();
+                 if (!companyName) {
+                         showToast('Please select a Company first.', 'warning');
+                         $(this).val('Direct');
+                         return;
+                 }
+
+                 $('#AgainstByValue').html('<option value="">Loading...</option>');
+
+                 $.ajax({
+                     url: '@Url.Action("GetQuotationsByCompany", "Taxinvoice")',
+                     type: 'GET',
+                     data: { companyName: companyName, type: selected },
+                     success: function (response) {
+                         $('#AgainstByValue').html('<option value="">-- Select --</option>');
+                         if (!response || response.length === 0) {
+                             $('#AgainstByValue').html('<option value="">No records found</option>');
+                             return;
+                         }
+                         response.forEach(function (item) {
+                             $('#AgainstByValue').append(
+                                 $('<option>').val(item.id).text(item.displayText)
+                             );
+                         });
+                         $('#AgainstByValue').prop('disabled', false);
+                     },
+                     error: function () {
+                         $('#AgainstByValue').html('<option value="">No data</option>');
+                     }
+                 });
+             } else {
+                 $('#AgainstByValue').html('<option value="">N/A</option>').prop('disabled', true);
+             }
+         });
+
+             setTodayDate();
+             addInvoiceRow();
+            applyGSTBasedOnCompany();
+         });
+
+         $('#AgainstByValue').on('change', function () {
+             const selectedId = $(this).val();
+             const type       = $('#AgainstBy').val();
+
+             if (!selectedId || selectedId === '') return;
+
+             $.ajax({
+                 url: '@Url.Action("GetQuotationProformaDetails", "Taxinvoice")',
+                 type: 'GET',
+                 data: { id: selectedId, type: type },
+                 beforeSend: function () {
+                     $('#AgainstByValue').prop('disabled', true);
+                 },
+                 success: function (response) {
+                     if (!response) {
+                         showToast('No data found.', 'warning');
+                         return;
+                     }
+                     bindQuotationProformaData(response);
+                 },
+                 error: function () {
+                     showToast('Error loading details.', 'error');
+                 },
+                 complete: function () {
+                     $('#AgainstByValue').prop('disabled', false);
+                 }
+             });
+         });
+
+     function bindQuotationProformaData(data) {
+         // ── Clear existing rows ──
+         document.getElementById('invoiceItems').innerHTML = '';
+         rowCounter = 0;
+
+         if (data.details && data.details.length > 0) {
+             data.details.forEach(function (item) {
+                 addInvoiceRow();
+
+                 const rows = document.querySelectorAll('.invoice-item-row');
+                 const row  = rows[rows.length - 1];
+
+                 // ── Service ──
+                 row.querySelector('.service').value             = item.serviceName        || '';
+                 row.querySelector('.service-name-hidden').value = item.serviceName        || '';
+                 row.querySelector('.service-id').value          = item.serviceId          || '';
+                 row.querySelector('.sac-code').value            = item.sacCode            || '';
+                 row.querySelector('.description').value         = item.productdescription || '';
+
+                 // ── Amounts ──
+                 row.querySelector('.rate').value          = parseInt(item.rate)         || 0;
+                 row.querySelector('.taxable-value').value = parseInt(item.taxablevalue) || 0;
+
+                 // ── CGST ──
+                 row.querySelector('.cgst-rate').value   = parseInt(item.cgstrate) || 0;
+                 row.querySelector('.cgst-amount').value = parseInt(item.cgstamt)  || 0;
+
+                 // ── SGST ──
+                 row.querySelector('.sgst-rate').value   = parseInt(item.sgstrate) || 0;
+                 row.querySelector('.sgst-amount').value = parseInt(item.sgstamt)  || 0;
+
+                 // ── IGST ──
+                 row.querySelector('.igst-rate').value   = parseInt(item.igstrate) || 0;
+                 row.querySelector('.igst-amount').value = parseInt(item.igstamt)  || 0;
+
+                 // ── Row Total ──
+                 row.querySelector('.row-total').value = parseInt(item.total) || 0;
+
+                 // ── Lock/unlock tax fields based on which tax is applied ──
+                 const cgst = parseInt(item.cgstrate) || 0;
+                 const igst = parseInt(item.igstrate) || 0;
+
+             });
+         } else {
+             addInvoiceRow();
+         }
+
+         calculateAll();
+         updateAmountInWords();
+     }
+
+     function getCompanyDetails(cname) {
+         $.ajax({
+             url: '@Url.Action("Getcomapnybycname", "Taxinvoice")',
+             type: 'GET',
+             data: { cname: cname },
+             beforeSend: function () { $('#companyName').prop('disabled', true); },
+             success: function (data) {
+                if (!data) {
+                     showToast('Company details not found.', 'warning');
+                     clearCompanyDetails();
+                     return;
                 }
+                 $('#gstin').val(data.gstIn || '');
+                 $('#address').val(data.address || '');
+                 $('#Location').val(data.location ||  '');
+                 $('#billingState').val(data.state || '');
+                 $('#billingPincode').val(data.pinCode || '');
+                 $('#billingStateCode').val(data.statecode  || '');
+                 applyGSTBasedOnCompany();
+             },
+             error: function () { alert("Error while loading company details."); },
+             complete: function () { $('#companyName').prop('disabled', false); }
+         });
+     }
 
-                $('#AgainstByValue').html('<option value="">Loading...</option>');
+     function clearCompanyDetails() {
+         ['#gstin','#address','#Location','#billingState',
+          '#billingPincode','#billingStateCode'].forEach(id => $(id).val(''));
+     }
 
-                $.ajax({
-                    url: '@Url.Action("GetQuotationsByCompany", "Taxinvoice")',
-                    type: 'GET',
-                    data: { companyName: companyName, type: selected },
-                    success: function (response) {
-                        $('#AgainstByValue').html('<option value="">-- Select --</option>');
-                        if (!response || response.length === 0) {
-                            $('#AgainstByValue').html('<option value="">No records found</option>');
-                            return;
-                        }
-                        response.forEach(function (item) {
-                            $('#AgainstByValue').append(
-                                $('<option>').val(item.id).text(item.displayText)
-                            );
-                        });
-                        $('#AgainstByValue').prop('disabled', false);
-                    },
-                    error: function () {
-                        $('#AgainstByValue').html('<option value="">No data</option>');
-                    }
-                });
-            } else {
-                $('#AgainstByValue').html('<option value="">N/A</option>').prop('disabled', true);
-            }
-        });
+     function setTodayDate() {
+         const d = new Date();
+         $('#invoiceDate').val(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+     }
 
-            setTodayDate();
-            addInvoiceRow();
-           applyGSTBasedOnCompany();
-        });
+     function addInvoiceRow() {
+         rowCounter++;
+         const row = document.createElement('tr');
+         row.className = 'invoice-item-row';
+         row.innerHTML = `
+             <td><input type="text" value="${rowCounter}" readonly class="serial-number" /></td>
+             <td class="service-desc-cell" colspan="2">
+                 <div class="sd-top">
+                     <div class="sd-service">
+                         <div class="service-wrapper" style="position:relative;">
+                             <input type="text" placeholder="Search service..." class="service"
+                                    autocomplete="off"
+                                    oninput="searchService(this)"
+                                    onkeydown="handleServiceKeydown(event,this)" ${!isAdmin ? 'disabled' : ''} />
+                             <input type="hidden" class="service-id" />
+                             <input type="hidden" class="service-name-hidden" />
+                             <ul class="service-dropdown"></ul>
+                         </div>
+                     </div>
+                     <div class="sd-sac">
+                         <input type="text" class="sac-code" value="" placeholder="SAC Code" />
+                     </div>
+                 </div>
+                 <div class="sd-bottom">
+                     <textarea class="description" placeholder="Enter service description..."></textarea>
+                 </div>
+             </td>
+             <td>
+                 <select class="validTill">
+                     <option value="1 Year">1 Year</option>
+                     <option value="2 Year">2 Year</option>
+                     <option value="3 Year">3 Year</option>
+                     <option value="4 Year">4 Year</option>
+                     <option value="5 Year">5 Year</option>
+                 </select>
+             </td>
+             <td><input type="number" class="rate" min="0" value="0"
+                        oninput="calculateRow(this);updateAmountInWords();"
+                        onblur="updateAmountInWords();" /></td>
+             <td><input type="number" class="taxable-value" value="0" readonly /></td>
+             <td><div class="tax-pair">
+                 <input type="number" class="cgst-rate" min="0" value="0" placeholder="%"
+                        oninput="taxChanged(this,'CGST');updateAmountInWords();"
+                        onblur="updateAmountInWords();" ${!isAdmin ? 'disabled' : ''} />
+                 <input type="text" class="cgst-amount" value="0" readonly />
+             </div></td>
+             <td><div class="tax-pair">
+                 <input type="number" class="sgst-rate" min="0" value="0" placeholder="%"
+                        oninput="taxChanged(this,'SGST');updateAmountInWords();"
+                        onblur="updateAmountInWords();" ${!isAdmin ? 'disabled' : ''} />
+                 <input type="text" class="sgst-amount" value="0" readonly />
+             </div></td>
+             <td><div class="tax-pair">
+                 <input type="number" class="igst-rate" min="0" value="0" placeholder="%"
+                        oninput="taxChanged(this,'IGST');updateAmountInWords();"
+                        onblur="updateAmountInWords();" ${!isAdmin ? 'disabled' : ''} />
+                 <input type="text" class="igst-amount" value="0" readonly />
+             </div></td>
+             <td><input type="number" class="row-total" value="0" readonly /></td>
+             <td><button type="button" class="btn btn-danger btn-sm remove-row"
+                         onclick="removeRow(this);" style="padding:1px 6px;">×</button></td>`;
 
-        $('#AgainstByValue').on('change', function () {
-            const selectedId = $(this).val();
-            const type       = $('#AgainstBy').val();
+         document.getElementById('invoiceItems').appendChild(row);
+         applyGSTBasedOnCompany();
+         refreshSerialNumbers();
+         calculateAll();
+         updateAmountInWords();
+         $('#err-items').text('');
+     }
 
-            if (!selectedId || selectedId === '') return;
+     function removeRow(btn) {
+         if (document.querySelectorAll('.invoice-item-row').length <= 1) {
+             showToast('At least one item row is required.', 'warning');
+             return;
+         }
+         showConfirmToast('Remove this row?', function () {
+             btn.closest('tr').remove();
+             refreshSerialNumbers();
+             calculateAll();
+         });
+     }
 
-            $.ajax({
-                url: '@Url.Action("GetQuotationProformaDetails", "Taxinvoice")',
-                type: 'GET',
-                data: { id: selectedId, type: type },
-                beforeSend: function () {
-                    $('#AgainstByValue').prop('disabled', true);
-                },
-                success: function (response) {
-                    if (!response) {
-                        showToast('No data found.', 'warning');
-                        return;
-                    }
-                    bindQuotationProformaData(response);
-                },
-                error: function () {
-                    showToast('Error loading details.', 'error');
-                },
-                complete: function () {
-                    $('#AgainstByValue').prop('disabled', false);
-                }
-            });
-        });
+     function refreshSerialNumbers() {
+         document.querySelectorAll('.invoice-item-row').forEach((r, i) => {
+             r.querySelector('.serial-number').value = i + 1;
+         });
+     }
 
-    function bindQuotationProformaData(data) {
-        // ── Clear existing rows ──
-        document.getElementById('invoiceItems').innerHTML = '';
-        rowCounter = 0;
-
-        if (data.details && data.details.length > 0) {
-            data.details.forEach(function (item) {
-                addInvoiceRow();
-
-                const rows = document.querySelectorAll('.invoice-item-row');
-                const row  = rows[rows.length - 1];
-
-                // ── Service ──
-                row.querySelector('.service').value             = item.serviceName        || '';
-                row.querySelector('.service-name-hidden').value = item.serviceName        || '';
-                row.querySelector('.service-id').value          = item.serviceId          || '';
-                row.querySelector('.sac-code').value            = item.sacCode            || '';
-                row.querySelector('.description').value         = item.productdescription || '';
-
-                // ── Amounts ──
-                row.querySelector('.rate').value          = parseInt(item.rate)         || 0;
-                row.querySelector('.taxable-value').value = parseInt(item.taxablevalue) || 0;
-
-                // ── CGST ──
-                row.querySelector('.cgst-rate').value   = parseInt(item.cgstrate) || 0;
-                row.querySelector('.cgst-amount').value = parseInt(item.cgstamt)  || 0;
-
-                // ── SGST ──
-                row.querySelector('.sgst-rate').value   = parseInt(item.sgstrate) || 0;
-                row.querySelector('.sgst-amount').value = parseInt(item.sgstamt)  || 0;
-
-                // ── IGST ──
-                row.querySelector('.igst-rate').value   = parseInt(item.igstrate) || 0;
-                row.querySelector('.igst-amount').value = parseInt(item.igstamt)  || 0;
-
-                // ── Row Total ──
-                row.querySelector('.row-total').value = parseInt(item.total) || 0;
-
-                // ── Lock/unlock tax fields based on which tax is applied ──
-                const cgst = parseInt(item.cgstrate) || 0;
-                const igst = parseInt(item.igstrate) || 0;
-
-            });
-        } else {
-            addInvoiceRow();
-        }
-
-        calculateAll();
-        updateAmountInWords();
-    }
-
-    function getCompanyDetails(cname) {
-        $.ajax({
-            url: '@Url.Action("Getcomapnybycname", "Taxinvoice")',
-            type: 'GET',
-            data: { cname: cname },
-            beforeSend: function () { $('#companyName').prop('disabled', true); },
-            success: function (data) {
-               if (!data) {
-                    showToast('Company details not found.', 'warning');
-                    clearCompanyDetails();
-                    return;
-               }
-                $('#gstin').val(data.gstIn || '');
-                $('#address').val(data.address || '');
-                $('#Location').val(data.location ||  '');
-                $('#billingState').val(data.state || '');
-                $('#billingPincode').val(data.pinCode || '');
-                $('#billingStateCode').val(data.statecode  || '');
-                applyGSTBasedOnCompany();
-            },
-            error: function () { alert("Error while loading company details."); },
-            complete: function () { $('#companyName').prop('disabled', false); }
-        });
-    }
-
-    function clearCompanyDetails() {
-        ['#gstin','#address','#Location','#billingState',
-         '#billingPincode','#billingStateCode'].forEach(id => $(id).val(''));
-    }
-
-    function setTodayDate() {
-        const d = new Date();
-        $('#invoiceDate').val(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
-    }
-
-    function addInvoiceRow() {
-        rowCounter++;
-        const row = document.createElement('tr');
-        row.className = 'invoice-item-row';
-        row.innerHTML = `
-            <td><input type="text" value="${rowCounter}" readonly class="serial-number" /></td>
-            <td class="service-desc-cell" colspan="2">
-                <div class="sd-top">
-                    <div class="sd-service">
-                        <div class="service-wrapper" style="position:relative;">
-                            <input type="text" placeholder="Search service..." class="service"
-                                   autocomplete="off"
-                                   oninput="searchService(this)"
-                                   onkeydown="handleServiceKeydown(event,this)" ${!isAdmin ? 'disabled' : ''} />
-                            <input type="hidden" class="service-id" />
-                            <input type="hidden" class="service-name-hidden" />
-                            <ul class="service-dropdown"></ul>
-                        </div>
-                    </div>
-                    <div class="sd-sac">
-                        <input type="text" class="sac-code" value="" placeholder="SAC Code" />
-                    </div>
-                </div>
-                <div class="sd-bottom">
-                    <textarea class="description" placeholder="Enter service description..."></textarea>
-                </div>
-            </td>
-            <td>
-                <select class="validTill">
-                    <option value="1 Year">1 Year</option>
-                    <option value="2 Year">2 Year</option>
-                    <option value="3 Year">3 Year</option>
-                    <option value="4 Year">4 Year</option>
-                    <option value="5 Year">5 Year</option>
-                </select>
-            </td>
-            <td><input type="number" class="rate" min="0" value="0"
-                       oninput="calculateRow(this);updateAmountInWords();"
-                       onblur="updateAmountInWords();" /></td>
-            <td><input type="number" class="taxable-value" value="0" readonly /></td>
-            <td><div class="tax-pair">
-                <input type="number" class="cgst-rate" min="0" value="0" placeholder="%"
-                       oninput="taxChanged(this,'CGST');updateAmountInWords();"
-                       onblur="updateAmountInWords();" ${!isAdmin ? 'disabled' : ''} />
-                <input type="text" class="cgst-amount" value="0" readonly />
-            </div></td>
-            <td><div class="tax-pair">
-                <input type="number" class="sgst-rate" min="0" value="0" placeholder="%"
-                       oninput="taxChanged(this,'SGST');updateAmountInWords();"
-                       onblur="updateAmountInWords();" ${!isAdmin ? 'disabled' : ''} />
-                <input type="text" class="sgst-amount" value="0" readonly />
-            </div></td>
-            <td><div class="tax-pair">
-                <input type="number" class="igst-rate" min="0" value="0" placeholder="%"
-                       oninput="taxChanged(this,'IGST');updateAmountInWords();"
-                       onblur="updateAmountInWords();" ${!isAdmin ? 'disabled' : ''} />
-                <input type="text" class="igst-amount" value="0" readonly />
-            </div></td>
-            <td><input type="number" class="row-total" value="0" readonly /></td>
-            <td><button type="button" class="btn btn-danger btn-sm remove-row"
-                        onclick="removeRow(this);" style="padding:1px 6px;">×</button></td>`;
-
-        document.getElementById('invoiceItems').appendChild(row);
-        applyGSTBasedOnCompany();
-        refreshSerialNumbers();
-        calculateAll();
-        updateAmountInWords();
-        $('#err-items').text('');
-    }
-
-    function removeRow(btn) {
-        if (document.querySelectorAll('.invoice-item-row').length <= 1) {
-            showToast('At least one item row is required.', 'warning');
-            return;
-        }
-        showConfirmToast('Remove this row?', function () {
-            btn.closest('tr').remove();
-            refreshSerialNumbers();
-            calculateAll();
-        });
-    }
-
-    function refreshSerialNumbers() {
-        document.querySelectorAll('.invoice-item-row').forEach((r, i) => {
-            r.querySelector('.serial-number').value = i + 1;
-        });
-    }
-
-    function taxChanged(input, taxType) {
-        const row = input.closest('tr');
-        const cgst = row.querySelector('.cgst-rate');
-        const sgst = row.querySelector('.sgst-rate');
-        const igst = row.querySelector('.igst-rate');
-        let v = parseFloat(input.value) || 0;
-        if (v < 0) { input.value = 0; v = 0; }
-        if (taxType === 'CGST' || taxType === 'SGST') {
-            if (v > 0) { igst.value = 0; igst.disabled = true; }
-            else if ((parseFloat(cgst.value)||0)===0 && (parseFloat(sgst.value)||0)===0) igst.disabled = false;
-        }
-        if (taxType === 'IGST') {
-            if (v > 0) { cgst.value = 0; sgst.value = 0; cgst.disabled = true; sgst.disabled = true; }
-            else { cgst.disabled = false; sgst.disabled = false; }
-        }
-        calculateRow(input);
-    }
+     function taxChanged(input, taxType) {
+         const row = input.closest('tr');
+         const cgst = row.querySelector('.cgst-rate');
+         const sgst = row.querySelector('.sgst-rate');
+         const igst = row.querySelector('.igst-rate');
+         let v = parseFloat(input.value) || 0;
+         if (v < 0) { input.value = 0; v = 0; }
+         if (taxType === 'CGST' || taxType === 'SGST') {
+             if (v > 0) { igst.value = 0; igst.disabled = true; }
+             else if ((parseFloat(cgst.value)||0)===0 && (parseFloat(sgst.value)||0)===0) igst.disabled = false;
+         }
+         if (taxType === 'IGST') {
+             if (v > 0) { cgst.value = 0; sgst.value = 0; cgst.disabled = true; sgst.disabled = true; }
+             else { cgst.disabled = false; sgst.disabled = false; }
+         }
+         calculateRow(input);
+     }
 
 
-     function calculateTDS() {
-        // TDS always on basic/taxable amount (before GST)
-        const taxableBase = parseFloat($('#summaryGrandTotal').data('tds-base')) || 0;
-        const tdsPercent  = parseFloat($('#tdsPercent').val()) || 0;
+    function calculateTDS() {
+         // TDS always on basic/taxable amount (before GST)
+         const taxableBase = parseFloat($('#summaryGrandTotal').data('tds-base')) || 0;
+         const tdsPercent  = parseFloat($('#tdsPercent').val()) || 0;
 
-        if (tdsPercent < 0 || tdsPercent > 100) {
-            showToast('TDS % must be between 0 and 100.', 'warning');
-            return;
-        }
+         if (tdsPercent < 0 || tdsPercent > 100) {
+             showToast('TDS % must be between 0 and 100.', 'warning');
+             return;
+         }
 
-        const tdsAmount     = (taxableBase * tdsPercent) / 100;
+         const tdsAmount     = (taxableBase * tdsPercent) / 100;
 
-        // Grand payable = grand total (with GST) - TDS amount
-        const grandWithGST  = parseFloat($('#summaryamountGtotal').val()) || 0;
-        const totalPayable  = grandWithGST - tdsAmount;
+         // Grand payable = grand total (with GST) - TDS amount
+         const grandWithGST  = parseFloat($('#summaryamountGtotal').val()) || 0;
+         const totalPayable  = grandWithGST - tdsAmount;
 
-        $('#summaryTDSAmount').val(tdsAmount.toFixed(2));
-        $('#summaryGrandTotal').val(totalPayable.toFixed(2));
-        updateAmountInWords();
-    }
+         $('#summaryTDSAmount').val(tdsAmount.toFixed(2));
+         $('#summaryGrandTotal').val(totalPayable.toFixed(2));
+         updateAmountInWords();
+     }
 
-    function calculateRow(el) {
-        const row = el.closest('tr');
-        if (!row) return;
-        const rate = parseFloat(row.querySelector('.rate').value) || 0;
-        const taxable = rate;
-        row.querySelector('.taxable-value').value = taxable.toFixed(2);
-        const cgst = taxable * (parseFloat(row.querySelector('.cgst-rate').value)||0) / 100;
-        const sgst = taxable * (parseFloat(row.querySelector('.sgst-rate').value)||0) / 100;
-        const igst = taxable * (parseFloat(row.querySelector('.igst-rate').value)||0) / 100;
-        row.querySelector('.cgst-amount').value = cgst.toFixed(2);
-        row.querySelector('.sgst-amount').value = sgst.toFixed(2);
-        row.querySelector('.igst-amount').value = igst.toFixed(2);
-        row.querySelector('.row-total').value = (taxable + cgst + sgst + igst).toFixed(2);
-        calculateAll();
-    }
+     function calculateRow(el) {
+         const row = el.closest('tr');
+         if (!row) return;
+         const rate = parseFloat(row.querySelector('.rate').value) || 0;
+         const taxable = rate;
+         row.querySelector('.taxable-value').value = taxable.toFixed(2);
+         const cgst = taxable * (parseFloat(row.querySelector('.cgst-rate').value)||0) / 100;
+         const sgst = taxable * (parseFloat(row.querySelector('.sgst-rate').value)||0) / 100;
+         const igst = taxable * (parseFloat(row.querySelector('.igst-rate').value)||0) / 100;
+         row.querySelector('.cgst-amount').value = cgst.toFixed(2);
+         row.querySelector('.sgst-amount').value = sgst.toFixed(2);
+         row.querySelector('.igst-amount').value = igst.toFixed(2);
+         row.querySelector('.row-total').value = (taxable + cgst + sgst + igst).toFixed(2);
+         calculateAll();
+     }
 
-    function calculateAll() {
-        debugger;
-        let totalQty=0, totalTaxable=0, totalCGST=0, totalSGST=0, totalIGST=0, grand=0;
-        document.querySelectorAll('.invoice-item-row').forEach(row => {
-            totalTaxable += parseFloat(row.querySelector('.taxable-value').value)||0;
-            totalCGST    += parseFloat(row.querySelector('.cgst-amount').value)||0;
-            totalSGST    += parseFloat(row.querySelector('.sgst-amount').value)||0;
-            totalIGST    += parseFloat(row.querySelector('.igst-amount').value)||0;
-            grand        += parseFloat(row.querySelector('.row-total').value)||0;
-        });
-        const totalTax = totalCGST + totalSGST + totalIGST;
-        $('#totalTaxable').val(totalTaxable.toFixed(2));
-        $('#totalCGST').val(totalCGST.toFixed(2));
-        $('#totalSGST').val(totalSGST.toFixed(2));
-        $('#totalIGST').val(totalIGST.toFixed(2));
-        $('#grandTotalTable').val(grand.toFixed(2));
-        $('#summaryBeforeTax').val(totalTaxable.toFixed(2));
-        $('#summaryCGST').val(totalCGST.toFixed(2));
-        $('#summarySGST').val(totalSGST.toFixed(2));
-        $('#summaryIGST').val(totalIGST.toFixed(2));
-        $('#summaryTax').val(totalTax.toFixed(2));
-        $('#summaryamountGtotal').val(grand.toFixed(2));
+     function calculateAll() {
+         let totalQty=0, totalTaxable=0, totalCGST=0, totalSGST=0, totalIGST=0, grand=0;
+         document.querySelectorAll('.invoice-item-row').forEach(row => {
+             totalTaxable += parseFloat(row.querySelector('.taxable-value').value)||0;
+             totalCGST    += parseFloat(row.querySelector('.cgst-amount').value)||0;
+             totalSGST    += parseFloat(row.querySelector('.sgst-amount').value)||0;
+             totalIGST    += parseFloat(row.querySelector('.igst-amount').value)||0;
+             grand        += parseFloat(row.querySelector('.row-total').value)||0;
+         });
+         const totalTax = totalCGST + totalSGST + totalIGST;
+         $('#totalTaxable').val(totalTaxable.toFixed(2));
+         $('#totalCGST').val(totalCGST.toFixed(2));
+         $('#totalSGST').val(totalSGST.toFixed(2));
+         $('#totalIGST').val(totalIGST.toFixed(2));
+         $('#grandTotalTable').val(grand.toFixed(2));
+         $('#summaryBeforeTax').val(totalTaxable.toFixed(2));
+         $('#summaryCGST').val(totalCGST.toFixed(2));
+         $('#summarySGST').val(totalSGST.toFixed(2));
+         $('#summaryIGST').val(totalIGST.toFixed(2));
+         $('#summaryTax').val(totalTax.toFixed(2));
+         $('#summaryamountGtotal').val(grand.toFixed(2));
 
-        // Store taxable base for TDS calculation
-        $('#summaryGrandTotal').data('tds-base', totalTaxable);
+         // Store taxable base for TDS calculation
+         $('#summaryGrandTotal').data('tds-base', totalTaxable);
 
-        // Always recalculate TDS if a % is already entered
-        const tpct = parseFloat($('#tdsPercent').val()) || 0;
-        if (tpct > 0) {
-            calculateTDS();
-        } else {
-            $('#summaryTDSAmount').val('0.00');
-            $('#summaryGrandTotal').val(grand.toFixed(2));
-        }
+         // Always recalculate TDS if a % is already entered
+         const tpct = parseFloat($('#tdsPercent').val()) || 0;
+         if (tpct > 0) {
+             calculateTDS();
+         } else {
+             $('#summaryTDSAmount').val('0.00');
+             $('#summaryGrandTotal').val(grand.toFixed(2));
+         }
+            $('#TransAmt').val(grand.toFixed(2));
 
-    updateAmountInWords();
+         updateAmountInWords();
+     }
 
-        updateAmountInWords();
-    }
+     function validateInvoice() {
+         let valid = true;
+         document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+         document.querySelectorAll('.err-msg').forEach(el => el.textContent = '');
 
-    function validateInvoice() {
-        let valid = true;
-        document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
-        document.querySelectorAll('.err-msg').forEach(el => el.textContent = '');
+         const requiredFields = [
+             { id: 'invoiceDate',   errId: 'err-invoiceDate',   label: 'Invoice Date'   },
+             { id: 'companyName',   errId: 'err-companyName',   label: 'Company Name'   },
+             { id: 'amountInWords', errId: 'err-amountInWords', label: 'Amount in Words' },
+         ];
 
-        const requiredFields = [
-            { id: 'invoiceDate',   errId: 'err-invoiceDate',   label: 'Invoice Date'   },
-            { id: 'companyName',   errId: 'err-companyName',   label: 'Company Name'   },
-            { id: 'amountInWords', errId: 'err-amountInWords', label: 'Amount in Words' },
-        ];
+         requiredFields.forEach(f => {
+             const el = document.getElementById(f.id);
+             if (!el || !el.value.trim()) {
+                 if (el) el.classList.add('field-error');
+                 document.getElementById(f.errId).textContent = `${f.label} is required.`;
+                 valid = false;
+             }
+         });
 
-        requiredFields.forEach(f => {
-            const el = document.getElementById(f.id);
-            if (!el || !el.value.trim()) {
-                if (el) el.classList.add('field-error');
-                document.getElementById(f.errId).textContent = `${f.label} is required.`;
-                valid = false;
-            }
-        });
+         let itemsValid = true;
+         document.querySelectorAll('.invoice-item-row').forEach(row => {
+             const service = row.querySelector('.service');
+             const rate    = row.querySelector('.rate');
 
-        let itemsValid = true;
-        document.querySelectorAll('.invoice-item-row').forEach(row => {
-            const service = row.querySelector('.service');
-            const rate    = row.querySelector('.rate');
+             if (!service.value.trim()) {
+                 service.classList.add('field-error');
+                 itemsValid = false;
+             }
+             if ((parseFloat(rate.value) || 0) <= 0) {
+                 rate.classList.add('field-error');
+                 itemsValid = false;
+             }
+         });
 
-            if (!service.value.trim()) {
-                service.classList.add('field-error');
-                itemsValid = false;
-            }
-            if ((parseFloat(rate.value) || 0) <= 0) {
-                rate.classList.add('field-error');
-                itemsValid = false;
-            }
-        });
+         if (!itemsValid) {
+             document.getElementById('err-items').textContent = 'All rows need a service name and rate > 0.';
+             valid = false;
+         }
 
-        if (!itemsValid) {
-            document.getElementById('err-items').textContent = 'All rows need a service name and rate > 0.';
-            valid = false;
-        }
+         if ((parseFloat(document.getElementById('summaryGrandTotal').value) || 0) <= 0) {
+             document.getElementById('err-items').textContent = 'Grand total must be greater than zero.';
+             valid = false;
+         }
 
-        if ((parseFloat(document.getElementById('summaryGrandTotal').value) || 0) <= 0) {
-            document.getElementById('err-items').textContent = 'Grand total must be greater than zero.';
-            valid = false;
-        }
+         if (!valid) {
+             const firstErr = document.querySelector('.field-error');
+             if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+         }
+         return valid;
+     }
 
-        if (!valid) {
-            const firstErr = document.querySelector('.field-error');
-            if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        return valid;
-    }
+     function saveInvoice() {
+         calculateAll();
+         if (!validateInvoice()) return;
 
-    function saveInvoice() {
-        calculateAll();
-        if (!validateInvoice()) return;
+         // ── Helper: parse summary field safely ──
+         function sumVal(id) {
+             const v = parseFloat($('#' + id).val());
+             return isNaN(v) ? 0 : v;
+         }
 
-        // ── Helper: parse summary field safely ──
-        function sumVal(id) {
-            const v = parseFloat($('#' + id).val());
-            return isNaN(v) ? 0 : v;
-        }
-
-        const totalCGST = sumVal('summaryCGST');
-        const totalSGST = sumVal('summarySGST');
-        const totalIGST = sumVal('summaryIGST');
+         const totalCGST = sumVal('summaryCGST');
+         const totalSGST = sumVal('summarySGST');
+         const totalIGST = sumVal('summaryIGST');
 
 
-        const main = {
+         const main = {
 
-            // ── Invoice Header ──
-            invoiceno:         $('#invoiceNo').val()      || null,
-            invoicedate:       $('#invoiceDate').val()    || null,
-            reversecharge:     $('#reverseCharge').val()  || null,
-            InvoiceType:        null,
+             // ── Invoice Header ──
+             invoiceno:         $('#invoiceNo').val()      || null,
+             invoicedate:       $('#invoiceDate').val()    || null,
+             reversecharge:     $('#reverseCharge').val()  || null,
+             InvoiceType:        null,
 
-            AgainstBy:         $('#AgainstBy').val()      || null,
-            AgainstByValue:    $('#AgainstByValue').val()?.toString() || null,
+             AgainstBy:         $('#AgainstBy').val()      || null,
+             AgainstByValue:    $('#AgainstByValue').val()?.toString() || null,
 
-            // ── Bill To ──
-            companyName:       $('#companyName').val()        || null,
-            gstIn:             $('#gstin').val()              || null,
-            Address:           $('#address').val()            || null,
-            Location:          $('#Location').val()           || null,
-            PinCode:           $('#billingPincode').val()     || null,
-            state:             $('#billingState').val()       || null,
-            statecode:         $('#billingStateCode').val()   || null,
+             // ── Bill To ──
+             companyName:       $('#companyName').val()        || null,
+             gstIn:             $('#gstin').val()              || null,
+             Address:           $('#address').val()            || null,
+             Location:          $('#Location').val()           || null,
+             PinCode:           $('#billingPincode').val()     || null,
+             state:             $('#billingState').val()       || null,
+             statecode:         $('#billingStateCode').val()   || null,
 
-            // ── Transaction ──
-            TransMode:         $('#Transaction').val()  || null,
-            TransNo:           $('#transNo').val()       || null,
-            TransDate:         $('#transDate').val()     || null,
-            TransAmt:          $('#TransAmt').val()      || null,
+             // ── Transaction ──
+             TransMode:         $('#Transaction').val()  || null,
+             TransNo:           $('#transNo').val()       || null,
+             TransDate:         $('#transDate').val()     || null,
+             TransAmt:          $('#TransAmt').val()      || null,
 
-            // ── Tax Summary ──
-            cgst:              totalCGST > 0 ? 9  : 0,
-            cgstamt:           totalCGST,
-            sgst:              totalSGST > 0 ? 9  : 0,
-            sgstamt:           totalSGST,
-            igst:              totalIGST > 0 ? 18 : 0,
-            igstamt:           totalIGST,
+             // ── Tax Summary ──
+             cgst:              totalCGST > 0 ? 9  : 0,
+             cgstamt:           totalCGST,
+             sgst:              totalSGST > 0 ? 9  : 0,
+             sgstamt:           totalSGST,
+             igst:              totalIGST > 0 ? 18 : 0,
+             igstamt:           totalIGST,
 
-            totalqty:          document.querySelectorAll('.invoice-item-row').length,
-            taxablevalue:      sumVal('summaryBeforeTax'),
-            totalrate:         sumVal('summaryBeforeTax'),
-            totalamtbeforetax: sumVal('summaryBeforeTax'),
-            total_tax_amount:  sumVal('summaryTax').toString(),
-            totalamtaftertax:  sumVal('summaryamountGtotal'),
-            TdsPer:            parseFloat($('#tdsPercent').val())         || 0,
-            TdsAmt:            parseFloat($('#summaryTDSAmount').val())   || 0,
-            TotalPayable:      parseFloat($('#summaryGrandTotal').val())   || 0,
+             totalqty:          document.querySelectorAll('.invoice-item-row').length,
+             taxablevalue:      sumVal('summaryBeforeTax'),
+             totalrate:         sumVal('summaryBeforeTax'),
+             totalamtbeforetax: sumVal('summaryBeforeTax'),
+             total_tax_amount:  sumVal('summaryTax').toString(),
+             totalamtaftertax:  sumVal('summaryamountGtotal'),
 
-            amtinwords:        $('#amountInWords').val() || null
-        };
+             TdsPer:            String(parseFloat($('#tdsPercent').val()))        || 0,
+             TdsAmt:            String(parseFloat($('#summaryTDSAmount').val()))   || 0,
+             TotalPayable:      String(parseFloat($('#summaryGrandTotal').val()))   || 0,
 
-        // ── Build details rows ──
-        const details = [];
-        document.querySelectorAll('.invoice-item-row').forEach(row => {
-            details.push({
-                serviceId:          row.querySelector('.service-id').value.trim()          || null,
-                serviceName:        row.querySelector('.service-name-hidden').value.trim() || null,
-                productdescription: row.querySelector('.description').value.trim()         || null,
-                saccode:            row.querySelector('.sac-code').value.trim()            || null,
-                serviceTill:        row.querySelector('.validTill').value.trim()            || null,
-                qty:                1,
-                rate:               parseFloat(row.querySelector('.rate').value)           || 0,
-                taxablevalue:       parseFloat(row.querySelector('.taxable-value').value)  || 0,
-                cgstrate:           parseFloat(row.querySelector('.cgst-rate').value)      || 0,
-                cgstamt:            parseFloat(row.querySelector('.cgst-amount').value)    || 0,
-                sgstrate:           parseFloat(row.querySelector('.sgst-rate').value)      || 0,
-                sgstamt:            parseFloat(row.querySelector('.sgst-amount').value)    || 0,
-                igstrate:           parseFloat(row.querySelector('.igst-rate').value)      || 0,
-                igstamt:            parseFloat(row.querySelector('.igst-amount').value)    || 0,
-                total:              parseFloat(row.querySelector('.row-total').value)      || 0
-            });
-        });
+             amtinwords:        $('#amountInWords').val() || null
+         };
 
-        const payload  = { main: main, details: details };
-        const $saveBtn = $('button[onclick="saveInvoice()"]');
-        $saveBtn.prop('disabled', true).text('Saving...');
+         // ── Build details rows ──
+         const details = [];
+         document.querySelectorAll('.invoice-item-row').forEach(row => {
+             details.push({
+                 serviceId:          row.querySelector('.service-id').value.trim()          || null,
+                 serviceName:        row.querySelector('.service-name-hidden').value.trim() || null,
+                 productdescription: row.querySelector('.description').value.trim()         || null,
+                 saccode:            row.querySelector('.sac-code').value.trim()            || null,
+                 serviceTill:        row.querySelector('.validTill').value.trim()            || null,
+                 qty:                1,
+                 rate:               parseFloat(row.querySelector('.rate').value)           || 0,
+                 taxablevalue:       parseFloat(row.querySelector('.taxable-value').value)  || 0,
+                 cgstrate:           parseFloat(row.querySelector('.cgst-rate').value)      || 0,
+                 cgstamt:            parseFloat(row.querySelector('.cgst-amount').value)    || 0,
+                 sgstrate:           parseFloat(row.querySelector('.sgst-rate').value)      || 0,
+                 sgstamt:            parseFloat(row.querySelector('.sgst-amount').value)    || 0,
+                 igstrate:           parseFloat(row.querySelector('.igst-rate').value)      || 0,
+                 igstamt:            parseFloat(row.querySelector('.igst-amount').value)    || 0,
+                 total:              parseFloat(row.querySelector('.row-total').value)      || 0
+             });
+         });
 
-        $.ajax({
-            url:         '@Url.Action("SaveInvoice", "Taxinvoice")',
-            type:        'POST',
-            contentType: 'application/json',
-            data:        JSON.stringify(payload),
-            success: function (response) {
-                if (response && response.success) {
-                    showToast('Invoice saved successfully! Invoice No: ' + (response.invoiceNo || ''), 'success');
-                    setTimeout(function () {
-                        window.location.href = '/Taxinvoice/Index';
-                    }, 4000);
-                } else {
-                    showToast('Save failed: ' + (response?.message || 'Unknown error.'), 'error');
-                }
-            },
-            error: function (xhr) {
-                let msg = 'Error saving invoice.';
-                try {
-                    const err = JSON.parse(xhr.responseText);
-                    if (err.message) msg = err.message;
-                } catch (e) { }
-                showToast(msg, 'error');
-            },
-            complete: function () {
-                $saveBtn.prop('disabled', false).text('Save');
-            }
-        });
-    }
+         const payload  = { main: main, details: details };
+         const $saveBtn = $('button[onclick="saveInvoice()"]');
+         $saveBtn.prop('disabled', true).text('Saving...');
 
-    function clearInvoice() {
-        showConfirmToast('Are you sure you want to clear the invoice?', function () {
-            $('#companyName').val('').trigger('change');
-            $('#reverseCharge').val('N');
-            $('#Transaction').val('');
-            ['#gstin','#address','#Location','#billingState',
-             '#billingPincode','#billingStateCode','#transNo','#transDate','#TransAmt','#amountInWords']
-                .forEach(id => $(id).val(''));
-            document.getElementById('invoiceItems').innerHTML = '';
-            rowCounter = 0;
-            addInvoiceRow();
-            setTodayDate();
-            document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
-            document.querySelectorAll('.err-msg').forEach(el => el.textContent = '');
-        });
-    }
+         $.ajax({
+             url:         '@Url.Action("SaveInvoice", "Taxinvoice")',
+             type:        'POST',
+             contentType: 'application/json',
+             data:        JSON.stringify(payload),
+             success: function (response) {
+                 if (response && response.success) {
+                     showToast('Invoice saved successfully! Invoice No: ' + (response.invoiceNo || ''), 'success');
+                     setTimeout(function () {
+                         window.location.href = '/Taxinvoice/Index';
+                     }, 4000);
+                 } else {
+                     showToast('Save failed: ' + (response?.message || 'Unknown error.'), 'error');
+                 }
+             },
+             error: function (xhr) {
+                 let msg = 'Error saving invoice.';
+                 try {
+                     const err = JSON.parse(xhr.responseText);
+                     if (err.message) msg = err.message;
+                 } catch (e) { }
+                 showToast(msg, 'error');
+             },
+             complete: function () {
+                 $saveBtn.prop('disabled', false).text('Save');
+             }
+         });
+     }
+
+     function clearInvoice() {
+         showConfirmToast('Are you sure you want to clear the invoice?', function () {
+             $('#companyName').val('').trigger('change');
+             $('#reverseCharge').val('N');
+             $('#Transaction').val('');
+             ['#gstin','#address','#Location','#billingState',
+              '#billingPincode','#billingStateCode','#transNo','#transDate','#TransAmt','#amountInWords']
+                 .forEach(id => $(id).val(''));
+             document.getElementById('invoiceItems').innerHTML = '';
+             rowCounter = 0;
+             addInvoiceRow();
+             setTodayDate();
+             document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+             document.querySelectorAll('.err-msg').forEach(el => el.textContent = '');
+         });
+     }
 </script>
 
 <script type="text/javascript">

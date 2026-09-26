@@ -5,7 +5,7 @@
 
         public class TaxInvoiceCreate
         {
-            public string Id { get; set; }
+            public string? Id { get; set; }
 
             // Invoice Information
             public string? invoiceno { get; set; }

@@ -279,7 +279,8 @@ namespace WLSPL_ERP_CRM.repository
                 state, BillingStatecode As statecode, BillingLocation, TransMode, TransNo, TransDate, TransAmt, cgst, cgstamt, sgst,
                 sgstamt, igst, igstamt, gstonreversecharge, totalqty, totalrate, taxablevalue, totalamtbeforetax, totalamtaftertax,
                 amtinwords, servicedescription, sessionname, createddate, IsApprove, IsReject, ApprovedRejectedBy, Remarks, Remarkss,
-                ExportInvoiceNo, BillingAddress, BillingGST, BillingPincode, BillingStatecode, AgainstBy, AgainstByValue FROM InvoiceMain
+                ExportInvoiceNo, BillingAddress, BillingGST, BillingPincode, BillingStatecode, AgainstBy, AgainstByValue,
+                TotalPayable, TdsPer, TdsAmt FROM InvoiceMain
                 WHERE id = @id;
                
                 SELECT id, invoiceid, productdescription, saccode, qty, rate, amount, taxablevalue, cgstrate,
@@ -535,6 +536,10 @@ namespace WLSPL_ERP_CRM.repository
                 parameters.Add("@taxablevalue", model.main.taxablevalue);
                 parameters.Add("@totalamtbeforetax", model.main.totalamtbeforetax);
                 parameters.Add("@totalamtaftertax", model.main.totalamtaftertax);
+
+                parameters.Add("@TotalPayable", model.main.TotalPayable);
+                parameters.Add("@TdsPer", model.main.TdsPer);
+                parameters.Add("@TdsAmt", model.main.TdsAmt);
 
                 // =====================================================
                 // OTHER
