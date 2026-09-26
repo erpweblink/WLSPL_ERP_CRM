@@ -521,7 +521,6 @@
                         <label class="col-md-4 col-form-label font-weight-bold">Against By Value</label>
                         <div class="col-md-8">
                             <select asp-for="main.AgainstByValue" type="text" class="form-control" id="AgainstByValue">
-                               
                             </select>
                         </div>
                     </div>
@@ -594,7 +593,7 @@
             <div class="summary-grid">
 
                 <div style="border-right:1px solid #dee2e6;">
-                    <div style="padding:10px 12px; font-size:12px; font-weight:700; border-bottom:1px solid #dee2e6;">
+                    <div style="padding:10px 12px; font-size:12px; font-weight:700; border-bottom:1px solid #000000;">
                         Amount in Words
                     </div>
                     <div class="words-box">
@@ -606,15 +605,88 @@
                 </div>
 
                 <div class="summary-right">
-                    <div style="padding:10px 12px; font-size:12px; font-weight:700; border-bottom:1px solid #dee2e6;">
+
+                    <div style="padding:10px 16px; font-size:12px; font-weight:700;
+                     border-bottom:1px solid #000000; display:flex; align-items:center; gap:6px;">
+                        <i class="ti ti-calculator" style="font-size:14px; color:#1a3e66;"></i>
                         Tax Summary
                     </div>
-                    <div class="summary-row"><span>Total Amount Before Tax</span><input type="text" id="summaryBeforeTax" readonly /></div>
-                    <div class="summary-row"><span>Total CGST</span><input type="text" id="summaryCGST" readonly /></div>
-                    <div class="summary-row"><span>Total SGST</span><input type="text" id="summarySGST" readonly /></div>
-                    <div class="summary-row"><span>Total IGST</span><input type="text" id="summaryIGST" readonly /></div>
-                    <div class="summary-row"><span>Total Tax Amount</span><input type="text" id="summaryTax" readonly /></div>
-                    <div class="summary-row"><span>Grand Total</span><input type="text" id="summaryGrandTotal" readonly /></div>
+
+                    <div class="summary-row">
+                        <span><i class="ti ti-file-invoice" style="margin-right:5px;"></i>Total Basic Amount</span>
+                        <input type="text" id="summaryBeforeTax" readonly />
+                    </div>
+
+                    <div class="summary-row">
+                        <span><i class="ti ti-percentage" style="margin-right:5px;"></i>Total CGST</span>
+                        <input type="text" id="summaryCGST" readonly />
+                    </div>
+
+                    <div class="summary-row">
+                        <span><i class="ti ti-percentage" style="margin-right:5px;"></i>Total SGST</span>
+                        <input type="text" id="summarySGST" readonly />
+                    </div>
+
+                    <div class="summary-row">
+                        <span><i class="ti ti-percentage" style="margin-right:5px;"></i>Total IGST</span>
+                        <input type="text" id="summaryIGST" readonly />
+                    </div>
+
+                    <div class="summary-row" style="background:#eef6ff;">
+                        <span style="color:#185fa5; font-weight:600;">
+                            <i class="ti ti-receipt-tax" style="margin-right:5px;"></i>Total Tax Amount
+                        </span>
+                        <input type="text" id="summaryTax" readonly
+                               style="background:#d0e8ff !important; border-color:#378add; color:#185fa5; font-weight:600;" />
+                    </div>
+
+                    <div class="summary-row">
+                        <span><i class="ti ti-cash" style="margin-right:5px;"></i>Grand Total</span>
+                        <input type="text" id="summaryamountGtotal" readonly />
+                    </div>
+
+                    <!-- TDS row -->
+                    <div class="summary-row" style="background:#fffbeb; border-top:1px dashed #e0c97a;">
+                        <span style="color:#854f0b; font-weight:600; display:flex; align-items:center; gap:6px;">
+                            <i class="ti ti-minus-vertical"></i>
+                            TDS Deduction
+                            <span style="font-size:10px; background:#fef3c7; color:#854f0b;
+                   border:0.5px solid #e0c97a; border-radius:999px;
+                   padding:1px 7px; font-weight:500;">%</span>
+                        </span>
+                        <input type="number" id="tdsPercent" min="0" max="100" value="0"
+                               placeholder="Enter %"
+                               oninput="calculateTDS()"
+                               style="width:130px; text-align:right; border:1px solid #d0a800;
+                  border-radius:6px; background:#fffef0 !important;
+                  color:#444; font-size:11px; padding:2px 8px; height:28px;" />
+                    </div>
+
+                    <div class="summary-row" style="background:#fff5f5;">
+                        <span style="color:#a32d2d;">
+                            <i class="ti ti-arrow-down-circle" style="margin-right:5px;"></i>TDS Amount
+                        </span>
+                        <input type="text" id="summaryTDSAmount" readonly
+                               style="background:#ffe4e4 !important; border-color:#f09595; color:#a32d2d;" />
+                    </div>
+
+                    <!-- Total Payable — dark footer row -->
+                    <div style="display:flex; align-items:center; justify-content:space-between;
+                          padding:10px 16px;
+                          background:linear-gradient(135deg,#0b0f14,#1a3e66);
+                          border-radius:0 0 8px 8px;">
+                        <span style="font-size:12px; font-weight:600; color:rgba(255,255,255,0.85);
+                             display:flex; align-items:center; gap:6px;">
+                            <i class="ti ti-wallet" style="color:rgba(255,255,255,0.7);"></i>
+                            Total Payable
+                        </span>
+                        <input type="text" id="summaryGrandTotal" readonly
+                               style="width:130px; text-align:right; border:1px solid rgba(255,255,255,0.3);
+                              border-radius:6px; background:rgba(255,255,255,0.1) !important;
+                              color:#fff; font-size:13px; font-weight:700;
+                              padding:2px 8px; height:30px;" />
+                    </div>
+
                 </div>
 
             </div>
@@ -671,7 +743,10 @@
 
 </form>
 
+
 <script type="text/javascript">
+    // Razor writes this once — all JS can read it
+    const isAdmin = @(Context.Session.GetString("Role").ToString() == "Admin" ? "true" : "false");
     let rowCounter = 0;
 
     $(document).ready(function () {
@@ -803,15 +878,6 @@
                 const cgst = parseInt(item.cgstrate) || 0;
                 const igst = parseInt(item.igstrate) || 0;
 
-                if (igst > 0) {
-                    row.querySelector('.cgst-rate').disabled = true;
-                    row.querySelector('.sgst-rate').disabled = true;
-                    row.querySelector('.igst-rate').disabled = false;
-                } else if (cgst > 0) {
-                    row.querySelector('.cgst-rate').disabled = false;
-                    row.querySelector('.sgst-rate').disabled = false;
-                    row.querySelector('.igst-rate').disabled = true;
-                }
             });
         } else {
             addInvoiceRow();
@@ -869,7 +935,7 @@
                             <input type="text" placeholder="Search service..." class="service"
                                    autocomplete="off"
                                    oninput="searchService(this)"
-                                   onkeydown="handleServiceKeydown(event,this)" />
+                                   onkeydown="handleServiceKeydown(event,this)" ${!isAdmin ? 'disabled' : ''} />
                             <input type="hidden" class="service-id" />
                             <input type="hidden" class="service-name-hidden" />
                             <ul class="service-dropdown"></ul>
@@ -899,19 +965,19 @@
             <td><div class="tax-pair">
                 <input type="number" class="cgst-rate" min="0" value="0" placeholder="%"
                        oninput="taxChanged(this,'CGST');updateAmountInWords();"
-                       onblur="updateAmountInWords();" />
+                       onblur="updateAmountInWords();" ${!isAdmin ? 'disabled' : ''} />
                 <input type="text" class="cgst-amount" value="0" readonly />
             </div></td>
             <td><div class="tax-pair">
                 <input type="number" class="sgst-rate" min="0" value="0" placeholder="%"
                        oninput="taxChanged(this,'SGST');updateAmountInWords();"
-                       onblur="updateAmountInWords();" />
+                       onblur="updateAmountInWords();" ${!isAdmin ? 'disabled' : ''} />
                 <input type="text" class="sgst-amount" value="0" readonly />
             </div></td>
             <td><div class="tax-pair">
                 <input type="number" class="igst-rate" min="0" value="0" placeholder="%"
                        oninput="taxChanged(this,'IGST');updateAmountInWords();"
-                       onblur="updateAmountInWords();" />
+                       onblur="updateAmountInWords();" ${!isAdmin ? 'disabled' : ''} />
                 <input type="text" class="igst-amount" value="0" readonly />
             </div></td>
             <td><input type="number" class="row-total" value="0" readonly /></td>
@@ -962,6 +1028,28 @@
         calculateRow(input);
     }
 
+
+     function calculateTDS() {
+        // TDS always on basic/taxable amount (before GST)
+        const taxableBase = parseFloat($('#summaryGrandTotal').data('tds-base')) || 0;
+        const tdsPercent  = parseFloat($('#tdsPercent').val()) || 0;
+
+        if (tdsPercent < 0 || tdsPercent > 100) {
+            showToast('TDS % must be between 0 and 100.', 'warning');
+            return;
+        }
+
+        const tdsAmount     = (taxableBase * tdsPercent) / 100;
+
+        // Grand payable = grand total (with GST) - TDS amount
+        const grandWithGST  = parseFloat($('#summaryamountGtotal').val()) || 0;
+        const totalPayable  = grandWithGST - tdsAmount;
+
+        $('#summaryTDSAmount').val(tdsAmount.toFixed(2));
+        $('#summaryGrandTotal').val(totalPayable.toFixed(2));
+        updateAmountInWords();
+    }
+
     function calculateRow(el) {
         const row = el.closest('tr');
         if (!row) return;
@@ -979,6 +1067,7 @@
     }
 
     function calculateAll() {
+        debugger;
         let totalQty=0, totalTaxable=0, totalCGST=0, totalSGST=0, totalIGST=0, grand=0;
         document.querySelectorAll('.invoice-item-row').forEach(row => {
             totalTaxable += parseFloat(row.querySelector('.taxable-value').value)||0;
@@ -998,7 +1087,21 @@
         $('#summarySGST').val(totalSGST.toFixed(2));
         $('#summaryIGST').val(totalIGST.toFixed(2));
         $('#summaryTax').val(totalTax.toFixed(2));
-        $('#summaryGrandTotal').val(grand.toFixed(2));
+        $('#summaryamountGtotal').val(grand.toFixed(2));
+
+        // Store taxable base for TDS calculation
+        $('#summaryGrandTotal').data('tds-base', totalTaxable);
+
+        // Always recalculate TDS if a % is already entered
+        const tpct = parseFloat($('#tdsPercent').val()) || 0;
+        if (tpct > 0) {
+            calculateTDS();
+        } else {
+            $('#summaryTDSAmount').val('0.00');
+            $('#summaryGrandTotal').val(grand.toFixed(2));
+        }
+
+    updateAmountInWords();
 
         updateAmountInWords();
     }
@@ -1109,7 +1212,10 @@
             totalrate:         sumVal('summaryBeforeTax'),
             totalamtbeforetax: sumVal('summaryBeforeTax'),
             total_tax_amount:  sumVal('summaryTax').toString(),
-            totalamtaftertax:  sumVal('summaryGrandTotal'),
+            totalamtaftertax:  sumVal('summaryamountGtotal'),
+            TdsPer:            parseFloat($('#tdsPercent').val())         || 0,
+            TdsAmt:            parseFloat($('#summaryTDSAmount').val())   || 0,
+            TotalPayable:      parseFloat($('#summaryGrandTotal').val())   || 0,
 
             amtinwords:        $('#amountInWords').val() || null
         };

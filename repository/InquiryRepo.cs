@@ -665,7 +665,7 @@ namespace WEBLINK_CRM.repository
         public async Task<List<Inquiry>> Getlead(string user, string role)
         {
             var Lead = new List<Inquiry>();
-           
+
             string connectionString =
                 _configuration.GetConnectionString("Conn_Stringg");
 
@@ -681,7 +681,7 @@ namespace WEBLINK_CRM.repository
                 "@Action",
                 "GetLead"
             );
-            
+
             cmd.Parameters.AddWithValue("@user", user);
             cmd.Parameters.AddWithValue("@Role", role);
             await con.OpenAsync();
@@ -715,16 +715,21 @@ namespace WEBLINK_CRM.repository
                     ServiceRequested = reader["ServiceRequested"] == DBNull.Value
                         ? null
                         : reader["ServiceRequested"].ToString(),
+
                     // ADD THIS
                     Leadcode = reader["LeadCode"] == DBNull.Value
-                ? null
-                : reader["LeadCode"].ToString(),
+                        ? null
+                        : reader["LeadCode"].ToString(),
+
                     Status = reader["Status"] == DBNull.Value
-                ? null
-                : reader["Status"].ToString()
+                        ? null
+                        : reader["Status"].ToString(),
+
+                    AssignTo = reader["AssignTo"] == DBNull.Value
+                        ? null
+                        : reader["AssignTo"].ToString()
                 });
             }
-
             return Lead;
         }
     }

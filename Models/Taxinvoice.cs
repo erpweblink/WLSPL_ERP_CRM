@@ -53,6 +53,13 @@
 
             public string? total_tax_amount { get; set; }
 
+
+            //TDS Amount and payable
+            public string? TdsPer { get; set; }
+            public string? TdsAmt { get; set; }
+            public string? TotalPayable { get; set; }
+
+
             public string? amtinwords { get; set; }
 
             // Service

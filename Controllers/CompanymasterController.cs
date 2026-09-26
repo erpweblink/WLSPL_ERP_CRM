@@ -6,6 +6,8 @@ using WEBLINK_CRM.Helpers;
 using WEBLINK_CRM.Models;
 using WEBLINK_CRM.repository;
 
+/* In [dbo].[SP_Company] add lead code field to save company master 
+ * Also alter compnay master add LeadCode nvarchar(max) null */
 
 namespace WEBLINK_CRM.Controllers
 {
@@ -164,7 +166,7 @@ namespace WEBLINK_CRM.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Create(string? leadCode,string? mobile,string? email,string? ownerName)
+        public async Task<IActionResult> Create(string? leadCode,string? mobile,string? email,string? ownerName, string? assignedName)
         {
             var model = new Companymaster();
 
@@ -180,15 +182,10 @@ namespace WEBLINK_CRM.Controllers
             model.OName = ownerName;
 
             // Find requested person in BDE list
-            var bde = result.FirstOrDefault(x =>
-                !string.IsNullOrWhiteSpace(x.name) &&
-                !string.IsNullOrWhiteSpace(ownerName) &&
-                x.name.Trim().Equals(
-                    ownerName.Trim(),
-                    StringComparison.OrdinalIgnoreCase));
+            var bde = result.FirstOrDefault(x =>x.empcode == assignedName);
 
             // Automatically select matching BDE
-            model.BDE = bde?.name;
+            model.BDE = bde?.empcode;
 
             // Send BDE list to View
             model.SalesPersons = result;
@@ -214,9 +211,9 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-                string userName = HttpContext.Session.GetString("UserName");
+                string userName = HttpContext.Session.GetString("EmpCode");
 
-                model.CreatedBy = userName;
+                model.CreatedBy = model.BDE;
 
                 var result = await _companymaster.SubmitDetails(model, "Insert");
 
@@ -346,13 +343,13 @@ namespace WEBLINK_CRM.Controllers
             try
             {
 
-                string userName = HttpContext.Session.GetString("UserName");
+                string userName = HttpContext.Session.GetString("EmpCode");
 
                 model.CreatedBy = userName;
                 model.Id = EncryptionHelper.Decrypt(model.Id);
 
 
-                var result = await _companymaster.SubmitDetails(model, "UpdateCompany");
+                var result = await _companymaster.SubmitDetails(model, "Update");
 
 
                 if (result == -1)
@@ -367,7 +364,7 @@ namespace WEBLINK_CRM.Controllers
 
                 if (result > 0)
                 {
-                    TempData["ToastMessage"] = "Company Created successfully.";
+                    TempData["ToastMessage"] = "Company Updated successfully.";
                     TempData["ToastType"] = "success";          
 
                     return RedirectToAction("Index", "Companymaster");

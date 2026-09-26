@@ -3,6 +3,7 @@ using Microsoft.Data.SqlClient;
 using System;
 using System.Data;
 using WEBLINK_CRM.Models;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using static WEBLINK_CRM.Models.Company;
 
 namespace WEBLINK_CRM.repository
@@ -16,6 +17,7 @@ namespace WEBLINK_CRM.repository
         {
             _configuration = configuration;
         }
+
         public async Task<List<Company>> checkcomapnies(string action, string company, string GstNo)
         {
           
@@ -34,21 +36,26 @@ namespace WEBLINK_CRM.repository
                 return result.ToList();
             }
         }
+
         public async Task<int> DeleteReord(string ID, string CreatedBy)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
             {
                 await connection.OpenAsync();
+
+                var query = @"UPDATE Company
+                        SET isdeleted = 1
+                        WHERE id = @id";
+
                 var parameters = new DynamicParameters();
                 parameters.Add("@id", ID);
-                parameters.Add("@Action", "DeleteRecords");
 
-                parameters.Add("@Result", dbType: DbType.Int32, direction: ParameterDirection.Output);
-                await connection.ExecuteAsync("SP_companymasterAWS", parameters, commandType: CommandType.StoredProcedure);
-                int isSuccess = parameters.Get<int>("@Result");
-                return isSuccess;
+                int rowsAffected = await connection.ExecuteAsync(query, parameters);
+
+                return rowsAffected > 0 ? 1 : 0;
             }
         }
+
         public async Task<Companymaster> GetcompanybyId(string Id)
         {
             try
@@ -58,12 +65,16 @@ namespace WEBLINK_CRM.repository
 
                 var parameters = new DynamicParameters();
                 parameters.Add("@id", Id);
-                parameters.Add("@Action", "GetcompanybyID");
 
-                var data = await connection.QueryFirstOrDefaultAsync<dynamic>(
-                    "SP_companymasterAWS",
-                    parameters,
-                    commandType: CommandType.StoredProcedure);
+                const string query = @"SELECT id, ccode, cname, oname, email, mobile, visitingcard, type, address, 
+                      shippingaddress, Meetingwithmanager, visitdate, website As Website,  status, State, CountryName, 
+                     isdeleted, regdate, sessionname, updateddate, BDE, updatedby, email2, gstno, area, Category, RegisterType,
+                     IsUpdated, RequestedBy, RequestOn, Billing_location AS BillingLocation, Billing_pincode AS BillingPincode,
+                     Billing_statecode AS BillingStateCode, Shipping_location AS ShippingLocation, Shipping_pincode AS ShippingPincode,
+                     Shipping_statecode AS ShippingStateCode, E_inv_Typeof_supply AS EInvTypeOfSupply, CountryCode, CountryName,
+                     Address AS BillingAddress,BDE FROM Company WHERE Id = @id and isdeleted=0 ";
+
+                var data = await connection.QueryFirstOrDefaultAsync<dynamic>(query,parameters);
 
                 if (data == null)
                     return null;
@@ -118,6 +129,7 @@ namespace WEBLINK_CRM.repository
                 throw;
             }
         }
+
         public async Task<List<dynamic>> GetcompanyName(string Name)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
@@ -155,6 +167,7 @@ namespace WEBLINK_CRM.repository
             }
 
         }
+
         public async Task<List<Company>> GetLeadlist(string Action, Company Model)
         {
             using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
@@ -275,60 +288,50 @@ namespace WEBLINK_CRM.repository
 
                     var parameters = new DynamicParameters();
 
-                    parameters.Add("@ccode", Model.CCode);
-                    parameters.Add("@Id", Model.Id);
+                    parameters.Add("@id", Model.Id);
 
-                    parameters.Add("@CompanyName", Model.CName);
-                    parameters.Add("@OwnerName", Model.OName);
+                    parameters.Add("@cname", Model.CName?.ToString()?.Trim());
+                    parameters.Add("@oname", Model.OName?.ToString()?.Trim());
 
-                    parameters.Add("@Email", Model.Email);
-                    parameters.Add("@Mobile", Model.Mobile);
+                    parameters.Add("@email", Model.Email?.ToString()?.Trim());
+                    parameters.Add("@mobile", Model.Mobile?.ToString()?.Trim());
 
-                    parameters.Add("@GSTNo", Model.GSTNo);
-                    parameters.Add("@AreaNAme", Model.Area);
+                    parameters.Add("@gstno", Model.GSTNo?.ToString()?.Trim());
+                    parameters.Add("@area", Model.Area?.ToString()?.Trim());
 
-                    parameters.Add("@website", Model.Website);
+                    parameters.Add("@website", Model.Website?.ToString()?.Trim());
 
-                    parameters.Add("@address", Model.Address);
-                    parameters.Add("@shippaddress", Model.ShippingAddress);
+                    parameters.Add("@address", Model.Address?.ToString()?.Trim());
+                    parameters.Add("@shippingaddress", Model.ShippingAddress?.ToString()?.Trim());
 
-                    parameters.Add("@Category", Model.Category);
+                    parameters.Add("@Category", Model.Category?.ToString()?.Trim());
 
-                    parameters.Add("@State", Model.State);
-                    parameters.Add("@RegisterType", Model.RegisterType);
+                    parameters.Add("@State", Model.State?.ToString()?.Trim());
+                    parameters.Add("@RegisterType", Model.RegisterType?.ToString()?.Trim());
 
-                    parameters.Add("@CountryCode", Model.CountryCode);
-                    parameters.Add("@CountryName", Model.CountryName);
+                    parameters.Add("@CountryCode", Model.CountryCode?.ToString()?.Trim());
+                    parameters.Add("@CountryName", Model.CountryName?.ToString()?.Trim());
 
-                    parameters.Add("@BillLocation", Model.BillingLocation);
-                    parameters.Add("@BillingPincode", Model.BillingPincode);
-                    parameters.Add("@BillStateCode", Model.BillingStateCode);
-                    parameters.Add("@type", Model.typess);
+                    parameters.Add("@Billing_location", Model.BillingLocation?.ToString()?.Trim());
+                    parameters.Add("@Billing_pincode", Model.BillingPincode?.ToString()?.Trim());
+                    parameters.Add("@Billing_statecode", Model.BillingStateCode?.ToString()?.Trim());
+                    parameters.Add("@type", Model.typess?.ToString()?.Trim());
 
                     parameters.Add("@visitdate", Model.VisitDate);
-                    parameters.Add("@ShippLocation", Model.ShippingLocation);
-                    parameters.Add("@ShippingPincode", Model.ShippingPincode);
-                    parameters.Add("@ShippStateCode", Model.ShippingStateCode);
-                    parameters.Add("@LeadCode", Model.LeadCode);
-                    parameters.Add("@CreatedBy", Model.CreatedBy);
+                    parameters.Add("@Shipping_location", Model.ShippingLocation?.ToString()?.Trim());
+                    parameters.Add("@Shipping_pincode", Model.ShippingPincode?.ToString()?.Trim());
+                    parameters.Add("@Shipping_statecode", Model.ShippingStateCode?.ToString()?.Trim());
+                    parameters.Add("@LeadCode", Model.LeadCode?.ToString()?.Trim());
+                    parameters.Add("@sessionname", Model.CreatedBy);
                     parameters.Add("@BDE", Model.BDE);
                     parameters.Add("@Action", Action);
 
-                    parameters.Add("@Result",
-                        dbType: DbType.Int32,
-                        direction: ParameterDirection.Output);
-
-
-                
-
-
-                    await connection.ExecuteAsync(
-                        "SP_companymasterAWS",
+                    int rowsAffected = await connection.ExecuteAsync(
+                        "[dbo].[SP_Company]",
                         parameters,
                         commandType: CommandType.StoredProcedure);
 
-
-                    return parameters.Get<int>("@Result");
+                    return rowsAffected > 0 ? 1 : 0;
                 }
             }
             catch (Exception)
@@ -407,7 +410,6 @@ namespace WEBLINK_CRM.repository
                 return result.ToList();
             }
         }
-
 
         public async Task<dynamic> GetCommentHistoryById(int Id)
         {

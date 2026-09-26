@@ -41,7 +41,7 @@ namespace WEBLINK_CRM.Repositories
                         Designation,
                         ProfileImagePath
                     FROM employees
-                    WHERE UserName = @UserName
+                    WHERE empcode = @UserName
                       AND panelpsw = @Password
                       AND ISNULL(isdeleted, 0) = 0
                       AND status = 1";
