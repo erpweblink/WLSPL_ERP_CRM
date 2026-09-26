@@ -619,9 +619,7 @@ namespace WEBLINK_CRM.repository
             }
         }
 
-        public async Task<int> AssignSalesPerson(
-            int inquiryId,
-            string salesEmpCode, string Action)
+        public async Task<int> AssignSalesPerson(int inquiryId, string salesEmpCode, string Action)
         {
             string connectionString =
                 _configuration.GetConnectionString("Conn_Stringg");
@@ -726,6 +724,47 @@ namespace WEBLINK_CRM.repository
             }
 
             return Lead;
+        }
+
+        public async Task<int> Revokesalespersons(int inquiryId, string salesEmpCode, string Action)
+        {
+            string connectionString =
+                 _configuration.GetConnectionString("Conn_Stringg");
+
+            using SqlConnection connection =
+                new SqlConnection(connectionString);
+
+            using SqlCommand command =
+                new SqlCommand("SP_InsertInquiry", connection);
+
+            command.CommandType = CommandType.StoredProcedure;
+
+            command.Parameters.AddWithValue(
+                "@Id",
+                inquiryId
+            );
+
+            command.Parameters.AddWithValue(
+                "@SalesEmpCode",
+                salesEmpCode
+            );
+
+            command.Parameters.AddWithValue(
+                "@Action",
+                Action
+            );
+
+            await connection.OpenAsync();
+
+            using var reader =
+                await command.ExecuteReaderAsync();
+
+            if (await reader.ReadAsync())
+            {
+                return Convert.ToInt32(reader["Success"]);
+            }
+
+            return 0;
         }
     }
 }

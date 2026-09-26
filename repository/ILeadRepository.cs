@@ -5,7 +5,6 @@ namespace WEBLINK_CRM.repository
     public interface ILeadRepository
     {
         List<LeadGenration> GetAllLeads();
-
         LeadGenration GetLeadById(int id);
 
         bool CreateLead(LeadGenration model);
@@ -13,5 +12,8 @@ namespace WEBLINK_CRM.repository
         bool UpdateLead(LeadGenration model);
 
         bool DeleteLead(int id, string deletedBy);
+
+
+
     }
 }
