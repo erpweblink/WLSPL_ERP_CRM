@@ -1000,7 +1000,7 @@
                 <div class="d-flex align-items-center gap-2">
                     <button type="button" id="btnToggleFilter" class="btn-filter-toggle">
                         <i class="fa fa-filter"></i>
-                        <span>Show Filters</span>
+                        <span>Hide Filters</span>
                     </button>
                     @if (Context.Session.GetString("Role")?.ToString() == "Admin")
                     {
@@ -1013,7 +1013,7 @@
             </div>
         </div>
 
-        <div id="filterCard" class="filter-section filter-collapsed">
+        <div id="filterCard" class="filter-section">
             <div class="row align-items-end">
                 <div class="col-lg-4 col-md-6 mb-2">
                     <label class="filter-label">Search</label>
@@ -1072,12 +1072,12 @@
         </div>
 
         <!-- ── Summary Cards Toggle Bar ── -->
-        <div class="section-toggle-bar open" id="summaryToggleBar" onclick="toggleSection('summaryCard','summaryToggleBar','Summary Cards')">
+        <div class="section-toggle-bar" id="summaryToggleBar" onclick="toggleSection('summaryCard','summaryToggleBar','Summary Cards')">
             <span class="section-toggle-label">
                 <i class="fa fa-chart-pie"></i>
                 Summary Cards
             </span>
-            <i class="fa fa-chevron-up section-toggle-icon"></i>
+            <i class="fa fa-chevron-down section-toggle-icon"></i>
         </div>
 
         <div id="summaryCard" class="summary-section filter-collapsed">
@@ -1123,12 +1123,12 @@
         </div>
 
         <!-- ── FY Month Breakdown Toggle Bar ── -->
-        <div class="section-toggle-bar open" id="fyToggleBar" onclick="toggleSection('fyCard','fyToggleBar','Month Breakdown')">
+        <div class="section-toggle-bar" id="fyToggleBar" onclick="toggleSection('fyCard','fyToggleBar','Month Breakdown')">
             <span class="section-toggle-label">
                 <i class="fa fa-calendar-days"></i>
                 Month Breakdown — FY @selectedFinancialYear
             </span>
-            <i class="fa fa-chevron-up section-toggle-icon"></i>
+            <i class="fa fa-chevron-down section-toggle-icon"></i>
         </div>
 
         <div id="fyCard" class="fy-summary-section filter-collapsed" style="border-radius:0; border-left:0; border-right:0; margin:3px !important;">
@@ -1345,12 +1345,14 @@
           loadServerData();
       });
 
-    function toggleSection(cardId, barId, label) {
+     function toggleSection(cardId, barId, label) {
           const card = document.getElementById(cardId);
           const bar  = document.getElementById(barId);
 
-          const isCollapsed = card.classList.toggle('filter-collapsed');
-          bar.classList.toggle('open', !isCollapsed);
+          card.classList.toggle('filter-collapsed');
+          // card collapsed = bar NOT open; card visible = bar IS open
+          const isNowCollapsed = card.classList.contains('filter-collapsed');
+          bar.classList.toggle('open', !isNowCollapsed);
       }
 
       function selectMonth(month) {
