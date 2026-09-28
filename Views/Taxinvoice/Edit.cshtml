@@ -1060,27 +1060,47 @@
         // ── If edit mode and AgainstBy is Quotation/Proforma, load the options then re-select ──
         if (isEdit && (initAgainst === 'Quotation' || initAgainst === 'Proforma')) {
               $('.add-row-btn').hide();
-            const savedAgainstByValue = '@Html.Raw(Model?.main?.AgainstByValue ?? "")';
-            const companyName = $('#companyName').val();
+            const savedAgainstByValue = $('#AgainstByValueHidden').val();
+            const companyName = $('#companyNameHidden').val() || $('#companyName').val();
 
             $.ajax({
                 url: '@Url.Action("GetQuotationsByCompany", "Taxinvoice")',
                 type: 'GET',
                 data: { companyName: companyName, type: initAgainst },
-                success: function (response) {
-                    $('#AgainstByValue').html('<option value="">-- Select --</option>');
-                    if (response && response.length > 0) {
-                        response.forEach(function (item) {
-                            $('#AgainstByValue').append(
-                                $('<option>').val(item.id).text(item.displayText)
-                            );
-                        });
+                  success: function (response) {
+                        $('#AgainstByValue').html('<option value="">-- Select --</option>');
+
+                        if (response && response.length > 0) {
+                            response.forEach(function (item) {
+                                $('#AgainstByValue').append(
+                                    $('<option>').val(item.id).text(item.displayText)
+                                );
+                            });
+
+                            // ── Set value AFTER options are added ──
+                            if (savedAgainstByValue) {
+                                $('#AgainstByValue').val(savedAgainstByValue);
+
+                                // ── If still not matched, inject option directly ──
+                                if (!$('#AgainstByValue').val()) {
+                                    $('#AgainstByValue')
+                                        .prepend($('<option>').val(savedAgainstByValue).text(savedAgainstByValue))
+                                        .val(savedAgainstByValue);
+                                }
+                            }
+                        }
+
+                        $('#AgainstByValue').prop('disabled', true);
+                    },
+                    error: function () {
+                        // Fallback — inject the saved value directly so it shows
                         if (savedAgainstByValue) {
-                            $('#AgainstByValue').val(savedAgainstByValue);
+                            $('#AgainstByValue')
+                                .html(`<option value="${savedAgainstByValue}">${savedAgainstByValue}</option>`)
+                                .val(savedAgainstByValue)
+                                .prop('disabled', true);
                         }
                     }
-                    $('#AgainstByValue').prop('disabled', true);
-                }
             });
         }
 

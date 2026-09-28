@@ -60,8 +60,8 @@ namespace WLSPL_ERP_CRM.repository
                     WHERE companyname = @cname 
                     ORDER BY id DESC
                 ELSE
-                    SELECT id, proformano AS displayText 
-                    FROM stswlspl.tblProformaMain 
+                    SELECT id, invoiceno AS displayText 
+                    FROM [dbo].[tbl_ProformaInvoiceMain]
                     WHERE companyname = @cname 
                     ORDER BY id DESC";
 
@@ -85,8 +85,8 @@ namespace WLSPL_ERP_CRM.repository
                             SELECT  
                                 serviceId, serviceName, sacCode, productdescription,rate,
                                 taxablevalue,cgstrate,cgstamt,sgstrate,sgstamt,igstrate,igstamt,total
-                            FROM stswlspl.tblProformaDetails 
-                            WHERE proformaid = @id";
+                            FROM [dbo].[tbl_ProformaInvoiceDetails]
+                            WHERE invoiceid = @id";
 
             var param = new { id, type };
 
@@ -440,7 +440,7 @@ namespace WLSPL_ERP_CRM.repository
             {
                 using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
 
-                const string companySql = @" SELECT [WLSPL].[FN_GenerateTaxInvoiceNo]() AS InvoiceNo";
+                const string companySql = @"SELECT [WLSPL].[FN_GenerateTaxInvoiceNo]() AS InvoiceNo";
 
                 var result = await connection.QueryFirstOrDefaultAsync<Taxinvoice.TaxInvoiceCreateVM>(companySql);
 
@@ -802,6 +802,75 @@ namespace WLSPL_ERP_CRM.repository
             }
 
             return results;
+        }
+
+        public async Task<TaxInvoiceCreateVM?> GetProformaDetails(string ProformaId)
+        {
+            string query = @"
+                    SELECT 
+                        [WLSPL].[FN_GenerateTaxInvoiceNo]() AS invoiceno,
+                        PM.reversecharge,
+                       'Proforma'          AS AgainstBy,
+                        PM.invoiceno        AS AgainstByValue,
+                        PM.state,
+                        PM.companyname      AS companyName,
+                        PM.address          AS Address,
+                        PM.billstate,
+                        PM.BillingAddress,
+                        PM.BillingLocation,
+                        PM.BillingGST,
+                        PM.BillingPincode,
+                        PM.BillingStatecode,
+                        PB.Amount           AS TransAmt,
+                        PB.mode             AS TransMode,
+                        PB.ChequeNo         AS TransNo,
+                        PB.CreatedDate      AS TransDate,
+                        -- Details columns
+                        PD.productdescription,
+                        PD.ServiceName      AS serviceName,
+                        PD.ServiceId        AS serviceId,
+                        PD.saccode          AS saccode,
+                        PD.ValidateTill     AS serviceTill            
+                    FROM [dbo].[tbl_ProformaInvoiceMain] PM
+                    LEFT JOIN [dbo].[tbl_ProformaInvoiceDetails] PD ON PD.invoiceid = PM.id
+                    LEFT JOIN [dbo].[tbl_ProformaInvoiceBankDetails] PB ON PB.InvoiceMainId = PM.id
+                    WHERE PM.id = @id";
+
+            try
+            {
+                using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+
+                TaxInvoiceCreate? mainRecord = null;
+                var details = new List<InvoiceDetails>();
+
+                await connection.QueryAsync<TaxInvoiceCreate, InvoiceDetails, TaxInvoiceCreate>(
+                    query,
+                    (main, detail) =>
+                    {
+                        // Main is the same for every row — capture once
+                        mainRecord ??= main;
+
+                        if (detail != null && detail.serviceName != null)
+                            details.Add(detail);
+
+                        return main;
+                    },
+                    param: new { id = ProformaId },
+                    splitOn: "productdescription"  // column where Dapper splits main vs detail
+                );
+
+                if (mainRecord == null) return null;
+
+                return new TaxInvoiceCreateVM
+                {
+                    main = mainRecord,
+                    details = details
+                };
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

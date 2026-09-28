@@ -1,4 +1,5 @@
-﻿@model WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreateVM
+﻿@using WLSPL_ERP_CRM.Models
+@model WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreateVM
 
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -743,13 +744,16 @@
 
 </form>
 
-
 <script type="text/javascript">
      // Razor writes this once — all JS can read it
      const isAdmin = @(Context.Session.GetString("Role").ToString() == "Admin" ? "true" : "false");
      let rowCounter = 0;
 
-     $(document).ready(function () {
+         // Serialize server-side details into JS
+    const preloadedDetails = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.details ?? new List<Taxinvoice.InvoiceDetails>()));
+    const isProforma = @Html.Raw((Model.main.AgainstBy == "Proforma" && Model.details != null && Model.details.Any()).ToString().ToLower());
+
+    $(document).ready(function () {
          $('#companyName').select2({ placeholder: 'Select Company', allowClear: true, width: '100%' });
          $('#companyName').on('change', function () {
              const cname = $(this).val();
@@ -803,12 +807,52 @@
              }
          });
 
-             setTodayDate();
-             addInvoiceRow();
-            applyGSTBasedOnCompany();
-         });
+         setTodayDate();
+        // ── Proforma preload ──
+        if (isProforma && preloadedDetails.length > 0) {
+            bindQuotationProformaData({ details: preloadedDetails });
+            $('.add-row-btn').hide();
+        } else {
+            addInvoiceRow();
+        }
 
-         $('#AgainstByValue').on('change', function () {
+        // ── Pre-select AgainstBy / AgainstByValue ──
+        const serverAgainstBy    = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.AgainstBy ?? ""));
+        const serverAgainstByVal = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.AgainstByValue ?? ""));
+
+        if (serverAgainstBy) {
+            $('#AgainstBy').val(serverAgainstBy);
+            if (serverAgainstByVal) {
+                $('#AgainstByValue')
+                    .html(`<option value="${serverAgainstByVal}">${serverAgainstByVal}</option>`)
+                    .val(serverAgainstByVal)
+                    .prop('disabled', false);
+            }
+        }
+
+        // ── Pre-fill Bill To for Proforma ──
+        if (isProforma) {
+            $('#companyName').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.companyName ?? ""))).trigger('change.select2');
+            $('#gstin').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.BillingGST ?? Model.main.gstIn ?? "")));
+            $('#address').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.BillingAddress ?? Model.main.Address ?? "")));
+            $('#Location').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.BillingLocation ?? Model.main.Location ?? "")));
+            $('#billingState').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.state ?? "")));
+            $('#billingPincode').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.BillingPincode ?? Model.main.PinCode ?? "")));
+            $('#billingStateCode').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.BillingStatecode ?? Model.main.statecode ?? "")));
+            $('#Transaction').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.TransMode ?? "")));
+            $('#transNo').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.TransNo ?? Model.main.TransNo ?? "")));
+            $('#transDate').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                        Model.main.TransDate.HasValue
+                                ? Model.main.TransDate.Value.ToString("yyyy-MM-dd")
+                                : ""
+                )));
+            $('#TransAmt').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.TransAmt ?? Model.main.TransAmt ?? "")));
+            applyGSTBasedOnCompany();
+            lockProformaFields();
+        }    
+     });
+
+    $('#AgainstByValue').on('change', function () {
              const selectedId = $(this).val();
              const type       = $('#AgainstBy').val();
 
@@ -837,6 +881,85 @@
              });
          });
 
+    function lockProformaFields() {
+
+        // ── Header fields ──
+        if ($('#reverseCharge').val())
+            $('#reverseCharge').prop('disabled', true);
+
+        // ── Bill To ──
+        if ($('#companyName').val())
+            $('#companyName').prop('disabled', true);
+
+        if ($('#gstin').val())
+            $('#gstin').prop('readonly', true);
+
+        // $('#address') — always editable, skip
+
+        if ($('#Location').val())
+            $('#Location').prop('readonly', true);
+
+        if ($('#billingState').val())
+            $('#billingState').prop('readonly', true);
+
+        if ($('#billingPincode').val())
+            $('#billingPincode').prop('readonly', true);
+
+        if ($('#billingStateCode').val())
+            $('#billingStateCode').prop('readonly', true);
+
+        // ── Transaction fields ──
+        if ($('#Transaction').val())
+            $('#Transaction').prop('disabled', true);
+
+        if ($('#transNo').val())
+            $('#transNo').prop('readonly', true);
+
+        if ($('#transDate').val())
+            $('#transDate').prop('readonly', true);
+
+        // ── Against By / Value ──
+        if ($('#AgainstBy').val())
+            $('#AgainstBy').prop('disabled', true);
+
+        if ($('#AgainstByValue').val())
+            $('#AgainstByValue').prop('disabled', true);
+
+        // ── Service rows ──
+        lockServiceRows();
+    }
+
+    function lockServiceRows() {
+        document.querySelectorAll('.invoice-item-row').forEach(function (row) {
+
+            const serviceInput = row.querySelector('.service');
+            if (serviceInput && serviceInput.value.trim())
+                serviceInput.readOnly = true;
+
+            const sacCode = row.querySelector('.sac-code');
+            if (sacCode && sacCode.value.trim())
+                sacCode.readOnly = true;
+
+            const validTill = row.querySelector('.validTill');
+            if (validTill && validTill.value.trim())
+                validTill.disabled = true;
+
+            // Tax rates — lock only if they have a value > 0
+            row.querySelectorAll('.cgst-rate, .sgst-rate, .igst-rate').forEach(function (el) {
+                if (parseFloat(el.value) > 0) {
+                    el.readOnly = true;
+                    el.disabled = true;
+                }
+            });
+
+            // Hide remove button (row exists from proforma — always hide)
+            const removeBtn = row.querySelector('.remove-row');
+            if (removeBtn) removeBtn.style.display = 'none';
+
+            // ✅ .description and .rate — always stay editable
+        });
+    }
+
      function bindQuotationProformaData(data) {
          // ── Clear existing rows ──
          document.getElementById('invoiceItems').innerHTML = '';
@@ -853,7 +976,7 @@
                  row.querySelector('.service').value             = item.serviceName        || '';
                  row.querySelector('.service-name-hidden').value = item.serviceName        || '';
                  row.querySelector('.service-id').value          = item.serviceId          || '';
-                 row.querySelector('.sac-code').value            = item.sacCode            || '';
+                 row.querySelector('.sac-code').value            = item.saccode            || '';
                  row.querySelector('.description').value         = item.productdescription || '';
 
                  // ── Amounts ──
@@ -1028,7 +1151,6 @@
          }
          calculateRow(input);
      }
-
 
     function calculateTDS() {
          // TDS always on basic/taxable amount (before GST)

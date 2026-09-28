@@ -106,23 +106,36 @@ namespace WLSPL_ERP_CRM.Controllers
 
         }
 
-        public async Task<IActionResult> Create()
+        [HttpGet]
+        public async Task<IActionResult> Create(string? ProformaId)
         {
-            var invoiceMain = await _TaxinvoiceRepo.Getinvoicenoss();
-
             var companies = await _TaxinvoiceRepo.Getcompany();
 
-            var model = new TaxInvoiceCreateVM
+            TaxInvoiceCreateVM model;
+
+            if (!string.IsNullOrEmpty(ProformaId))
             {
-                main = invoiceMain ?? new TaxInvoiceCreate(),
-                details = new List<Taxinvoice.InvoiceDetails>(),
-                companies = companies ?? new List<TaxInvoiceCreate>()
-            };
+                model = await _TaxinvoiceRepo.GetProformaDetails(ProformaId)
+                        ?? new TaxInvoiceCreateVM();
+            }
+            else
+            {
+                var invoiceMain = await _TaxinvoiceRepo.Getinvoicenoss()
+                                  ?? new TaxInvoiceCreate();
+
+                model = new TaxInvoiceCreateVM
+                {
+                    main = invoiceMain,
+                    details = new List<InvoiceDetails>()
+                };
+            }
+
+            // Always attach companies
+            model.companies = companies ?? new List<TaxInvoiceCreate>();
 
             if (model.main.invoicedate == null)
-            {
                 model.main.invoicedate = DateTime.Today;
-            }
+
             return View(model);
         }
 

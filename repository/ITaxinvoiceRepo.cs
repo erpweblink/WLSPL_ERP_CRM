@@ -6,21 +6,26 @@ namespace WLSPL_ERP_CRM.repository
 {
     public interface ITaxinvoiceRepo
     {
-
-
         Task<List<Taxinvoice.TaxInvoiceCreate>> GetInfo(string financialYear,int? month);
+
         Task<List<Taxinvoice.TaxInvoiceCreate>> GetApprovelList();
 
         Task<List<Taxinvoice.TaxInvoiceCreate>>GetFinancialYearSummary(string financialYear);
 
         Task<Taxinvoice.TaxInvoiceCreateVM?>GetInvoiceForPdfAsync(int id);
 
-        Task<Taxinvoice.TaxInvoiceCreateVM?>Getinvoiceno();
+        Task<Taxinvoice.TaxInvoiceCreateVM?>Getinvoiceno();    
+
         Task<Taxinvoice.TaxInvoiceCreate?> Getinvoicenoss();
 
+        Task<Taxinvoice.TaxInvoiceCreateVM?> GetProformaDetails(string ProformaId);
+
         Task<List<TaxInvoiceCreate>>Getcompany();
+
         Task<List<dynamic>> GetCompanyByType(string cname ,string type);
+
         Task<object> GetQuotationProformaDetails(int id, string type);
+
         Task<TaxInvoiceCreate> Getcompanybycname(string cname);
 
         Task<List<InvoiceDetails>> SearchServices(string cname);
@@ -28,9 +33,11 @@ namespace WLSPL_ERP_CRM.repository
         Task<bool> UpdateSave(TaxInvoiceCreateVM model, string Action);
 
         Task<bool>Deletereords(int ID);
+
         Task<dynamic>Getinvoicebyid(int ID);
 
         Task<bool> Approve(int id, string user);
+
         Task<bool> Reject(int id, string user);
     }
 }
