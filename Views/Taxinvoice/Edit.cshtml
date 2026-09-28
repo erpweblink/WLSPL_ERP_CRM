@@ -1021,16 +1021,15 @@
 
 
 <script type="text/javascript">
-
     const isAdmin = @(Context.Session.GetString("Role").ToString() == "Admin" ? "true" : "false");
     let rowCounter = 0;
 
     const isEdit = @(isEdit ? "true" : "false");
     const invoiceId = @(isEdit ? Model.main.Id : "0");
-
     const existingDetails = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(invoiceDetails));
-
     const existingCompany = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model?.main?.companyName ?? ""));
+    const receivedAmt = parseFloat(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model?.main?.TransAmt ?? "0"))) || 0;
+    let reconciling = false;
 
  
     // =========================================================
@@ -1204,6 +1203,15 @@
 
             // ── NOW recalculate this row so taxable, amounts, total are computed fresh ──
             calculateRow(row.querySelector('.rate'));
+
+            const setAmt = (sel, val) => {
+                const n = parseFloat(val);
+                if (!isNaN(n)) row.querySelector(sel).value = n.toFixed(2);
+            };
+            setAmt('.cgst-amount', item.cgstamt  ?? item.CgstAmt);
+            setAmt('.sgst-amount', item.sgstamt  ?? item.SgstAmt);
+            setAmt('.igst-amount', item.igstamt  ?? item.IgstAmt);
+            setAmt('.row-total',   item.total    ?? item.Total);
         });
 
         refreshSerialNumbers();
@@ -1437,6 +1445,7 @@
         calculateRow(input);
     }
 
+
     function calculateTDS() {
         // TDS always on basic/taxable amount (before GST)
         const taxableBase = parseFloat($('#summaryGrandTotal').data('tds-base')) || 0;
@@ -1462,29 +1471,25 @@
     // CALCULATE ROW
     // =========================================================
 
-    function calculateRow(el) {
+     function calculateRow(el) {
         const row = el.closest('tr');
         if (!row) return;
+        const r2 = n => Math.round((n + Number.EPSILON) * 100) / 100;
 
-        const rate = parseFloat(row.querySelector('.rate').value) || 0;
-        const taxable =   rate;
-
+        const rate    = parseFloat(row.querySelector('.rate').value) || 0;
+        const taxable = r2(rate);
         row.querySelector('.taxable-value').value = taxable.toFixed(2);
 
-        const cgstRate = parseFloat(row.querySelector('.cgst-rate').value) || 0;
-        const sgstRate = parseFloat(row.querySelector('.sgst-rate').value) || 0;
-        const igstRate = parseFloat(row.querySelector('.igst-rate').value) || 0;
-
-        const cgst = taxable * cgstRate / 100;
-        const sgst = taxable * sgstRate / 100;
-        const igst = taxable * igstRate / 100;
+        const cgst = r2(taxable * (parseFloat(row.querySelector('.cgst-rate').value) || 0) / 100);
+        const sgst = r2(taxable * (parseFloat(row.querySelector('.sgst-rate').value) || 0) / 100);
+        const igst = r2(taxable * (parseFloat(row.querySelector('.igst-rate').value) || 0) / 100);
 
         row.querySelector('.cgst-amount').value = cgst.toFixed(2);
         row.querySelector('.sgst-amount').value = sgst.toFixed(2);
         row.querySelector('.igst-amount').value = igst.toFixed(2);
-        row.querySelector('.row-total').value = (taxable + cgst + sgst + igst).toFixed(2);
-
+        row.querySelector('.row-total').value   = r2(taxable + cgst + sgst + igst).toFixed(2);
         calculateAll();
+        if (!reconciling) reconcileToReceived();
     }
 
     // =========================================================
@@ -1529,9 +1534,45 @@
             $('#summaryGrandTotal').val(grand.toFixed(2));
         }
 
-         $('#TransAmt').val(grand.toFixed(2));
+         $('#TransAmt').val($('#summaryGrandTotal').val());
 
         updateAmountInWords();
+    }
+
+    function reconcileToReceived() {
+        if (reconciling) return;
+        if ($('#AgainstByHidden').val() !== 'Proforma' || receivedAmt <= 0) return;
+
+        const rows = document.querySelectorAll('.invoice-item-row');
+        if (!rows.length) return;
+        const last = rows[rows.length - 1];
+
+        // recompute the last row fresh so earlier adjustments don't pile up
+        reconciling = true;
+        calculateRow(last.querySelector('.rate'));
+        reconciling = false;
+
+        const current = parseFloat($('#summaryGrandTotal').val()) || 0;
+        const diff = Math.round((receivedAmt - current) * 100);
+        if (diff === 0 || Math.abs(diff) > 5) return;   // real change, don't force it
+
+        const cg = last.querySelector('.cgst-amount');
+        const sg = last.querySelector('.sgst-amount');
+        const ig = last.querySelector('.igst-amount');
+
+        if ((parseFloat(ig.value) || 0) > 0) {
+            ig.value = ((parseFloat(ig.value) || 0) + diff / 100).toFixed(2);
+        } else {
+            const half = Math.trunc(diff / 2);
+            cg.value = ((parseFloat(cg.value) || 0) + half / 100).toFixed(2);
+            sg.value = ((parseFloat(sg.value) || 0) + (diff - half) / 100).toFixed(2);
+        }
+
+        const taxable = parseFloat(last.querySelector('.taxable-value').value) || 0;
+        last.querySelector('.row-total').value =
+            (taxable + (parseFloat(cg.value) || 0) + (parseFloat(sg.value) || 0) + (parseFloat(ig.value) || 0)).toFixed(2);
+
+        calculateAll();
     }
 
     // =========================================================

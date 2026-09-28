@@ -153,37 +153,7 @@ namespace WLSPL_ERP_CRM.Controllers
             return Json(new { success = true, invoiceNo = model.main.invoiceno });
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetQuotationsByCompany(string companyName, string type)
-        {
-            if (string.IsNullOrWhiteSpace(companyName))
-                return BadRequest("Company name is required.");
-
-            if (string.IsNullOrWhiteSpace(type))
-                return BadRequest("Type is required.");
-
-            var result = await _TaxinvoiceRepo.GetCompanyByType(companyName, type);
-
-            if (result.Count == 0)
-                return NotFound("No records found.");
-
-            return Json(result);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetQuotationProformaDetails(int id, string type)
-        {
-            if (id <= 0 || string.IsNullOrWhiteSpace(type))
-                return BadRequest("Invalid request.");
-
-            var result = await _TaxinvoiceRepo.GetQuotationProformaDetails(id, type);
-
-            if (result == null)
-                return NotFound("No details found.");
-
-            return Json(result);
-        }
-
+      
         [HttpGet]
         public async Task<IActionResult> Getcomapnybycname(string cname)
         {

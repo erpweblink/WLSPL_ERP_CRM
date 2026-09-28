@@ -30,23 +30,7 @@
                 cursor: default;
             }
 
-    /* Select2 match */
-    .select2-container .select2-selection--single {
-        background-color: #f4f5f6 !important;
-        border: 1px solid #343434 !important;
-        border-radius: 3px !important;
-        height: 38px !important;
-    }
-
-        .select2-container .select2-selection--single .select2-selection__rendered {
-            line-height: 36px !important;
-            color: #444 !important;
-        }
-
-        .select2-container .select2-selection--single .select2-selection__arrow {
-            height: 36px !important;
-        }
-
+   
     /* ── Consistent card-body row spacing ── */
     .card-body .row.form-row-item {
         margin-bottom: 16px;
@@ -269,6 +253,80 @@
 </style>
 
 <style type="text/css">
+    .company-wrapper {
+        position: relative;
+    }
+
+    .company-dropdown {
+        display: none;
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        max-height: 250px;
+        overflow-y: auto;
+        margin: 0;
+        padding: 6px;
+        list-style: none;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 12px 32px rgba(11, 15, 20, .18);
+    }
+
+        .company-dropdown li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: #1f2937;
+            transition: background .12s ease;
+        }
+
+            .company-dropdown li .c-avatar {
+                flex: 0 0 28px;
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 12px;
+                font-weight: 700;
+                color: #fff;
+                background: linear-gradient(314deg, #0b0f14, #1a3e66);
+            }
+
+            .company-dropdown li strong {
+                color: #1a3e66;
+                font-weight: 700;
+            }
+
+            .company-dropdown li.highlighted {
+                background: linear-gradient(90deg, #e8f1fb, #f4f8fd);
+                box-shadow: inset 3px 0 0 #1a3e66;
+            }
+
+            .company-dropdown li.no-result {
+                color: #94a3b8;
+                cursor: default;
+                justify-content: center;
+                font-weight: 400;
+            }
+
+        .company-dropdown::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .company-dropdown::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 6px;
+        }
     .sd-top {
         display: grid;
         grid-template-columns: 1fr 100px;
@@ -377,16 +435,12 @@
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label font-weight-bold required">Company Name</label>
                         <div class="col-md-8">
-                            <select asp-for="main.companyName" class="form-control ddlselect"
-                                    id="companyName">
-                                <option value="">Select Company</option>
-                                @foreach (var company in Model.companies)
-                                {
-                                    <option value="@company.companyName">
-                                        @company.companyName
-                                    </option>
-                                }
-                            </select>
+                            <div class="company-wrapper">
+                                <input asp-for="main.companyName" type="text" class="form-control"
+                                       id="companyName" autocomplete="off"
+                                       placeholder="Type to search company..." />
+                                <ul class="company-dropdown" id="companyDropdown"></ul>
+                            </div>
                             <span class="err-msg" id="err-companyName"></span>
                         </div>
                     </div>
@@ -508,11 +562,7 @@
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label font-weight-bold">Against By</label>
                         <div class="col-md-8">
-                            <select asp-for="main.AgainstBy" type="text" class="form-control" id="AgainstBy">
-                                <option value="Direct">Direct</option>
-                                <option value="Quotation">Quotation</option>
-                                <option value="Proforma">Proforma</option>
-                            </select>
+                            <input asp-for="main.AgainstBy" type="text" class="form-control" id="AgainstBy" value="Direct" readonly/>
                         </div>
                     </div>
                 </div>
@@ -521,8 +571,7 @@
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label font-weight-bold">Against By Value</label>
                         <div class="col-md-8">
-                            <select asp-for="main.AgainstByValue" type="text" class="form-control" id="AgainstByValue">
-                            </select>
+                            <input asp-for="main.AgainstByValue" type="text" class="form-control" id="AgainstByValue" value="NA" readonly />
                         </div>
                     </div>
                 </div>
@@ -751,63 +800,12 @@
 
          // Serialize server-side details into JS
     const preloadedDetails = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.details ?? new List<Taxinvoice.InvoiceDetails>()));
+    const receivedAmt = parseFloat(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.TransAmt ?? "0"))) || 0;
     const isProforma = @Html.Raw((Model.main.AgainstBy == "Proforma" && Model.details != null && Model.details.Any()).ToString().ToLower());
-
+    
     $(document).ready(function () {
-         $('#companyName').select2({ placeholder: 'Select Company', allowClear: true, width: '100%' });
-         $('#companyName').on('change', function () {
-             const cname = $(this).val();
-             if (!cname) { clearCompanyDetails(); return; }
-             getCompanyDetails(cname);
-         });
-
-          // AgainstByValue — initially disabled
-         $('#AgainstByValue').prop('disabled', true)
-             .html('<option value="">-- Select First --</option>');
-
-         $('#AgainstBy').on('change', function () {
-             const selected    = $(this).val();
-             const companyName = $('#companyName').val();
-
-             $('#AgainstByValue').html('<option value="">-- Select --</option>').prop('disabled', true);
-
-             if (selected === 'Quotation' || selected === 'Proforma') {
-                   $('.add-row-btn').hide();
-                 if (!companyName) {
-                         showToast('Please select a Company first.', 'warning');
-                         $(this).val('Direct');
-                         return;
-                 }
-
-                 $('#AgainstByValue').html('<option value="">Loading...</option>');
-
-                 $.ajax({
-                     url: '@Url.Action("GetQuotationsByCompany", "Taxinvoice")',
-                     type: 'GET',
-                     data: { companyName: companyName, type: selected },
-                     success: function (response) {
-                         $('#AgainstByValue').html('<option value="">-- Select --</option>');
-                         if (!response || response.length === 0) {
-                             $('#AgainstByValue').html('<option value="">No records found</option>');
-                             return;
-                         }
-                         response.forEach(function (item) {
-                             $('#AgainstByValue').append(
-                                 $('<option>').val(item.id).text(item.displayText)
-                             );
-                         });
-                         $('#AgainstByValue').prop('disabled', false);
-                     },
-                     error: function () {
-                         $('#AgainstByValue').html('<option value="">No data</option>');
-                     }
-                 });
-             } else {
-                 $('#AgainstByValue').html('<option value="">N/A</option>').prop('disabled', true);
-             }
-         });
-
-         setTodayDate();
+    
+        setTodayDate();
         // ── Proforma preload ──
         if (isProforma && preloadedDetails.length > 0) {
             bindQuotationProformaData({ details: preloadedDetails });
@@ -815,24 +813,11 @@
         } else {
             addInvoiceRow();
         }
-
-        // ── Pre-select AgainstBy / AgainstByValue ──
-        const serverAgainstBy    = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.AgainstBy ?? ""));
-        const serverAgainstByVal = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.AgainstByValue ?? ""));
-
-        if (serverAgainstBy) {
-            $('#AgainstBy').val(serverAgainstBy);
-            if (serverAgainstByVal) {
-                $('#AgainstByValue')
-                    .html(`<option value="${serverAgainstByVal}">${serverAgainstByVal}</option>`)
-                    .val(serverAgainstByVal)
-                    .prop('disabled', false);
-            }
-        }
-
+     
         // ── Pre-fill Bill To for Proforma ──
         if (isProforma) {
-            $('#companyName').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.companyName ?? ""))).trigger('change.select2');
+            $('#companyName').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.companyName ?? "")));
+            companySelected = $('#companyName').val();
             $('#gstin').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.BillingGST ?? Model.main.gstIn ?? "")));
             $('#address').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.BillingAddress ?? Model.main.Address ?? "")));
             $('#Location').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.BillingLocation ?? Model.main.Location ?? "")));
@@ -841,45 +826,45 @@
             $('#billingStateCode').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.BillingStatecode ?? Model.main.statecode ?? "")));
             $('#Transaction').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.TransMode ?? "")));
             $('#transNo').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.TransNo ?? Model.main.TransNo ?? "")));
-            $('#transDate').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-                        Model.main.TransDate.HasValue
-                                ? Model.main.TransDate.Value.ToString("yyyy-MM-dd")
-                                : ""
-                )));
+            $('#transDate').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.TransDate.HasValue ? Model.main.TransDate.Value.ToString("yyyy-MM-dd"): "")));
             $('#TransAmt').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.TransAmt ?? Model.main.TransAmt ?? "")));
+            $('#AgainstBy').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.AgainstBy ?? "")));
+            $('#AgainstByValue').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.AgainstByValue ?? "")));
+
             applyGSTBasedOnCompany();
+            reconcileToReceived();
             lockProformaFields();
         }    
      });
 
-    $('#AgainstByValue').on('change', function () {
-             const selectedId = $(this).val();
-             const type       = $('#AgainstBy').val();
+    function reconcileToReceived() {
+        const rows = document.querySelectorAll('.invoice-item-row');
+        if (!rows.length || receivedAmt <= 0) return;
 
-             if (!selectedId || selectedId === '') return;
+        // difference in paise between what we want (received) and what page computed
+        const current = parseFloat($('#summaryGrandTotal').val()) || 0;
+        const diff = Math.round((receivedAmt - current) * 100);
+        if (diff === 0 || Math.abs(diff) > 5) return;   // only fix rounding-size gaps
 
-             $.ajax({
-                 url: '@Url.Action("GetQuotationProformaDetails", "Taxinvoice")',
-                 type: 'GET',
-                 data: { id: selectedId, type: type },
-                 beforeSend: function () {
-                     $('#AgainstByValue').prop('disabled', true);
-                 },
-                 success: function (response) {
-                     if (!response) {
-                         showToast('No data found.', 'warning');
-                         return;
-                     }
-                     bindQuotationProformaData(response);
-                 },
-                 error: function () {
-                     showToast('Error loading details.', 'error');
-                 },
-                 complete: function () {
-                     $('#AgainstByValue').prop('disabled', false);
-                 }
-             });
-         });
+        const last = rows[rows.length - 1];
+        const cg = last.querySelector('.cgst-amount');
+        const sg = last.querySelector('.sgst-amount');
+        const ig = last.querySelector('.igst-amount');
+
+        if ((parseFloat(ig.value) || 0) > 0) {
+            ig.value = ((parseFloat(ig.value) || 0) + diff / 100).toFixed(2);
+        } else {
+            const half = Math.trunc(diff / 2);
+            cg.value = ((parseFloat(cg.value) || 0) + half / 100).toFixed(2);
+            sg.value = ((parseFloat(sg.value) || 0) + (diff - half) / 100).toFixed(2);
+        }
+
+        const taxable = parseFloat(last.querySelector('.taxable-value').value) || 0;
+        last.querySelector('.row-total').value =
+            (taxable + (parseFloat(cg.value) || 0) + (parseFloat(sg.value) || 0) + (parseFloat(ig.value) || 0)).toFixed(2);
+
+        calculateAll();   // re-sums totals, TDS and amount in words
+    }
 
     function lockProformaFields() {
 
@@ -960,12 +945,12 @@
         });
     }
 
-     function bindQuotationProformaData(data) {
+    function bindQuotationProformaData(data) {
          // ── Clear existing rows ──
          document.getElementById('invoiceItems').innerHTML = '';
          rowCounter = 0;
 
-         if (data.details && data.details.length > 0) {
+         if (data.details && data.details.length > 0) {         
              data.details.forEach(function (item) {
                  addInvoiceRow();
 
@@ -979,9 +964,16 @@
                  row.querySelector('.sac-code').value            = item.saccode            || '';
                  row.querySelector('.description').value         = item.productdescription || '';
 
+                 const tillSel = row.querySelector('.validTill');
+                 const till    = (item.serviceTill ?? item.ServiceTill ?? '1 Year').toString().trim();
+                 if (tillSel) {
+                    const opt = [...tillSel.options].find(o => o.value === till);
+                    tillSel.value = opt ? till : tillSel.options[0].value;
+                 }
+
                  // ── Amounts ──
-                 row.querySelector('.rate').value          = parseInt(item.rate)         || 0;
-                 row.querySelector('.taxable-value').value = parseInt(item.taxablevalue) || 0;
+                 row.querySelector('.rate').value          = parseFloat(item.rate)         || 0;
+                 row.querySelector('.taxable-value').value = parseFloat(item.taxablevalue) || 0;
 
                  // ── CGST ──
                  row.querySelector('.cgst-rate').value   = parseInt(item.cgstrate) || 0;
@@ -1011,12 +1003,11 @@
          updateAmountInWords();
      }
 
-     function getCompanyDetails(cname) {
+    function getCompanyDetails(cname) {
          $.ajax({
              url: '@Url.Action("Getcomapnybycname", "Taxinvoice")',
              type: 'GET',
              data: { cname: cname },
-             beforeSend: function () { $('#companyName').prop('disabled', true); },
              success: function (data) {
                 if (!data) {
                      showToast('Company details not found.', 'warning');
@@ -1032,21 +1023,20 @@
                  applyGSTBasedOnCompany();
              },
              error: function () { alert("Error while loading company details."); },
-             complete: function () { $('#companyName').prop('disabled', false); }
          });
      }
 
-     function clearCompanyDetails() {
+    function clearCompanyDetails() {
          ['#gstin','#address','#Location','#billingState',
           '#billingPincode','#billingStateCode'].forEach(id => $(id).val(''));
      }
 
-     function setTodayDate() {
+    function setTodayDate() {
          const d = new Date();
          $('#invoiceDate').val(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
      }
 
-     function addInvoiceRow() {
+    function addInvoiceRow() {
          rowCounter++;
          const row = document.createElement('tr');
          row.className = 'invoice-item-row';
@@ -1087,7 +1077,7 @@
                         onblur="updateAmountInWords();" /></td>
              <td><input type="number" class="taxable-value" value="0" readonly /></td>
              <td><div class="tax-pair">
-                 <input type="number" class="cgst-rate" min="0" value="0" placeholder="%"
+                 <input type="number" class="cgst-rate" step="any" min="0" value="0" placeholder="%"
                         oninput="taxChanged(this,'CGST');updateAmountInWords();"
                         onblur="updateAmountInWords();" ${!isAdmin ? 'disabled' : ''} />
                  <input type="text" class="cgst-amount" value="0" readonly />
@@ -1116,7 +1106,7 @@
          $('#err-items').text('');
      }
 
-     function removeRow(btn) {
+    function removeRow(btn) {
          if (document.querySelectorAll('.invoice-item-row').length <= 1) {
              showToast('At least one item row is required.', 'warning');
              return;
@@ -1128,13 +1118,13 @@
          });
      }
 
-     function refreshSerialNumbers() {
+    function refreshSerialNumbers() {
          document.querySelectorAll('.invoice-item-row').forEach((r, i) => {
              r.querySelector('.serial-number').value = i + 1;
          });
      }
 
-     function taxChanged(input, taxType) {
+    function taxChanged(input, taxType) {
          const row = input.closest('tr');
          const cgst = row.querySelector('.cgst-rate');
          const sgst = row.querySelector('.sgst-rate');
@@ -1173,23 +1163,27 @@
          updateAmountInWords();
      }
 
-     function calculateRow(el) {
-         const row = el.closest('tr');
-         if (!row) return;
-         const rate = parseFloat(row.querySelector('.rate').value) || 0;
-         const taxable = rate;
-         row.querySelector('.taxable-value').value = taxable.toFixed(2);
-         const cgst = taxable * (parseFloat(row.querySelector('.cgst-rate').value)||0) / 100;
-         const sgst = taxable * (parseFloat(row.querySelector('.sgst-rate').value)||0) / 100;
-         const igst = taxable * (parseFloat(row.querySelector('.igst-rate').value)||0) / 100;
-         row.querySelector('.cgst-amount').value = cgst.toFixed(2);
-         row.querySelector('.sgst-amount').value = sgst.toFixed(2);
-         row.querySelector('.igst-amount').value = igst.toFixed(2);
-         row.querySelector('.row-total').value = (taxable + cgst + sgst + igst).toFixed(2);
-         calculateAll();
-     }
+    function calculateRow(el) {
+        const row = el.closest('tr');
+        if (!row) return;
+        const r2 = n => Math.round((n + Number.EPSILON) * 100) / 100;
 
-     function calculateAll() {
+        const rate    = parseFloat(row.querySelector('.rate').value) || 0;
+        const taxable = r2(rate);
+        row.querySelector('.taxable-value').value = taxable.toFixed(2);
+
+        const cgst = r2(taxable * (parseFloat(row.querySelector('.cgst-rate').value) || 0) / 100);
+        const sgst = r2(taxable * (parseFloat(row.querySelector('.sgst-rate').value) || 0) / 100);
+        const igst = r2(taxable * (parseFloat(row.querySelector('.igst-rate').value) || 0) / 100);
+
+        row.querySelector('.cgst-amount').value = cgst.toFixed(2);
+        row.querySelector('.sgst-amount').value = sgst.toFixed(2);
+        row.querySelector('.igst-amount').value = igst.toFixed(2);
+        row.querySelector('.row-total').value   = r2(taxable + cgst + sgst + igst).toFixed(2);
+        calculateAll();
+    }
+
+    function calculateAll() {
          let totalQty=0, totalTaxable=0, totalCGST=0, totalSGST=0, totalIGST=0, grand=0;
          document.querySelectorAll('.invoice-item-row').forEach(row => {
              totalTaxable += parseFloat(row.querySelector('.taxable-value').value)||0;
@@ -1227,7 +1221,7 @@
          updateAmountInWords();
      }
 
-     function validateInvoice() {
+    function validateInvoice() {
          let valid = true;
          document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
          document.querySelectorAll('.err-msg').forEach(el => el.textContent = '');
@@ -1279,7 +1273,7 @@
          return valid;
      }
 
-     function saveInvoice() {
+    function saveInvoice() {
          calculateAll();
          if (!validateInvoice()) return;
 
@@ -1397,9 +1391,11 @@
          });
      }
 
-     function clearInvoice() {
+    function clearInvoice() {
          showConfirmToast('Are you sure you want to clear the invoice?', function () {
-             $('#companyName').val('').trigger('change');
+              $('#companyName').val('');
+               companySelected = '';
+             $('#companyDropdown').hide().empty();
              $('#reverseCharge').val('N');
              $('#Transaction').val('');
              ['#gstin','#address','#Location','#billingState',
@@ -1725,4 +1721,110 @@
             });
         }
     }
+</script>
+
+<script type="text/javascript">
+    const companyNames = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+                                                        Model.companies.Select(c => c.companyName)));
+    let companySelected = '';
+    let activeIdx = -1;
+
+    function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+    function setActive(idx) {
+        const items = document.querySelectorAll('#companyDropdown li[data-name]');
+        if (!items.length) return;
+        activeIdx = (idx + items.length) % items.length;      // wraps around
+        items.forEach(li => li.classList.remove('highlighted'));
+        items[activeIdx].classList.add('highlighted');
+        items[activeIdx].scrollIntoView({ block: 'nearest' });
+    }
+
+    function renderCompanyDropdown() {
+        const q  = $('#companyName').val().trim();
+        const dd = document.getElementById('companyDropdown');
+        dd.innerHTML = '';
+        activeIdx = -1;
+
+        if (!q) { dd.style.display = 'none'; return; }
+
+        const matches = companyNames.filter(n => n.toLowerCase().includes(q.toLowerCase()));
+
+        if (!matches.length) {
+            dd.innerHTML = '<li class="no-result">No companies found</li>';
+            dd.style.display = 'block';
+            return;
+        }
+
+        const rx = new RegExp('(' + escapeRegex(q) + ')', 'gi');
+        matches.forEach(name => {
+            const li = document.createElement('li');
+            li.setAttribute('data-name', name);
+            li.innerHTML = '<span class="c-avatar">' + name.charAt(0).toUpperCase() + '</span>' +
+                           '<span>' + name.replace(rx, '<strong>$1</strong>') + '</span>';
+            li.addEventListener('mousedown', e => { e.preventDefault(); pickCompany(name); });
+            li.addEventListener('mouseenter', () => {
+                const all = [...dd.querySelectorAll('li[data-name]')];
+                setActive(all.indexOf(li));
+            });
+            dd.appendChild(li);
+        });
+
+        dd.style.display = 'block';
+        setActive(0);                                          // first item ready for Enter
+    }
+
+    function pickCompany(name) {
+        $('#companyName').val(name);
+        companySelected = name;
+        $('#companyDropdown').hide().empty();
+        getCompanyDetails(name);
+    }
+
+    $(document).ready(function () {
+        $('#companyName')
+            .on('input', function () {
+                if (companySelected && $(this).val().trim() !== companySelected) {
+                    companySelected = '';
+                    clearCompanyDetails();
+                }
+                renderCompanyDropdown();
+            })
+            .on('focus', renderCompanyDropdown)
+            .on('keydown', function (e) {
+                const dd   = document.getElementById('companyDropdown');
+                const open = dd.style.display === 'block';
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    open ? setActive(activeIdx + 1) : renderCompanyDropdown();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (open) setActive(activeIdx - 1);
+                } else if (e.key === 'Enter') {
+                    const cur = dd.querySelector('li.highlighted');
+                    if (open && cur) {
+                        e.preventDefault();
+                        pickCompany(cur.getAttribute('data-name'));
+                    }
+                } else if (e.key === 'Escape' || e.key === 'Tab') {
+                    dd.style.display = 'none';
+                }
+            })
+            .on('blur', function () {
+                $('#companyDropdown').hide();
+                const typed = $(this).val().trim();
+                if (!typed) return;
+
+                const match = companyNames.find(n => n.toLowerCase() === typed.toLowerCase());
+                if (!match) {
+                    $(this).val('');
+                    companySelected = '';
+                    clearCompanyDetails();
+                    showToast('Company not found. Please select from the available companies.', 'warning');
+                } else if (match !== companySelected) {
+                    pickCompany(match);
+                }
+            });
+    });
 </script>

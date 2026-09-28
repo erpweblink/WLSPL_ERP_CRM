@@ -49,54 +49,6 @@ namespace WLSPL_ERP_CRM.repository
 
         }
 
-        public async Task<List<dynamic>> GetCompanyByType(string cname, string type)
-        {
-            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
-
-            const string companySql = @"
-                IF @type = 'Quotation'
-                    SELECT id, Quotationno AS displayText 
-                    FROM stswlspl.tblQuotationMain 
-                    WHERE companyname = @cname 
-                    ORDER BY id DESC
-                ELSE
-                    SELECT id, invoiceno AS displayText 
-                    FROM [dbo].[tbl_ProformaInvoiceMain]
-                    WHERE companyname = @cname 
-                    ORDER BY id DESC";
-
-            var result = await connection.QueryAsync<dynamic>(companySql, new { cname, type });
-
-            return result.ToList();
-        }
-
-        public async Task<object> GetQuotationProformaDetails(int id, string type)
-        {
-            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
-
-            const string detailSql = @"
-                         IF @type = 'Quotation'
-                            SELECT 
-                                serviceId, serviceName, sacCode, productdescription,rate,
-                                taxablevalue,cgstrate,cgstamt,sgstrate,sgstamt,igstrate,igstamt,total
-                            FROM stswlspl.tblQuotationDetails 
-                            WHERE Quotationid = @id
-                        ELSE
-                            SELECT  
-                                serviceId, serviceName, sacCode, productdescription,rate,
-                                taxablevalue,cgstrate,cgstamt,sgstrate,sgstamt,igstrate,igstamt,total
-                            FROM [dbo].[tbl_ProformaInvoiceDetails]
-                            WHERE invoiceid = @id";
-
-            var param = new { id, type };
-
-            var details = await connection.QueryAsync<dynamic>(detailSql, param);
-
-            return new
-            {
-                details = details.ToList()
-            };
-        }
 
         public async Task<TaxInvoiceCreate> Getcompanybycname(string cname)
         {
@@ -806,71 +758,81 @@ namespace WLSPL_ERP_CRM.repository
 
         public async Task<TaxInvoiceCreateVM?> GetProformaDetails(string ProformaId)
         {
-            string query = @"
-                    SELECT 
-                        [WLSPL].[FN_GenerateTaxInvoiceNo]() AS invoiceno,
-                        PM.reversecharge,
-                       'Proforma'          AS AgainstBy,
-                        PM.invoiceno        AS AgainstByValue,
-                        PM.state,
-                        PM.companyname      AS companyName,
-                        PM.address          AS Address,
-                        PM.billstate,
-                        PM.BillingAddress,
-                        PM.BillingLocation,
-                        PM.BillingGST,
-                        PM.BillingPincode,
-                        PM.BillingStatecode,
-                        PB.Amount           AS TransAmt,
-                        PB.mode             AS TransMode,
-                        PB.ChequeNo         AS TransNo,
-                        PB.CreatedDate      AS TransDate,
-                        -- Details columns
-                        PD.productdescription,
-                        PD.ServiceName      AS serviceName,
-                        PD.ServiceId        AS serviceId,
-                        PD.saccode          AS saccode,
-                        PD.ValidateTill     AS serviceTill            
-                    FROM [dbo].[tbl_ProformaInvoiceMain] PM
-                    LEFT JOIN [dbo].[tbl_ProformaInvoiceDetails] PD ON PD.invoiceid = PM.id
-                    LEFT JOIN [dbo].[tbl_ProformaInvoiceBankDetails] PB ON PB.InvoiceMainId = PM.id
-                    WHERE PM.id = @id";
+            const string sql = @"
+                SELECT [WLSPL].[FN_GenerateTaxInvoiceNo]() AS invoiceno,
+                       PM.reversecharge, 'Proforma' AS AgainstBy, PM.invoiceno AS AgainstByValue,
+                       PM.state, PM.companyname AS companyName, PM.address AS Address, PM.billstate,
+                       PM.BillingAddress, PM.BillingLocation, PM.BillingGST,
+                       PM.BillingPincode, PM.BillingStatecode
+                FROM dbo.tbl_ProformaInvoiceMain PM WHERE PM.id = @id;
 
-            try
+                SELECT CAST(ISNULL(TDSPercentage,0) AS decimal(9,2))
+                FROM dbo.tbl_ProformaInvoiceMain WHERE id = @id;
+
+                SELECT PD.productdescription, PD.ServiceName AS serviceName, PD.ServiceId AS serviceId,
+                       PD.saccode AS saccode, PD.ValidateTill AS serviceTill,
+                       PD.rate, PD.taxablevalue
+                FROM dbo.tbl_ProformaInvoiceDetails PD WHERE PD.invoiceid = @id ORDER BY PD.id;
+
+                SELECT [mode], ChequeNo, CreatedDate, Amount
+                FROM dbo.tbl_ProformaInvoiceBankDetails
+                WHERE InvoiceMainId = @id AND ISNULL(IsDeleted,0) = 0 ORDER BY id;";
+
+            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+            using var multi = await connection.QueryMultipleAsync(sql, new { id = ProformaId });
+
+            var main = await multi.ReadFirstOrDefaultAsync<TaxInvoiceCreate>();
+            if (main == null) return null;
+
+            decimal tdsPct = await multi.ReadFirstAsync<decimal>();
+            var details = (await multi.ReadAsync<InvoiceDetails>()).ToList();
+            var payments = (await multi.ReadAsync<ProformaPaymentRow>()).ToList();
+
+            // ── 1. Received amount ──
+            decimal received = payments.Sum(p => p.Amount);
+
+            // ── 2. GST % from customer GSTIN ──
+            string gstin = (main.BillingGST ?? main.gstIn ?? "").Trim();
+            decimal gstPct = gstin.Length < 2 ? 0m : 18m;   // 27 → 9+9, else 18 IGST (same total)
+
+            // ── 3. Back-calculate basic ──
+            decimal divisor = 1m + gstPct / 100m - tdsPct / 100m;
+            decimal basic = divisor > 0 ? Math.Round(received / divisor, 2) : 0m;
+
+            // ── 4. Distribute equally across services ──
+            if (details.Count > 0)
             {
-                using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+                decimal equalShare = Math.Round(basic / details.Count, 2);
+                decimal allocated = 0m;
 
-                TaxInvoiceCreate? mainRecord = null;
-                var details = new List<InvoiceDetails>();
-
-                await connection.QueryAsync<TaxInvoiceCreate, InvoiceDetails, TaxInvoiceCreate>(
-                    query,
-                    (main, detail) =>
-                    {
-                        // Main is the same for every row — capture once
-                        mainRecord ??= main;
-
-                        if (detail != null && detail.serviceName != null)
-                            details.Add(detail);
-
-                        return main;
-                    },
-                    param: new { id = ProformaId },
-                    splitOn: "productdescription"  // column where Dapper splits main vs detail
-                );
-
-                if (mainRecord == null) return null;
-
-                return new TaxInvoiceCreateVM
+                for (int i = 0; i < details.Count; i++)
                 {
-                    main = mainRecord,
-                    details = details
-                };
+                    decimal share = (i == details.Count - 1)
+                        ? basic - allocated      // remainder goes to the last row
+                        : equalShare;
+
+                    allocated += share;
+                    details[i].rate = share;
+                    details[i].taxablevalue = share;
+                }
             }
-            catch (Exception)
-            {
-                throw;
-            }
+
+            // ── 5. Transaction info ──
+            main.TransAmt = received.ToString("0.00");
+            main.TransMode = string.Join(", ", payments.Select(p => p.mode).Distinct());
+            main.TransNo = string.Join(", ", payments.Where(p => !string.IsNullOrEmpty(p.ChequeNo)).Select(p => p.ChequeNo));
+            main.TransDate = payments.Max(p => (DateTime?)p.CreatedDate);
+            main.TdsPer = tdsPct.ToString("0.##");
+
+            return new TaxInvoiceCreateVM { main = main, details = details };
+        }
+
+        public class ProformaPaymentRow
+        {
+            public string? mode { get; set; }
+            public string? ChequeNo { get; set; }
+            public DateTime? CreatedDate { get; set; }
+            public decimal Amount { get; set; }
         }
     }
 }

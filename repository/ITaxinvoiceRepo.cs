@@ -22,9 +22,6 @@ namespace WLSPL_ERP_CRM.repository
 
         Task<List<TaxInvoiceCreate>>Getcompany();
 
-        Task<List<dynamic>> GetCompanyByType(string cname ,string type);
-
-        Task<object> GetQuotationProformaDetails(int id, string type);
 
         Task<TaxInvoiceCreate> Getcompanybycname(string cname);
 
