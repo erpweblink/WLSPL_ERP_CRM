@@ -17,6 +17,7 @@
             public DateTime? invoicedate { get; set; }
 
             // Company Information
+            public string? compCode { get; set; }
             public string? companyName { get; set; }
             public string? gstIn { get; set; }
             public string? Address { get; set; }
@@ -78,7 +79,6 @@
             public string? ApprovedRejectedBy { get; set; }
 
             public string? Remarks { get; set; }
-            public string? Remarkss { get; set; }
 
             // Export Invoice
             public string? ExportInvoiceNo { get; set; }
@@ -136,6 +136,8 @@
             public int id { get; set; }
 
             public int invoiceid { get; set; }
+
+            public string? proformadetailsId { get; set; }
 
             public string? serviceName { get; set; }
 

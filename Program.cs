@@ -19,13 +19,6 @@ builder.Services.AddScoped(resolver =>
 
 
 // ======================================================
-// MVC
-// ======================================================
-
-builder.Services.AddControllersWithViews();
-
-
-// ======================================================
 // REPOSITORIES
 // ======================================================
 
@@ -56,12 +49,9 @@ builder.Services.AddDistributedMemoryCache();
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30);
-
+    options.IdleTimeout = TimeSpan.FromMinutes(60);
     options.Cookie.Name = ".WEBLINK_CRM.Session";
-
     options.Cookie.HttpOnly = true;
-
     options.Cookie.IsEssential = true;
 });
 
@@ -72,22 +62,14 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddAuthentication(
     CookieAuthenticationDefaults.AuthenticationScheme
-)
-.AddCookie(options =>
+).AddCookie(options =>
 {
     options.Cookie.Name = ".WEBLINK_CRM.Auth";
-
     options.LoginPath = "/Login/Index";
-
     options.AccessDeniedPath = "/Login/AccessDenied";
-
-    options.ExpireTimeSpan =
-        TimeSpan.FromMinutes(30);
-
+    options.ExpireTimeSpan =TimeSpan.FromMinutes(60);
     options.SlidingExpiration = true;
-
     options.Cookie.HttpOnly = true;
-
     options.Cookie.IsEssential = true;
 });
 
