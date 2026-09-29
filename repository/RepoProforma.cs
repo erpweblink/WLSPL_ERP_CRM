@@ -6,7 +6,9 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 using System.Net;
 using WEBLINK_CRM.Models;
+using WLSPL_ERP_CRM.Models;
 using static WEBLINK_CRM.Models.VM_Proforma;
+using static WLSPL_ERP_CRM.Models.ProformaInvoice;
 
 namespace WEBLINK_CRM.repository
 {
@@ -21,289 +23,840 @@ namespace WEBLINK_CRM.repository
             _env = env;
         }
 
-        public async Task<List<object>> GetCompanyList(string Status, string sessionname)
+        public async Task<List<ProformaInvoiceCreate>> Getcompany()
         {
-            using (var connection = new SqlConnection(
-               _configuration.GetConnectionString("Conn_Stringg")))
-            {
-                await connection.OpenAsync();
+            using var connection = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg"));
 
-                var parameters = new DynamicParameters();
 
-                parameters.Add("@Action", "GetCompanyList");
-                parameters.Add("@Status", Status);
-                parameters.Add("@SessionName", sessionname);
+            const string companySql = @"select  cname As companyName from Company  where isdeleted = 0  and status =1 and type='paid';";
 
-                var result = await connection.QueryAsync<object>(
-                    "SP_Proforma",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
+            var companies = await connection.QueryAsync<ProformaInvoiceCreate>(companySql);
 
-                return result.Cast<object>().ToList();
-            }
+            return companies.ToList();
+
         }
 
-        public async Task<List<object>> GetCompanyByCode(string Code)
+        public async Task<List<dynamic>> GetQuotationsByCompany(string cname, string type)
         {
-            using (var connection = new SqlConnection(
-                 _configuration.GetConnectionString("Conn_Stringg")))
-            {
-                await connection.OpenAsync();
+            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
 
-                var parameters = new DynamicParameters();
+            const string companySql = @"            
+                  SELECT qm.id, Quotationno AS displayText 
+                    FROM stswlspl.tblQuotationMain as qm
+                    LEFT JOIN [WLSPLCRM].[dbo].[tbl_ProformaInvoiceMain] as pm ON pm.AgainstByValue=qm.id
+                    WHERE qm.companyname = @cname  AND qm.isdeleted = 0
+                   AND  pm.id is null
+                    ORDER BY id DESC
+               ";
 
-                parameters.Add("@Action", "GetCompanyDataByCode");
-                parameters.Add("@Code", Code);
+            var result = await connection.QueryAsync<dynamic>(companySql, new { cname, type });
 
-                var result = await connection.QueryAsync<object>(
-                    "SP_Proforma",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
-
-                return result.ToList();
-            }
+            return result.ToList();
         }
 
-        public async Task<List<object>> GetDetailsByQuotationNo(string Code)
+        public async Task<object> GetQuotationProformaDetails(int id, string type)
         {
-            using (var connection = new SqlConnection(
-                 _configuration.GetConnectionString("Conn_Stringg")))
+            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+
+            const string detailSql = @"                    
+                              SELECT  serviceId, serviceName, sacCode, productdescription,rate,
+                                taxablevalue,cgstrate,cgstamt,sgstrate,sgstamt,igstrate,igstamt,total
+                            FROM stswlspl.tblQuotationDetails 
+                            WHERE Quotationid = @id
+                      ";
+
+            var param = new { id, type };
+
+            var details = await connection.QueryAsync<dynamic>(detailSql, param);
+
+            return new
             {
-                await connection.OpenAsync();
-
-                var parameters = new DynamicParameters();
-
-                parameters.Add("@Action", "GetDetailsByQuotationNo");
-                parameters.Add("@QuotationNo", Code);
-
-                var result = await connection.QueryAsync<object>(
-                    "SP_Proforma",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
-
-                return result.ToList();
-            }
+                details = details.ToList()
+            };
         }
-        public async Task<int> Save(VM_Proforma model)
+
+        public async Task<ProformaInvoiceCreate> Getcompanybycname(string cname)
         {
             try
             {
-                using (SqlConnection con =
-                       new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
-                {
-                    await con.OpenAsync();
+                using var connection = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg"));
 
-                    var parameters = new DynamicParameters();
+                var parameters = new DynamicParameters();
 
-                    parameters.Add("@ID", model.ID);
-                    parameters.Add("@ProformaDate", model.ProformaDate);
-                    parameters.Add("@ReverseCharge", model.ReverseCharge);
-                    parameters.Add("@State", model.State);
-                    parameters.Add("@CompanyName", model.CompanyName);
-                    parameters.Add("@CompanyCode", model.CompanyCode);
-                    parameters.Add("@Address", model.Address);
-                    parameters.Add("@GSTNO", model.GSTNO);
-                    parameters.Add("@BillState", model.BillState);
-                    parameters.Add("@TotalAmtBeforeTax", model.TotalAmtBeforeTax);
-                    parameters.Add("@TotalAmtAfterTax", model.TotalAmtAfterTax);
-                    parameters.Add("@CreatedBy", model.CreatedBy);
-                    parameters.Add("@AgainstBy", model.AgainstBy);
-                    parameters.Add("@AgainstNo", model.AgainstNo);
+                parameters.Add("@cname", cname);
 
-                    DataTable dtDetails = new DataTable();
-                    dtDetails.Columns.Add("ServiceID", typeof(string));
-                    dtDetails.Columns.Add("ServiceName", typeof(string));
-                    dtDetails.Columns.Add("ProductDescription", typeof(string));
-                    dtDetails.Columns.Add("SACCode", typeof(string));
-                    dtDetails.Columns.Add("Qty", typeof(decimal));
-                    dtDetails.Columns.Add("Rate", typeof(decimal));
-                    dtDetails.Columns.Add("Amount", typeof(decimal));
-                    dtDetails.Columns.Add("TaxableValue", typeof(decimal));
-                    dtDetails.Columns.Add("CGSTRate", typeof(decimal));
-                    dtDetails.Columns.Add("CGSTAmt", typeof(decimal));
-                    dtDetails.Columns.Add("SGSTRate", typeof(decimal));
-                    dtDetails.Columns.Add("SGSTAmt", typeof(decimal));
-                    dtDetails.Columns.Add("IGSTRate", typeof(decimal));
-                    dtDetails.Columns.Add("IGSTAmt", typeof(decimal));
-                    dtDetails.Columns.Add("Total", typeof(decimal));
+                const string companySql = @"select ccode AS companyCode,gstno As gstIn,address As Address, Billing_location As Location ,Billing_pincode As PinCode, State As state,Billing_statecode As statecode   from Company  where isdeleted = 0  and status =1 and type='paid' and cname = @cname;";
 
-                    if (model.objtblProformaDtl != null)
-                    {
-                        foreach (var item in model.objtblProformaDtl)
-                        {
-                            dtDetails.Rows.Add(
-                                item.ServiceID,
-                                item.ServiceName,
-        item.ProductDescription,
-        item.SACCode,
-        item.Qty,
-        item.Rate,
-        item.Amount,
-        item.TaxableValue,
-        item.CGSTRate,
-        item.CGSTAmt,
-        item.SGSTRate,
-        item.SGSTAmt,
-        item.IGSTRate,
-        item.IGSTAmt,
-        item.Total
-    );
-                        }
-                    }
+                var result = await connection.QueryFirstOrDefaultAsync<ProformaInvoiceCreate>(companySql, parameters);
 
-                    parameters.Add(
-                        "@ProformaDetails",
-                        dtDetails.AsTableValuedParameter("WLSPL.ProformaDetailType")
-                    );
-
-                    var result = await con.QuerySingleAsync<int>(
-                        "[WLSPL].[SP_SaveProforma]",
-                        parameters,
-                        commandType: CommandType.StoredProcedure
-                    );
-
-                    return result;
-                }
+                return result ?? new ProformaInvoiceCreate();
             }
             catch (Exception)
             {
                 throw;
             }
-
         }
 
-        public async Task<List<VM_Proforma>> GetProformaList(string size, string sessionname)
+
+        public async Task<dynamic> Getinvoicebyid(int ID)
         {
-            using (var connection = new SqlConnection(
-              _configuration.GetConnectionString("Conn_Stringg")))
+            using var con = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg"));
+
+            await con.OpenAsync();
+
+            var parameters = new DynamicParameters();
+
+            parameters.Add("@id", ID);
+
+            const string companySql = @"SELECT  *
+  FROM [WLSPLCRM].[dbo].[tbl_ProformaInvoiceMain] WHERE id=@id
+
+  SELECT  *,ValidateTill as ServiceTill
+  FROM [WLSPLCRM].[dbo].[tbl_ProformaInvoiceDetails]  WHERE invoiceid=@id
+
+
+  SELECT  *,PaymentDate as date
+  FROM [WLSPLCRM].[dbo].[tbl_ProformaInvoiceBankDetails]  WHERE invoicemainid=@id
+            ";
+
+            using var multi = await con.QueryMultipleAsync(companySql, parameters);
+
+            var main = await multi.ReadFirstOrDefaultAsync<ProformaInvoice.ProformaInvoiceCreate>();
+
+            if (main == null)
             {
-                await connection.OpenAsync();
-
-                var parameters = new DynamicParameters();
-
-                parameters.Add("@Action", "GetProformaList");
-                parameters.Add("@PageSize", size);
-                parameters.Add("@SessionName", sessionname);
-
-                var result = await connection.QueryAsync<VM_Proforma>(
-     "SP_Proforma",
-     parameters,
-     commandType: CommandType.StoredProcedure
- );
-
-                return result.Cast<VM_Proforma>().ToList();
+                return null;
             }
+
+            var details = (await multi.ReadAsync<ProformaInvoice.InvoiceDetails>())
+                .ToList();
+            var bankdetails = (await multi.ReadAsync<ProformaInvoice.InvoiceBankDetail>())
+                .ToList();
+
+            return new ProformaInvoice.ProformaInvoiceCreateVM
+            {
+                main = main,
+                details = details,
+                BankDetails = bankdetails
+            };
         }
 
-        public async Task<VM_Proforma> GetProformaById(string ID)
+      
+        public async Task<ProformaInvoice.ProformaInvoiceCreate?> GetBlankModelWithinvoiceno()
         {
-            using (var connection = new SqlConnection(
-                _configuration.GetConnectionString("Conn_Stringg")))
+            try
             {
-                await connection.OpenAsync();
+                using var connection = new SqlConnection(
+           _configuration.GetConnectionString("Conn_Stringg"));
 
-                var parameters = new DynamicParameters();
+                const string query = @"
+           SELECT [WLSPL].FN_GenerateProformaNo()";
 
-                parameters.Add("@Action", "GetProformaDataById");
-                parameters.Add("@ID", ID);
-
-                var result = await connection.QueryFirstOrDefaultAsync<VM_Proforma>(
-               "SP_Proforma",
-               parameters,
-               commandType: CommandType.StoredProcedure
-           );
+                var result = await connection.QueryFirstOrDefaultAsync<ProformaInvoice.ProformaInvoiceCreate>(
+                    query
+                );
 
                 return result;
             }
-        }
-        public async Task<List<ProformaDetailVM>> GetDetailsById(string ID)
-        {
-            using (var connection = new SqlConnection(
-                _configuration.GetConnectionString("Conn_Stringg")))
+            catch (Exception)
             {
-                await connection.OpenAsync();
-
-                var parameters = new DynamicParameters();
-
-                parameters.Add("@Action", "GetDetailsById");
-                parameters.Add("@ID", ID);
-
-                var result = await connection.QueryAsync<ProformaDetailVM>(
-                    "SP_Proforma",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
-
-                return result.Cast<ProformaDetailVM>().ToList();
+                throw;
             }
         }
 
-        public async Task<bool> Delete(int id)
+        public async Task<bool> UpdateSave(ProformaInvoice.ProformaInvoiceCreateVM model, string Action)
         {
-            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
+            if (model == null) throw new ArgumentNullException(nameof(model));
+
+            if (model.main == null)
+                throw new Exception("Main invoice data is required.");
+
+            using var connection = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg"));
+
+            await connection.OpenAsync();
+
+            using var transaction =
+                await connection.BeginTransactionAsync();
+
+            try
             {
-                using (SqlCommand cmd = new SqlCommand("SP_Proforma", con))
+                // =========================================================
+                // MAIN INVOICE PARAMETERS
+                // =========================================================
+
+                var parameters = new DynamicParameters();
+
+                parameters.Add("@id", model.main.Id);
+
+                parameters.Add(
+                    "@invoiceno",
+                    model.main.invoiceno);
+
+                parameters.Add(
+                    "@invoicedate",
+                    model.main.invoicedate);
+
+                parameters.Add(
+                    "@reversecharge",
+                    model.main.reversecharge);
+
+                parameters.Add(
+                    "@InvoiceType",
+                    model.main.InvoiceType);
+
+                parameters.Add(
+                    "@AgainstBy",
+                    model.main.AgainstBy);
+
+                parameters.Add(
+                    "@AgainstByValue",
+                    model.main.AgainstByValue);
+
+
+                // =========================================================
+                // COMPANY
+                // =========================================================
+
+                parameters.Add(
+                    "@companyname",
+                    model.main.companyName);
+
+                parameters.Add(
+                    "@companyCode",
+                    model.main.companyCode);
+
+                parameters.Add(
+                    "@cgstin",
+                    model.main.gstIn);
+
+                parameters.Add(
+                    "@address",
+                    model.main.Address);
+
+                parameters.Add(
+                    "@BillingLocation",
+                    model.main.Location);
+
+                parameters.Add(
+                    "@BillingPincode",
+                    model.main.PinCode);
+
+                parameters.Add(
+                    "@state",
+                    "Maharashtra");
+
+                parameters.Add(
+                    "@billstate",
+                    model.main.state);
+
+                parameters.Add(
+                    "@BillingStatecode",
+                    model.main.statecode);
+
+
+                // =========================================================
+                // TRANSACTION
+                // =========================================================
+
+                parameters.Add(
+                    "@TransMode",
+                    model.main.TransMode);
+
+                parameters.Add(
+                    "@TransNo",
+                    model.main.TransNo);
+
+                parameters.Add(
+                    "@TransDate",
+                    model.main.TransDate);
+
+                parameters.Add(
+                    "@TransAmt",
+                    model.main.TransAmt);
+
+
+                // =========================================================
+                // GST
+                // =========================================================
+
+                parameters.Add(
+                    "@cgst",
+                    model.main.cgst ?? 0);
+
+                parameters.Add(
+                    "@cgstamt",
+                    model.main.cgstamt ?? 0);
+
+                parameters.Add(
+                    "@sgst",
+                    model.main.sgst ?? 0);
+
+                parameters.Add(
+                    "@sgstamt",
+                    model.main.sgstamt ?? 0);
+
+                parameters.Add(
+                    "@igst",
+                    model.main.igst ?? 0);
+
+                parameters.Add(
+                    "@igstamt",
+                    model.main.igstamt ?? 0);
+
+                parameters.Add(
+                    "@gstonreversecharge",
+                    model.main.gstonreversecharge);
+
+
+                // =========================================================
+                // INVOICE TOTALS
+                // =========================================================
+
+                parameters.Add(
+                    "@totalqty",
+                    model.main.totalqty ?? 0);
+
+                parameters.Add(
+                    "@totalrate",
+                    model.main.totalrate ?? 0);
+
+                parameters.Add(
+                    "@taxablevalue",
+                    model.main.taxablevalue ?? 0);
+
+                parameters.Add(
+                    "@totalamtbeforetax",
+                    model.main.totalamtbeforetax ?? 0);
+
+                parameters.Add(
+                    "@totalamtaftertax",
+                    model.main.totalamtaftertax ?? 0);
+
+                parameters.Add(
+                    "@total_tax_amount",
+                    model.main.total_tax_amount);
+
+                parameters.Add(
+                    "@amtinwords",
+                    model.main.totalamtaftertax);
+
+
+                // =========================================================
+                // PAYMENT / SUMMARY TOTALS
+                // =========================================================
+
+                parameters.Add(
+                    "@TotalBasicAmount",
+                    model.main.TotalBasicAmount ?? 0);
+
+                parameters.Add(
+                    "@TotalTaxableAmount",
+                    model.main.TotalTaxableAmount ?? 0);
+
+                parameters.Add(
+                    "@TotalCGSTAmount",
+                    model.main.TotalCGSTAmount ?? 0);
+
+                parameters.Add(
+                    "@TotalSGSTAmount",
+                    model.main.TotalSGSTAmount ?? 0);
+
+                parameters.Add(
+                    "@TotalIGSTAmount",
+                    model.main.TotalIGSTAmount ?? 0);
+
+                parameters.Add(
+                    "@TotalGSTAmount",
+                    model.main.TotalGSTAmount ?? 0);
+
+                parameters.Add(
+                    "@TotalInvoiceAmount",
+                    model.main.TotalInvoiceAmount ?? 0);
+
+                parameters.Add(
+                    "@BasicAmountReceived",
+                    model.main.BasicAmountReceived ?? 0);
+
+                parameters.Add(
+                    "@GSTAmountReceived",
+                    model.main.GSTAmountReceived ?? 0);
+
+                parameters.Add(
+                    "@TotalAmountReceived",
+                    model.main.TotalAmountReceived ?? 0);
+
+                parameters.Add(
+                    "@PendingBasicAmount",
+                    model.main.PendingBasicAmount ?? 0);
+
+                parameters.Add(
+                    "@PendingGSTAmount",
+                    model.main.PendingGSTAmount ?? 0);
+
+                parameters.Add(
+                    "@PendingAmountBeforeTDS",
+                    model.main.PendingAmountBeforeTDS ?? 0);
+
+                parameters.Add(
+                    "@TDSPercentage",
+                    model.main.TDSPercentage ?? 0);
+
+                parameters.Add(
+                    "@TDSAmount",
+                    model.main.TDSAmount ?? 0);
+
+                parameters.Add(
+                    "@BankAmountReceived",
+                    model.main.BankAmountReceived ?? 0);
+
+                parameters.Add(
+                    "@TotalTDSAmount",
+                    model.main.TotalTDSAmount ?? 0);
+
+                parameters.Add(
+                    "@FinalPendingAmount",
+                    model.main.FinalPendingAmount ?? 0);
+
+                parameters.Add(
+                    "@TotalAmountBalance",
+                    model.main.TotalAmountBalance ?? 0);
+
+
+                // =========================================================
+                // SERVICE
+                // =========================================================
+
+                parameters.Add(
+                    "@servicedescription",
+                    model.main.servicedescription);
+
+
+                // =========================================================
+                // SESSION
+                // =========================================================
+
+                parameters.Add(
+                    "@sessionname",
+                    model.main.sessionname);
+
+                parameters.Add(
+                    "@NAME",
+                    model.main.NAME);
+
+
+                // =========================================================
+                // BILLING
+                // =========================================================
+
+                parameters.Add(
+                    "@BillingAddress",
+                    model.main.BillingAddress ?? model.main.Address);
+
+                parameters.Add(
+                    "@BillingLocation",
+                    model.main.BillingLocation ?? model.main.Location);
+
+                parameters.Add(
+                    "@BillingGST",
+                    model.main.BillingGST ?? model.main.gstIn);
+
+                parameters.Add(
+                    "@BillingPincode",
+                    model.main.BillingPincode ?? model.main.PinCode);
+
+                parameters.Add(
+                    "@BillingStatecode",
+                    model.main.BillingStatecode ?? model.main.statecode);
+
+
+                // =========================================================
+                // ACTION
+                // =========================================================
+
+                parameters.Add(
+                    "@action",
+                    Action);
+
+
+                // =========================================================
+                // OUTPUT INVOICE ID
+                // =========================================================
+
+                parameters.Add(
+                    "@myinvoice",
+                    dbType: DbType.Int32,
+                    direction: ParameterDirection.Output);
+
+
+                // =========================================================
+                // SAVE MAIN INVOICE
+                // =========================================================
+
+                await connection.ExecuteAsync(
+                    "[WLSPL].[SP_SaveProforma]",
+                    parameters,
+                    transaction,
+                    commandType: CommandType.StoredProcedure);
+
+
+                // =========================================================
+                // GET INVOICE ID
+                // =========================================================
+
+                int myInvoice =
+                    parameters.Get<int>("@myinvoice");
+
+
+                // =========================================================
+                // UPDATE EXISTING RECORD
+                // =========================================================
+
+                if (Action.Equals(
+                    "updateOldData",
+                    StringComparison.OrdinalIgnoreCase))
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
+                    if (string.IsNullOrWhiteSpace(model.main.Id))
+                        throw new Exception(
+                            "Invoice ID is required for update.");
 
-                    cmd.Parameters.AddWithValue("@Action", "Delete");
-                    cmd.Parameters.AddWithValue("@ID", id);
+                    myInvoice =
+                        Convert.ToInt32(model.main.Id);
 
-                    await con.OpenAsync();
 
-                    int result = await cmd.ExecuteNonQueryAsync();
+                    // -----------------------------------------------------
+                    // DELETE OLD INVOICE DETAILS
+                    // -----------------------------------------------------
 
-                    return result > 0;
+                    await connection.ExecuteAsync(
+                        @"
+                DELETE FROM tbl_ProformaInvoiceDetails
+                WHERE invoiceid = @invoiceid
+                ",
+                        new
+                        {
+                            invoiceid = myInvoice
+                        },
+                        transaction);
+
+
+                    // -----------------------------------------------------
+                    // DELETE OLD BANK DETAILS
+                    // -----------------------------------------------------
+
+                    await connection.ExecuteAsync(
+                        @"
+                DELETE FROM [WLSPLCRM].[dbo].tbl_ProformaInvoiceBankDetails
+                WHERE InvoiceMainId = @InvoiceId
+                ",
+                        new
+                        {
+                            InvoiceId = myInvoice
+                        },
+                        transaction);
                 }
-            }
-        }
 
-        public async Task<List<object>> GetQuotationNoList(string CompanyCode)
-        {
-            using (var connection = new SqlConnection(
-              _configuration.GetConnectionString("Conn_Stringg")))
+
+                if (myInvoice <= 0)
+                {
+                    throw new Exception(
+                        "Invoice ID was not generated.");
+                }
+
+
+                // =========================================================
+                // INSERT INVOICE DETAILS
+                // =========================================================
+
+                if (model.details != null &&
+                    model.details.Count > 0)
+                {
+                    const string detailSql = @"
+                INSERT INTO tbl_ProformaInvoiceDetails
+                (
+                    invoiceid,
+                    productdescription,
+                    saccode,
+                    qty,
+                    rate,                  
+                    taxablevalue,
+                    cgstrate,
+                    cgstamt,
+                    sgstrate,
+                    sgstamt,
+                    igstrate,
+                    igstamt,
+                    total,
+                    ServiceName,
+                    ServiceId,
+                    ValidateTill
+                )
+                VALUES
+                (
+                    @invoiceid,
+                    @productdescription,
+                    @saccode,
+                    @qty,
+                    @rate,                
+                    @taxablevalue,
+                    @cgstrate,
+                    @cgstamt,
+                    @sgstrate,
+                    @sgstamt,
+                    @igstrate,
+                    @igstamt,
+                    @total,
+                    @ServiceName,
+                    @ServiceId,
+                    @ValidateTill
+                );";
+
+
+                    foreach (var detail in model.details)
+                    {
+                        var detailParameters =
+                            new DynamicParameters();
+
+
+                        detailParameters.Add(
+                            "@invoiceid",
+                            myInvoice);
+
+                        detailParameters.Add(
+                            "@productdescription",
+                            detail.productdescription);
+
+                        detailParameters.Add(
+                            "@saccode",
+                            detail.saccode);
+
+                        detailParameters.Add(
+                            "@qty",
+                            detail.qty ?? 1);
+
+                        detailParameters.Add(
+                            "@rate",
+                            detail.rate ?? 0);
+
+                        detailParameters.Add(
+                            "@taxablevalue",
+                            detail.taxablevalue ?? 0);
+
+                        detailParameters.Add(
+                            "@cgstrate",
+                            detail.cgstrate ?? 0);
+
+                        detailParameters.Add(
+                            "@cgstamt",
+                            detail.cgstamt ?? 0);
+
+                        detailParameters.Add(
+                            "@sgstrate",
+                            detail.sgstrate ?? 0);
+
+                        detailParameters.Add(
+                            "@sgstamt",
+                            detail.sgstamt ?? 0);
+
+                        detailParameters.Add(
+                            "@igstrate",
+                            detail.igstrate ?? 0);
+
+                        detailParameters.Add(
+                            "@igstamt",
+                            detail.igstamt ?? 0);
+
+                        detailParameters.Add(
+                            "@total",
+                            detail.total ?? 0);
+
+                        detailParameters.Add(
+                            "@ServiceName",
+                            detail.serviceName);
+
+                        detailParameters.Add(
+                            "@ServiceId",
+                            detail.serviceId);
+
+                        detailParameters.Add(
+                            "@ValidateTill",
+                            detail.serviceTill);
+
+
+                        await connection.ExecuteAsync(
+                            detailSql,
+                            detailParameters,
+                            transaction);
+                    }
+                }
+
+
+                // =========================================================
+                // INSERT BANK DETAILS
+                // =========================================================
+
+                if (model.BankDetails != null &&
+                    model.BankDetails.Count > 0)
+                {
+                    const string bankSql = @"
+                INSERT INTO tbl_ProformaInvoiceBankDetails
+                (
+                    InvoiceMainId,
+                    BankName,
+                    ChequeNo,                   
+                    Amount,
+PaymentDate,
+                    CreatedDate,
+mode
+                )
+                VALUES
+                (
+                    @InvoiceId,
+                    @BankName,
+                    @ChequeNo,               
+                    @Amount,
+                    @BankDate,
+GETDATE(),
+@mode
+                );";
+
+
+                    foreach (var bank in model.BankDetails)
+                    {
+                        var bankParameters =
+                            new DynamicParameters();
+
+
+                        bankParameters.Add(
+                            "@InvoiceId",
+                            myInvoice);
+
+                        bankParameters.Add(
+                            "@BankName",
+                            bank.bankName);
+
+                        bankParameters.Add(
+                           "@mode",
+                           bank.mode);
+
+                        bankParameters.Add(
+                            "@ChequeNo",
+                            bank.chequeNo);
+
+                        bankParameters.Add(
+                            "@BankDate",
+                            bank.date);
+
+                        bankParameters.Add(
+                            "@Amount",
+                            bank.amount ?? 0);
+
+
+                        await connection.ExecuteAsync(
+                            bankSql,
+                            bankParameters,
+                            transaction);
+                    }
+                }
+
+
+                // =========================================================
+                // COMMIT EVERYTHING
+                // =========================================================
+
+                await transaction.CommitAsync();
+
+                return true;
+            }
+            catch (Exception ex)
             {
-                await connection.OpenAsync();
+                // =========================================================
+                // ROLLBACK EVERYTHING
+                // =========================================================
 
-                var parameters = new DynamicParameters();
+                await transaction.RollbackAsync();
 
-                parameters.Add("@Action", "GetQuotationNoList");
-                parameters.Add("@CompanyCode", CompanyCode);
-
-                var result = await connection.QueryAsync<object>(
-                    "SP_Proforma",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
-
-                return result.Cast<object>().ToList();
+                throw ex;
             }
         }
 
-        public async Task<List<object>> GetStateList(string Status)
+        public async Task<bool> DeleteInvoiceDetails(int id, string name)
         {
-            using (var connection = new SqlConnection(
-              _configuration.GetConnectionString("Conn_Stringg")))
-            {
-                await connection.OpenAsync();
+            using var connection = new SqlConnection(
+         _configuration.GetConnectionString("Conn_Stringg"));
 
-                var parameters = new DynamicParameters();
+            const string sql = @"
+        UPDATE [WLSPLCRM].[dbo].[tbl_ProformaInvoiceMain] 
+        SET 
+            IsDeleted = 1,
+            DeletedBy = @deletedBy,
+            DeletedOn = GETDATE()
+        WHERE id = @invoiceId;";
 
-                parameters.Add("@Action", "GetStateList");
-                parameters.Add("@Status", Status);
+            await connection.OpenAsync();
 
-                var result = await connection.QueryAsync<object>(
-                    "SP_Proforma",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
+            var rowsAffected = await connection.ExecuteAsync(
+                sql,
+                new
+                {
+                    invoiceId = id,
+                    deletedBy = name
+                });
 
-                return result.Cast<object>().ToList();
-            }
+            return rowsAffected > 0;
         }
+
+        public async Task<List<InvoiceDetails>> SearchServices(string q)
+        {
+            var results = new List<InvoiceDetails>();
+
+            using var con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")
+                ?? throw new Exception("Connection string 'Conn_Stringg' not found."));
+
+            string query = @"
+                        SELECT ID,ServiceName, ServiceCode, Price 
+                        FROM Tbl_servicemaster 
+                        WHERE ServiceName LIKE @Search ";
+
+            using var cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@Search", $"%{q}%");
+
+            await con.OpenAsync();
+            using var reader = await cmd.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                results.Add(new InvoiceDetails
+                {
+                    serviceId = reader["ID"]?.ToString() ?? "",
+                    serviceName = reader["ServiceName"]?.ToString() ?? "",
+                    saccode = reader["ServiceCode"]?.ToString() ?? "",
+                    rate = reader["Price"] != DBNull.Value
+                                  ? Convert.ToDecimal(reader["Price"])
+                                  : 0
+                });
+            }
+
+            return results;
+        }
+
+        public async Task<List<ProformaInvoiceCreate>> GetProformaList(string size, string sessionname)
+        {
+            using var connection = new SqlConnection(
+           _configuration.GetConnectionString("Conn_Stringg"));
+
+
+            const string companySql = @"SELECT  *
+  FROM [WLSPLCRM].[dbo].[tbl_ProformaInvoiceMain] WHERE IsDeleted=0";
+
+            var companies = await connection.QueryAsync<ProformaInvoiceCreate>(companySql);
+
+            return companies.ToList();
+        }
+
 
         public byte[] ProformaPdf(int id)
         {
@@ -586,7 +1139,7 @@ namespace WEBLINK_CRM.repository
                         Font gstAmountFont = FontFactory.GetFont(
                             "Arial",
                             9,
-                         
+
                             BaseColor.DARK_GRAY
                         );
 
@@ -658,7 +1211,8 @@ namespace WEBLINK_CRM.repository
                                 BodyCell(rowid.ToString(), shaded));
 
                             prodTable.AddCell(
-                                BodyCell(d.ProductDescription, shaded));
+     BodyCell($"{d.ServiceName} - {d.ProductDescription}", shaded)
+ );
 
                             prodTable.AddCell(
                                 BodyCell(d.SACCode, shaded));
@@ -937,17 +1491,17 @@ namespace WEBLINK_CRM.repository
                 var vm = new VM_Proforma();
 
                 string query = @"
-      SELECT ID, ProformaNo, ProformaDate, ReverseCharge, State, CompanyName,Againstby,AgainstNo,
+         SELECT ID,invoiceno AS ProformaNo,invoicedate AS ProformaDate, ReverseCharge, State, CompanyName,Againstby,AgainstByValue AS AgainstNo,
                CompanyCode, Address, cgstin as GSTNO, BillState, TotalAmtBeforeTax, TotalAmtAfterTax
-        FROM [WLSPLCRM].[stswlspl].[tblProformaMain]
+        FROM tbl_ProformaInvoiceMain
         WHERE ID = @ID;
 
-         SELECT ID, ProformaID, ProductDescription, SACCode, CAST(qty as float) as qty,
+         SELECT ID,invoiceid AS ProformaID,ServiceName,  ProductDescription, SACCode, CAST(qty as float) as qty,
       CAST(Rate as float) as  Rate, Amount, TaxableValue,
                CAST(CGSTRate as float) as CGSTRate, CGSTAmt, CAST(SGSTRate as float) as SGSTRate,
                SGSTAmt,CAST(IGSTRate as float) as  IGSTRate, IGSTAmt, Total
-        FROM [WLSPLCRM].[stswlspl].[tblProformaDetails]      
-        WHERE ProformaID = @ID
+        FROM [tbl_ProformaInvoiceDetails]      
+        WHERE invoiceid = 15
         ORDER BY ID;";
 
                 using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
@@ -986,6 +1540,7 @@ namespace WEBLINK_CRM.repository
                                 {
                                     ID = rdr["ID"] as int?,
                                     ProformaID = rdr["ProformaID"] as int?,
+                                    ServiceName = rdr["ServiceName"]?.ToString(),
                                     ProductDescription = rdr["ProductDescription"]?.ToString(),
                                     SACCode = rdr["SACCode"]?.ToString(),
                                     Qty = rdr["Qty"]?.ToString(),
@@ -1014,7 +1569,6 @@ namespace WEBLINK_CRM.repository
                 throw;
             }
         }
-
 
     }
 }
