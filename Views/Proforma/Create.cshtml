@@ -25,13 +25,13 @@
         companies = companyList.Select(c => c.companyName).Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToList(),
         urls = new
         {
-            getCompany = Url.Action("Getcomapnybycname", "PI"),
-            getQuotations = Url.Action("GetQuotationsByCompany", "PI"),
-            getQuotationDetails = Url.Action("GetQuotationProformaDetails", "PI"),
-            searchServices = Url.Action("SearchServices", "PI"),
-            save = Url.Action("SaveInvoice", "PI"),
-            update = Url.Action("UpdateInvoice", "PI"),
-            index = Url.Action("Index", "PI")
+            getCompany = Url.Action("Getcomapnybycname", "Proforma"),
+            getQuotations = Url.Action("GetQuotationsByCompany", "Proforma"),
+            getQuotationDetails = Url.Action("GetQuotationProformaDetails", "Proforma"),
+            searchServices = Url.Action("SearchServices", "Proforma"),
+            save = Url.Action("SaveInvoice", "Proforma"),
+            update = Url.Action("UpdateInvoice", "Proforma"),
+            index = Url.Action("Index", "Proforma")
         },
         main = isEdit ? Model.main : null,
         details = isEdit ? invoiceDetails : null,
