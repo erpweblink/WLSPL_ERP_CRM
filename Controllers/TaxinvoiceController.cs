@@ -30,10 +30,13 @@ namespace WLSPL_ERP_CRM.Controllers
             _TaxinvoiceRepo = taxinvoiceRepo;
         }
 
-        public async Task<IActionResult> Index(string? financialYear, int? month)
+        public async Task<IActionResult> Index(string? financialYear, int? month, string? salesManager)
         {
             try
             {
+                string SessionName = HttpContext.Session.GetString("EmpCode")?.ToString() ?? "NA";
+                string SessionRole = HttpContext.Session.GetString("Role")?.ToString() ?? "NA";
+
                 var today = DateTime.Now;
 
                 // ============================================
@@ -53,18 +56,17 @@ namespace WLSPL_ERP_CRM.Controllers
                 }
 
 
-                var data = await _TaxinvoiceRepo.GetInfo(financialYear,month);
+                var data = await _TaxinvoiceRepo.GetInfo(financialYear, month, salesManager, SessionName, SessionRole);
 
-                var financialYearSummary = await _TaxinvoiceRepo.GetFinancialYearSummary(financialYear);
+                var financialYearSummary = await _TaxinvoiceRepo.GetFinancialYearSummary(financialYear, salesManager, SessionName, SessionRole);
 
-                // ============================================
-                // SEND DATA TO VIEW
-                // ============================================
 
+                var personLists = await _TaxinvoiceRepo.GetSalesPersonList(SessionName, SessionRole);
+
+                ViewBag.SalesManagers = personLists.SalesManagers;
+                ViewBag.SelectedSalesManager = salesManager;
                 ViewBag.SelectedFinancialYear = financialYear;
-
                 ViewBag.SelectedMonth = month;
-
                 ViewBag.FinancialYearSummary = financialYearSummary;
 
                 return View(data);

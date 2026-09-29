@@ -94,13 +94,19 @@
     }
 
     .filter-label {
-        display: block;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 7px;
+        color: #526174;
         font-size: 12px;
         font-weight: 600;
-        color: #475467;
-        margin-bottom: 5px;
     }
 
+        .filter-label i {
+        color: #6b7cff;
+        font-size: 13px;
+    }
     .search-wrapper {
         display: flex;
         width: 100%;
@@ -993,6 +999,31 @@
     }
 </style>
 
+<style type="text/css">
+    .select2-container {
+        width: 100% !important;
+    }
+
+        .select2-container .select2-selection--single {
+            height: 38px !important;
+            border: 1px solid #1e2022 !important;
+            border-radius: 7px !important;
+            background: #fff !important;
+            display: flex !important;
+            align-items: center !important;
+            transition: all .2s ease;
+        }
+
+            .select2-container .select2-selection--single:hover {
+                border-color: #b9c4d2 !important;
+            }
+
+    .select2-container--open .select2-selection--single {
+        border-color: #6b7cff !important;
+        box-shadow: 0 0 0 3px rgba(107,124,255,.10);
+    }
+</style>
+
 <div class="invoice-page">
     <div class="invoice-card">
         <div class="invoice-header">
@@ -1020,25 +1051,49 @@
         <!-- ── List filters (client-side, list only) ── -->
         <div id="filterCard" class="filter-section">
             <div class="row align-items-end">
-                <div class="col-lg-4 col-md-4">
+                <div class="col-lg-3 col-md-3">
                     <label class="filter-label">Search</label>
                     <div class="search-wrapper">
                         <span class="search-icon"><i class="fa fa-search text-muted"></i></span>
-                        <input type="text" id="searchInput" class="form-control search-box" placeholder="Search invoice, company, GSTIN, salesperson..." />
+                        <input type="text" id="searchInput" class="form-control search-box" placeholder="Search invoice, company, GST..." />
                     </div>
                 </div>
 
                 <div class="col-lg-4 col-md-4">
                     <div class="row gx-2">
                         <div class="col-6">
-                            <label class="filter-label">From Date</label>
+                            <label class="filter-label"><i class="fa-solid fa-calendar-days"></i> From Date</label>
                             <input type="date" id="fromDate" class="form-control search-box" />
                         </div>
                         <div class="col-6">
-                            <label class="filter-label">To Date</label>
+                            <label class="filter-label"><i class="fa-solid fa-calendar-days"></i> To Date</label>
                             <input type="date" id="toDate" class="form-control search-box" />
                         </div>
                     </div>
+                </div>
+                <div class="col-lg-3 col-md-3">
+                    <label class="modern-label">
+                        <i class="fa-solid fa-user-tie"></i> Sales Manager
+                    </label>
+
+                    <select id="ddlTeamuser" class="form-control">
+                        <option value="">All Sales Managers</option>
+
+                        @if (ViewBag.SalesManagers != null)
+                        {
+                            string selectedManager = ViewBag.SelectedSalesManager?.ToString() ?? "";
+
+                            foreach (var mgr in (IEnumerable<dynamic>)ViewBag.SalesManagers)
+                            {
+                                string userCode = mgr.UserCode;
+
+                                <option value="@userCode"
+                                        selected="@(userCode == selectedManager ? "selected" : null)">
+                                    @mgr.FullName
+                                </option>
+                            }
+                        }
+                    </select>
                 </div>
 
                 <div class="col-lg-1 col-md-1">
@@ -1356,6 +1411,9 @@
 
         setDateLimits();
 
+        $("#ddlTeamuser").select2({ placeholder: "Select Sales Manager", allowClear: true, width: "100%" });
+        $("#ddlTeamuser").on("change", loadServerData);
+
         allRows = Array.from(document.querySelectorAll("#invoiceTableBody .invoice-row"));
         filteredRows = [...allRows];
         applyFilters();
@@ -1373,10 +1431,12 @@
     function loadServerData() {
         const financialYear = document.getElementById("financialYearFilter").value;
         const month = document.getElementById("monthFilter").value;
+        const manager = $("#ddlTeamuser").val();
 
         const params = new URLSearchParams();
         if (financialYear) params.append("financialYear", financialYear);
         params.append("month", (month === "all" || !month) ? "0" : month);
+        if (manager) params.append("salesManager", manager);
 
         window.location.href = '@Url.Action("Index", "Taxinvoice")' + "?" + params.toString();
     }
