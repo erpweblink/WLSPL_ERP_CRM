@@ -424,7 +424,7 @@
                     </div>
 
                 </div>
-                
+
             </div>
 
         </div>
@@ -459,28 +459,17 @@
                         </label>
 
                         <div class="col-md-8">
-
-                            <select asp-for="main.companyName"
-                                    class="form-control ddlselect"
-                                    id="companyName" disabled>
-
-                                <option value="">
-                                    Select Company
-                                </option>
-
+                            <select asp-for="main.companyName" class="form-control ddlselect" id="companyName" disabled>
+                                <option value="">Select Company </option>
                                 @foreach (var company in companyList)
                                 {
-                                    <option value="@company.companyName">
-                                        @company.companyName
-                                    </option>
+                                    <option value="@company.companyName"> @company.companyName </option>
                                 }
-
                             </select>
                             <input type="hidden" id="companyNameHidden" value="@(Model?.main?.companyName ?? "")" />
+                            <input type="hidden" id="compCodeHidden" value="@(Model?.main?.compCode ?? "")" />
 
-                            <span class="err-msg"
-                                  id="err-companyName"></span>
-
+                            <span class="err-msg" id="err-companyName"></span>
                         </div>
 
                     </div>
@@ -628,43 +617,26 @@
             </div>
 
             <div class="row form-row-item">
-
                 <div class="col-md-6">
-
                     <div class="form-group row">
-
                         <label class="col-md-4 col-form-label font-weight-bold">
                             Transaction Mode
                         </label>
-
                         <div class="col-md-8">
-
-                            <select asp-for="main.TransMode"
-                                    class="form-control"
-                                    id="Transaction">
-
-                                <option value="">
-                                    Select Transaction Mode
-                                </option>
-
-                                <option value="Cheque">
-                                    Cheque
-                                </option>
-
-                                <option value="Online/UPI">
-                                    Online/UPI
-                                </option>
-
-                                <option value="Cash">
-                                    Cash
-                                </option>
-
+                            <select class="form-control" asp-for="main.TransMode" id="Transaction">
+                                <option value="">--Select Payment Mode--</option>
+                                <option value="Online / UPI">Online / UPI</option>
+                                <option value="Cheque">Cheque</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Credit Card">Credit Card</option>
+                                <option value="Debit Card">Debit Card</option>
+                                <option value="NEFT">NEFT</option>
+                                <option value="RTGS">RTGS</option>
+                                <option value="IMPS">IMPS</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
                             </select>
-
                         </div>
-
                     </div>
-
                 </div>
 
                 <div class="col-md-6">
@@ -763,6 +735,16 @@
                 </div>
             </div>
 
+            <div class="row form-row-item">
+                <div class="col-md-12">
+                    <div class="form-group row">
+                        <label class="col-md-2 col-form-label font-weight-bold">Remark/Feedback</label>
+                        <div class="col-md-10">
+                            <textarea asp-for="main.Remarks" type="text" class="form-control" id="Remarks" placeholder="Add Custom Remark/Feedback"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>
@@ -991,16 +973,13 @@
                     class="btn btn-primary px-4"
                     onclick="saveInvoice()">
 
-                   @(isEdit ? "Update" : "Save")
+                @(isEdit ? "Update" : "Save")
 
             </button>
 
         </div>
 
         <div class="col-auto">
-
-
-
         </div>
 
         <div class="col-auto">
@@ -1025,13 +1004,14 @@
     let rowCounter = 0;
 
     const isEdit = @(isEdit ? "true" : "false");
-    const invoiceId = @(isEdit ? Model.main.Id : "0");
+    const invoiceId = @(isEdit? Model.main.Id : "0");
     const existingDetails = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(invoiceDetails));
     const existingCompany = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model?.main?.companyName ?? ""));
+    const companyListWithCodes = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(companyList.Select(c => new { name = c.companyName, code = c.compCode })));
     const receivedAmt = parseFloat(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model?.main?.TransAmt ?? "0"))) || 0;
     let reconciling = false;
 
- 
+
     // =========================================================
     // DOCUMENT READY
     // =========================================================
@@ -1048,7 +1028,21 @@
       // ── Set today if new, else keep server date ──
         if (!isEdit) setTodayDate();
 
-      
+            // ── On load: if compCodeHidden is empty, resolve it from the company list ──
+        if (isEdit) {
+            let storedCode = $('#compCodeHidden').val();
+
+            if (!storedCode) {
+                // Fallback: look up by name from the list
+                const cname = $('#companyNameHidden').val() || $('#companyName').val();
+                const found = companyListWithCodes.find(c => c.name === cname);
+                if (found) {
+                    storedCode = found.code;
+                    $('#compCodeHidden').val(storedCode);
+                }
+            }
+        }
+
         // ── AgainstBy: disable AgainstByValue initially if Direct ──
         const initAgainst = $('#AgainstBy').val();
         if (initAgainst === 'Direct' || !initAgainst) {
@@ -1166,7 +1160,7 @@
         }
 
         existingDetails.forEach(function (item) {
-            
+
             const row = addInvoiceRow();
             if (!row) return;
 
@@ -1249,6 +1243,12 @@
                 $('#billingState').val(data.state || '');
                 $('#billingPincode').val(data.pinCode || '');
                 $('#billingStateCode').val(data.statecode || '');
+                if (data.compCode) {
+                   $('#compCodeHidden').val(data.compCode);
+                } else {
+                    const found = companyListWithCodes.find(c => c.name === cname);
+                    if (found) $('#compCodeHidden').val(found.code ?? '');
+                }
             },
             error: function () {
                 showToast("Error while loading company details.", "error");
@@ -1691,7 +1691,7 @@
 
     function saveInvoice() {
         calculateAll();
-        
+
         if (!validateInvoice()) return;
 
         const main = {
@@ -1701,6 +1701,7 @@
             reversecharge: $('#reverseCharge').val() || null,
             InvoiceType: $('#InvoiceType').val() || null,
             companyName: $('#companyNameHidden').val() || $('#companyName').val() || null,
+            compCode:    $('#compCodeHidden').val()    || null,
             AgainstBy:      $('#AgainstByHidden').val()      || $('#AgainstBy').val()      || null,
             AgainstByValue: $('#AgainstByValueHidden').val() || $('#AgainstByValue').val() || null,
             gstIn: $('#gstin').val() || null,
@@ -1733,7 +1734,8 @@
             TdsAmt:            String(parseFloat($('#summaryTDSAmount').val()))   || 0,
             TotalPayable:      String(parseFloat($('#summaryGrandTotal').val()))   || 0,
 
-            amtinwords: $('#amountInWords').val() || null
+            amtinwords: $('#amountInWords').val() || null,
+            Remarks :          $('#Remarks').val() || null
         };
 
         const details = [];

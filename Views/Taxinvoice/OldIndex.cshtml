@@ -6,7 +6,6 @@
 
     var invoiceList = Model?.ToList() ?? new List<WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreate>();
     var today = DateTime.Now;
-    var inCulture = System.Globalization.CultureInfo.GetCultureInfo("en-IN");
 
     var currentFinancialYear = today.Month >= 4
         ? $"{today.Year}-{(today.Year + 1).ToString().Substring(2)}"
@@ -39,19 +38,7 @@
 
     var selectedMonthName = selectedMonthNumber == 0
         ? "All Months"
-        : inCulture.DateTimeFormat.GetMonthName(selectedMonthNumber);
-
-    // Dynamic FY list: starts at 2021-22, runs up to next financial year
-    int firstFyStart = 2021;
-    int currentFyStart = today.Month >= 4 ? today.Year : today.Year - 1;
-    int lastFyStart = currentFyStart + 1;
-
-    // if the URL asks for a later FY, still show it
-    int selectedFyStart = 0;
-    if (selectedFinancialYear.Length >= 4 && int.TryParse(selectedFinancialYear.Substring(0, 4), out selectedFyStart))
-    {
-        lastFyStart = Math.Max(lastFyStart, selectedFyStart);
-    }
+        : System.Globalization.CultureInfo.GetCultureInfo("en-IN").DateTimeFormat.GetMonthName(selectedMonthNumber);
 }
 
 <style type="text/css">
@@ -101,6 +88,21 @@
         margin-bottom: 5px;
     }
 
+    .filter-control {
+        height: 38px;
+        border: 1px solid #d0d5dd;
+        border-radius: 7px;
+        font-size: 13px;
+        color: #344054;
+        width: 100%;
+        background-color: #fff;
+    }
+
+        .filter-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 .15rem rgba(13,110,253,.10);
+        }
+
     .search-wrapper {
         display: flex;
         width: 100%;
@@ -114,14 +116,14 @@
         justify-content: center;
         border: 1px solid #d0d5dd;
         border-right: 0;
-        border-radius: 10px 0 0 10px;
+        border-radius: 7px 0 0 7px;
         background: #fff;
     }
 
     .search-box {
-        height: 36px;
+        height: 38px;
         border: 1px solid #d0d5dd;
-        border-radius: 10px 0 10px 0;
+        border-radius: 0 7px 7px 0;
         font-size: 13px;
         width: 100%;
     }
@@ -143,53 +145,15 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 4px;
+        gap: 6px;
         color: #087443;
         background: #e8fff2;
         border: 1px solid #b8f0d0;
-        border-radius: 7px;
-        padding: 3px 8px;
-        font-size: 12px;
+        border-radius: 20px;
+        padding: 6px 12px;
+        font-size: 11px;
         font-weight: 600;
         white-space: nowrap;
-    }
-
-    .summary-filter-item {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-    }
-
-    .summary-filter-select {
-        height: 26px;
-        min-width: 100px;
-        padding: 2px 24px 2px 7px;
-        border: none !important;
-        border-radius: 6px;
-        background: #e8fff2;
-        color: #087443;
-        font-size: 11px;
-        font-weight: 600;
-        outline: none;
-        cursor: pointer;
-    }
-
-        .summary-filter-select:focus {
-            border-color: #087443;
-            box-shadow: 0 0 0 2px rgba(8, 116, 67, .08);
-        }
-
-        .summary-filter-select option {
-            background: #fff;
-            color: #344054;
-            font-size: 12px;
-        }
-
-    .summary-filter-separator {
-        color: #087443;
-        font-size: 11px;
-        font-weight: 600;
-        opacity: .6;
     }
 
     .summary-section {
@@ -240,6 +204,14 @@
 
     .summary-invoice {
         border-left: 4px solid #6f42c1;
+    }
+
+    .fy-summary-section {
+        margin: 16px 18px 20px;
+        border: 1px solid #edf0f5;
+        border-radius: 10px;
+        background: #fff;
+        overflow: hidden;
     }
 
     .fy-summary-header {
@@ -748,6 +720,10 @@
             font-size: 17px;
         }
 
+        .fy-summary-section {
+            margin: 12px 10px 16px;
+        }
+
         .fy-summary-header {
             padding: 11px;
         }
@@ -907,8 +883,9 @@
                     content: none !important;
                 }
     }
+</style>
 
-    /* ── Filter / summary toggles ── */
+<style type="text/css">
     .btn-filter-toggle {
         background: #fff;
         border: 1px solid #d0d5dd;
@@ -956,6 +933,7 @@
             padding: 0 !important;
         }
 
+
     .section-toggle-bar {
         display: flex;
         align-items: center;
@@ -964,12 +942,17 @@
         background: #f8fafc;
         border-top: 1px solid #edf0f5;
         border-bottom: 1px solid #edf0f5;
+        cursor: pointer;
         user-select: none;
         transition: background 0.2s ease;
     }
 
+        .section-toggle-bar:hover {
+            background: #f0f4f8;
+        }
+
     .section-toggle-label {
-        font-size: 14px;
+        font-size: 12px;
         font-weight: 600;
         color: #475467;
         display: flex;
@@ -978,7 +961,7 @@
     }
 
         .section-toggle-label i {
-            font-size: 14px;
+            font-size: 13px;
             color: #0d6efd;
         }
 
@@ -1003,7 +986,7 @@
                 </h3>
                 <div class="d-flex align-items-center gap-2">
                     <button type="button" id="btnToggleFilter" class="btn-filter-toggle">
-                        <i class="fa fa-filter-circle-xmark"></i>
+                        <i class="fa fa-filter"></i>
                         <span>Hide Filters</span>
                     </button>
                     @if (Context.Session.GetString("Role")?.ToString() == "Admin")
@@ -1017,10 +1000,9 @@
             </div>
         </div>
 
-        <!-- ── List filters (client-side, list only) ── -->
         <div id="filterCard" class="filter-section">
             <div class="row align-items-end">
-                <div class="col-lg-4 col-md-4">
+                <div class="col-lg-4 col-md-6 mb-2">
                     <label class="filter-label">Search</label>
                     <div class="search-wrapper">
                         <span class="search-icon"><i class="fa fa-search text-muted"></i></span>
@@ -1028,85 +1010,70 @@
                     </div>
                 </div>
 
-                <div class="col-lg-4 col-md-4">
-                    <div class="row gx-2">
-                        <div class="col-6">
-                            <label class="filter-label">From Date</label>
-                            <input type="date" id="fromDate" class="form-control search-box" />
-                        </div>
-                        <div class="col-6">
-                            <label class="filter-label">To Date</label>
-                            <input type="date" id="toDate" class="form-control search-box" />
-                        </div>
-                    </div>
+                <div class="col-lg-2 col-md-3 mb-2">
+                    <label class="filter-label">Financial Year</label>
+                    <select id="financialYearFilter" class="form-select filter-control">
+                        <option value="2021-22">FY 2021-22</option>
+                        <option value="2022-23">FY 2022-23</option>
+                        <option value="2023-24">FY 2023-24</option>
+                        <option value="2024-25">FY 2024-25</option>
+                        <option value="2025-26">FY 2025-26</option>
+                        <option value="2026-27">FY 2026-27</option>
+                        <option value="2027-28">FY 2027-28</option>
+                        <option value="2028-29">FY 2028-29</option>
+                    </select>
                 </div>
 
-                <div class="col-lg-1 col-md-1">
-                    <button type="button" id="clearFilter" class="btn btn-outline-secondary clear-filter-btn" title="Clear search and dates">
-                        <i class="fa fa-rotate-left"></i>
+                <div class="col-lg-2 col-md-3 mb-2">
+                    <label class="filter-label">Invoice Month</label>
+                    <select id="monthFilter" class="form-select filter-control">
+                        <option value="all">All Months</option>
+                        <option value="04">April</option>
+                        <option value="05">May</option>
+                        <option value="06">June</option>
+                        <option value="07">July</option>
+                        <option value="08">August</option>
+                        <option value="09">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+                        <option value="01">January</option>
+                        <option value="02">February</option>
+                        <option value="03">March</option>
+                    </select>
+                </div>
+
+                <div class="col-lg-1 col-md-3 mb-2">
+                    <button type="button" id="clearFilter" class="btn btn-outline-secondary clear-filter-btn">
+                        <i class="fa fa-rotate-left"></i> Clear
                     </button>
                 </div>
+
+                <div class="col-lg-3 col-md-9 mb-2 d-flex justify-content-lg-end align-items-center">
+                    <span class="current-filter-info">
+                        <i class="fa fa-calendar-check"></i>
+                        <span id="currentFilterText">@selectedMonthName | FY @selectedFinancialYear</span>
+                    </span>
+                </div>
             </div>
         </div>
 
-        <!-- ── Summary toggle bar (FY + Month server filters) ── -->
-        <div class="section-toggle-bar" id="summaryBar">
-            <div class="d-flex align-items-center gap-2">
-                <span class="section-toggle-label">
-                    <i class="fa fa-chart-pie"></i>
-                    Summary Cards
-                </span>
-            </div>
-
-            <div class="d-flex align-items-center gap-2">
-                <span class="current-filter-info" id="summaryToggleBar">
-                    <i class="fa fa-calendar-check"></i>
-                    <span class="summary-filter-item">
-                        <select id="financialYearFilter" class="summary-filter-select">
-                            @for (int y = firstFyStart; y <= lastFyStart; y++)
-                            {
-                                var fyValue = $"{y}-{(y + 1).ToString().Substring(2)}";
-                                <option value="@fyValue">FY @fyValue</option>
-                            }
-                        </select>
-                    </span>
-                    <span class="summary-filter-separator">|</span>
-                    <span class="summary-filter-item">
-                        <select id="monthFilter" class="summary-filter-select">
-                            <option value="all">All Months</option>
-                            <option value="04">April</option>
-                            <option value="05">May</option>
-                            <option value="06">June</option>
-                            <option value="07">July</option>
-                            <option value="08">August</option>
-                            <option value="09">September</option>
-                            <option value="10">October</option>
-                            <option value="11">November</option>
-                            <option value="12">December</option>
-                            <option value="01">January</option>
-                            <option value="02">February</option>
-                            <option value="03">March</option>
-                        </select>
-                    </span>
-                </span>
-
-                <button type="button"
-                        class="btn btn-sm btn-light"
-                        onclick="toggleSection('summaryCard','summaryBar')"
-                        title="Toggle Summary">
-                    <i class="fa fa-chevron-down section-toggle-icon"></i>
-                </button>
-            </div>
+        <!-- ── Summary Cards Toggle Bar ── -->
+        <div class="section-toggle-bar" id="summaryToggleBar" onclick="toggleSection('summaryCard','summaryToggleBar','Summary Cards')">
+            <span class="section-toggle-label">
+                <i class="fa fa-chart-pie"></i>
+                Summary Cards
+            </span>
+            <i class="fa fa-chevron-down section-toggle-icon"></i>
         </div>
 
-        <!-- ── Summary cards (server data only) ── -->
         <div id="summaryCard" class="summary-section filter-collapsed">
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-2">
                     <div class="summary-card summary-fy">
                         <div class="summary-title">Financial Year Total</div>
-                        <div class="summary-value">
-                            @financialYearTotal.ToString("C2", inCulture)
+                        <div class="summary-value" id="fyGrandTotal">
+                            @financialYearTotal.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-IN"))
                         </div>
                         <div class="summary-subtitle">FY @selectedFinancialYear</div>
                     </div>
@@ -1114,29 +1081,29 @@
 
                 <div class="col-lg-3 col-md-6 mb-2">
                     <div class="summary-card summary-filtered">
-                        <div class="summary-title">Selected Period Total</div>
-                        <div class="summary-value">
-                            @selectedMonthGrandTotal.ToString("C2", inCulture)
+                        <div class="summary-title">Filtered Grand Total</div>
+                        <div class="summary-value" id="filteredGrandTotal">
+                            @selectedMonthGrandTotal.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-IN"))
                         </div>
-                        <div class="summary-subtitle">@selectedMonthName</div>
+                        <div class="summary-subtitle" id="filteredSubtitle">@selectedMonthName</div>
                     </div>
                 </div>
 
                 <div class="col-lg-3 col-md-6 mb-2">
                     <div class="summary-card summary-tax">
                         <div class="summary-title">Tax Amount</div>
-                        <div class="summary-value">
-                            @selectedMonthTaxTotal.ToString("C2", inCulture)
+                        <div class="summary-value" id="filteredTaxTotal">
+                            @selectedMonthTaxTotal.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-IN"))
                         </div>
-                        <div class="summary-subtitle">@selectedMonthName</div>
+                        <div class="summary-subtitle">Selected period</div>
                     </div>
                 </div>
 
                 <div class="col-lg-3 col-md-6 mb-2">
                     <div class="summary-card summary-invoice">
                         <div class="summary-title">Invoice Count</div>
-                        <div class="summary-value">@selectedMonthInvoiceCount</div>
-                        <div class="summary-subtitle">@selectedMonthName</div>
+                        <div class="summary-value" id="fyInvoiceCount">@financialYearInvoiceCount</div>
+                        <div class="summary-subtitle">Selected Financial Year</div>
                     </div>
                 </div>
             </div>
@@ -1147,7 +1114,7 @@
                         <h6 class="fy-summary-title">
                             <i class="fa fa-chart-column"></i>
                             Financial Year Summary Monthly Breakdown - FY
-                            <span class="text-primary">@selectedFinancialYear</span>
+                            <span class="text-primary">  @selectedFinancialYear</span>
                         </h6>
                         <small class="text-muted">April - March</small>
                     </div>
@@ -1162,18 +1129,19 @@
                         var monthData = financialYearSummary.FirstOrDefault(x => x.mon == monthNumber);
                         var monthTotal = monthData?.GrandTotal ?? 0m;
                         var monthInvoiceCount = monthData?.TotalInvoice ?? 0;
-                        var monthName = inCulture.DateTimeFormat.GetMonthName(monthNumber);
+                        var monthName = System.Globalization.CultureInfo.GetCultureInfo("en-IN").DateTimeFormat.GetMonthName(monthNumber);
                         var monthValue = monthNumber.ToString("00");
                         var activeClass = selectedMonth == monthValue ? "active" : "";
 
                         <div class="fy-month-card @activeClass" data-month-card="@monthValue" onclick="selectMonth('@monthValue')">
                             <div class="fy-month-name">@monthName</div>
-                            <div class="fy-month-value">@monthTotal.ToString("C2", inCulture)</div>
+                            <div class="fy-month-value">@monthTotal.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-IN"))</div>
                             <div class="fy-month-count">@monthInvoiceCount invoice(s)</div>
                         </div>
                     }
                 </div>
             </div>
+
         </div>
 
         <div class="record-section mt-2">
@@ -1210,11 +1178,21 @@
                         int count = 1;
                         foreach (var item in invoiceList)
                         {
+                            var fy = "";
+                            if (item.invoicedate.HasValue)
+                            {
+                                var invoiceDate = item.invoicedate.Value;
+                                fy = invoiceDate.Month >= 4
+                                ? $"{invoiceDate.Year}-{(invoiceDate.Year + 1).ToString().Substring(2)}"
+                                : $"{invoiceDate.Year - 1}-{invoiceDate.Year.ToString().Substring(2)}";
+                            }
+
                             decimal parsedTaxAmount = 0m;
                             decimal.TryParse(item.total_tax_amount, out parsedTaxAmount);
 
                             <tr class="invoice-row"
-                                data-invoice-date="@(item.invoicedate?.ToString("yyyy-MM-dd") ?? "")"
+                                data-month="@(item.invoicedate?.ToString("MM") ?? "")"
+                                data-financial-year="@fy"
                                 data-taxable="@(item.totalamtbeforetax ?? 0m)"
                                 data-tax="@parsedTaxAmount"
                                 data-grandtotal="@(item.totalamtaftertax ?? 0m)">
@@ -1232,15 +1210,15 @@
                                 <td data-label="GSTIN"><span class="gstin">@(item.gstIn ?? "-")</span></td>
 
                                 <td class="text-end" data-label="Taxable Value">
-                                    <span class="amount">@((item.totalamtbeforetax ?? 0m).ToString("C2", inCulture))</span>
+                                    <span class="amount">@((item.totalamtbeforetax ?? 0m).ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-IN")))</span>
                                 </td>
 
                                 <td class="text-end" data-label="Tax Amount">
-                                    <span class="tax-amount">@parsedTaxAmount.ToString("C2", inCulture)</span>
+                                    <span class="tax-amount">@parsedTaxAmount.ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-IN"))</span>
                                 </td>
 
                                 <td class="text-end" data-label="Grand Total">
-                                    <span class="grand-total">@((item.totalamtaftertax ?? 0m).ToString("C2", inCulture))</span>
+                                    <span class="grand-total">@((item.totalamtaftertax ?? 0m).ToString("C2", System.Globalization.CultureInfo.GetCultureInfo("en-IN")))</span>
                                 </td>
 
                                 <td data-label="Salesperson"><span class="salesperson">@(item.NAME ?? "-")</span></td>
@@ -1281,7 +1259,7 @@
                             <td colspan="11" class="no-record">
                                 <i class="fa fa-file-invoice fa-2x"></i>
                                 <div class="no-record-title">No invoices found.</div>
-                                <div class="no-record-text">There are no tax invoices available for the selected period.</div>
+                                <div class="no-record-text">There are no tax invoices available.</div>
                             </td>
                         </tr>
                     }
@@ -1303,326 +1281,344 @@
 </div>
 
 <script type="text/javascript">
-    (function () {
-        try {
-            if (localStorage.getItem('invoiceFilterCollapsed') === '1') {
-                document.getElementById('filterCard').classList.add('filter-collapsed');
-                var btn = document.getElementById('btnToggleFilter');
-                btn.querySelector('span').textContent = 'Show Filters';
-                btn.querySelector('i').className = 'fa fa-filter';
-            }
-        } catch (e) { }
-    })();
-</script>
+     const rowsPerPage = 20;
+     let currentPage = 1;
+     let allRows = [];
+     let filteredRows = [];
 
-<script type="text/javascript">
-    const rowsPerPage = 20;
-    let currentPage = 1;
-    let allRows = [];
-    let filteredRows = [];
+         // ── Filter toggle ──
+     document.getElementById('btnToggleFilter').addEventListener('click', function () {
+         const card = document.getElementById('filterCard');
+         card.classList.toggle('filter-collapsed');
 
-    // values coming from the server (what was actually loaded)
-    const selectedFY = "@selectedFinancialYear";
-    const selectedMonth = "@selectedMonth";   // "all" or "04".."03"
+         const collapsed = card.classList.contains('filter-collapsed');
+         this.querySelector('span').textContent = collapsed ? 'Show Filters' : 'Hide Filters';
 
-      // ── Filter panel toggle (state is remembered across reloads) ──
-    document.getElementById('btnToggleFilter').addEventListener('click', function () {
-        const card = document.getElementById('filterCard');
-        card.classList.toggle('filter-collapsed');
-        const collapsed = card.classList.contains('filter-collapsed');
+         const icon = this.querySelector('i');
+         icon.className = collapsed ? 'fa fa-filter' : 'fa fa-filter-circle-xmark';
+     });
 
-        this.querySelector('span').textContent = collapsed ? 'Show Filters' : 'Hide Filters';
-        this.querySelector('i').className = collapsed ? 'fa fa-filter' : 'fa fa-filter-circle-xmark';
+     document.addEventListener("DOMContentLoaded", function () {
+         allRows = Array.from(document.querySelectorAll("#invoiceTableBody .invoice-row"));
+         filteredRows = [...allRows];
 
-        try { localStorage.setItem('invoiceFilterCollapsed', collapsed ? '1' : '0'); } catch (e) { }
-    });
+         document.getElementById("financialYearFilter").value = "@selectedFinancialYear";
+         document.getElementById("monthFilter").value = "@selectedMonth";
 
-      // ── Summary panel toggle (state is remembered across reloads) ──
-    function toggleSection(cardId, barId) {
-        const card = document.getElementById(cardId);
-        const bar = document.getElementById(barId);
-        card.classList.toggle('filter-collapsed');
+         updateFilterText();
+         applyFilters();
+     });
 
-        const isOpen = !card.classList.contains('filter-collapsed');
-        bar.classList.toggle('open', isOpen);
+     document.getElementById("searchInput").addEventListener("input", function () {
+         currentPage = 1;
+         applyFilters();
+     });
 
-        try { localStorage.setItem('invoiceSummaryOpen', isOpen ? '1' : '0'); } catch (e) { }
-    }
+     document.getElementById("financialYearFilter").addEventListener("change", function () {
+         currentPage = 1;
+         loadServerData();
+     });
 
-    document.addEventListener("DOMContentLoaded", function () {
-        // show the loaded FY / month in the dropdowns
-        document.getElementById("financialYearFilter").value = selectedFY;
-        document.getElementById("monthFilter").value = selectedMonth;
+     document.getElementById("monthFilter").addEventListener("change", function () {
+         currentPage = 1;
+         loadServerData();
+     });
 
-        setDateLimits();
+    function toggleSection(cardId, barId, label) {
+         const card = document.getElementById(cardId);
+         const bar  = document.getElementById(barId);
 
-        allRows = Array.from(document.querySelectorAll("#invoiceTableBody .invoice-row"));
-        filteredRows = [...allRows];
-        applyFilters();
-    });
+         card.classList.toggle('filter-collapsed');
+         // card collapsed = bar NOT open; card visible = bar IS open
+         const isNowCollapsed = card.classList.contains('filter-collapsed');
+         bar.classList.toggle('open', !isNowCollapsed);
+     }
 
-    // ── Server-side filters (summary + list data) ──
-    document.getElementById("financialYearFilter").addEventListener("change", loadServerData);
-    document.getElementById("monthFilter").addEventListener("change", loadServerData);
+     function selectMonth(month) {
+         document.getElementById("monthFilter").value = month;
+         currentPage = 1;
+         loadServerData();
+     }
 
-    function selectMonth(month) {
-        document.getElementById("monthFilter").value = month;
-        loadServerData();
-    }
+     function loadServerData() {
+         const financialYear = document.getElementById("financialYearFilter").value;
+         const month = document.getElementById("monthFilter").value;
+         let url = '@Url.Action("Index", "Taxinvoice")';
+         const params = new URLSearchParams();
 
-    function loadServerData() {
-        const financialYear = document.getElementById("financialYearFilter").value;
-        const month = document.getElementById("monthFilter").value;
+         if (financialYear) {
+             params.append("financialYear", financialYear);
+         }
 
-        const params = new URLSearchParams();
-        if (financialYear) params.append("financialYear", financialYear);
-        params.append("month", (month === "all" || !month) ? "0" : month);
+         if (month === "all" || month === "0") {
+             params.append("month", "0");
+         } else if (month) {
+             params.append("month", month);
+         }
 
-        window.location.href = '@Url.Action("Index", "Taxinvoice")' + "?" + params.toString();
-    }
+         window.location.href = url + "?" + params.toString();
+     }
 
-    // ── Client-side filters (list only) ──
-    document.getElementById("searchInput").addEventListener("input", function () {
-        currentPage = 1;
-        applyFilters();
-    });
-    document.getElementById("fromDate").addEventListener("change", function () {
-        currentPage = 1;
-        applyFilters();
-    });
-    document.getElementById("toDate").addEventListener("change", function () {
-        currentPage = 1;
-        applyFilters();
-    });
+     document.getElementById("clearFilter").addEventListener("click", function () {
+         document.getElementById("searchInput").value = "";
+         document.getElementById("financialYearFilter").value = "@currentFinancialYear";
+         document.getElementById("monthFilter").value = "@currentMonth";
+         toastr.info("Filters have been reset.");
+         loadServerData();
+     });
 
-    const currentFY = "@currentFinancialYear";
-    const currentMonthValue = "@currentMonth";
+     function applyFilters() {
+         const searchValue = document.getElementById("searchInput").value.toLowerCase().trim();
+         const selectedMonth = document.getElementById("monthFilter").value;
+         const selectedFinancialYear = document.getElementById("financialYearFilter").value;
 
-    document.getElementById("clearFilter").addEventListener("click", function () {
-        // clear list filters
-        document.getElementById("searchInput").value = "";
-        document.getElementById("fromDate").value = "";
-        document.getElementById("toDate").value = "";
+         filteredRows = allRows.filter(function (row) {
+             const rowText = row.innerText.toLowerCase();
+             const matchesSearch = searchValue === "" || rowText.includes(searchValue);
 
-         window.location.href = '@Url.Action("Index", "Taxinvoice")';
-            return;
-    });
+             const rowMonth = row.getAttribute("data-month");
+             const matchesMonth = selectedMonth === "all" || selectedMonth === "0" || rowMonth === selectedMonth;
 
-    function applyFilters() {
-        const search = document.getElementById("searchInput").value.toLowerCase().trim();
-        const from = document.getElementById("fromDate").value;   // yyyy-MM-dd
-        const to = document.getElementById("toDate").value;
+             const rowFY = row.getAttribute("data-financial-year");
+             const matchesFY = selectedFinancialYear === "all" || rowFY === selectedFinancialYear;
 
-        filteredRows = allRows.filter(function (row) {
-            const matchesSearch = !search || row.innerText.toLowerCase().includes(search);
+             return matchesSearch && matchesMonth && matchesFY;
+         });
 
-            const d = row.getAttribute("data-invoice-date") || "";
-            const matchesFrom = !from || (d && d >= from);
-            const matchesTo = !to || (d && d <= to);
+         updateSummary();
+         updateFilterText();
+         renderTable();
+     }
 
-            return matchesSearch && matchesFrom && matchesTo;
-        });
+     function updateSummary() {
+         const fyGrandTotal = @financialYearTotal.ToString(System.Globalization.CultureInfo.InvariantCulture);
+         const fyInvoiceCount = @financialYearInvoiceCount;
 
-        renderTable();
-    }
+         let filteredGrandTotal = 0;
+         let filteredTaxTotal = 0;
 
-    // limit the date pickers to the loaded FY / month
-    function setDateLimits() {
-        const startYear = parseInt(selectedFY.substring(0, 4), 10);
-        let start, end;
+         filteredRows.forEach(function (row) {
+             filteredGrandTotal += parseFloat(row.getAttribute("data-grandtotal")) || 0;
+             filteredTaxTotal += parseFloat(row.getAttribute("data-tax")) || 0;
+         });
 
-        if (selectedMonth === "all") {
-            start = new Date(startYear, 3, 1);
-            end = new Date(startYear + 1, 3, 0);
-        } else {
-            const m = parseInt(selectedMonth, 10);
-            const y = m >= 4 ? startYear : startYear + 1;
-            start = new Date(y, m - 1, 1);
-            end = new Date(y, m, 0);
-        }
+         const searchValue = document.getElementById("searchInput").value.trim();
+         const selectedMonth = document.getElementById("monthFilter").value;
 
-        const fromEl = document.getElementById("fromDate");
-        const toEl = document.getElementById("toDate");
-        fromEl.min = toEl.min = toISO(start);
-        fromEl.max = toEl.max = toISO(end);
-    }
+         if (searchValue === "" && selectedMonth !== "all" && selectedMonth !== "0") {
+             filteredGrandTotal = @selectedMonthGrandTotal.ToString(System.Globalization.CultureInfo.InvariantCulture);
+             filteredTaxTotal = @selectedMonthTaxTotal.ToString(System.Globalization.CultureInfo.InvariantCulture);
+         }
 
-    function toISO(d) {
-        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
-    }
+         if (searchValue === "" && (selectedMonth === "all" || selectedMonth === "0")) {
+             filteredGrandTotal = fyGrandTotal;
+             filteredTaxTotal = @financialYearTaxTotal.ToString(System.Globalization.CultureInfo.InvariantCulture);
+         }
 
-    // ── Table rendering ──
-    function updateTotalRecords() {
-        document.getElementById("totalRecords").innerText = allRows.length;
-        document.getElementById("filteredRecords").innerText = filteredRows.length;
-    }
+         document.getElementById("fyGrandTotal").innerText = formatCurrency(fyGrandTotal);
+         document.getElementById("filteredGrandTotal").innerText = formatCurrency(filteredGrandTotal);
+         document.getElementById("filteredTaxTotal").innerText = formatCurrency(filteredTaxTotal);
+         document.getElementById("fyInvoiceCount").innerText = fyInvoiceCount;
+     }
 
-    function renderTable() {
-        removeDynamicEmptyRow();
-        allRows.forEach(function (row) { row.style.display = "none"; });
+     function formatCurrency(value) {
+         return "₹ " + Number(value || 0).toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+     }
 
-        if (filteredRows.length === 0) {
-            if (allRows.length > 0) {
-                showEmptyRow();
-            }
-            updateShowingInfo(0, 0, 0);
-            createPagination();
-            updateTotalRecords();
-            return;
-        }
+     function updateFilterText() {
+         const fy = document.getElementById("financialYearFilter").value;
+         const month = document.getElementById("monthFilter").value;
 
-        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-        if (currentPage > totalPages) {
-            currentPage = totalPages;
-        }
+         const monthNames = {
+             "01": "January", "02": "February", "03": "March", "04": "April",
+             "05": "May", "06": "June", "07": "July", "08": "August",
+             "09": "September", "10": "October", "11": "November", "12": "December"
+         };
 
-        const startIndex = (currentPage - 1) * rowsPerPage;
-        const endIndex = Math.min(startIndex + rowsPerPage, filteredRows.length);
-        const pageRows = filteredRows.slice(startIndex, endIndex);
+         let monthText = "All Months";
+         if (month && month !== "all" && month !== "0" && monthNames[month]) {
+             monthText = monthNames[month];
+         }
 
-        pageRows.forEach(function (row) { row.style.display = ""; });
-        pageRows.forEach(function (row, index) {
-            const numberCell = row.querySelector(".row-number");
-            if (numberCell) {
-                numberCell.innerText = startIndex + index + 1;
-            }
-        });
+         document.getElementById("currentFilterText").innerText = monthText + " | FY " + fy;
+         document.getElementById("filteredSubtitle").innerText = monthText;
+     }
 
-        updateShowingInfo(startIndex + 1, endIndex, filteredRows.length);
-        createPagination();
-        updateTotalRecords();
-    }
+     function updateTotalRecords() {
+         document.getElementById("totalRecords").innerText = allRows.length;
+         document.getElementById("filteredRecords").innerText = filteredRows.length;
+     }
 
-    function updateShowingInfo(from, to, total) {
-        document.getElementById("showingFrom").innerText = from;
-        document.getElementById("showingTo").innerText = to;
-        document.getElementById("showingTotal").innerText = total;
-    }
+     function renderTable() {
+         removeDynamicEmptyRow();
+         allRows.forEach(function (row) { row.style.display = "none"; });
 
-    function createPagination() {
-        const pagination = document.getElementById("pagination");
-        pagination.innerHTML = "";
+         if (filteredRows.length === 0) {
+             showEmptyRow();
+             updateShowingInfo(0, 0, 0);
+             createPagination();
+             updateTotalRecords();
+             return;
+         }
 
-        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-        if (totalPages <= 1) {
-            return;
-        }
+         const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+         if (currentPage > totalPages) {
+             currentPage = totalPages;
+         }
 
-        const previous = document.createElement("li");
-        previous.className = "page-item " + (currentPage === 1 ? "disabled" : "");
-        previous.innerHTML = `<a class="page-link" href="javascript:void(0)"><i class="fa fa-chevron-left"></i> Previous</a>`;
-        previous.onclick = function () {
-            if (currentPage > 1) {
-                currentPage--;
-                renderTable();
-                window.scrollTo({ top: 0, behavior: "smooth" });
-            }
-        };
-        pagination.appendChild(previous);
+         const startIndex = (currentPage - 1) * rowsPerPage;
+         const endIndex = Math.min(startIndex + rowsPerPage, filteredRows.length);
+         const pageRows = filteredRows.slice(startIndex, endIndex);
 
-        const maxVisiblePages = 5;
-        let startPage = Math.max(1, currentPage - 2);
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-        if (endPage - startPage + 1 < maxVisiblePages) {
-            startPage = Math.max(1, endPage - maxVisiblePages + 1);
-        }
+         pageRows.forEach(function (row) { row.style.display = ""; });
+         pageRows.forEach(function (row, index) {
+             const numberCell = row.querySelector(".row-number");
+             if (numberCell) {
+                 numberCell.innerText = startIndex + index + 1;
+             }
+         });
 
-        if (startPage > 1) {
-            addPageButton(1, pagination);
-            if (startPage > 2) {
-                addDots(pagination);
-            }
-        }
+         updateShowingInfo(startIndex + 1, endIndex, filteredRows.length);
+         createPagination();
+         updateTotalRecords();
+     }
 
-        for (let i = startPage; i <= endPage; i++) {
-            addPageButton(i, pagination);
-        }
+     function updateShowingInfo(from, to, total) {
+         document.getElementById("showingFrom").innerText = from;
+         document.getElementById("showingTo").innerText = to;
+         document.getElementById("showingTotal").innerText = total;
+     }
 
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                addDots(pagination);
-            }
-            addPageButton(totalPages, pagination);
-        }
+     function createPagination() {
+         const pagination = document.getElementById("pagination");
+         pagination.innerHTML = "";
 
-        const next = document.createElement("li");
-        next.className = "page-item " + (currentPage === totalPages ? "disabled" : "");
-        next.innerHTML = `<a class="page-link" href="javascript:void(0)">Next <i class="fa fa-chevron-right"></i></a>`;
-        next.onclick = function () {
-            if (currentPage < totalPages) {
-                currentPage++;
-                renderTable();
-                window.scrollTo({ top: 0, behavior: "smooth" });
-            }
-        };
-        pagination.appendChild(next);
-    }
+         const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+         if (totalPages <= 1) {
+             return;
+         }
 
-    function addPageButton(pageNumber, pagination) {
-        const li = document.createElement("li");
-        li.className = "page-item " + (pageNumber === currentPage ? "active" : "");
-        li.innerHTML = `<a class="page-link" href="javascript:void(0)">${pageNumber}</a>`;
-        li.onclick = function () {
-            currentPage = pageNumber;
-            renderTable();
-            window.scrollTo({ top: 0, behavior: "smooth" });
-        };
-        pagination.appendChild(li);
-    }
+         const previous = document.createElement("li");
+         previous.className = "page-item " + (currentPage === 1 ? "disabled" : "");
+         previous.innerHTML = `<a class="page-link" href="javascript:void(0)"><i class="fa fa-chevron-left"></i> Previous</a>`;
+         previous.onclick = function () {
+             if (currentPage > 1) {
+                 currentPage--;
+                 renderTable();
+                 window.scrollTo({ top: 0, behavior: "smooth" });
+             }
+         };
+         pagination.appendChild(previous);
 
-    function addDots(pagination) {
-        const li = document.createElement("li");
-        li.className = "page-item disabled";
-        li.innerHTML = `<span class="page-link">...</span>`;
-        pagination.appendChild(li);
-    }
+         const maxVisiblePages = 5;
+         let startPage = Math.max(1, currentPage - 2);
+         let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+         if (endPage - startPage + 1 < maxVisiblePages) {
+             startPage = Math.max(1, endPage - maxVisiblePages + 1);
+         }
 
-    function showEmptyRow() {
-        const tbody = document.getElementById("invoiceTableBody");
-        const emptyRow = document.createElement("tr");
-        emptyRow.id = "dynamicEmptyRow";
-        emptyRow.innerHTML = `
-            <td colspan="11" class="no-record">
-                <i class="fa fa-search fa-2x"></i>
-                <div class="no-record-title">No matching invoices found.</div>
-                <div class="no-record-text">Try changing the search text or date range.</div>
-            </td>`;
-        tbody.appendChild(emptyRow);
-    }
+         if (startPage > 1) {
+             addPageButton(1, pagination);
+             if (startPage > 2) {
+                 addDots(pagination);
+             }
+         }
 
-    function removeDynamicEmptyRow() {
-        const emptyRow = document.getElementById("dynamicEmptyRow");
-        if (emptyRow) {
-            emptyRow.remove();
-        }
-    }
+         for (let i = startPage; i <= endPage; i++) {
+             addPageButton(i, pagination);
+         }
 
-    // ── Delete ──
-    function deleteInvoice(event, element) {
-        event.preventDefault();
-        var url = element.href;
+         if (endPage < totalPages) {
+             if (endPage < totalPages - 1) {
+                 addDots(pagination);
+             }
+             addPageButton(totalPages, pagination);
+         }
 
-        showConfirmToast(
-            "Are you sure you want to delete this invoice?",
-            function () {
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function (response) {
-                        if (response.success) {
-                            showToast("Invoice deleted successfully..", "success");
-                            setTimeout(function () { location.reload(); }, 800); // refresh list + summary
-                        } else {
-                            showToast(response.message, "error");
-                        }
-                    },
-                    error: function () {
-                        showToast("Something went wrong while deleting the invoice.", "error");
-                    }
-                });
-            },
-            function () { showToast("Delete cancelled.", "warning"); }
-        );
-        return false;
-    }
+         const next = document.createElement("li");
+         next.className = "page-item " + (currentPage === totalPages ? "disabled" : "");
+         next.innerHTML = `<a class="page-link" href="javascript:void(0)">Next <i class="fa fa-chevron-right"></i></a>`;
+         next.onclick = function () {
+             if (currentPage < totalPages) {
+                 currentPage++;
+                 renderTable();
+                 window.scrollTo({ top: 0, behavior: "smooth" });
+             }
+         };
+         pagination.appendChild(next);
+     }
+
+     function addPageButton(pageNumber, pagination) {
+         const li = document.createElement("li");
+         li.className = "page-item " + (pageNumber === currentPage ? "active" : "");
+         li.innerHTML = `<a class="page-link" href="javascript:void(0)">${pageNumber}</a>`;
+         li.onclick = function () {
+             currentPage = pageNumber;
+             renderTable();
+             window.scrollTo({ top: 0, behavior: "smooth" });
+         };
+         pagination.appendChild(li);
+     }
+
+     function addDots(pagination) {
+         const li = document.createElement("li");
+         li.className = "page-item disabled";
+         li.innerHTML = `<span class="page-link">...</span>`;
+         pagination.appendChild(li);
+     }
+
+     function showEmptyRow() {
+         const tbody = document.getElementById("invoiceTableBody");
+         const emptyRow = document.createElement("tr");
+         emptyRow.id = "dynamicEmptyRow";
+         emptyRow.innerHTML = `
+             <td colspan="11" class="no-record">
+                 <i class="fa fa-search fa-2x"></i>
+                 <div class="no-record-title">No matching invoices found.</div>
+                 <div class="no-record-text">Try changing the financial year, month or search criteria.</div>
+             </td>`;
+         tbody.appendChild(emptyRow);
+     }
+
+     function removeDynamicEmptyRow() {
+         const emptyRow = document.getElementById("dynamicEmptyRow");
+         if (emptyRow) {
+             emptyRow.remove();
+         }
+     }
+
+
+     function deleteInvoice(event, element) {
+         event.preventDefault();
+
+         var url = element.href;
+
+         showConfirmToast(
+             "Are you sure you want to delete this invoice?",
+             function () {
+                 $.ajax({
+                     url: url,
+                     type: 'GET',
+                     success: function (response) {
+                         if (response.success) {
+                             showToast("Invoice deleted successfully..", "success");
+                             $(element).closest('tr').fadeOut(500, function () {
+                                 $(this).remove();
+                             });
+                         } else {
+                             showToast(response.message, "error");
+                         }
+                     },
+                     error: function () {
+                         showToast("Something went wrong while deleting the invoice.", "error");
+                     }
+                 });
+             },
+             function () {
+                 showToast("Delete cancelled.", "warning");
+             }
+         );
+
+         return false;
+     }
 </script>

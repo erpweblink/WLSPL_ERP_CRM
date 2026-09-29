@@ -1,5 +1,7 @@
 ﻿using Dapper;
+using Humanizer;
 using Microsoft.Data.SqlClient;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System;
 using System.Data;
 using WEBLINK_CRM.Models;
@@ -40,15 +42,13 @@ namespace WLSPL_ERP_CRM.repository
             using var connection = new SqlConnection(
                 _configuration.GetConnectionString("Conn_Stringg"));
 
-
-            const string companySql = @"select  cname As companyName from Company  where isdeleted = 0  and status =1 and type='paid';";
+            const string companySql = @"select ccode As compCode,cname As companyName from Company where isdeleted = 0  and status =1 and type='paid';";
 
             var companies = await connection.QueryAsync<TaxInvoiceCreate>(companySql);
 
             return companies.ToList();
 
         }
-
 
         public async Task<TaxInvoiceCreate> Getcompanybycname(string cname)
         {
@@ -61,7 +61,7 @@ namespace WLSPL_ERP_CRM.repository
 
                 parameters.Add("@cname", cname);
 
-                const string companySql = @"select gstno As gstIn,address As Address, Billing_location As Location ,Billing_pincode As PinCode, State As state,Billing_statecode As statecode   from Company  where isdeleted = 0  and status =1 and type='paid' and cname = @cname;";
+                const string companySql = @"select ccode AS compCode,gstno As gstIn,address As Address, Billing_location As Location ,Billing_pincode As PinCode, State As state,Billing_statecode As statecode   from Company  where isdeleted = 0  and status =1 and type='paid' and cname = @cname;";
 
                 var result = await connection.QueryFirstOrDefaultAsync<TaxInvoiceCreate>(companySql, parameters);
 
@@ -94,64 +94,63 @@ namespace WLSPL_ERP_CRM.repository
             string connectionString =
                 _configuration.GetConnectionString("Conn_Stringg");
 
-            using (SqlConnection con =
-                   new SqlConnection(connectionString))
+            using (SqlConnection con =new SqlConnection(connectionString))
             {
                 await con.OpenAsync();
 
                 string query = @"
-                SELECT 
-                    MONTH(invoicedate) AS Mon,
+                        SELECT 
+                            MONTH(invoicedate) AS Mon,
 
-                    COUNT(invoiceno) AS TotalInvoice,
+                            COUNT(invoiceno) AS TotalInvoice,
 
-                    ISNULL(
-                        SUM(
-                            CAST(totalamtbeforetax AS DECIMAL(18,2))
-                        ), 0
-                    ) AS TotalTaxableValue,
+                            ISNULL(
+                                SUM(
+                                    CAST(totalamtbeforetax AS DECIMAL(18,2))
+                                ), 0
+                            ) AS TotalTaxableValue,
 
-                    ISNULL(
-                        SUM(
-                            CAST(ISNULL(cgstamt, 0) AS DECIMAL(18,2))
-                            +
-                            CAST(ISNULL(sgstamt, 0) AS DECIMAL(18,2))
-                            +
-                            CAST(ISNULL(igstamt, 0) AS DECIMAL(18,2))
-                        ), 0
-                    ) AS TotalTaxAmount,
+                            ISNULL(
+                                SUM(
+                                    CAST(ISNULL(cgstamt, 0) AS DECIMAL(18,2))
+                                    +
+                                    CAST(ISNULL(sgstamt, 0) AS DECIMAL(18,2))
+                                    +
+                                    CAST(ISNULL(igstamt, 0) AS DECIMAL(18,2))
+                                ), 0
+                            ) AS TotalTaxAmount,
 
-                    ISNULL(
-                        SUM(
-                            CAST(totalamtaftertax AS DECIMAL(18,2))
-                        ), 0
-                    ) AS GrandTotal
+                            ISNULL(
+                                SUM(
+                                    CAST(totalamtaftertax AS DECIMAL(18,2))
+                                ), 0
+                            ) AS GrandTotal
 
-                FROM invoicemain
+                        FROM invoicemain
 
-                WHERE 
-                    e_invoice_cancel_status IS NULL
-                    AND invoicedate >= @StartDate
-                    AND invoicedate < DATEADD(DAY, 1, @EndDate)
+                        WHERE 
+                            e_invoice_cancel_status IS NULL
+                            AND invoicedate >= @StartDate
+                            AND invoicedate < DATEADD(DAY, 1, @EndDate)
 
-                GROUP BY MONTH(invoicedate)
+                        GROUP BY MONTH(invoicedate)
 
-                ORDER BY
-                    CASE
-                        WHEN MONTH(invoicedate) = 4 THEN 1
-                        WHEN MONTH(invoicedate) = 5 THEN 2
-                        WHEN MONTH(invoicedate) = 6 THEN 3
-                        WHEN MONTH(invoicedate) = 7 THEN 4
-                        WHEN MONTH(invoicedate) = 8 THEN 5
-                        WHEN MONTH(invoicedate) = 9 THEN 6
-                        WHEN MONTH(invoicedate) = 10 THEN 7
-                        WHEN MONTH(invoicedate) = 11 THEN 8
-                        WHEN MONTH(invoicedate) = 12 THEN 9
-                        WHEN MONTH(invoicedate) = 1 THEN 10
-                        WHEN MONTH(invoicedate) = 2 THEN 11
-                        WHEN MONTH(invoicedate) = 3 THEN 12
-                    END;
-            ";
+                        ORDER BY
+                            CASE
+                                WHEN MONTH(invoicedate) = 4 THEN 1
+                                WHEN MONTH(invoicedate) = 5 THEN 2
+                                WHEN MONTH(invoicedate) = 6 THEN 3
+                                WHEN MONTH(invoicedate) = 7 THEN 4
+                                WHEN MONTH(invoicedate) = 8 THEN 5
+                                WHEN MONTH(invoicedate) = 9 THEN 6
+                                WHEN MONTH(invoicedate) = 10 THEN 7
+                                WHEN MONTH(invoicedate) = 11 THEN 8
+                                WHEN MONTH(invoicedate) = 12 THEN 9
+                                WHEN MONTH(invoicedate) = 1 THEN 10
+                                WHEN MONTH(invoicedate) = 2 THEN 11
+                                WHEN MONTH(invoicedate) = 3 THEN 12
+                            END;
+                    ";
 
                 using (SqlCommand cmd =
                        new SqlCommand(query, con))
@@ -195,25 +194,90 @@ namespace WLSPL_ERP_CRM.repository
             return result;
         }
 
-        public async Task<List<Taxinvoice.TaxInvoiceCreate>> GetInfo(string financialYear, int? month)
+        public async Task<List<Taxinvoice.TaxInvoiceCreate>> GetInfo(string financialYear,int? month)
         {
             using var connection = new SqlConnection(
                 _configuration.GetConnectionString("Conn_Stringg"));
 
+            int startYear = int.Parse(financialYear.Substring(0, 4));
+
+            DateTime startDate;
+            DateTime endDate;
+
+            // Month = 0 or null => Full financial year
+            if (!month.HasValue || month.Value == 0)
+            {
+                startDate = new DateTime(startYear, 4, 1);
+                endDate = new DateTime(startYear + 1, 4, 1);
+            }
+            else
+            {
+                int selectedMonth = month.Value;
+
+                int year = selectedMonth >= 4
+                    ? startYear
+                    : startYear + 1;
+
+                startDate = new DateTime(year, selectedMonth, 1);
+                endDate = startDate.AddMonths(1);
+            }
+
+            const string query = @"
+                        SELECT
+                            id,
+                            invoicedate,
+                            invoiceno,
+                            companyname,
+                            cgstin AS gstin,
+
+                            ISNULL(
+                                TRY_CAST(totalamtbeforetax AS DECIMAL(18,2)),
+                                0
+                            ) AS totalamtbeforetax,
+
+                            ISNULL(
+                                TRY_CAST(sgstamt AS DECIMAL(18,2)),
+                                0
+                            )
+                            +
+                            ISNULL(
+                                TRY_CAST(cgstamt AS DECIMAL(18,2)),
+                                0
+                            )
+                            +
+                            ISNULL(
+                                TRY_CAST(igstamt AS DECIMAL(18,2)),
+                                0
+                            ) AS total_tax_amount,
+
+                            ISNULL(
+                                TRY_CAST(totalamtaftertax AS DECIMAL(18,2)),
+                                0
+                            ) AS totalamtaftertax,
+
+                            isapprove,
+                            isreject,
+                            ExportInvoiceNo,
+                            NAME
+
+                        FROM [stswlspl].vw_invoicebyemp
+
+                        WHERE invoicedate >= @StartDate
+                          AND invoicedate < @EndDate
+
+                        ORDER BY invoicedate ASC;
+                    ";
+
             var parameters = new DynamicParameters();
 
-            parameters.Add("@Action", "GetMonthInfo");
-            parameters.Add("@FinancialYear", financialYear);
-            parameters.Add("@Month", month);
+            parameters.Add("@StartDate", startDate);
+            parameters.Add("@EndDate", endDate);
 
-            var result = await connection.QueryAsync<Taxinvoice.TaxInvoiceCreate>(
-                "SP_comapnylistDetails",
-                parameters,
-                commandType: CommandType.StoredProcedure
-            );
+            var result = await connection.QueryAsync<Taxinvoice.TaxInvoiceCreate>(query,parameters);
 
             return result.ToList();
         }
+
 
         public async Task<dynamic> Getinvoicebyid(int ID)
         {
@@ -232,7 +296,7 @@ namespace WLSPL_ERP_CRM.repository
                 sgstamt, igst, igstamt, gstonreversecharge, totalqty, totalrate, taxablevalue, totalamtbeforetax, totalamtaftertax,
                 amtinwords, servicedescription, sessionname, createddate, IsApprove, IsReject, ApprovedRejectedBy, Remarks, Remarkss,
                 ExportInvoiceNo, BillingAddress, BillingGST, BillingPincode, BillingStatecode, AgainstBy, AgainstByValue,
-                TotalPayable, TdsPer, TdsAmt FROM InvoiceMain
+                TotalPayable, TdsPer, TdsAmt, Remarks FROM InvoiceMain
                 WHERE id = @id;
                
                 SELECT id, invoiceid, productdescription, saccode, qty, rate, amount, taxablevalue, cgstrate,
@@ -451,6 +515,7 @@ namespace WLSPL_ERP_CRM.repository
 
                 // Company
                 parameters.Add("@companyname", model.main.companyName);
+                parameters.Add("@companyCode", model.main.compCode);
                 parameters.Add("@cgstin", model.main.gstIn);
                 parameters.Add("@address", model.main.Address);
                 parameters.Add("@BillingLocation", model.main.Location);
@@ -492,6 +557,7 @@ namespace WLSPL_ERP_CRM.repository
                 parameters.Add("@TotalPayable", model.main.TotalPayable);
                 parameters.Add("@TdsPer", model.main.TdsPer);
                 parameters.Add("@TdsAmt", model.main.TdsAmt);
+                parameters.Add("@Remarks", model.main.Remarks);
 
                 // =====================================================
                 // OTHER
@@ -499,7 +565,6 @@ namespace WLSPL_ERP_CRM.repository
 
                 parameters.Add("@amtinwords", model.main.amtinwords);
                 parameters.Add("@sessionname", model.main.sessionname);
-
                 parameters.Add("@AgainstBy", model.main.AgainstBy);
                 parameters.Add("@AgainstByValue", model.main.AgainstByValue);
 
@@ -512,36 +577,11 @@ namespace WLSPL_ERP_CRM.repository
                 parameters.Add("@BillingGST", model.main.gstIn);
                 parameters.Add("@BillingPincode", model.main.PinCode);
                 parameters.Add("@BillingStatecode", model.main.statecode);
-
-                // =====================================================
-                // ACTION
-                // =====================================================
-
                 parameters.Add("@action", Action);
 
-                // =====================================================
-                // OUTPUT INVOICE ID
-                // =====================================================
+                parameters.Add("@myinvoice", dbType: DbType.Int32, direction: ParameterDirection.Output);
 
-                parameters.Add(
-                    "@myinvoice",
-                    dbType: DbType.Int32,
-                    direction: ParameterDirection.Output
-                );
-
-                // =====================================================
-                // SAVE MAIN INVOICE
-                // =====================================================
-
-                int rowsAffected = await connection.ExecuteAsync(
-                    "[dbo].[SP_AddInvoice]",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
-
-                // =====================================================
-                // GET INVOICE ID
-                // =====================================================
+                int rowsAffected = await connection.ExecuteAsync("[dbo].[SP_AddInvoice]", parameters, commandType: CommandType.StoredProcedure);
 
                 int myInvoice = parameters.Get<int>("@myinvoice");
 
@@ -550,19 +590,12 @@ namespace WLSPL_ERP_CRM.repository
                 {
                     myInvoice = Convert.ToInt32(model.main.Id);
 
-                    // =================================================
-                    // DELETE OLD DETAILS
-                    // =================================================
-
                     await DeleteInvoiceDetails(
                         myInvoice,
                         connection
                     );
                 }
 
-                // =====================================================
-                // INSERT NEW DETAILS
-                // =====================================================
 
                 if (model.details != null && model.details.Count > 0 && myInvoice > 0)
                 {
@@ -588,10 +621,6 @@ namespace WLSPL_ERP_CRM.repository
                         parametersd.Add("@ServiceId", detail.serviceId);
                         parametersd.Add("@ServiceName", detail.serviceName);
                         parametersd.Add("@ValidateTill", detail.serviceTill);
-
-                        // =================================================
-                        // INSERT DETAIL
-                        // =================================================
 
                         const string invoicedetailsSql = @"
                                 INSERT INTO [InvoiceDetails]
@@ -633,10 +662,28 @@ namespace WLSPL_ERP_CRM.repository
                                     @ValidateTill
                                 );";
 
-                        await connection.ExecuteAsync(
-                            invoicedetailsSql,
-                            parametersd
-                        );
+                        await connection.ExecuteAsync(invoicedetailsSql,parametersd);
+
+                        if (Action == "insert" && !string.IsNullOrEmpty(detail.proformadetailsId))
+                        {
+                            var bankIds = detail.proformadetailsId
+                                .Split(',', StringSplitOptions.RemoveEmptyEntries).Select(x => x.Trim())
+                                .Where(x => int.TryParse(x, out _)).Select(int.Parse).ToList();
+
+                            if (bankIds.Any())
+                            {
+                                const string proformadtls = @"
+                                    UPDATE dbo.tbl_ProformaInvoiceBankDetails 
+                                    SET TaxInvoiceID = @invoiceid 
+                                    WHERE id IN @bankIds";
+
+                                await connection.ExecuteAsync(proformadtls, new
+                                {
+                                    invoiceid = myInvoice,
+                                    bankIds = bankIds  
+                                });
+                            }
+                        }
                     }
                 }
 
@@ -646,6 +693,102 @@ namespace WLSPL_ERP_CRM.repository
             {
                 throw;
             }
+        }
+
+        public string BuildChangeComment(Taxinvoice.TaxInvoiceCreate oldMain, List<Taxinvoice.InvoiceDetails> oldDetails,
+          Taxinvoice.TaxInvoiceCreate newMain, List<Taxinvoice.InvoiceDetails> newDetails)
+        {
+            var changes = new List<string>();
+
+            void Check(string label, object? oldVal, object? newVal)
+            {
+                var o = oldVal?.ToString()?.Trim() ?? "";
+                var n = newVal?.ToString()?.Trim() ?? "";
+                if (!string.Equals(o, n, StringComparison.OrdinalIgnoreCase))
+                    changes.Add($"{label} changed from '{(string.IsNullOrEmpty(o) ? "N/A" : o)}' to '{(string.IsNullOrEmpty(n) ? "N/A" : n)}'");
+            }
+
+            // ── Invoice Header ──
+            Check("Invoice Date", oldMain.invoicedate, newMain.invoicedate);
+            Check("Reverse Charge", oldMain.reversecharge, newMain.reversecharge);
+
+            // ── Bill To ──
+            Check("Company Name", oldMain.companyName, newMain.companyName);
+            Check("GST No", oldMain.gstIn, newMain.gstIn);
+            Check("Address", oldMain.Address, newMain.Address);
+            Check("Billing Location", oldMain.BillingLocation, newMain.BillingLocation);
+            Check("Pincode", oldMain.PinCode, newMain.PinCode);
+            Check("State", oldMain.state, newMain.state);
+            Check("State Code", oldMain.statecode, newMain.statecode);
+
+            // ── Transaction ──
+            Check("Transaction Mode", oldMain.TransMode, newMain.TransMode);
+            Check("Transaction No", oldMain.TransNo, newMain.TransNo);
+            Check("Transaction Date", oldMain.TransDate, newMain.TransDate);
+            Check("Transaction Amt", oldMain.TransAmt, newMain.TransAmt);
+
+            // ── Against By ──
+            Check("Against By", oldMain.AgainstBy, newMain.AgainstBy);
+            Check("Against By Value", oldMain.AgainstByValue, newMain.AgainstByValue);
+
+            // ── Totals ──
+            Check("Taxable Value", oldMain.taxablevalue, newMain.taxablevalue);
+            Check("Grand Total", oldMain.totalamtaftertax, newMain.totalamtaftertax);
+            Check("TDS %", oldMain.TdsPer, newMain.TdsPer);
+            Check("TDS Amount", oldMain.TdsAmt, newMain.TdsAmt);
+            Check("Total Payable", oldMain.TotalPayable, newMain.TotalPayable);
+
+            // ── Service Detail Rows ──
+            oldDetails ??= new List<Taxinvoice.InvoiceDetails>();
+            newDetails ??= new List<Taxinvoice.InvoiceDetails>();
+
+            // Rows added
+            if (newDetails.Count > oldDetails.Count)
+                changes.Add($"{newDetails.Count - oldDetails.Count} new service row(s) added");
+
+            // Rows removed
+            if (newDetails.Count < oldDetails.Count)
+                changes.Add($"{oldDetails.Count - newDetails.Count} service row(s) removed");
+
+            // Compare matching rows
+            int compareCount = Math.Min(oldDetails.Count, newDetails.Count);
+            for (int i = 0; i < compareCount; i++)
+            {
+                var od = oldDetails[i];
+                var nd = newDetails[i];
+                string prefix = $"Row {i + 1}";
+
+                Check($"{prefix} Service", od.serviceName, nd.serviceName);
+                Check($"{prefix} Description", od.productdescription, nd.productdescription);
+                Check($"{prefix} SAC Code", od.saccode, nd.saccode);
+                Check($"{prefix} Rate", od.rate, nd.rate);
+                Check($"{prefix} CGST %", od.cgstrate, nd.cgstrate);
+                Check($"{prefix} SGST %", od.sgstrate, nd.sgstrate);
+                Check($"{prefix} IGST %", od.igstrate, nd.igstrate);
+                Check($"{prefix} Total", od.total, nd.total);
+            }
+
+            if (!changes.Any()) return string.Empty;
+
+            return $"Invoice {newMain.invoiceno} updated on {DateTime.Now:dd-MMM-yyyy HH:mm}: "
+                   + string.Join("; ", changes) + ".";
+        }
+
+        public async Task SaveInvoiceChangeHistory(string sessionName, string invoiceNo, string message)
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+
+            const string sql = @"
+                INSERT INTO [dbo].[CommentHistory] (sessionname, ccode, commentdatetime, message)
+                VALUES (@sessionname, @ccode, @commentdatetime, @message)";
+
+            await connection.ExecuteAsync(sql, new
+            {
+                sessionname = sessionName,
+                ccode = invoiceNo,
+                commentdatetime = DateTime.Now,
+                message = message
+            });
         }
 
         private async Task DeleteInvoiceDetails(int invoiceId, SqlConnection connection)
@@ -761,7 +904,7 @@ namespace WLSPL_ERP_CRM.repository
             const string sql = @"
                 SELECT [WLSPL].[FN_GenerateTaxInvoiceNo]() AS invoiceno,
                        PM.reversecharge, 'Proforma' AS AgainstBy, PM.invoiceno AS AgainstByValue,
-                       PM.state, PM.companyname AS companyName, PM.address AS Address, PM.billstate,
+                       PM.state,PM.companycode AS compCode, PM.companyname AS companyName, PM.address AS Address, PM.billstate,
                        PM.BillingAddress, PM.BillingLocation, PM.BillingGST,
                        PM.BillingPincode, PM.BillingStatecode
                 FROM dbo.tbl_ProformaInvoiceMain PM WHERE PM.id = @id;
@@ -769,12 +912,18 @@ namespace WLSPL_ERP_CRM.repository
                 SELECT CAST(ISNULL(TDSPercentage,0) AS decimal(9,2))
                 FROM dbo.tbl_ProformaInvoiceMain WHERE id = @id;
 
-                SELECT PD.productdescription, PD.ServiceName AS serviceName, PD.ServiceId AS serviceId,
-                       PD.saccode AS saccode, PD.ValidateTill AS serviceTill,
-                       PD.rate, PD.taxablevalue
+                SELECT PD.productdescription,  
+                       STUFF((
+                           SELECT ',' + CAST(id AS VARCHAR)
+                           FROM dbo.tbl_ProformaInvoiceBankDetails
+                           WHERE InvoiceMainId = @id AND ISNULL(IsDeleted,0) = 0
+                           FOR XML PATH('')
+                       ), 1, 1, '')     AS proformadetailsId,
+                       PD.ServiceName AS serviceName, PD.ServiceId AS serviceId,
+                       PD.saccode AS saccode, PD.ValidateTill AS serviceTill,PD.rate, PD.taxablevalue
                 FROM dbo.tbl_ProformaInvoiceDetails PD WHERE PD.invoiceid = @id ORDER BY PD.id;
 
-                SELECT [mode], ChequeNo, CreatedDate, Amount
+                SELECT id as proformadetailsId,[mode], ChequeNo, CreatedDate, Amount
                 FROM dbo.tbl_ProformaInvoiceBankDetails
                 WHERE InvoiceMainId = @id AND ISNULL(IsDeleted,0) = 0 ORDER BY id;";
 

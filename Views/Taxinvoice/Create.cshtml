@@ -30,7 +30,7 @@
                 cursor: default;
             }
 
-   
+
     /* ── Consistent card-body row spacing ── */
     .card-body .row.form-row-item {
         margin-bottom: 16px;
@@ -239,17 +239,6 @@
         margin-top: 2px;
     }
 
-    /* ── Print ── */
-    @@media print {
-        .add-row-btn, .remove-row, .action-btns {
-            display: none !important;
-        }
-
-        @@page {
-            size: A4 landscape;
-            margin: 8mm;
-        }
-    }
 </style>
 
 <style type="text/css">
@@ -327,6 +316,7 @@
             background: #cbd5e1;
             border-radius: 6px;
         }
+
     .sd-top {
         display: grid;
         grid-template-columns: 1fr 100px;
@@ -428,8 +418,6 @@
             <h5 style="margin:0; color:#fff;">Bill To</h5>
         </div>
         <div class="card-body">
-
-
             <div class="row form-row-item">
                 <div class="col-md-6">
                     <div class="form-group row">
@@ -440,6 +428,7 @@
                                        id="companyName" autocomplete="off"
                                        placeholder="Type to search company..." />
                                 <ul class="company-dropdown" id="companyDropdown"></ul>
+                                <input type="hidden" asp-for="main.compCode" id="compCode" />
                             </div>
                             <span class="err-msg" id="err-companyName"></span>
                         </div>
@@ -515,11 +504,17 @@
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label font-weight-bold">Transaction Mode</label>
                         <div class="col-md-8">
-                            <select asp-for="main.TransMode" class="form-control" id="Transaction">
-                                <option value="">Select Transaction Mode</option>
+                            <select class="form-control" asp-for="main.TransMode" id="Transaction">
+                                <option value="">--Select Payment Mode--</option>
+                                <option value="Online / UPI">Online / UPI</option>
                                 <option value="Cheque">Cheque</option>
-                                <option value="Online/UPI">Online/UPI</option>
                                 <option value="Cash">Cash</option>
+                                <option value="Credit Card">Credit Card</option>
+                                <option value="Debit Card">Debit Card</option>
+                                <option value="NEFT">NEFT</option>
+                                <option value="RTGS">RTGS</option>
+                                <option value="IMPS">IMPS</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
                             </select>
                         </div>
                     </div>
@@ -562,7 +557,7 @@
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label font-weight-bold">Against By</label>
                         <div class="col-md-8">
-                            <input asp-for="main.AgainstBy" type="text" class="form-control" id="AgainstBy" value="Direct" readonly/>
+                            <input asp-for="main.AgainstBy" type="text" class="form-control" id="AgainstBy" value="Direct" readonly />
                         </div>
                     </div>
                 </div>
@@ -577,7 +572,17 @@
                 </div>
             </div>
 
-        </div>
+            <div class="row form-row-item">
+                <div class="col-md-12">
+                    <div class="form-group row">
+                        <label class="col-md-2 col-form-label font-weight-bold">Remark/Feedback</label>
+                        <div class="col-md-10">
+                            <textarea asp-for="main.Remarks" type="text" class="form-control" id="Remarks" placeholder="Add Custom Remark/Feedback"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
     </div>
 
     <!-- ══════════════ ITEM DETAILS ══════════════ -->
@@ -794,17 +799,14 @@
 </form>
 
 <script type="text/javascript">
-     // Razor writes this once — all JS can read it
-     const isAdmin = @(Context.Session.GetString("Role").ToString() == "Admin" ? "true" : "false");
-     let rowCounter = 0;
-
-         // Serialize server-side details into JS
+    const isAdmin = @(Context.Session.GetString("Role").ToString() == "Admin" ? "true" : "false");
+    let rowCounter = 0;
     const preloadedDetails = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.details ?? new List<Taxinvoice.InvoiceDetails>()));
     const receivedAmt = parseFloat(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.TransAmt ?? "0"))) || 0;
     const isProforma = @Html.Raw((Model.main.AgainstBy == "Proforma" && Model.details != null && Model.details.Any()).ToString().ToLower());
-    
+
     $(document).ready(function () {
-    
+
         setTodayDate();
         // ── Proforma preload ──
         if (isProforma && preloadedDetails.length > 0) {
@@ -813,7 +815,7 @@
         } else {
             addInvoiceRow();
         }
-     
+
         // ── Pre-fill Bill To for Proforma ──
         if (isProforma) {
             $('#companyName').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.companyName ?? "")));
@@ -826,7 +828,7 @@
             $('#billingStateCode').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.BillingStatecode ?? Model.main.statecode ?? "")));
             $('#Transaction').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.TransMode ?? "")));
             $('#transNo').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.TransNo ?? Model.main.TransNo ?? "")));
-            $('#transDate').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.TransDate.HasValue ? Model.main.TransDate.Value.ToString("yyyy-MM-dd"): "")));
+            $('#transDate').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.TransDate.HasValue ? Model.main.TransDate.Value.ToString("yyyy-MM-dd") : "")));
             $('#TransAmt').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.TransAmt ?? Model.main.TransAmt ?? "")));
             $('#AgainstBy').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.AgainstBy ?? "")));
             $('#AgainstByValue').val(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.AgainstByValue ?? "")));
@@ -834,7 +836,7 @@
             applyGSTBasedOnCompany();
             reconcileToReceived();
             lockProformaFields();
-        }    
+        }
      });
 
     function reconcileToReceived() {
@@ -950,7 +952,7 @@
          document.getElementById('invoiceItems').innerHTML = '';
          rowCounter = 0;
 
-         if (data.details && data.details.length > 0) {         
+         if (data.details && data.details.length > 0) {
              data.details.forEach(function (item) {
                  addInvoiceRow();
 
@@ -960,6 +962,7 @@
                  // ── Service ──
                  row.querySelector('.service').value             = item.serviceName        || '';
                  row.querySelector('.service-name-hidden').value = item.serviceName        || '';
+                 row.querySelector('.proforma-detailed-id').value = item.proformadetailsId || '';
                  row.querySelector('.service-id').value          = item.serviceId          || '';
                  row.querySelector('.sac-code').value            = item.saccode            || '';
                  row.querySelector('.description').value         = item.productdescription || '';
@@ -993,6 +996,8 @@
                  // ── Lock/unlock tax fields based on which tax is applied ──
                  const cgst = parseInt(item.cgstrate) || 0;
                  const igst = parseInt(item.igstrate) || 0;
+
+                 calculateRow(row.querySelector('.rate'));
 
              });
          } else {
@@ -1029,6 +1034,7 @@
     function clearCompanyDetails() {
          ['#gstin','#address','#Location','#billingState',
           '#billingPincode','#billingStateCode'].forEach(id => $(id).val(''));
+           $('#compCode').val('');
      }
 
     function setTodayDate() {
@@ -1052,6 +1058,7 @@
                                     onkeydown="handleServiceKeydown(event,this)" ${!isAdmin ? 'disabled' : ''} />
                              <input type="hidden" class="service-id" />
                              <input type="hidden" class="service-name-hidden" />
+                             <input type="hidden" class="proforma-detailed-id" />
                              <ul class="service-dropdown"></ul>
                          </div>
                      </div>
@@ -1301,6 +1308,7 @@
 
              // ── Bill To ──
              companyName:       $('#companyName').val()        || null,
+             compCode:          $('#compCode').val()    || null,
              gstIn:             $('#gstin').val()              || null,
              Address:           $('#address').val()            || null,
              Location:          $('#Location').val()           || null,
@@ -1333,7 +1341,8 @@
              TdsAmt:            String(parseFloat($('#summaryTDSAmount').val()))   || 0,
              TotalPayable:      String(parseFloat($('#summaryGrandTotal').val()))   || 0,
 
-             amtinwords:        $('#amountInWords').val() || null
+             amtinwords:        $('#amountInWords').val() || null, 
+             Remarks :          $('#Remarks').val() || null
          };
 
          // ── Build details rows ──
@@ -1342,6 +1351,7 @@
              details.push({
                  serviceId:          row.querySelector('.service-id').value.trim()          || null,
                  serviceName:        row.querySelector('.service-name-hidden').value.trim() || null,
+                 proformadetailsId:  row.querySelector('.proforma-detailed-id').value.trim()|| null,
                  productdescription: row.querySelector('.description').value.trim()         || null,
                  saccode:            row.querySelector('.sac-code').value.trim()            || null,
                  serviceTill:        row.querySelector('.validTill').value.trim()            || null,
@@ -1394,7 +1404,8 @@
     function clearInvoice() {
          showConfirmToast('Are you sure you want to clear the invoice?', function () {
               $('#companyName').val('');
-               companySelected = '';
+              $('#compCode').val('');
+              companySelected = '';
              $('#companyDropdown').hide().empty();
              $('#reverseCharge').val('N');
              $('#Transaction').val('');
@@ -1513,14 +1524,16 @@
         gstin = gstin.trim();
 
         if (gstin.length < 2) {
+            document.querySelectorAll('.invoice-item-row').forEach(function(row) {
+                calculateRow(row.querySelector('.rate'));
+            });
+            calculateAll();
+            updateAmountInWords();
             return;
         }
 
         // First 2 digits of GSTIN = State Code
         var customerStateCode = gstin.substring(0, 2);
-
-        // Your company state code
-        // Maharashtra = 27
         var companyStateCode = '27';
 
         $('.invoice-item-row').each(function () {
@@ -1724,8 +1737,8 @@
 </script>
 
 <script type="text/javascript">
-    const companyNames = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-                                                        Model.companies.Select(c => c.companyName)));
+    const companyList = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.companies.Select(c => new { name = c.companyName, code = c.compCode })));
+    const companyNames = companyList.map(c => c.name);
     let companySelected = '';
     let activeIdx = -1;
 
@@ -1777,6 +1790,10 @@
     function pickCompany(name) {
         $('#companyName').val(name);
         companySelected = name;
+
+        const found = companyList.find(c => c.name === name);
+        $('#compCode').val(found ? found.code : '');
+
         $('#companyDropdown').hide().empty();
         getCompanyDetails(name);
     }

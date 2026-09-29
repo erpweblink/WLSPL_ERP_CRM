@@ -1,5 +1,7 @@
 ﻿using iTextSharp.text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Channels;
 using WEBLINK_CRM.Helpers;
 using WLSPL_ERP_CRM.Models;
 using WLSPL_ERP_CRM.repository;
@@ -8,12 +10,17 @@ using static WLSPL_ERP_CRM.Models.Taxinvoice;
 /* Things to do when creating invoice 
    1.Alter table InvoiceMain add columns AgainstBy Nvarchar(500) null and AgainstByValue Nvarchar(500) null
    2.Alter table invoicedetails add column ServiceName Nvarchar(500) null and ServiceId nvarchar(500) null and ValidateTill nvarchar(500) null 
-   3.ADD parameters in [dbo].[SP_AddInvoice] for InvoiceMain  @AgainstBy nvarchar(MAX) = null, @AgainstByValue nvarchar(MAX) = null, @TotalPayable nvarchar(MAX) = null, @TdsPer nvarchar(MAX) = null, @TdsAmt nvarchar(MAX) = null
+   3.ADD parameters in [dbo].[SP_AddInvoice] for InvoiceMain  @AgainstBy nvarchar(MAX) = null,
+        @AgainstByValue nvarchar(MAX) = null, @TotalPayable nvarchar(MAX) = null, @TdsPer nvarchar(MAX) = null,
+        @TdsAmt nvarchar(MAX) = null,@companyCode nvarchar(MAX) = null, @Remarks nvarchar(MAX) = null
    4.Alter table InvoiceMain add TotalPayable nvarchar(max) null, TdsPer nvarchar(max) null, TdsAmt nvarchar(max) null
+   5.Alter table InvoiceMain add compCode nvarchar(max) null
  */
 
 namespace WLSPL_ERP_CRM.Controllers
 {
+    [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
+    [Authorize]
     public class TaxinvoiceController : Controller
     {
         private readonly ITaxinvoiceRepo _TaxinvoiceRepo;
@@ -40,36 +47,15 @@ namespace WLSPL_ERP_CRM.Controllers
                         : $"{today.Year - 1}-{today.Year.ToString().Substring(2)}";
                 }
 
-                // ============================================
-                // DEFAULT MONTH
-                // Current month when no month is selected
-                //
-                // month = 0 => All Months
-                // month = 1-12 => Selected Month
-                // ============================================
-
                 if (!month.HasValue)
                 {
                     month = today.Month;
                 }
 
-                // ============================================
-                // GET INVOICE DATA
-                // ============================================
 
-                var data = await _TaxinvoiceRepo.GetInfo(
-                    financialYear,
-                    month
-                );
+                var data = await _TaxinvoiceRepo.GetInfo(financialYear,month);
 
-                // ============================================
-                // GET COMPLETE FINANCIAL YEAR SUMMARY
-                // ============================================
-
-                var financialYearSummary =
-                    await _TaxinvoiceRepo.GetFinancialYearSummary(
-                        financialYear
-                    );
+                var financialYearSummary = await _TaxinvoiceRepo.GetFinancialYearSummary(financialYear);
 
                 // ============================================
                 // SEND DATA TO VIEW
@@ -141,19 +127,24 @@ namespace WLSPL_ERP_CRM.Controllers
 
         [HttpPost]
         [IgnoreAntiforgeryToken]
-        public IActionResult SaveInvoice([FromBody] TaxInvoiceCreateVM model)
+        public async Task<IActionResult> SaveInvoice([FromBody] TaxInvoiceCreateVM model)
         {
             model.main.sessionname = HttpContext.Session.GetString("EmpCode")?.ToString();
 
             if (!ModelState.IsValid)
                 return Json(new { success = false, message = "Invalid data." });
 
-              var result = _TaxinvoiceRepo.UpdateSave(model, Action : "insert");
+            var result = await _TaxinvoiceRepo.UpdateSave(model, Action : "insert");
+
+            await _TaxinvoiceRepo.SaveInvoiceChangeHistory(
+                      sessionName: model.main.sessionname ?? "System",
+                      invoiceNo: model.main.compCode ?? model.main.Id,
+                      message: $"Invoice {model.main.invoiceno} created on {DateTime.Now:dd-MMM-yyyy HH:mm} ."
+                  );
 
             return Json(new { success = true, invoiceNo = model.main.invoiceno });
         }
-
-      
+ 
         [HttpGet]
         public async Task<IActionResult> Getcomapnybycname(string cname)
         {
@@ -234,14 +225,31 @@ namespace WLSPL_ERP_CRM.Controllers
         }
 
         [HttpPost]
-        public IActionResult UpdateInvoice([FromBody] TaxInvoiceCreateVM model)
+        public async Task<IActionResult> UpdateInvoice([FromBody] TaxInvoiceCreateVM model)
         {
             model.main.sessionname = HttpContext.Session.GetString("EmpCode")?.ToString();
 
             if (!ModelState.IsValid)
                 return Json(new { success = false, message = "Invalid data." });
 
-            var result = _TaxinvoiceRepo.UpdateSave(model, Action: "updateOldData");
+            var oldVM = await _TaxinvoiceRepo.Getinvoicebyid(Convert.ToInt32(model.main.Id))
+             as Taxinvoice.TaxInvoiceCreateVM;
+
+            var result = await _TaxinvoiceRepo.UpdateSave(model, Action: "updateOldData");
+
+            if (oldVM?.main != null)
+            {
+                var changes = _TaxinvoiceRepo.BuildChangeComment(oldVM.main, oldVM.details, model.main, model.details);
+
+                if (!string.IsNullOrEmpty(changes))
+                {
+                    await _TaxinvoiceRepo.SaveInvoiceChangeHistory(
+                        sessionName: model.main.sessionname ?? "System",
+                        invoiceNo: model.main.compCode ?? model.main.Id,
+                        message: changes
+                    );
+                }
+            }
 
             return Json(new { success = true, invoiceNo = model.main.invoiceno });
         }
