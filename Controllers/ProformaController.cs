@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
+using WEBLINK_CRM.Helpers;
 using WEBLINK_CRM.Models;
 using WEBLINK_CRM.repository;
+using WLSPL_ERP_CRM.Models;
+using WLSPL_ERP_CRM.repository;
+using static WLSPL_ERP_CRM.Models.ProformaInvoice;
 
 
 namespace WEBLINK_CRM.Controllers
@@ -15,29 +19,163 @@ namespace WEBLINK_CRM.Controllers
         {
             objProforma = proforma;
         }
-        [HttpGet]
-        public async Task<IActionResult> Index()
-        {
-            var loginId = HttpContext.Session.GetString("EmpCode");
-            string pageSize = "10";
-            var list = await objProforma.GetProformaList(pageSize, loginId);
-            return View(list);
-
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> GetDetailsById(string ID)
+        public async Task<IActionResult> Index(string? financialYear, int? month)
         {
             try
             {
-                var list = await objProforma.GetDetailsById(ID);
-
-                return Json(new { Success = true, Data = list });
+                var loginId = HttpContext.Session.GetString("EmpCode");
+                string pageSize = "10";
+                var list = await objProforma.GetProformaList(pageSize, loginId);
+                return View(list);
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                ViewBag.ErrorMessage = ex.Message;
+
+                return View("Error");
             }
+        }
+
+
+        public async Task<IActionResult> Create(string id = null)
+        {
+            var companies = await objProforma.Getcompany();
+
+            // Edit
+            if (!string.IsNullOrEmpty(id))
+            {
+                var invoiceId = Convert.ToInt32(EncryptionHelper.Decrypt(id));
+
+                var result = await objProforma.Getinvoicebyid(invoiceId);
+
+                if (result == null || result.main == null)
+                {
+                    return NotFound();
+                }
+
+                var vm = new ProformaInvoice.ProformaInvoiceCreateVM
+                {
+                    main = result.main,
+                    details = result.details ?? new List<ProformaInvoice.InvoiceDetails>(),
+                    companies = companies ?? new List<ProformaInvoice.ProformaInvoiceCreate>(),
+                    BankDetails = result.BankDetails ?? new List<ProformaInvoice.InvoiceBankDetail>()
+                };
+
+                return View("Create", vm);
+            }
+
+            // Create
+            var invoiceMain = await objProforma.GetBlankModelWithinvoiceno();
+
+            var model = new ProformaInvoiceCreateVM
+            {
+                main = invoiceMain ?? new ProformaInvoiceCreate(),
+                details = new List<ProformaInvoice.InvoiceDetails>(),
+                companies = companies ?? new List<ProformaInvoiceCreate>(),
+                BankDetails = new List<ProformaInvoice.InvoiceBankDetail>()
+            };
+
+            if (model.main.invoicedate == null)
+            {
+                model.main.invoicedate = DateTime.Today;
+            }
+
+            return View("Create", model);
+        }
+
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public IActionResult SaveInvoice([FromBody] ProformaInvoiceCreateVM model)
+        {
+            model.main.sessionname = HttpContext.Session.GetString("EmpCode")?.ToString();
+
+            if (!ModelState.IsValid)
+                return Json(new { success = false, message = "Invalid data." });
+
+            var result = objProforma.UpdateSave(model, Action: "insert");
+
+            return Json(new { success = true, invoiceNo = model.main.invoiceno });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetQuotationsByCompany(string companyName, string type)
+        {
+            if (string.IsNullOrWhiteSpace(companyName))
+                return BadRequest("Company name is required.");
+
+            if (string.IsNullOrWhiteSpace(type))
+                return BadRequest("Type is required.");
+
+            var result = await objProforma.GetQuotationsByCompany(companyName, type);
+
+            if (result.Count == 0)
+                return NotFound("No records found.");
+
+            return Json(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetQuotationProformaDetails(int id, string type)
+        {
+            if (id <= 0 || string.IsNullOrWhiteSpace(type))
+                return BadRequest("Invalid request.");
+
+            var result = await objProforma.GetQuotationProformaDetails(id, type);
+
+            if (result == null)
+                return NotFound("No details found.");
+
+            return Json(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Getcomapnybycname(string cname)
+        {
+            if (string.IsNullOrWhiteSpace(cname))
+            {
+                return BadRequest("Company name is required.");
+            }
+
+            var result = await objProforma.Getcompanybycname(cname);
+
+            if (result == null)
+            {
+                return NotFound("Company not found.");
+            }
+
+            return Json(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> SearchServices(string q)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(q))
+                    return BadRequest("Search query is required.");
+
+                var result = await objProforma.SearchServices(q);
+
+                return Json(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message, inner = ex.InnerException?.Message });
+            }
+        }
+
+
+        [HttpPost]
+        public IActionResult UpdateInvoice([FromBody] ProformaInvoiceCreateVM model)
+        {
+            model.main.sessionname = HttpContext.Session.GetString("EmpCode")?.ToString();
+
+            if (!ModelState.IsValid)
+                return Json(new { success = false, message = "Invalid data." });
+
+            var result = objProforma.UpdateSave(model, Action: "updateOldData");
+
+            return Json(new { success = true, invoiceNo = model.main.invoiceno });
         }
 
         [HttpPost]
@@ -53,8 +191,8 @@ namespace WEBLINK_CRM.Controllers
                         message = "Invalid Proforma ID."
                     });
                 }
-
-                var result = await objProforma.Delete(ID);
+                var name= HttpContext.Session.GetString("EmpCode")?.ToString();
+                var result = await objProforma.DeleteInvoiceDetails(ID, name);
 
                 if (result)
                 {
@@ -81,203 +219,6 @@ namespace WEBLINK_CRM.Controllers
             }
         }
 
-        [HttpGet]
-        public IActionResult Create()
-        {
-            return View();
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> CreateOrEdit([FromBody] VM_Proforma DataList)
-        {
-            try
-            {
-
-                if (DataList == null)
-                {
-                    return Json(new
-                    {
-                        Success = false,
-                        Message = "Invalid request."
-                    });
-                }
-                DataList.CreatedBy = HttpContext.Session.GetString("EmpCode");
-                int ID = await objProforma.Save(DataList);
-
-                return Json(new
-                {
-                    success = true,
-                    ID = ID,
-                    Message = "Proforma saved successfully."
-                });
-
-
-            }
-            catch (Exception ex)
-            {
-                return Json(new
-                {
-                    Success = false,
-                    Message = ex.Message
-                });
-            }
-        }
-
-        public async Task<IActionResult> GetCompany(string Status)
-        {
-            try
-            {
-                if (HttpContext.Session.GetString("EmpCode") != null)
-                {
-                    var loginId = HttpContext.Session.GetString("EmpCode");
-                    if (loginId != null)
-                    {
-                        var list = await objProforma.GetCompanyList(Status, loginId);
-                        if (list != null)
-                        {
-                            return Json(new { Success = true, Data = list });
-                        }
-                        else
-                        {
-                            return Json(new { success = false, message = "Data Not Found.......!" });
-                        }
-                    }
-                    else
-                    {
-                        return RedirectToAction("Login", "Login");
-                    }
-                }
-                else
-                {
-                    return RedirectToAction("Login", "Login");
-                }
-            }
-            catch (Exception e)
-            {
-                return Json(new { success = false, message = e.Message });
-            }
-        }
-
-        public async Task<IActionResult> GetCompanyByCode(string ID)
-        {
-            try
-            {
-                if (HttpContext.Session.GetString("EmpCode") != null)
-                {
-                    var loginId = HttpContext.Session.GetString("EmpCode");
-                    if (loginId != null)
-                    {
-                        var list = await objProforma.GetCompanyByCode(ID);
-                        if (list != null)
-                        {
-                            return Json(new { Success = true, Data = list });
-                        }
-                        else
-                        {
-                            return Json(new { success = false, message = "Data Not Found.......!" });
-                        }
-                    }
-                    else
-                    {
-                        return RedirectToAction("Login", "Login");
-                    }
-                }
-                else
-                {
-                    return RedirectToAction("Login", "Login");
-                }
-            }
-            catch (Exception e)
-            {
-                return Json(new { success = false, message = e.Message });
-            }
-        }
-
-        public async Task<IActionResult> GetProformaDataById(string ID)
-        {
-            try
-            {
-                if (HttpContext.Session.GetString("EmpCode") == null)
-                {
-                    return RedirectToAction("Login", "Login");
-                }
-
-                var loginId = HttpContext.Session.GetString("EmpCode");
-
-                if (string.IsNullOrEmpty(loginId))
-                {
-                    return RedirectToAction("Login", "Login");
-                }
-
-                // IMPORTANT: await async methods
-                var list = await objProforma.GetProformaById(ID);
-                var Dtlslist = await objProforma.GetDetailsById(ID);
-
-                if (list == null)
-                {
-                    return Json(new
-                    {
-                        Success = false,
-                        Message = "Work Order not found"
-                    });
-                }
-                var result = new
-                {
-                    proformaHdr = list,
-                    proformaDtls = Dtlslist
-                };
-
-                return Json(new
-                {
-                    Success = true,
-                    Data = result
-                });
-            }
-            catch (Exception e)
-            {
-                return Json(new
-                {
-                    Success = false,
-                    Message = e.Message
-                });
-            }
-        }
-
-        public async Task<IActionResult> GetState(string Status)
-        {
-            try
-            {
-                if (HttpContext.Session.GetString("EmpCode") != null)
-                {
-                    var loginId = HttpContext.Session.GetString("EmpCode");
-                    if (loginId != null)
-                    {
-                        var list = await objProforma.GetStateList(Status);
-                        if (list != null)
-                        {
-                            return Json(new { Success = true, Data = list });
-                        }
-                        else
-                        {
-                            return Json(new { success = false, message = "Data Not Found.......!" });
-                        }
-                    }
-                    else
-                    {
-                        return RedirectToAction("Login", "Login");
-                    }
-                }
-                else
-                {
-                    return RedirectToAction("Login", "Login");
-                }
-            }
-            catch (Exception e)
-            {
-                return Json(new { success = false, message = e.Message });
-            }
-        }
-
         [HttpPost]
         public async Task<IActionResult> ViewPDF(string ID)
         {
@@ -296,76 +237,6 @@ namespace WEBLINK_CRM.Controllers
                 fileName = $"Proforma_{decryptedId}.pdf",
                 fileData = base64Pdf
             });
-        }
-
-        public async Task<IActionResult> GetQuotationNo(string Companyname)
-        {
-            try
-            {
-                if (HttpContext.Session.GetString("EmpCode") != null)
-                {
-                    var loginId = HttpContext.Session.GetString("EmpCode");
-                    if (loginId != null)
-                    {
-                        var list = await objProforma.GetQuotationNoList(Companyname);
-                        if (list != null)
-                        {
-                            return Json(new { Success = true, Data = list });
-                        }
-                        else
-                        {
-                            return Json(new { success = false, message = "Data Not Found.......!" });
-                        }
-                    }
-                    else
-                    {
-                        return RedirectToAction("Login", "Login");
-                    }
-                }
-                else
-                {
-                    return RedirectToAction("Login", "Login");
-                }
-            }
-            catch (Exception e)
-            {
-                return Json(new { success = false, message = e.Message });
-            }
-        }
-
-        public async Task<IActionResult> GetDetailsByQuotationNo(string AgainstNo)
-        {
-            try
-            {
-                if (HttpContext.Session.GetString("EmpCode") != null)
-                {
-                    var loginId = HttpContext.Session.GetString("EmpCode");
-                    if (loginId != null)
-                    {
-                        var list = await objProforma.GetDetailsByQuotationNo(AgainstNo);
-                        if (list != null)
-                        {
-                            return Json(new { Success = true, Data = list });
-                        }
-                        else
-                        {
-                            return Json(new { success = false, message = "Data Not Found.......!" });
-                        }
-                    }
-                    else
-                    {
-                        return RedirectToAction("Login", "Login");
-                    }
-                }
-                else
-                {
-                    return RedirectToAction("Login", "Login");
-                }
-            }
-            catch (Exception e)
-            {
-                return Json(new { success = false, message = e.Message });
-            }
         }
 
     }

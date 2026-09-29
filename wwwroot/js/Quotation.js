@@ -22,7 +22,7 @@
     // =====================================================
     var BindStateList = function (callback) {
         $.ajax({
-            url: "/Proforma/GetState",
+            url: "/Quotation/GetState",
             data: { "Status": "1" },
             type: "post",
             cache: false,
