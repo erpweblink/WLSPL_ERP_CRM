@@ -6,11 +6,13 @@ namespace WLSPL_ERP_CRM.repository
 {
     public interface ITaxinvoiceRepo
     {
-        Task<List<Taxinvoice.TaxInvoiceCreate>> GetInfo(string financialYear, int? month);
+        Task<List<Taxinvoice.TaxInvoiceCreate>> GetInfo(string financialYear, int? month, string? salesManager, string empCode, string empRole);
 
         Task<List<Taxinvoice.TaxInvoiceCreate>> GetApprovelList();
 
-        Task<List<Taxinvoice.TaxInvoiceCreate>> GetFinancialYearSummary(string financialYear);
+        Task<List<Taxinvoice.TaxInvoiceCreate>> GetFinancialYearSummary(string financialYear, string? salesManager, string empCode, string empRole);
+
+        Task<dynamic> GetSalesPersonList(string empCode, string empRole);
 
         Task<Taxinvoice.TaxInvoiceCreateVM?> GetInvoiceForPdfAsync(int id);
 

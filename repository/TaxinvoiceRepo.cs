@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Humanizer;
+using Microsoft.CodeAnalysis.Elfie.Diagnostics;
 using Microsoft.Data.SqlClient;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System;
@@ -73,7 +74,7 @@ namespace WLSPL_ERP_CRM.repository
             }
         }
 
-        public async Task<List<Taxinvoice.TaxInvoiceCreate>> GetFinancialYearSummary(string financialYear)
+        public async Task<List<Taxinvoice.TaxInvoiceCreate>> GetFinancialYearSummary(string financialYear, string? salesManager, string empCode, string empRole)
         {
             var result = new List<Taxinvoice.TaxInvoiceCreate>();
 
@@ -132,6 +133,13 @@ namespace WLSPL_ERP_CRM.repository
                             e_invoice_cancel_status IS NULL
                             AND invoicedate >= @StartDate
                             AND invoicedate < DATEADD(DAY, 1, @EndDate)
+                            AND (@SalesManager IS NULL OR sessionname  = @SalesManager)
+                            AND (
+                                        @CurrentRole = 'Admin'
+                                        OR sessionname  = @CurrentUser
+                                        OR sessionname  IN (SELECT empcode FROM [dbo].[employees]
+                                                       WHERE TL_Manager = @CurrentUser AND status = '1' AND isdeleted = '0')
+                                    )
 
                         GROUP BY MONTH(invoicedate)
 
@@ -155,13 +163,11 @@ namespace WLSPL_ERP_CRM.repository
                 using (SqlCommand cmd =
                        new SqlCommand(query, con))
                 {
-                    cmd.Parameters.AddWithValue(
-                        "@StartDate",
-                        startDate);
-
-                    cmd.Parameters.AddWithValue(
-                        "@EndDate",
-                        endDate);
+                    cmd.Parameters.AddWithValue("@StartDate",startDate);
+                    cmd.Parameters.AddWithValue("@EndDate",endDate);
+                    cmd.Parameters.AddWithValue("@SalesManager", string.IsNullOrWhiteSpace(salesManager)? DBNull.Value : salesManager);
+                    cmd.Parameters.AddWithValue("@CurrentUser", empCode);
+                    cmd.Parameters.AddWithValue("@CurrentRole", empRole);
 
                     using (SqlDataReader reader =
                            await cmd.ExecuteReaderAsync())
@@ -194,7 +200,46 @@ namespace WLSPL_ERP_CRM.repository
             return result;
         }
 
-        public async Task<List<Taxinvoice.TaxInvoiceCreate>> GetInfo(string financialYear,int? month)
+        public async Task<dynamic> GetSalesPersonList(string empCode, string empRole)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
+                {
+                    await connection.OpenAsync();
+                    string query = @"SELECT empcode as UserCode, name as FullName FROM [dbo].[employees] 
+                                     WHERE status = '1' AND isdeleted = '0' 
+                                     AND (@CurrentRole = 'Admin' OR empcode = @CurrentUser OR TL_Manager = @CurrentUser) 
+                                     ORDER BY  CASE WHEN empcode = @CurrentUser THEN 0 ELSE 1 END, name;
+         
+                                     SELECT empcode as UserCode, name as FullName 
+                                     FROM [dbo].[employees] 
+                                     WHERE status = '1' AND isdeleted = '0' AND Sales_TL_Manager = '1'
+                                     ORDER BY name;";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@CurrentUser", empCode);
+                    parameters.Add("@CurrentRole", empRole);
+                    using (var multi = await connection.QueryMultipleAsync(query, parameters))
+                    {
+                        var salesManagers = (await multi.ReadAsync<dynamic>()).ToList();
+                        var meetingWithManagers = (await multi.ReadAsync<dynamic>()).ToList();
+
+                        return new
+                        {
+                            SalesManagers = salesManagers,
+                            MeetingWithManagers = meetingWithManagers
+                        };
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<Taxinvoice.TaxInvoiceCreate>> GetInfo(string financialYear, int? month, string? salesManager, string empCode, string empRole)
         {
             using var connection = new SqlConnection(
                 _configuration.GetConnectionString("Conn_Stringg"));
@@ -264,6 +309,13 @@ namespace WLSPL_ERP_CRM.repository
 
                         WHERE invoicedate >= @StartDate
                           AND invoicedate < @EndDate
+                            AND (@SalesManager IS NULL OR empcode = @SalesManager)
+                              AND (
+                                      @CurrentRole = 'Admin'
+                                      OR empcode = @CurrentUser
+                                      OR empcode IN (SELECT empcode FROM [dbo].[employees]
+                                                     WHERE TL_Manager = @CurrentUser AND status = '1' AND isdeleted = '0')
+                                  )
 
                         ORDER BY invoicedate ASC;
                     ";
@@ -272,6 +324,9 @@ namespace WLSPL_ERP_CRM.repository
 
             parameters.Add("@StartDate", startDate);
             parameters.Add("@EndDate", endDate);
+            parameters.Add("@SalesManager", string.IsNullOrWhiteSpace(salesManager) ? null : salesManager, DbType.String);
+            parameters.Add("@CurrentUser", empCode);
+            parameters.Add("@CurrentRole", empRole);
 
             var result = await connection.QueryAsync<Taxinvoice.TaxInvoiceCreate>(query,parameters);
 
@@ -925,7 +980,7 @@ namespace WLSPL_ERP_CRM.repository
 
                 SELECT id as proformadetailsId,[mode], ChequeNo, CreatedDate, Amount
                 FROM dbo.tbl_ProformaInvoiceBankDetails
-                WHERE InvoiceMainId = @id AND ISNULL(IsDeleted,0) = 0 ORDER BY id;";
+                WHERE TaxInvoiceID IS NULL AND InvoiceMainId = @id AND ISNULL(IsDeleted,0) = 0 ORDER BY id;";
 
             using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
             using var multi = await connection.QueryMultipleAsync(sql, new { id = ProformaId });
