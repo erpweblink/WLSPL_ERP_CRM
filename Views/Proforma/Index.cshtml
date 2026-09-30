@@ -5,6 +5,19 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <style>
+    :root {
+        --pf-ink: #1f2a37;
+        --pf-muted: #6b7686;
+        --pf-line: #e3e8ef;
+        --pf-surface: #ffffff;
+        --pf-head: #f3f6fa;
+        --pf-accent: #1d5f8a;
+        --pf-accent-soft: #e6f0f7;
+        --pf-danger: #b42318;
+        --pf-danger-soft: #fdecea;
+        --pf-ok: #1a7f4b;
+        --pf-ok-soft: #e4f5ec;
+    }
     .active-status {
         background-color: #198754 !important;
         color: #ffffff !important;
@@ -263,7 +276,7 @@
                                         <a asp-controller="Proforma"
                                            asp-action="Create"
                                            asp-route-ID="@EncryptionHelper.Encrypt(item.Id)"
-                                           class="btn btn-sm btn-primary"
+                                           class="btn btn-sm btn-secondary"
                                            title="Edit">
                                             <i class="fa fa-edit"></i>
                                         </a>
@@ -278,7 +291,7 @@
                                         </button>
 
                                         <button type="button"
-                                                class="btn btn-sm btn-primary"
+                                                class="btn btn-sm btn-success"
                                                 title="Send PDF"
                                                 onclick="ViewPDF('@item.Id')">
                                             <i class="fa fa-file-pdf"></i>
@@ -286,8 +299,8 @@
                                         <a asp-controller="Taxinvoice"
                                            asp-action="Create"
                                            asp-route-ID="@EncryptionHelper.Encrypt(item.Id)"
-                                           class="btn btn-sm btn-primary"
-                                           title="Edit">
+                                           class="btn btn-sm btn-info"
+                                           title="Create Tax Invoice">
                                             <i class="fa fa-plus"></i>
                                         </a>
                                     </div>
