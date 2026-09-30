@@ -23,6 +23,8 @@ namespace WEBLINK_CRM.Models
 
         //public string? Type { get; set; }
 
+        public string? ConstitutionofBusiness { get; set; }
+
         public string? Address { get; set; }
 
         public string? ShippingAddress { get; set; }
