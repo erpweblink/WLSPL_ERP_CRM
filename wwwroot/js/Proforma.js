@@ -863,7 +863,7 @@ var GetProformaForm = function () {
         const taxInvoiceId = hasTaxInvoice ? parsedId : '';
 
         const firstCell = hasTaxInvoice
-            ? `<button type="button" class="btn btn-sm btn-primary" data-id="${taxInvoiceId}" title="View Tax Invoice PDF">
+            ? `<button type="button" class="btn-pdf-view" data-id="${taxInvoiceId}" title="View Tax Invoice PDF">
                <i class="fa fa-file-pdf"></i><span>PDF</span>
            </button>`
             : `<input type="checkbox" class="bank-select">`;
@@ -1529,10 +1529,12 @@ var GetProformaForm = function () {
                 if (response && response.success === true) {
 
                     showToast(
-                        (isEdit ? 'Invoice updated successfully!' : 'Invoice saved successfully!') +
-                        ' Invoice No: ' + (response.invoiceNo || getValue('invoiceNo')),
+                        isEdit
+                            ? 'Invoice updated successfully! Invoice No: ' + (response.invoiceNo || getValue('invoiceNo'))
+                            : 'Invoice saved successfully!',
                         'success'
                     );
+
 
                     setTimeout(function () {
                         window.location.href = pfUrls.index;
