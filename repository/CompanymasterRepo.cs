@@ -8,7 +8,6 @@ using static WEBLINK_CRM.Models.Company;
 
 namespace WEBLINK_CRM.repository
 {
-
     public class CompanymasterRepo : IcomapnymasterRepo
     {
         private readonly IConfiguration _configuration;
@@ -340,6 +339,80 @@ namespace WEBLINK_CRM.repository
             {
                 throw;
             }
+        }
+
+        public string BuildCompanyChangeComment(Companymaster oldC, Companymaster newC)
+        {
+            var changes = new List<string>();
+
+            static string Fmt(object? v) => v switch
+            {
+                null => "",
+                DateTime d => d.ToString("dd-MMM-yyyy"),
+                _ => v.ToString()?.Trim() ?? ""
+            };
+
+            void Check(string label, object? oldVal, object? newVal)
+            {
+                var o = Fmt(oldVal);
+                var n = Fmt(newVal);
+                if (!string.Equals(o, n, StringComparison.OrdinalIgnoreCase))
+                    changes.Add($"{label} changed from '{(o == "" ? "N/A" : o)}' to '{(n == "" ? "N/A" : n)}'");
+            }
+
+            // ── Company ──
+            Check("Register Type", oldC.RegisterType, newC.RegisterType);
+            Check("Category", oldC.Category, newC.Category);
+            Check("GST No", oldC.GSTNo, newC.GSTNo);
+            Check("Company Name", oldC.CName, newC.CName);
+            Check("Owner Name", oldC.OName, newC.OName);
+            Check("Email", oldC.Email, newC.Email);
+            Check("Mobile", oldC.Mobile, newC.Mobile);
+            Check("BDE", oldC.BDE, newC.BDE);
+            Check("Area", oldC.Area, newC.Area);
+            Check("Country", oldC.CountryName, newC.CountryName);
+            Check("State", oldC.State, newC.State);
+            Check("Constitution of Business", oldC.ConstitutionofBusiness, newC.ConstitutionofBusiness);
+            Check("Address", oldC.Address, newC.Address);
+            Check("Website", oldC.Website, newC.Website);
+            Check("Visit Date", oldC.VisitDate, newC.VisitDate);
+            Check("Type Of Supply", oldC.EInvTypeOfSupply, newC.EInvTypeOfSupply);
+            Check("Status", oldC.Status == true ? "Active" : "Inactive", newC.Status == true ? "Active" : "Inactive");
+            Check("Client Type", oldC.typess, newC.typess);
+
+            // ── Billing ──
+            Check("Billing Location", oldC.BillingLocation, newC.BillingLocation);
+            Check("Billing Pincode", oldC.BillingPincode, newC.BillingPincode);
+            Check("Billing State Code", oldC.BillingStateCode, newC.BillingStateCode);
+            Check("Billing Address", oldC.BillingAddress, newC.BillingAddress);
+
+            // ── Shipping ──
+            Check("Shipping Location", oldC.ShippingLocation, newC.ShippingLocation);
+            Check("Shipping Pincode", oldC.ShippingPincode, newC.ShippingPincode);
+            Check("Shipping State Code", oldC.ShippingStateCode, newC.ShippingStateCode);
+            Check("Shipping Address", oldC.ShippingAddress, newC.ShippingAddress);
+
+            if (!changes.Any()) return string.Empty;
+
+            return $"Company {newC.CName ?? oldC.CName} updated on {DateTime.Now:dd-MMM-yyyy HH:mm}: "
+                   + string.Join("; ", changes) + ".";
+        }
+
+        public async Task SaveCompanyChangeHistory(string sessionName, string compnayCode, string message)
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+
+            const string sql = @"
+            INSERT INTO [dbo].[CommentHistory] (sessionname, ccode, commentdatetime, message)
+            VALUES (@sessionname, @ccode, @commentdatetime, @message)";
+
+            await connection.ExecuteAsync(sql, new
+            {
+                sessionname = sessionName,
+                ccode = compnayCode,
+                commentdatetime = DateTime.Now,
+                message = message
+            });
         }
 
         public async Task<List<Employee>> GetBDE(string Action)
