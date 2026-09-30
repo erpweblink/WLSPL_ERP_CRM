@@ -168,6 +168,12 @@ namespace WEBLINK_CRM.Controllers
         [HttpPost]
         public IActionResult UpdateInvoice([FromBody] ProformaInvoiceCreateVM model)
         {
+            if (model == null || model.main == null)
+            {
+                var errors = ModelState.Where(x => x.Value.Errors.Count > 0)
+                    .Select(x => new { Field = x.Key, Error = x.Value.Errors[0].ErrorMessage });
+                return BadRequest(new { success = false, message = "Model binding failed", errors });
+            }
             model.main.sessionname = HttpContext.Session.GetString("EmpCode")?.ToString();
 
             if (!ModelState.IsValid)
@@ -236,6 +242,25 @@ namespace WEBLINK_CRM.Controllers
                 success = true,
                 fileName = $"Proforma_{decryptedId}.pdf",
                 fileData = base64Pdf
+            });
+        }
+
+        [HttpPost]
+        public IActionResult ViewTaxInvoicePDF(string id)
+        {
+            string encId = EncryptionHelper.Encrypt(id.ToString());
+
+            var url = Url.Action(
+     "TaxInvoicePDF",
+     "TaxInvoice",
+     null
+ ) + "?ID=" + Uri.EscapeDataString(encId);
+
+
+            return Json(new
+            {
+                success = true,
+                url = url
             });
         }
 

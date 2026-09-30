@@ -287,6 +287,8 @@
             public DateTime? date { get; set; }
 
             public decimal? amount { get; set; }
+            public string? taxinvoiceid { get; set; }
+
         }
 
 

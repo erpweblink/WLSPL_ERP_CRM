@@ -705,6 +705,7 @@ namespace WEBLINK_CRM.repository
                 INSERT INTO tbl_ProformaInvoiceBankDetails
                 (
                     InvoiceMainId,
+taxInvoiceId,
                     BankName,
                     ChequeNo,                   
                     Amount,
@@ -715,6 +716,7 @@ mode
                 VALUES
                 (
                     @InvoiceId,
+@taxInvoiceId,
                     @BankName,
                     @ChequeNo,               
                     @Amount,
@@ -733,6 +735,10 @@ GETDATE(),
                         bankParameters.Add(
                             "@InvoiceId",
                             myInvoice);
+
+                        bankParameters.Add(
+                      "@taxInvoiceId",
+                      bank.taxinvoiceid);
 
                         bankParameters.Add(
                             "@BankName",
