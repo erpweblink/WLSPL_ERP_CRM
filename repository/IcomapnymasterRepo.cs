@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using WEBLINK_CRM.Models;
+using WLSPL_ERP_CRM.Models;
 using static WEBLINK_CRM.Controllers.CompanymasterController;
 
 namespace WEBLINK_CRM.repository
@@ -20,6 +21,7 @@ namespace WEBLINK_CRM.repository
 
         //Task<dynamic> GetcompanybyId(string Id);
         Task<Companymaster> GetcompanybyId(string Id);
+
         Task<List<dynamic>> GetcompanyName(string Name);
 
         Task<int> DeleteReord(string ID, String CreatedBy);
@@ -36,6 +38,9 @@ namespace WEBLINK_CRM.repository
         Task<int> UpdateCompanyCreatedByName(string newName, string CompCode, string SessionName);
         Task<int> FromListSubmitCommentHistory(CallandMeeting Model);
         Task<int> UpdateOldCommentHistory(int id);
+
+        Task SaveCompanyChangeHistory(string sessionName, string compnayCode, string message);
+        public string? BuildCompanyChangeComment(Companymaster oldMain,Companymaster newMain);
 
     }
 }

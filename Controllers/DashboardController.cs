@@ -102,6 +102,7 @@ namespace WEBLINK_CRM.Controllers
                 data = result
             });
         }
+
         [HttpGet]
         public IActionResult GetInvoiceRenewals()
         {
@@ -142,7 +143,6 @@ namespace WEBLINK_CRM.Controllers
                 });
             }
         }
-
 
     }
 }
