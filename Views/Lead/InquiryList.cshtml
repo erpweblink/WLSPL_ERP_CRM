@@ -1,5 +1,5 @@
-﻿@model List<WEBLINK_CRM.Models.Inquiry>
-
+﻿
+@model List<WEBLINK_CRM.Models.Inquiry>
 
 @{
     ViewData["Title"] = "Inquiry List";
@@ -7,6 +7,11 @@
 }
 
 <style type="text/css">
+
+    /* ==============================
+           TABLE
+           ============================== */
+
     .table tbody td {
         font-size: 13px;
         vertical-align: middle;
@@ -24,7 +29,6 @@
     .feedback-scroll {
         max-height: 120px;
         overflow-y: auto;
-        overflow-y: auto;
         word-break: break-word;
         padding: 4px 8px;
         background: #ffffff;
@@ -34,7 +38,12 @@
     .status-icon {
         margin-right: 5px;
     }
-     
+
+
+    /* ==============================
+           RECORD INFO
+           ============================== */
+
     .record-info {
         font-size: 14px;
         color: #6c757d;
@@ -45,40 +54,33 @@
             font-size: 15px;
         }
 
+
+    /* ==============================
+           TEXT
+           ============================== */
+
     .name-text {
         color: #344054;
         font-weight: 600;
     }
 
-    /* =========================================================
-                                               MOBILE
-                                            ========================================================= */
-
     .mobile-text {
         color: #344054;
     }
 
-    /* =========================================================
-                                               EMAIL
-                                            ========================================================= */
-
     .email-text {
         color: #0d6efd;
     }
-
-
-    /* =========================================================
-                                               DATE
-                                            ========================================================= */
 
     .date-text {
         color: #667085;
         font-size: 12px;
     }
 
-    /* =========================================================
-                                               LOCATION
-                                            ========================================================= */
+
+    /* ==============================
+           LOCATION
+           ============================== */
 
     .location-badge {
         display: inline-block;
@@ -89,6 +91,11 @@
         border-radius: 20px;
         font-size: 12px;
     }
+
+
+    /* ==============================
+           PAGINATION
+           ============================== */
 
     .pagination {
         margin-bottom: 0;
@@ -110,66 +117,210 @@
             background-color: #e9f2ff;
         }
 
+
+    /* ==============================
+           ACTION AREA
+           ============================== */
+
+    .action-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 270px;
+    }
+
+    .sales-person-select {
+        width: 220px !important;
+        min-width: 220px;
+    }
+
+
+    /* ==============================
+           REVOKE ICON BUTTON
+           ============================== */
+
+    .revoke-icon-btn {
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background: #fff1f2;
+        color: #dc3545;
+        border: 1px solid #dc3545;
+        border-radius: 5px;
+        padding: 0;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s ease;
+    }
+
+        .revoke-icon-btn:hover {
+            background: #dc3545;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(220, 53, 69, 0.20);
+        }
+
+        .revoke-icon-btn:active {
+            transform: scale(0.94);
+        }
+
+        .revoke-icon-btn i {
+            margin: 0;
+            line-height: 1;
+        }
+
+
+    /* ==============================
+           EMPTY ROW
+           ============================== */
+
+    .empty-row {
+        text-align: center;
+        padding: 30px !important;
+        color: #98a2b3;
+        font-size: 14px;
+    }
+
 </style>
 
+
+<!-- =========================================================
+     MAIN CARD
+     ========================================================= -->
+
 <div class="card">
+
+    <!-- =====================================================
+         HEADER
+         ===================================================== -->
+
     <div class="card-header">
+
         <div>
-            <h3><i class="fa fa-envelope-open-text"></i> Inquiry Management</h3>
+
+            <h3>
+                <i class="fa fa-envelope-open-text"></i>
+                Inquiry Management
+            </h3>
+
             <span class="page-subtitle">
                 Manage customer inquiries and convert them into leads
             </span>
+
         </div>
+
     </div>
+
+
+    <!-- =====================================================
+         BODY
+         ===================================================== -->
+
     <div class="card-body">
+
+        <!-- STATUS -->
+
         <span id="statusMessage">
+
             <i class="fa fa-circle-check status-icon"></i>
+
             Records loaded
+
         </span>
 
-        <div class="row align-items-center">
+
+        <!-- =================================================
+             SEARCH + RECORD COUNT
+             ================================================= -->
+
+        <div class="row align-items-center mb-3">
+
             <div class="col-md-4">
+
                 <input type="text"
                        id="searchInput"
                        class="form-control search-box"
                        placeholder="Search salesperson, name, mobile, email, city..." />
+
             </div>
+
+
             <div class="col-md-8 d-flex justify-content-end align-items-center">
+
                 <span class="record-info">
+
                     Total Records :
-                    <strong id="totalRecords">@Model.Count()</strong>
+
+                    <strong id="totalRecords">
+                        @Model.Count()
+                    </strong>
+
                 </span>
+
             </div>
+
         </div>
 
+
+        <!-- =================================================
+             TABLE
+             ================================================= -->
+
         <div class="table-responsive">
+
             <table id="dataTable"
                    class="table table-bordered table-hover">
+
                 <thead>
+
                     <tr>
-                        <th>#</th>
 
-                        <th>Name</th>
+                        <th>
+                            #
+                        </th>
 
-                        <th>Mobile</th>
+                        <th>
+                            Name
+                        </th>
 
-                        <th>Email</th>
+                        <th>
+                            Mobile
+                        </th>
 
-                        <th>Inquiry</th>
+                        <th>
+                            Email
+                        </th>
 
-                        <th>Date</th>
+                        <th>
+                            Inquiry
+                        </th>
 
-                        <th>Location</th>
+                        <th>
+                            Date
+                        </th>
 
-                        <th>Action</th>
+                        <th>
+                            Location
+                        </th>
+
+                        <th>
+                            Action
+                        </th>
 
                     </tr>
 
                 </thead>
+
+
                 <tbody id="tableBody">
+
                     @{
                         var count = 1;
                     }
+
+
                     @if (Model != null && Model.Any())
                     {
 
@@ -177,18 +328,27 @@
                         {
 
                             <tr class="inquiry-row">
+
+                                <!-- ==================================
+                                     #
+                                     ================================== -->
+
                                 <td>
                                     @count
                                 </td>
+
+
+                                <!-- ==================================
+                                     NAME
+                                     ================================== -->
+
                                 <td>
 
                                     @if (!string.IsNullOrWhiteSpace(inquiry.Name))
                                     {
 
                                         <span class="name-text">
-
                                             @inquiry.Name
-
                                         </span>
 
                                     }
@@ -204,9 +364,9 @@
                                 </td>
 
 
-                                <!-- =================================
+                                <!-- ==================================
                                      MOBILE
-                                ================================== -->
+                                     ================================== -->
 
                                 <td>
 
@@ -214,9 +374,7 @@
                                     {
 
                                         <span class="mobile-text">
-
                                             @inquiry.MobileNumber
-
                                         </span>
 
                                     }
@@ -232,9 +390,9 @@
                                 </td>
 
 
-                                <!-- =================================
+                                <!-- ==================================
                                      EMAIL
-                                ================================== -->
+                                     ================================== -->
 
                                 <td>
 
@@ -242,9 +400,7 @@
                                     {
 
                                         <span class="email-text">
-
                                             @inquiry.Email
-
                                         </span>
 
                                     }
@@ -260,34 +416,43 @@
                                 </td>
 
 
-                                <!-- =================================
+                                <!-- ==================================
                                      INQUIRY
-                                ================================== -->
+                                     ================================== -->
 
                                 <td>
+
                                     <div class="feedback-scroll">
 
-                                        @if (!string.IsNullOrWhiteSpace(inquiry.ServiceRequested))
+                                        @if (!string.IsNullOrWhiteSpace(
+                                                                        inquiry.ServiceRequested))
                                         {
+
                                             @Html.Raw(
                                             inquiry.ServiceRequested
                                             .Replace("<br>", " ")
                                             .Replace("<br/>", " ")
-                                            .Replace("<br />", " "))
+                                            .Replace("<br />", " ")
+                                                                )
+
                                                                 }
                                         else
                                         {
+
                                             <span class="text-muted">
                                                 No inquiry details
                                             </span>
+
                                         }
+
                                     </div>
+
                                 </td>
 
 
-                                <!-- =================================
+                                <!-- ==================================
                                      DATE
-                                ================================== -->
+                                     ================================== -->
 
                                 <td>
 
@@ -295,9 +460,7 @@
                                     {
 
                                         <span class="date-text">
-
                                             @inquiry.CreatedAt
-
                                         </span>
 
                                     }
@@ -313,13 +476,14 @@
                                 </td>
 
 
-                                <!-- =================================
+                                <!-- ==================================
                                      LOCATION
-                                ================================== -->
+                                     ================================== -->
 
                                 <td>
 
-                                    @if (!string.IsNullOrWhiteSpace(inquiry.City))
+                                    @if (!string.IsNullOrWhiteSpace(
+                                                                inquiry.City))
                                     {
 
                                         <span class="location-badge">
@@ -343,60 +507,124 @@
                                 </td>
 
 
+                                <!-- ==================================
+                                     ACTION
+                                     ================================== -->
 
                                 <td>
-                                    <select class="form-select form-select-sm sales-person-select"
-                                            data-inquiry-id="@inquiry.Id"
-                                            onchange="updateSalesPerson(this)">
 
-                                        <option value="">Select Sales Person</option>
+                                    <div class="action-wrapper">
 
-                                        @if (inquiry.SalesPersons != null && inquiry.SalesPersons.Any())
-                                        {
-                                            foreach (var employee in inquiry.SalesPersons)
-                                            {
-                                                if (employee.empcode == inquiry.SalesEmpCode)
-                                                {
-                                                    <option value="@employee.empcode" selected>
-                                                        @employee.name
-                                                        @if (!string.IsNullOrWhiteSpace(employee.empcode))
-                                                        {
-                                                            @: (@employee.empcode)
-                                                        }
-                                                    </option>
-                                                }
-                                                else
-                                                {
-                                                    <option value="@employee.empcode">
-                                                        @employee.name
-                                                        @if (!string.IsNullOrWhiteSpace(employee.empcode))
-                                                        {
-                                                            @: (@employee.empcode)
-                                                        }
-                                                    </option>
-                                                }
-                                            }
-                                        }
-                                        else
-                                        {
-                                            <option value="" disabled>
-                                                No Sales Person Found
+
+                                        <!-- SALES PERSON DROPDOWN -->
+
+                                        <select class="form-select form-select-sm sales-person-select"
+                                                data-inquiry-id="@inquiry.Id"
+                                                onchange="updateSalesPerson(this)">
+
+                                            <option value="">
+                                                Select Sales Person
                                             </option>
+
+
+                                            @if (inquiry.SalesPersons != null &&
+                                                                                inquiry.SalesPersons.Any())
+                                            {
+
+                                                foreach (var employee in inquiry.SalesPersons)
+                                                {
+
+                                                    if (employee.empcode ==
+                                                    inquiry.SalesEmpCode)
+                                                    {
+
+                                                        <option value="@employee.empcode"
+                                                                selected>
+
+                                                            @employee.name
+
+                                                            @if (!string.IsNullOrWhiteSpace(
+                                                                                                    employee.empcode))
+                                                            {
+                                                                @: (@employee.empcode)
+                                                            }
+
+                                                        </option>
+
+                                                    }
+                                                    else
+                                                    {
+
+                                                        <option value="@employee.empcode">
+
+                                                            @employee.name
+
+                                                            @if (!string.IsNullOrWhiteSpace(
+                                                                                                    employee.empcode))
+                                                            {
+                                                                @: (@employee.empcode)
+                                                            }
+
+                                                        </option>
+
+                                                    }
+
+                                                }
+
+                                            }
+                                            else
+                                            {
+
+                                                <option value=""
+                                                        disabled>
+
+                                                    No Sales Person Found
+
+                                                </option>
+
+                                            }
+
+                                        </select>
+
+
+                                        <!-- ==================================
+                                             REVOKE ICON
+                                             ================================== -->
+                                        @if (!string.IsNullOrWhiteSpace(
+                                                                        inquiry.SalesEmpCode))
+                                        {
+
+                                            <button type="button"
+                                                    class="revoke-icon-btn"
+                                                    data-inquiry-id="@inquiry.Id"
+                                                    data-sales-empcode="@inquiry.SalesEmpCode"
+                                                    onclick="revokeSalesPerson(this)"
+                                                    title="Revoke Sales Person">
+
+                                                <i class="fa fa-rotate-left"></i>
+
+                                            </button>
+
                                         }
 
-                                    </select>
+                                    </div>
+
                                 </td>
+
                             </tr>
 
+
                             count++;
+
                         }
+
                     }
                     else
                     {
 
                         <tr>
 
-                            <td colspan="10"
+                            <td colspan="8"
                                 class="empty-row">
 
                                 <i class="fa fa-envelope-open"></i>
@@ -412,6 +640,12 @@
                 </tbody>
 
             </table>
+
+
+            <!-- =================================================
+                 PAGINATION
+                 ================================================= -->
+
             <nav>
 
                 <ul class="pagination justify-content-center"
@@ -419,158 +653,876 @@
                 </ul>
 
             </nav>
+
         </div>
 
     </div>
 
 </div>
 
+
 <script type="text/javascript">
-          const rowsPerPage = 20;
+
+    /* =========================================================
+       PAGINATION VARIABLES
+       ========================================================= */
+
+    const rowsPerPage = 20;
+
     let currentPage = 1;
+
     let allRows = [];
+
     let filteredRows = [];
 
-    document.addEventListener("DOMContentLoaded", function () {
-        allRows = Array.from(document.querySelectorAll("#tableBody .inquiry-row"));
-        filteredRows = [...allRows];
-        document.getElementById("totalRecords").textContent = allRows.length;
-        document.getElementById("statusMessage").innerHTML = `
-            <i class="fa fa-circle-check status-icon"></i>
-            Loaded ${allRows.length} database records.
-        `;
-        renderTable();
-    });
 
-    document.getElementById("searchInput").addEventListener("input", function () {
-        const searchValue = this.value.toLowerCase().trim();
-        filteredRows = allRows.filter(function (row) {
-            return row.innerText.toLowerCase().includes(searchValue);
-        });
-        currentPage = 1;
-        document.getElementById("totalRecords").textContent = filteredRows.length;
-        renderTable();
-    });
+    /* =========================================================
+       PAGE LOAD
+       ========================================================= */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            allRows =
+                Array.from(
+                    document.querySelectorAll(
+                        "#tableBody .inquiry-row"
+                    )
+                );
+
+
+            filteredRows = [...allRows];
+
+
+            document.getElementById(
+                "totalRecords"
+            ).textContent =
+                allRows.length;
+
+
+            document.getElementById(
+                "statusMessage"
+            ).innerHTML = `
+
+                <i class="fa fa-circle-check status-icon"></i>
+
+                Loaded ${allRows.length} database records.
+
+            `;
+
+
+            renderTable();
+
+        }
+    );
+
+
+    /* =========================================================
+       SEARCH
+       ========================================================= */
+
+    document.getElementById(
+        "searchInput"
+    ).addEventListener(
+        "input",
+        function () {
+
+            const searchValue =
+                this.value
+                    .toLowerCase()
+                    .trim();
+
+
+            filteredRows =
+                allRows.filter(
+                    function (row) {
+
+                        return row.innerText
+                            .toLowerCase()
+                            .includes(searchValue);
+
+                    }
+                );
+
+
+            currentPage = 1;
+
+
+            document.getElementById(
+                "totalRecords"
+            ).textContent =
+                filteredRows.length;
+
+
+            renderTable();
+
+        }
+    );
+
+
+    /* =========================================================
+       RENDER TABLE
+       ========================================================= */
 
     function renderTable() {
-        allRows.forEach(function (row) { row.style.display = "none"; });
+
+        allRows.forEach(
+            function (row) {
+
+                row.style.display = "none";
+
+            }
+        );
+
 
         if (filteredRows.length === 0) {
+
             showEmptyResult();
+
             createPagination();
+
+            return;
+
+        }
+
+
+        removeEmptyRow();
+
+
+        const startIndex =
+            (currentPage - 1) *
+            rowsPerPage;
+
+
+        const pageRows =
+            filteredRows.slice(
+                startIndex,
+                startIndex + rowsPerPage
+            );
+
+
+        pageRows.forEach(
+            function (row) {
+
+                row.style.display = "";
+
+            }
+        );
+
+
+        createPagination();
+
+    }
+
+
+    /* =========================================================
+       EMPTY SEARCH RESULT
+       ========================================================= */
+
+    function showEmptyResult() {
+
+        allRows.forEach(
+            function (row) {
+
+                row.style.display = "none";
+
+            }
+        );
+
+
+        let emptyRow =
+            document.getElementById(
+                "dynamicEmptyRow"
+            );
+
+
+        if (!emptyRow) {
+
+            emptyRow =
+                document.createElement("tr");
+
+
+            emptyRow.id =
+                "dynamicEmptyRow";
+
+
+            emptyRow.innerHTML = `
+
+                <td colspan="8"
+                    class="empty-row">
+
+                    <i class="fa fa-search"></i>
+
+                    No matching records found.
+
+                </td>
+
+            `;
+
+
+            document.getElementById(
+                "tableBody"
+            ).appendChild(emptyRow);
+
+        }
+
+
+        emptyRow.style.display = "";
+
+    }
+
+
+    /* =========================================================
+       PAGINATION
+       ========================================================= */
+
+    function createPagination() {
+
+        const pagination =
+            document.getElementById(
+                "pagination"
+            );
+
+
+        pagination.innerHTML = "";
+
+
+        const totalPages =
+            Math.ceil(
+                filteredRows.length /
+                rowsPerPage
+            );
+
+
+        if (totalPages <= 1) {
+
+            return;
+
+        }
+
+
+        /* PREVIOUS */
+
+        const previous =
+            document.createElement("li");
+
+
+        previous.className =
+            "page-item " +
+            (
+                currentPage === 1
+                    ? "disabled"
+                    : ""
+            );
+
+
+        previous.innerHTML = `
+
+            <a class="page-link"
+               href="javascript:void(0);">
+
+                Previous
+
+            </a>
+
+        `;
+
+
+        previous.onclick =
+            function () {
+
+                if (currentPage > 1) {
+
+                    currentPage--;
+
+                    removeEmptyRow();
+
+                    renderTable();
+
+                }
+
+            };
+
+
+        pagination.appendChild(
+            previous
+        );
+
+
+        /* PAGE NUMBERS */
+
+        for (
+            let i = 1;
+            i <= totalPages;
+            i++
+        ) {
+
+            const li =
+                document.createElement("li");
+
+
+            li.className =
+                "page-item " +
+                (
+                    i === currentPage
+                        ? "active"
+                        : ""
+                );
+
+
+            li.innerHTML = `
+
+                <a class="page-link"
+                   href="javascript:void(0);">
+
+                    ${i}
+
+                </a>
+
+            `;
+
+
+            li.onclick =
+                function () {
+
+                    currentPage = i;
+
+                    removeEmptyRow();
+
+                    renderTable();
+
+                };
+
+
+            pagination.appendChild(li);
+
+        }
+
+
+        /* NEXT */
+
+        const next =
+            document.createElement("li");
+
+
+        next.className =
+            "page-item " +
+            (
+                currentPage === totalPages
+                    ? "disabled"
+                    : ""
+            );
+
+
+        next.innerHTML = `
+
+            <a class="page-link"
+               href="javascript:void(0);">
+
+                Next
+
+            </a>
+
+        `;
+
+
+        next.onclick =
+            function () {
+
+                if (
+                    currentPage <
+                    totalPages
+                ) {
+
+                    currentPage++;
+
+                    removeEmptyRow();
+
+                    renderTable();
+
+                }
+
+            };
+
+
+        pagination.appendChild(next);
+
+    }
+
+
+    /* =========================================================
+       REMOVE EMPTY ROW
+       ========================================================= */
+
+    function removeEmptyRow() {
+
+        const emptyRow =
+            document.getElementById(
+                "dynamicEmptyRow"
+            );
+
+
+        if (emptyRow) {
+
+            emptyRow.remove();
+
+        }
+
+    }
+
+
+    /* =========================================================
+       ADD LEAD
+       ========================================================= */
+
+    function addLead(id) {
+
+        if (!id) {
+
+            showToast(
+                "Inquiry ID not found.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        window.location.href =
+            `/Lead/CreateOrEdit?inquiryId=${
+                encodeURIComponent(id)
+            }`;
+
+    }
+
+
+    /* =========================================================
+       SELECT2
+       ========================================================= */
+
+    $(document).ready(
+        function () {
+
+            $('.sales-person-select').select2({
+
+                placeholder:
+                    "Select Sales Person",
+
+                allowClear:
+                    true,
+
+                width:
+                    '220px'
+
+            });
+
+        }
+    );
+
+
+    /* =========================================================
+       ASSIGN SALES PERSON
+       ========================================================= */
+
+    function updateSalesPerson(select) {
+
+        const inquiryId =
+            select.getAttribute(
+                "data-inquiry-id"
+            );
+
+
+        const salesEmpCode =
+            select.value;
+
+
+        if (!inquiryId) {
+
+            showToast(
+                "Inquiry ID not found.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (!salesEmpCode) {
+
+            return;
+
+        }
+
+
+        showConfirmToast(
+
+            "Are you sure you want to assign this sales person?",
+
+            function () {
+
+                $.ajax({
+
+                    url:
+                        '@Url.Action("AssignSalesPerson", "Lead")',
+
+                    type:
+                        'POST',
+
+                    data: {
+
+                        inquiryId:
+                            inquiryId,
+
+                        salesEmpCode:
+                            salesEmpCode,
+
+                        Action:
+                            "AssignToWebsite"
+
+                    },
+
+
+                    success:
+                        function (response) {
+
+                            if (response.success) {
+
+                                showToast(
+                                    "Sales person assigned successfully.",
+                                    "success"
+                                );
+
+
+                                /*
+                                 * Add revoke icon
+                                 * dynamically.
+                                 */
+
+                                addRevokeButton(
+                                    select,
+                                    inquiryId,
+                                    salesEmpCode
+                                );
+
+                            }
+                            else {
+
+                                showToast(
+                                    response.message ||
+                                    "Unable to assign sales person.",
+                                    "error"
+                                );
+
+
+                                clearSalesPerson(
+                                    select
+                                );
+
+                            }
+
+                        },
+
+
+                    error:
+                        function () {
+
+                            showToast(
+                                "Something went wrong while assigning the sales person.",
+                                "error"
+                            );
+
+
+                            clearSalesPerson(
+                                select
+                            );
+
+                        }
+
+                });
+
+            },
+
+
+            function () {
+
+                clearSalesPerson(
+                    select
+                );
+
+            }
+
+        );
+
+    }
+
+
+    /* =========================================================
+       ADD REVOKE ICON DYNAMICALLY
+       ========================================================= */
+
+    function addRevokeButton(
+        select,
+        inquiryId,
+        salesEmpCode
+    ) {
+
+        const wrapper =
+            select.closest(
+                ".action-wrapper"
+            );
+
+
+        if (!wrapper) {
+
+            return;
+
+        }
+
+
+        let button =
+            wrapper.querySelector(
+                ".revoke-icon-btn"
+            );
+
+
+        if (!button) {
+
+            button =
+                document.createElement(
+                    "button"
+                );
+
+
+            button.type =
+                "button";
+
+
+            button.className =
+                "revoke-icon-btn";
+
+
+            button.title =
+                "Revoke Sales Person";
+
+
+            button.onclick =
+                function () {
+
+                    revokeSalesPerson(
+                        this
+                    );
+
+                };
+
+
+            wrapper.appendChild(
+                button
+            );
+
+        }
+
+
+        button.setAttribute(
+            "data-inquiry-id",
+            inquiryId
+        );
+
+
+        button.setAttribute(
+            "data-sales-empcode",
+            salesEmpCode
+        );
+
+
+        button.innerHTML = `
+
+            <i class="fa fa-rotate-left"></i>
+
+        `;
+
+    }
+
+
+    /* =========================================================
+       REVOKE SALES PERSON
+       ========================================================= */
+
+    function revokeSalesPerson(button) {
+
+        const inquiryId =
+            button.getAttribute(
+                "data-inquiry-id"
+            );
+
+
+        const salesEmpCode =
+            button.getAttribute(
+                "data-sales-empcode"
+            );
+
+
+        if (!inquiryId) {
+
+            showToast(
+                "Inquiry ID not found.",
+                "error"
+            );
+
             return;
         }
 
-        const startIndex = (currentPage - 1) * rowsPerPage;
-        const pageRows = filteredRows.slice(startIndex, startIndex + rowsPerPage);
-        pageRows.forEach(function (row) { row.style.display = ""; });
-        createPagination();
-    }
 
-    function showEmptyResult() {
-        allRows.forEach(function (row) { row.style.display = "none"; });
+        if (!salesEmpCode) {
 
-        let emptyRow = document.getElementById("dynamicEmptyRow");
-        if (!emptyRow) {
-            emptyRow = document.createElement("tr");
-            emptyRow.id = "dynamicEmptyRow";
-            emptyRow.innerHTML = `
-                <td colspan="10" class="empty-row">
-                    <i class="fa fa-search"></i>
-                    No matching records found.
-                </td>
-            `;
-            document.getElementById("tableBody").appendChild(emptyRow);
-        }
-        emptyRow.style.display = "";
-    }
+            showToast(
+                "Sales person is not assigned.",
+                "error"
+            );
 
-    function createPagination() {
-        const pagination = document.getElementById("pagination");
-        pagination.innerHTML = "";
-
-        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-        if (totalPages <= 1) return;
-
-        const previous = document.createElement("li");
-        previous.className = "page-item " + (currentPage === 1 ? "disabled" : "");
-        previous.innerHTML = `<a class="page-link" href="javascript:void(0);">Previous</a>`;
-        previous.onclick = function () {
-            if (currentPage > 1) { currentPage--; removeEmptyRow(); renderTable(); }
-        };
-        pagination.appendChild(previous);
-
-        for (let i = 1; i <= totalPages; i++) {
-            const li = document.createElement("li");
-            li.className = "page-item " + (i === currentPage ? "active" : "");
-            li.innerHTML = `<a class="page-link" href="javascript:void(0);">${i}</a>`;
-            li.onclick = function () { currentPage = i; removeEmptyRow(); renderTable(); };
-            pagination.appendChild(li);
+            return;
         }
 
-        const next = document.createElement("li");
-        next.className = "page-item " + (currentPage === totalPages ? "disabled" : "");
-        next.innerHTML = `<a class="page-link" href="javascript:void(0);">Next</a>`;
-        next.onclick = function () {
-            if (currentPage < totalPages) { currentPage++; removeEmptyRow(); renderTable(); }
-        };
-        pagination.appendChild(next);
-    }
-
-    function removeEmptyRow() {
-        const emptyRow = document.getElementById("dynamicEmptyRow");
-        if (emptyRow) emptyRow.remove();
-    }
-
-    function addLead(id) {
-        if (!id) { showToast("Inquiry ID not found.", "error"); return; }
-        window.location.href = `/Lead/CreateOrEdit?inquiryId=${encodeURIComponent(id)}`;
-    }
-
-    $(document).ready(function () {
-        $('.sales-person-select').select2({
-            placeholder: "Select Sales Person",
-            allowClear: true,
-            width: '220px'
-        });
-    });
-
-    function updateSalesPerson(select) {
-        const inquiryId = select.getAttribute("data-inquiry-id");
-        const salesEmpCode = select.value;
-
-        if (!inquiryId) { showToast("Inquiry ID not found.", "error"); return; }
-        if (!salesEmpCode) return;
 
         showConfirmToast(
-            "Are you sure you want to assign this sales person?",
+
+            "Are you sure you want to revoke this sales person?",
+
             function () {
+
                 $.ajax({
-                    url: '@Url.Action("AssignSalesPerson", "Lead")',
-                    type: 'POST',
-                    data: { inquiryId: inquiryId, salesEmpCode: salesEmpCode, Action: "AssignToWebsite" },
-                    success: function (response) {
-                        if (response.success) {
-                            showToast("Sales person assigned successfully.", "success");
-                        } else {
-                            showToast(response.message || "Unable to assign sales person.", "error");
-                            clearSalesPerson(select);
-                        }
+
+                    url:
+                        '@Url.Action("RevokeSalesPerson", "Lead")',
+
+                    type:
+                        'POST',
+
+                    data: {
+
+                        inquiryId:
+                            inquiryId,
+
+                        salesEmpCode:
+                            salesEmpCode,
+
+                        Action:
+                            "RevokeFromWebsite"
                     },
-                    error: function () {
-                        showToast("Something went wrong while assigning the sales person.", "error");
-                        clearSalesPerson(select);
-                    }
+
+
+                    success:
+                        function (response) {
+
+                            if (response.success) {
+
+                                showToast(
+                                    "Sales person revoked successfully.",
+                                    "success"
+                                );
+
+
+                                /*
+                                 * Find dropdown
+                                 */
+                                const select =
+                                    document.querySelector(
+                                        '.sales-person-select[data-inquiry-id="' +
+                                        inquiryId +
+                                        '"]'
+                                    );
+
+
+                                /*
+                                 * Clear dropdown
+                                 */
+                                if (select) {
+
+                                    select.value = "";
+
+                                    $(select)
+                                        .val("")
+                                        .trigger("change");
+
+                                }
+
+
+                                /*
+                                 * Remove revoke icon
+                                 */
+                                button.remove();
+
+                            }
+                            else {
+
+                                showToast(
+                                    response.message ||
+                                    "Unable to revoke sales person.",
+                                    "error"
+                                );
+
+                            }
+
+                        },
+
+
+                    error:
+                        function () {
+
+                            showToast(
+                                "Something went wrong while revoking the sales person.",
+                                "error"
+                            );
+
+                        }
+
                 });
-            },
-            function () { clearSalesPerson(select); }
+
+            }
+
         );
+
     }
 
+
+    /* =========================================================
+       CLEAR SALES PERSON
+       ========================================================= */
+
     function clearSalesPerson(select) {
+
         select.value = "";
-        Array.from(select.options).forEach(function (option) { option.selected = false; });
-        if (select.options.length > 0) select.options[0].selected = true;
-        select.dispatchEvent(new Event("change", { bubbles: true }));
+
+
+        Array.from(
+            select.options
+        ).forEach(
+            function (option) {
+
+                option.selected =
+                    false;
+
+            }
+        );
+
+
+        if (
+            select.options.length > 0
+        ) {
+
+            select.options[0]
+                .selected = true;
+
+        }
+
+
+        $(select)
+            .val("")
+            .trigger("change");
+
     }
+
 </script>
+

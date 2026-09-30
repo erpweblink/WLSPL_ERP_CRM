@@ -6,6 +6,11 @@
 }
 
 <style type="text/css">
+
+    /* =========================================================
+           TABLE
+           ========================================================= */
+
     .table tbody td {
         font-size: 13px;
         vertical-align: middle;
@@ -15,14 +20,23 @@
         background: #f4f8ff;
     }
 
+
+    /* =========================================================
+           STATUS
+           ========================================================= */
+
     #statusMessage {
         font-size: 13px;
         color: #fff;
     }
 
+
+    /* =========================================================
+           INQUIRY / FEEDBACK
+           ========================================================= */
+
     .feedback-scroll {
         max-height: 120px;
-        overflow-y: auto;
         overflow-y: auto;
         word-break: break-word;
         padding: 4px 8px;
@@ -30,7 +44,10 @@
         font-size: 12px;
     }
 
-    /* RECORD */
+
+    /* =========================================================
+           RECORD INFO
+           ========================================================= */
 
     .record-info {
         font-size: 14px;
@@ -42,7 +59,10 @@
             font-size: 15px;
         }
 
-    /* WHATSAPP ID */
+
+    /* =========================================================
+           WHATSAPP ID
+           ========================================================= */
 
     .id-badge {
         display: inline-block;
@@ -54,34 +74,48 @@
         font-size: 12px;
     }
 
-    /* NAME */
+
+    /* =========================================================
+           NAME
+           ========================================================= */
 
     .name-text {
         color: #344054;
         font-weight: 600;
     }
 
-    /* MOBILE */
+
+    /* =========================================================
+           MOBILE
+           ========================================================= */
 
     .mobile-text {
         color: #344054;
     }
 
-    /* EMAIL */
+
+    /* =========================================================
+           EMAIL
+           ========================================================= */
 
     .email-text {
         color: #0d6efd;
     }
 
 
-    /* DATE */
+    /* =========================================================
+           DATE
+           ========================================================= */
 
     .date-text {
         color: #667085;
         font-size: 12px;
     }
 
-    /* LOCATION */
+
+    /* =========================================================
+           LOCATION
+           ========================================================= */
 
     .location-badge {
         display: inline-block;
@@ -94,7 +128,9 @@
     }
 
 
-    /* SOURCE */
+    /* =========================================================
+           SOURCE
+           ========================================================= */
 
     .url-scroll {
         max-height: 70px;
@@ -116,7 +152,61 @@
             text-decoration: underline;
         }
 
-    /* EMPTY */
+
+    /* =========================================================
+           SALES PERSON
+           ========================================================= */
+
+    .action-wrapper {
+        min-width: 300px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .sales-person-select {
+        min-width: 220px;
+    }
+
+
+    /* =========================================================
+           REVOKE BUTTON
+           ========================================================= */
+
+    .revoke-icon-btn {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        border: 1px solid #dc3545;
+        background: #fff;
+        color: #dc3545;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        flex-shrink: 0;
+    }
+
+        .revoke-icon-btn:hover {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .revoke-icon-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15);
+        }
+
+        .revoke-icon-btn i {
+            font-size: 13px;
+        }
+
+
+    /* =========================================================
+           EMPTY
+           ========================================================= */
 
     .empty-row {
         text-align: center !important;
@@ -130,6 +220,11 @@
             margin-bottom: 10px;
             color: #adb5bd;
         }
+
+
+    /* =========================================================
+           PAGINATION
+           ========================================================= */
 
     .pagination {
         margin-bottom: 0;
@@ -151,51 +246,134 @@
             background-color: #e9f2ff;
         }
 
+
+    /* =========================================================
+           SEARCH
+           ========================================================= */
+
+    .search-box {
+        height: 38px;
+    }
+
+
+    /* =========================================================
+           RESPONSIVE
+           ========================================================= */
+
+    @@media (max-width: 768px) {
+
+        .action-wrapper {
+            min-width: 280px;
+        }
+
+        .sales-person-select {
+            min-width: 200px;
+        }
+    }
+
 </style>
 
 
+<!-- =========================================================
+     MAIN CARD
+     ========================================================= -->
+
 <div class="card">
+
+    <!-- =====================================================
+         CARD HEADER
+         ===================================================== -->
+
     <div class="card-header">
+
         <div>
+
             <h2>
-                <i class="fab fa-whatsapp"></i>  WhatsApp Inquiry Management
+                <i class="fab fa-whatsapp"></i>
+                WhatsApp Inquiry Management
             </h2>
 
             <span class="page-subtitle">
-
                 Manage customer inquiries received from WhatsApp
-
             </span>
+
         </div>
+
     </div>
 
+
+    <!-- =====================================================
+         CARD BODY
+         ===================================================== -->
+
     <div class="card-body">
+
+
+        <!-- =================================================
+             STATUS
+             ================================================= -->
+
         <span id="statusMessage">
 
-            <i class="fa fa-circle-check status-icon"></i>
+            <i class="fab fa-whatsapp status-icon"></i>
 
             Records loaded
 
         </span>
-        <div class="row align-items-center">
+
+
+        <div class="row align-items-center mb-3">
+
+
+            <!-- =============================================
+                 SEARCH
+                 ============================================= -->
+
             <div class="col-md-4">
+
                 <input type="text"
                        id="searchInput"
                        class="form-control search-box"
                        placeholder="Search name, mobile, email, city..." />
+
             </div>
+
+
+            <!-- =============================================
+                 RECORD COUNT
+                 ============================================= -->
+
             <div class="col-md-8 d-flex justify-content-end align-items-center">
+
                 <span class="record-info">
+
                     Total Records :
-                    <strong id="totalRecords">@Model.Count()</strong>
+
+                    <strong id="totalRecords">
+                        @(Model != null ? Model.Count() : 0)
+                    </strong>
+
                 </span>
+
             </div>
+
         </div>
-        <div class="table-responsive" style="overflow:auto">
+
+
+        <!-- =================================================
+             TABLE
+             ================================================= -->
+
+        <div class="table-responsive"
+             style="overflow:auto">
+
             <table id="dataTable"
                    class="table table-bordered table-hover">
+
                 <thead>
+
                     <tr>
+
                         <th>#</th>
 
                         <th>WhatsApp ID</th>
@@ -212,96 +390,158 @@
 
                         <th>Location</th>
 
-                        <th class="d-none">Source</th>
+                        <th class="d-none">
+                            Source
+                        </th>
 
-                        <th>Sales Person</th>
+                        <th>
+                            Sales Person
+                        </th>
 
                     </tr>
+
                 </thead>
+
+
                 <tbody id="tableBody">
+
                     @if (Model != null && Model.Any())
                     {
+
                         var count = 1;
+
                         foreach (var inquiry in Model)
                         {
+
                             <tr class="inquiry-row">
 
-                                <!-- ID -->
+
+                                <!-- =================================
+                                     SERIAL NUMBER
+                                     ================================= -->
 
                                 <td>
+
                                     @count
+
                                 </td>
+
+
+                                <!-- =================================
+                                     WHATSAPP ID
+                                     ================================= -->
+
                                 <td>
 
                                     @if (inquiry.Id.HasValue)
                                     {
+
                                         <span class="id-badge">
+
                                             WA-@inquiry.Id
+
                                         </span>
+
                                     }
                                     else
                                     {
-                                        <span class="text-muted">-</span>
+
+                                        <span class="text-muted">
+                                            -
+                                        </span>
+
                                     }
 
                                 </td>
 
 
-                                <!-- NAME -->
+                                <!-- =================================
+                                     NAME
+                                     ================================= -->
 
                                 <td>
 
                                     @if (!string.IsNullOrWhiteSpace(inquiry.Name))
                                     {
+
                                         <span class="name-text">
+
                                             @inquiry.Name
+
                                         </span>
+
                                     }
                                     else
                                     {
-                                        <span class="text-muted">-</span>
+
+                                        <span class="text-muted">
+                                            -
+                                        </span>
+
                                     }
 
                                 </td>
 
 
-                                <!-- MOBILE -->
+                                <!-- =================================
+                                     MOBILE
+                                     ================================= -->
 
                                 <td>
 
                                     @if (!string.IsNullOrWhiteSpace(inquiry.MobileNumber))
                                     {
+
                                         <span class="mobile-text">
+
                                             @inquiry.MobileNumber
+
                                         </span>
+
                                     }
                                     else
                                     {
-                                        <span class="text-muted">-</span>
+
+                                        <span class="text-muted">
+                                            -
+                                        </span>
+
                                     }
 
                                 </td>
 
 
-                                <!-- EMAIL -->
+                                <!-- =================================
+                                     EMAIL
+                                     ================================= -->
 
                                 <td>
 
                                     @if (!string.IsNullOrWhiteSpace(inquiry.Email))
                                     {
+
                                         <span class="email-text">
+
                                             @inquiry.Email
+
                                         </span>
+
                                     }
                                     else
                                     {
-                                        <span class="text-muted">-</span>
+
+                                        <span class="text-muted">
+                                            -
+                                        </span>
+
                                     }
 
                                 </td>
 
 
-                                <!-- INQUIRY -->
+                                <!-- =================================
+                                     INQUIRY
+                                     ================================= -->
 
                                 <td>
 
@@ -309,13 +549,19 @@
 
                                         @if (!string.IsNullOrWhiteSpace(inquiry.ServiceRequested))
                                         {
+
                                             @inquiry.ServiceRequested
+
                                         }
                                         else
                                         {
+
                                             <span class="text-muted">
+
                                                 No inquiry details
+
                                             </span>
+
                                         }
 
                                     </div>
@@ -323,30 +569,43 @@
                                 </td>
 
 
-                                <!-- DATE -->
+                                <!-- =================================
+                                     DATE
+                                     ================================= -->
 
                                 <td>
 
                                     @if (!string.IsNullOrWhiteSpace(inquiry.CreatedAt))
                                     {
+
                                         <span class="date-text">
+
                                             @inquiry.CreatedAt
+
                                         </span>
+
                                     }
                                     else
                                     {
-                                        <span class="text-muted">-</span>
+
+                                        <span class="text-muted">
+                                            -
+                                        </span>
+
                                     }
 
                                 </td>
 
 
-                                <!-- LOCATION -->
+                                <!-- =================================
+                                     LOCATION
+                                     ================================= -->
 
                                 <td>
 
                                     @if (!string.IsNullOrWhiteSpace(inquiry.City))
                                     {
+
                                         <span class="location-badge">
 
                                             <i class="fa fa-location-dot me-1"></i>
@@ -354,21 +613,29 @@
                                             @inquiry.City
 
                                         </span>
+
                                     }
                                     else
                                     {
-                                        <span class="text-muted">-</span>
+
+                                        <span class="text-muted">
+                                            -
+                                        </span>
+
                                     }
 
                                 </td>
 
 
-                                <!-- SOURCE -->
+                                <!-- =================================
+                                     SOURCE
+                                     ================================= -->
 
                                 <td class="d-none">
 
                                     @if (!string.IsNullOrWhiteSpace(inquiry.SourceUrl))
                                     {
+
                                         <div class="url-scroll">
 
                                             <a href="@inquiry.SourceUrl"
@@ -380,74 +647,142 @@
                                             </a>
 
                                         </div>
+
                                     }
                                     else
                                     {
-                                        <span class="text-muted">-</span>
+
+                                        <span class="text-muted">
+                                            -
+                                        </span>
+
                                     }
 
                                 </td>
 
 
-                                <!-- SALES PERSON -->
+                                <!-- =================================
+                                     SALES PERSON
+                                     ================================= -->
 
                                 <td>
 
+                                    <div class="action-wrapper">
 
 
-                                    <select class="form-select form-select-sm sales-person-select"
-                                            data-inquiry-id="@inquiry.Id"
-                                            onchange="updateSalesPerson(this)">
+                                        <!-- =========================
+                                             SALES PERSON DROPDOWN
+                                             ========================= -->
 
-                                        <option value="">Select Sales Person</option>
+                                        <select class="form-select form-select-sm sales-person-select"
+                                                data-inquiry-id="@inquiry.Id"
+                                                onchange="updateSalesPerson(this)">
 
-                                        @if (inquiry.SalesPersons != null && inquiry.SalesPersons.Any())
-                                        {
-                                            foreach (var employee in inquiry.SalesPersons)
-                                            {
-                                                if (employee.empcode == inquiry.SalesEmpCode)
-                                                {
-                                                    <option value="@employee.empcode" selected>
-                                                        @employee.name
-                                                        @if (!string.IsNullOrWhiteSpace(employee.empcode))
-                                                        {
-                                                            @: (@employee.empcode)
-                                                        }
-                                                    </option>
-                                                }
-                                                else
-                                                {
-                                                    <option value="@employee.empcode">
-                                                        @employee.name
-                                                        @if (!string.IsNullOrWhiteSpace(employee.empcode))
-                                                        {
-                                                            @: (@employee.empcode)
-                                                        }
-                                                    </option>
-                                                }
-                                            }
-                                        }
-                                        else
-                                        {
-                                            <option value="" disabled>
-                                                No Sales Person Found
+                                            <option value="">
+                                                Select Sales Person
                                             </option>
+
+
+                                            @if (inquiry.SalesPersons != null &&
+                                                                                inquiry.SalesPersons.Any())
+                                            {
+
+                                                foreach (var employee in inquiry.SalesPersons)
+                                                {
+
+                                                    if (employee.empcode ==
+                                                    inquiry.SalesEmpCode)
+                                                    {
+
+                                                        <option value="@employee.empcode"
+                                                                selected>
+
+                                                            @employee.name
+
+                                                            @if (!string.IsNullOrWhiteSpace(employee.empcode))
+                                                            {
+                                                                @: (@employee.empcode)
+                                                            }
+
+                                                        </option>
+
+                                                    }
+                                                    else
+                                                    {
+
+                                                        <option value="@employee.empcode">
+
+                                                            @employee.name
+
+                                                            @if (!string.IsNullOrWhiteSpace(employee.empcode))
+                                                            {
+                                                                @: (@employee.empcode)
+                                                            }
+
+                                                        </option>
+
+                                                    }
+
+                                                }
+
+                                            }
+                                            else
+                                            {
+
+                                                <option value=""
+                                                        disabled>
+
+                                                    No Sales Person Found
+
+                                                </option>
+
+                                            }
+
+                                        </select>
+
+
+                                        <!-- =========================
+                                             EXISTING REVOKE BUTTON
+                                             ========================= -->
+                                        @if (!string.IsNullOrWhiteSpace(inquiry.SalesEmpCode))
+                                        {
+
+                                            <button type="button"
+                                                    class="revoke-icon-btn"
+                                                    title="Revoke Sales Person"
+                                                    data-inquiry-id="@inquiry.Id"
+                                                    data-sales-empcode="@inquiry.SalesEmpCode"
+                                                    onclick="revokeSalesPerson(this)">
+
+                                                <i class="fa fa-rotate-left"></i>
+
+                                            </button>
+
                                         }
 
-                                    </select>
+
+                                    </div>
 
                                 </td>
 
                             </tr>
+
+
                             count++;
+
                         }
+
                     }
                     else
                     {
 
-                        <tr>
+                        <!-- =================================
+                             EMPTY DATA
+                             ================================= -->
 
-                            <td colspan="9"
+                        <tr id="initialEmptyRow">
+
+                            <td colspan="10"
                                 class="empty-row">
 
                                 <i class="fab fa-whatsapp"></i>
@@ -463,180 +798,945 @@
                 </tbody>
 
             </table>
+
+
+            <!-- =================================================
+                 PAGINATION
+                 ================================================= -->
+
             <nav>
+
                 <ul class="pagination justify-content-center"
                     id="pagination">
                 </ul>
+
             </nav>
+
         </div>
+
     </div>
+
 </div>
 
+
 <script type="text/javascript">
+
+    /* =========================================================
+       PAGINATION
+       ========================================================= */
+
     const rowsPerPage = 20;
+
     let currentPage = 1;
+
     let allRows = [];
+
     let filteredRows = [];
 
-    document.addEventListener("DOMContentLoaded", function () {
-        allRows = Array.from(document.querySelectorAll("#tableBody tr.inquiry-row"));
-        filteredRows = [...allRows];
-        updateRecordCount();
-        renderTable();
-    });
 
-    const searchInput = document.getElementById("searchInput");
-    if (searchInput) {
-        searchInput.addEventListener("input", function () {
-            const searchValue = this.value.toLowerCase().trim();
-            filteredRows = allRows.filter(function (row) {
-                return row.innerText.toLowerCase().includes(searchValue);
-            });
-            currentPage = 1;
+    /* =========================================================
+       PAGE LOAD
+       ========================================================= */
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        function () {
+
+            allRows =
+                Array.from(
+                    document.querySelectorAll(
+                        "#tableBody tr.inquiry-row"
+                    )
+                );
+
+
+            filteredRows =
+                [...allRows];
+
+
             updateRecordCount();
-            removeEmptyRow();
+
             renderTable();
-        });
+
+        }
+    );
+
+
+    /* =========================================================
+       SEARCH
+       ========================================================= */
+
+    const searchInput =
+        document.getElementById(
+            "searchInput"
+        );
+
+
+    if (searchInput) {
+
+        searchInput.addEventListener(
+            "input",
+            function () {
+
+                const searchValue =
+                    this.value
+                        .toLowerCase()
+                        .trim();
+
+
+                filteredRows =
+                    allRows.filter(
+                        function (row) {
+
+                            return row.innerText
+                                .toLowerCase()
+                                .includes(searchValue);
+
+                        }
+                    );
+
+
+                currentPage = 1;
+
+                updateRecordCount();
+
+                removeEmptyRow();
+
+                renderTable();
+
+            }
+        );
+
     }
+
+
+    /* =========================================================
+       RECORD COUNT
+       ========================================================= */
 
     function updateRecordCount() {
-        const totalRecords = document.getElementById("totalRecords");
-        if (totalRecords) totalRecords.textContent = filteredRows.length;
 
-        const statusMessage = document.getElementById("statusMessage");
-        if (statusMessage) {
-            statusMessage.innerHTML = `
-                <i class="fab fa-whatsapp status-icon"></i>
-                Loaded ${filteredRows.length} WhatsApp records.
-            `;
+        const totalRecords =
+            document.getElementById(
+                "totalRecords"
+            );
+
+
+        if (totalRecords) {
+
+            totalRecords.textContent =
+                filteredRows.length;
+
         }
+
+
+        const statusMessage =
+            document.getElementById(
+                "statusMessage"
+            );
+
+
+        if (statusMessage) {
+
+            statusMessage.innerHTML = `
+
+                <i class="fab fa-whatsapp status-icon"></i>
+
+                Loaded ${filteredRows.length}
+                WhatsApp records.
+
+            `;
+
+        }
+
     }
 
+
+    /* =========================================================
+       RENDER TABLE
+       ========================================================= */
+
     function renderTable() {
+
         removeEmptyRow();
-        allRows.forEach(function (row) { row.style.display = "none"; });
+
+
+        allRows.forEach(
+            function (row) {
+
+                row.style.display =
+                    "none";
+
+            }
+        );
+
 
         if (filteredRows.length === 0) {
+
             showEmptyResult();
+
             createPagination();
+
+            return;
+
+        }
+
+
+        const startIndex =
+            (currentPage - 1) *
+            rowsPerPage;
+
+
+        filteredRows
+            .slice(
+                startIndex,
+                startIndex + rowsPerPage
+            )
+            .forEach(
+                function (row) {
+
+                    row.style.display =
+                        "table-row";
+
+                }
+            );
+
+
+        createPagination();
+
+    }
+
+
+    /* =========================================================
+       EMPTY RESULT
+       ========================================================= */
+
+    function showEmptyResult() {
+
+        removeEmptyRow();
+
+
+        const emptyRow =
+            document.createElement(
+                "tr"
+            );
+
+
+        emptyRow.id =
+            "dynamicEmptyRow";
+
+
+        emptyRow.innerHTML = `
+
+            <td colspan="10"
+                class="empty-row">
+
+                <i class="fa fa-search"></i>
+
+                No matching WhatsApp inquiries found.
+
+            </td>
+
+        `;
+
+
+        document
+            .getElementById("tableBody")
+            .appendChild(emptyRow);
+
+    }
+
+
+    /* =========================================================
+       REMOVE EMPTY ROW
+       ========================================================= */
+
+    function removeEmptyRow() {
+
+        const emptyRow =
+            document.getElementById(
+                "dynamicEmptyRow"
+            );
+
+
+        if (emptyRow) {
+
+            emptyRow.remove();
+
+        }
+
+
+        const initialEmptyRow =
+            document.getElementById(
+                "initialEmptyRow"
+            );
+
+
+        if (initialEmptyRow &&
+            allRows.length > 0) {
+
+            initialEmptyRow.remove();
+
+        }
+
+    }
+
+
+    /* =========================================================
+       PAGINATION
+       ========================================================= */
+
+    function createPagination() {
+
+        const pagination =
+            document.getElementById(
+                "pagination"
+            );
+
+
+        if (!pagination) {
             return;
         }
 
-        const startIndex = (currentPage - 1) * rowsPerPage;
-        filteredRows.slice(startIndex, startIndex + rowsPerPage).forEach(function (row) {
-            row.style.display = "table-row";
-        });
 
-        createPagination();
-    }
+        pagination.innerHTML =
+            "";
 
-    function showEmptyResult() {
-        removeEmptyRow();
-        const emptyRow = document.createElement("tr");
-        emptyRow.id = "dynamicEmptyRow";
-        emptyRow.innerHTML = `
-            <td colspan="10" class="empty-row">
-                <i class="fa fa-search"></i>
-                No matching WhatsApp inquiries found.
-            </td>
-        `;
-        document.getElementById("tableBody").appendChild(emptyRow);
-    }
 
-    function removeEmptyRow() {
-        const emptyRow = document.getElementById("dynamicEmptyRow");
-        if (emptyRow) emptyRow.remove();
-    }
+        const totalPages =
+            Math.ceil(
+                filteredRows.length /
+                rowsPerPage
+            );
 
-    function createPagination() {
-        const pagination = document.getElementById("pagination");
-        if (!pagination) return;
 
-        pagination.innerHTML = "";
-        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-        if (totalPages <= 1) return;
-
-        const previous = document.createElement("li");
-        previous.className = "page-item " + (currentPage === 1 ? "disabled" : "");
-        previous.innerHTML = `<a class="page-link" href="javascript:void(0)"><i class="fa fa-chevron-left"></i> Previous</a>`;
-        previous.addEventListener("click", function (e) {
-            e.preventDefault();
-            if (currentPage > 1) { currentPage--; renderTable(); scrollToTable(); }
-        });
-        pagination.appendChild(previous);
-
-        for (let i = 1; i <= totalPages; i++) {
-            const pageItem = document.createElement("li");
-            pageItem.className = "page-item " + (i === currentPage ? "active" : "");
-            pageItem.innerHTML = `<a class="page-link" href="javascript:void(0)">${i}</a>`;
-            pageItem.addEventListener("click", function (e) {
-                e.preventDefault();
-                currentPage = i;
-                renderTable();
-                scrollToTable();
-            });
-            pagination.appendChild(pageItem);
+        if (totalPages <= 1) {
+            return;
         }
 
-        const next = document.createElement("li");
-        next.className = "page-item " + (currentPage === totalPages ? "disabled" : "");
-        next.innerHTML = `<a class="page-link" href="javascript:void(0)">Next <i class="fa fa-chevron-right"></i></a>`;
-        next.addEventListener("click", function (e) {
-            e.preventDefault();
-            if (currentPage < totalPages) { currentPage++; renderTable(); scrollToTable(); }
-        });
-        pagination.appendChild(next);
+
+        /* ================================================
+           PREVIOUS
+           ================================================ */
+
+        const previous =
+            document.createElement(
+                "li"
+            );
+
+
+        previous.className =
+            "page-item " +
+            (
+                currentPage === 1
+                    ? "disabled"
+                    : ""
+            );
+
+
+        previous.innerHTML = `
+
+            <a class="page-link"
+               href="javascript:void(0)">
+
+                <i class="fa fa-chevron-left"></i>
+
+                Previous
+
+            </a>
+
+        `;
+
+
+        previous.addEventListener(
+            "click",
+            function (e) {
+
+                e.preventDefault();
+
+
+                if (currentPage > 1) {
+
+                    currentPage--;
+
+                    renderTable();
+
+                    scrollToTable();
+
+                }
+
+            }
+        );
+
+
+        pagination.appendChild(
+            previous
+        );
+
+
+        /* ================================================
+           PAGE NUMBERS
+           ================================================ */
+
+        for (
+            let i = 1;
+            i <= totalPages;
+            i++
+        ) {
+
+            const pageItem =
+                document.createElement(
+                    "li"
+                );
+
+
+            pageItem.className =
+                "page-item " +
+                (
+                    i === currentPage
+                        ? "active"
+                        : ""
+                );
+
+
+            pageItem.innerHTML = `
+
+                <a class="page-link"
+                   href="javascript:void(0)">
+
+                    ${i}
+
+                </a>
+
+            `;
+
+
+            pageItem.addEventListener(
+                "click",
+                function (e) {
+
+                    e.preventDefault();
+
+                    currentPage = i;
+
+                    renderTable();
+
+                    scrollToTable();
+
+                }
+            );
+
+
+            pagination.appendChild(
+                pageItem
+            );
+
+        }
+
+
+        /* ================================================
+           NEXT
+           ================================================ */
+
+        const next =
+            document.createElement(
+                "li"
+            );
+
+
+        next.className =
+            "page-item " +
+            (
+                currentPage === totalPages
+                    ? "disabled"
+                    : ""
+            );
+
+
+        next.innerHTML = `
+
+            <a class="page-link"
+               href="javascript:void(0)">
+
+                Next
+
+                <i class="fa fa-chevron-right"></i>
+
+            </a>
+
+        `;
+
+
+        next.addEventListener(
+            "click",
+            function (e) {
+
+                e.preventDefault();
+
+
+                if (currentPage < totalPages) {
+
+                    currentPage++;
+
+                    renderTable();
+
+                    scrollToTable();
+
+                }
+
+            }
+        );
+
+
+        pagination.appendChild(
+            next
+        );
+
     }
+
+
+    /* =========================================================
+       SCROLL TO TABLE
+       ========================================================= */
 
     function scrollToTable() {
-        const table = document.getElementById("dataTable");
-        if (!table) return;
-        if (table.getBoundingClientRect().top < 0) {
-            table.scrollIntoView({ behavior: "smooth", block: "start" });
+
+        const table =
+            document.getElementById(
+                "dataTable"
+            );
+
+
+        if (!table) {
+            return;
         }
+
+
+        if (
+            table.getBoundingClientRect().top < 0
+        ) {
+
+            table.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
+
+        }
+
     }
 
-    $(document).ready(function () {
-        $('.sales-person-select').select2({
-            placeholder: "Select Sales Person",
-            allowClear: true,
-            width: '220px'
-        });
-    });
+
+    /* =========================================================
+       SELECT2
+       ========================================================= */
+
+    $(document).ready(
+        function () {
+
+            $(".sales-person-select").select2({
+
+                placeholder:
+                    "Select Sales Person",
+
+                allowClear:
+                    true,
+
+                width:
+                    "220px"
+
+            });
+
+        }
+    );
+
+
+    /* =========================================================
+       ASSIGN SALES PERSON
+       ========================================================= */
 
     function updateSalesPerson(select) {
-        const inquiryId = select.getAttribute("data-inquiry-id");
-        const salesEmpCode = select.value;
 
-        if (!inquiryId) { showToast("Inquiry ID not found.", "error"); return; }
-        if (!salesEmpCode) return;
+        const inquiryId =
+            select.getAttribute(
+                "data-inquiry-id"
+            );
+
+
+        const salesEmpCode =
+            select.value;
+
+
+        if (!inquiryId) {
+
+            showToast(
+                "Inquiry ID not found.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (!salesEmpCode) {
+
+            return;
+
+        }
+
 
         showConfirmToast(
+
             "Are you sure you want to assign this sales person?",
+
             function () {
+
                 $.ajax({
-                    url: '@Url.Action("AssignSalesPerson", "Lead")',
-                    type: 'POST',
-                    data: { inquiryId: inquiryId, salesEmpCode: salesEmpCode, Action: "AssignToWebsite" },
-                    success: function (response) {
-                        if (response.success) {
-                            showToast("Sales person assigned successfully.", "success");
-                        } else {
-                            showToast(response.message || "Unable to assign sales person.", "error");
-                            clearSalesPerson(select);
-                        }
+
+                    url:
+                        '@Url.Action("AssignSalesPerson", "Lead")',
+
+                    type:
+                        "POST",
+
+                    data: {
+
+                        inquiryId:
+                            inquiryId,
+
+                        salesEmpCode:
+                            salesEmpCode,
+
+                        Action:
+                            "AssignToWebsite"
+
                     },
-                    error: function () {
-                        showToast("Something went wrong while assigning the sales person.", "error");
-                        clearSalesPerson(select);
-                    }
+
+
+                    success:
+                        function (response) {
+
+                            if (response.success) {
+
+                                showToast(
+                                    "Sales person assigned successfully.",
+                                    "success"
+                                );
+
+
+                                /*
+                                 * ADD REVOKE BUTTON
+                                 */
+                                addRevokeButton(
+                                    select,
+                                    inquiryId,
+                                    salesEmpCode
+                                );
+
+                            }
+                            else {
+
+                                showToast(
+                                    response.message ||
+                                    "Unable to assign sales person.",
+                                    "error"
+                                );
+
+
+                                clearSalesPerson(
+                                    select
+                                );
+
+                            }
+
+                        },
+
+
+                    error:
+                        function () {
+
+                            showToast(
+                                "Something went wrong while assigning the sales person.",
+                                "error"
+                            );
+
+
+                            clearSalesPerson(
+                                select
+                            );
+
+                        }
+
                 });
+
             },
-            function () { clearSalesPerson(select); }
+
+
+            function () {
+
+                /*
+                 * USER CANCELLED
+                 */
+                clearSalesPerson(
+                    select
+                );
+
+            }
+
         );
+
     }
 
-    function clearSalesPerson(select) {
-        $(select).val(null).trigger("change.select2");
+
+    /* =========================================================
+       ADD / UPDATE REVOKE BUTTON
+       ========================================================= */
+
+    function addRevokeButton(
+        select,
+        inquiryId,
+        salesEmpCode
+    ) {
+
+        const wrapper =
+            select.closest(
+                ".action-wrapper"
+            );
+
+
+        if (!wrapper) {
+
+            return;
+
+        }
+
+
+        let button =
+            wrapper.querySelector(
+                ".revoke-icon-btn"
+            );
+
+
+        /*
+         * CREATE BUTTON IF NOT EXISTS
+         */
+        if (!button) {
+
+            button =
+                document.createElement(
+                    "button"
+                );
+
+
+            button.type =
+                "button";
+
+
+            button.className =
+                "revoke-icon-btn";
+
+
+            button.title =
+                "Revoke Sales Person";
+
+
+            button.onclick =
+                function () {
+
+                    revokeSalesPerson(
+                        this
+                    );
+
+                };
+
+
+            wrapper.appendChild(
+                button
+            );
+
+        }
+
+
+        /*
+         * UPDATE BUTTON DATA
+         */
+        button.setAttribute(
+            "data-inquiry-id",
+            inquiryId
+        );
+
+
+        button.setAttribute(
+            "data-sales-empcode",
+            salesEmpCode
+        );
+
+
+        button.innerHTML = `
+
+            <i class="fa fa-rotate-left"></i>
+
+        `;
+
     }
+
+
+
+    function revokeSalesPerson(button) {
+
+        const inquiryId =
+            button.getAttribute(
+                "data-inquiry-id"
+            );
+
+
+        const salesEmpCode =
+            button.getAttribute(
+                "data-sales-empcode"
+            );
+
+
+        if (!inquiryId) {
+
+            showToast(
+                "Inquiry ID not found.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        if (!salesEmpCode) {
+
+            showToast(
+                "Sales person is not assigned.",
+                "error"
+            );
+
+            return;
+
+        }
+
+
+        showConfirmToast(
+
+            "Are you sure you want to revoke this sales person?",
+
+            function () {
+
+                $.ajax({
+
+                    url:
+                        '@Url.Action("RevokeSalesPerson", "Lead")',
+
+                    type:
+                        "POST",
+
+                    data: {
+
+                        inquiryId:
+                            inquiryId,
+
+                        salesEmpCode:
+                            salesEmpCode,
+
+                        Action:
+                            "RevokeFromWhatsapp"
+
+                    },
+
+
+                    success:
+                        function (response) {
+
+                            if (response.success) {
+
+                                showToast(
+                                    "Sales person revoked successfully.",
+                                    "success"
+                                );
+
+
+                                /*
+                                 * FIND DROPDOWN
+                                 */
+                                const select =
+                                    document.querySelector(
+                                        '.sales-person-select[data-inquiry-id="' +
+                                        inquiryId +
+                                        '"]'
+                                    );
+
+
+                                /*
+                                 * CLEAR DROPDOWN
+                                 */
+                                if (select) {
+
+                                    clearSalesPerson(
+                                        select
+                                    );
+
+                                }
+
+
+                                /*
+                                 * REMOVE REVOKE BUTTON
+                                 */
+                                button.remove();
+
+                            }
+                            else {
+
+                                showToast(
+                                    response.message ||
+                                    "Unable to revoke sales person.",
+                                    "error"
+                                );
+
+                            }
+
+                        },
+
+
+                    error:
+                        function () {
+
+                            showToast(
+                                "Something went wrong while revoking the sales person.",
+                                "error"
+                            );
+
+                        }
+
+                });
+
+            },
+
+
+            function () {
+
+                /*
+                 * USER CANCELLED
+                 */
+                return;
+
+            }
+
+        );
+
+    }
+
+
+
+    function clearSalesPerson(select) {
+
+        $(select)
+            .val(null)
+            .trigger("change.select2");
+
+    }
+
 </script>

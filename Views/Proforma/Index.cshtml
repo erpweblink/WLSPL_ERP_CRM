@@ -1,10 +1,23 @@
-﻿@model IEnumerable<WEBLINK_CRM.Models.VM_Proforma>
-
+﻿@model IEnumerable<WLSPL_ERP_CRM.Models.ProformaInvoice.ProformaInvoiceCreate>
+@using WEBLINK_CRM.Helpers
 @{
     ViewData["Title"] = "Proforma";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 <style>
+    :root {
+        --pf-ink: #1f2a37;
+        --pf-muted: #6b7686;
+        --pf-line: #e3e8ef;
+        --pf-surface: #ffffff;
+        --pf-head: #f3f6fa;
+        --pf-accent: #1d5f8a;
+        --pf-accent-soft: #e6f0f7;
+        --pf-danger: #b42318;
+        --pf-danger-soft: #fdecea;
+        --pf-ok: #1a7f4b;
+        --pf-ok-soft: #e4f5ec;
+    }
     .active-status {
         background-color: #198754 !important;
         color: #ffffff !important;
@@ -27,8 +40,8 @@
 </style>
 <style>
     /* =========================================
-           MAIN PROFORMA TABLE
-           ========================================= */
+                       MAIN PROFORMA TABLE
+                       ========================================= */
 
     .proforma-main-table-wrapper {
         height: 600px;
@@ -75,8 +88,8 @@
 
 
     /* =========================================
-           PROFORMA DETAILS MODAL
-           ========================================= */
+                       PROFORMA DETAILS MODAL
+                       ========================================= */
 
     #ProformaModal .proforma-table-wrapper {
         max-height: 500px;
@@ -233,26 +246,26 @@
                                 </td>
 
                                 <td>
-                                    @(item.ProformaDate.HasValue
-                                                                ? item.ProformaDate.Value.ToString("dd/MM/yyyy")
+                                    @(item.createddate.HasValue
+                                                                ? item.createddate.Value.ToString("dd/MM/yyyy")
                                                                 : "")
                         </td>
                         <td>
                             <strong>
-                                @item.ProformaNo
+                                @item.invoiceno
                             </strong>
                         </td>
 
                                 <td>
-                                    @item.CompanyName
+                                    @item.companyName
                                 </td>
 
                                 <td class="text-end">
-                                    @item.TotalAmtBeforeTax
+                                    @item.totalamtbeforetax
                                 </td>
 
                                 <td class="text-end">
-                                    @item.TotalAmtAfterTax
+                                    @item.totalamtaftertax
                                 </td>
 
                                 <td>
@@ -262,45 +275,41 @@
                                         <!-- Edit -->
                                         <a asp-controller="Proforma"
                                            asp-action="Create"
-                                           asp-route-ID="@item.ID"
-                                           class="btn btn-sm btn-primary"
+                                           asp-route-ID="@EncryptionHelper.Encrypt(item.Id)"
+                                           class="btn btn-sm btn-secondary"
                                            title="Edit">
                                             <i class="fa fa-edit"></i>
                                         </a>
-
-                                        <!-- Details -->
-                                        <button type="button"
-                                                class="btn btn-sm btn-info"
-                                                title="View Details"
-                                                onclick="GetProformaDetails('@item.ID')">
-
-                                            <i class="fa fa-eye"></i>
-
-                                        </button>
-
                                         <!-- Delete -->
                                         <button type="button"
                                                 class="btn btn-sm btn-danger"
                                                 title="Delete"
-                                                onclick="DeleteProforma('@item.ID')">
+                                                onclick="DeleteProforma('@item.Id')">
 
                                             <i class="fa fa-trash"></i>
 
                                         </button>
 
                                         <button type="button"
-                                                class="btn btn-sm btn-primary"
+                                                class="btn btn-sm btn-success"
                                                 title="Send PDF"
-                                                onclick="ViewPDF('@item.ID')">
+                                                onclick="ViewPDF('@item.Id')">
                                             <i class="fa fa-file-pdf"></i>
                                         </button>
+                                        <a asp-controller="Taxinvoice"
+                                           asp-action="Create"
+                                           asp-route-ID="@EncryptionHelper.Encrypt(item.Id)"
+                                           class="btn btn-sm btn-info"
+                                           title="Create Tax Invoice">
+                                            <i class="fa fa-plus"></i>
+                                        </a>
                                     </div>
 
                                 </td>
 
                             </tr>
 
-                            count++;
+                                        count++;
                         }
                     }
                     else
@@ -336,81 +345,6 @@
 
 </div>
 
-<div class="modal fade"
-     id="ProformaModal"
-     tabindex="-1"
-     aria-hidden="true">
-
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-
-        <div class="modal-content">
-
-            <div class="modal-header">
-
-                <h5 class="modal-title">
-                    <i class="fa fa-file-text-o me-2"></i>
-                    Proforma Details
-                </h5>
-
-                <button type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Close">
-                </button>
-
-            </div>
-
-
-            <div class="modal-body">
-
-                <div class="proforma-table-wrapper">
-
-                    <table id="tblProformaList"
-                           class="table table-bordered table-striped"
-                           style="width:100%;">
-
-                        <thead class="table-light">
-
-                            <tr>
-                                <th>Service</th>
-                                <th>Description</th>
-                                <th>Sac Code.</th>
-                                <th>Qty</th>
-                                <th>Rate</th>
-                                <th>Amount</th>
-                                <th>Total</th>
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
-
-
-            <div class="modal-footer">
-
-                <button type="button"
-                        class="btn btn-danger"
-                        data-bs-dismiss="modal">
-
-                    <i class="fa fa-times me-1"></i>
-                    Close
-
-                </button>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</div>
 
 <script>
     const searchInput = document.getElementById("searchInput");
@@ -549,69 +483,6 @@
         loadRows();
     });
 
-
-    function GetProformaDetails(id) {
-        $("#loader").show();
-
-        $.ajax({
-            url: '@Url.Action("GetDetailsById", "Proforma")',
-            type: "POST",
-            data: {
-                ID: id
-            },
-            success: function (response) {
-                if (response.success === true) {
-                    $("#tblProformaList tbody").empty();
-
-                    var details = response.data;
-
-                    if (details != null && details.length > 0) {
-                        var html = "";
-
-                        $.each(details, function (i, item) {
-                            html += `
-                                <tr>                          
-                                    <td>${item.serviceName ?? ""}</td>
-                                    <td>${item.productDescription ?? ""}</td>
-                                    <td>${item.sacCode ?? ""}</td>
-                                    <td class="text-end">${item.qty ?? 0}</td>                           
-                                    <td class="text-end">${item.rate ?? 0}</td>
-                                    <td class="text-end">${item.taxableValue ?? 0}</td>
-                                    <td class="text-end">${item.total ?? 0}</td>
-                                </tr>
-                            `;
-                        });
-
-                        $("#tblProformaList tbody").html(html);
-                    } else {
-                        $("#tblProformaList tbody").html(`
-                            <tr>
-                                <td colspan="7" class="text-center text-muted">
-                                    No Proforma details found.
-                                </td>
-                            </tr>
-                        `);
-                    }
-
-                    // Open Bootstrap 5 modal
-                    var modalElement = document.getElementById("ProformaModal");
-                    var modal = bootstrap.Modal.getOrCreateInstance(modalElement);
-                    modal.show();
-                }
-                else {
-                    showToast(response.message || "Unable to load Proforma details.", "error");
-                }
-            },
-            complete: function () {
-                $("#loader").hide();
-            },
-            error: function (xhr) {
-                showToast("Error while loading Proforma details.", "error");
-            }
-        });
-    }
-
-
     function DeleteProforma(id) {
         if (!id || id === "" || id === "0") {
             showToast("Invalid Proforma ID.", "error");
@@ -666,7 +537,7 @@
                 }
                 const byteArray = new Uint8Array(byteNumbers);
                 const blob = new Blob([byteArray], { type: 'application/pdf' });
-                const url = window.URL.createObjectURL(blob);              
+                const url = window.URL.createObjectURL(blob);
                 window.open(url);
                 setTimeout(() => window.URL.revokeObjectURL(url), 10000);
                 } else {

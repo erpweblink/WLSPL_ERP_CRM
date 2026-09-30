@@ -1,277 +1,610 @@
-﻿@{
-    ViewBag.Title = "Create";
+﻿@model WLSPL_ERP_CRM.Models.ProformaInvoice.ProformaInvoiceCreateVM
+
+@{
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Works whether Id is int / long / string
+    long invoiceId = 0;
+    long.TryParse(Model?.main?.Id?.ToString(), out invoiceId);
+    bool isEdit = invoiceId > 0;
+
+    var companyList = Model?.companies
+        ?? new List<WLSPL_ERP_CRM.Models.ProformaInvoice.ProformaInvoiceCreate>();
+
+    var invoiceDetails = Model?.details
+        ?? new List<WLSPL_ERP_CRM.Models.ProformaInvoice.InvoiceDetails>();
+
+    var bankDetails = Model?.BankDetails
+        ?? new List<WLSPL_ERP_CRM.Models.ProformaInvoice.InvoiceBankDetail>();
+
+    // Everything Proforma.js needs from Razor (external .js files cannot use @Url.Action / @Model)
+    var pfConfig = new
+    {
+        isEdit = isEdit,
+        invoiceId = invoiceId,
+        companies = companyList.Select(c => c.companyName).Where(n => !string.IsNullOrWhiteSpace(n)).Distinct().ToList(),
+        urls = new
+        {
+            getCompany = Url.Action("Getcomapnybycname", "Proforma"),
+            getQuotations = Url.Action("GetQuotationsByCompany", "Proforma"),
+            getQuotationDetails = Url.Action("GetQuotationProformaDetails", "Proforma"),
+            searchServices = Url.Action("SearchServices", "Proforma"),
+            save = Url.Action("SaveInvoice", "Proforma"),
+            update = Url.Action("UpdateInvoice", "Proforma"),
+            index = Url.Action("Index", "Proforma"),
+            taxInvoicePdf = Url.Action("ViewTaxInvoicePDF", "Proforma")
+        },
+        main = isEdit ? Model.main : null,
+        details = isEdit ? invoiceDetails : null,
+        bankDetails = isEdit ? bankDetails : null
+    };
 }
+
 <style type="text/css">
+    /* ───────── Tokens ───────── */
+    :root {
+        --pf-ink: #14263d;
+        --pf-brand: #1a3e66;
+        --pf-brand-soft: #e8eff7;
+        --pf-accent: #0e8f83;
+        --pf-page: #eef1f5;
+        --pf-card: #ffffff;
+        --pf-line: #d9dfe7;
+        --pf-field: #f7f9fb;
+        --pf-muted: #6b7889;
+        --pf-danger: #d33a4a;
+        --pf-radius: 10px;
+        --pf-radius-sm: 6px;
+    }
+
+    body, .content-wrapper, .page-content {
+        background: var(--pf-page);
+    }
+
+    #frmTaxInvoice {
+        font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: var(--pf-ink);
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 8px 4px 24px;
+    }
+
+        /* ───────── Cards ───────── */
+        #frmTaxInvoice .card {
+            background: var(--pf-card);
+            border: 1px solid var(--pf-line);
+            border-radius: var(--pf-radius);
+            box-shadow: 0 1px 2px rgba(20,38,61,.05);
+            margin-bottom: 18px;
+            overflow: hidden;
+        }
+
+        #frmTaxInvoice .card-header {
+            background: linear-gradient(120deg, #10233f 0%, #1a3e66 55%, #167a86 100%) !important;
+            border-bottom: 3px solid var(--pf-accent);
+            padding: 13px 22px;
+        }
+
+            #frmTaxInvoice .card-header h5 {
+                color: #fff !important;
+                font-size: 16px;
+                font-weight: 650;
+                letter-spacing: .2px;
+            }
+
+            #frmTaxInvoice .card-header .btn-primary {
+                background: rgba(255,255,255,.14);
+                border: 1px solid rgba(255,255,255,.4);
+                color: #fff;
+            }
+
+                #frmTaxInvoice .card-header .btn-primary:hover {
+                    background: rgba(255,255,255,.26);
+                    border-color: #fff;
+                }
+
+        #frmTaxInvoice .card-body {
+            padding: 22px 24px;
+        }
+
+            #frmTaxInvoice .card-body.p-0 {
+                padding: 0;
+            }
+
+        /* ───────── Labels & fields ───────── */
+        #frmTaxInvoice .col-form-label,
+        #frmTaxInvoice .form-label {
+            color: var(--pf-muted);
+            font-size: 13px;
+            font-weight: 600 !important;
+        }
 
     .required::after {
         content: " *";
-        color: red;
+        color: var(--pf-danger);
     }
 
-    .table-invalid {
-        border: 2px solid #dc3545 !important;
-        border-radius: 4px;
-        box-shadow: 0 0 0 0.15rem rgba(220, 53, 69, 0.25);
-    }
-
-    .is-invalid {
-        border-color: #dc3545 !important;
-    }
-
-    /* ── All form inputs / selects / textareas — grey, like Tax Invoice ── */
-    .form-control {
-        border: 1px solid gray !important;
-    }
-
-        .form-control,
-        .form-control:focus {
-            background-color: #f4f5f6 !important;
-            border: 1px solid #ced4da;
-            color: #444;
-            border-radius: 3px;
-        }
-
-            .form-control[readonly],
-            .form-control:disabled {
-                background-color: #e8eaeb !important;
-                color: #6c757d;
-                cursor: default;
-            }
-
-    /* Select2 match */
-    .select2-container .select2-selection--single {
-        background-color: #f4f5f6 !important;
-        border: 1px solid #343434 !important;
-        border-radius: 3px !important;
-        height: 38px !important;
-    }
-
-        .select2-container .select2-selection--single .select2-selection__rendered {
-            line-height: 36px !important;
-            color: #444 !important;
-        }
-
-        .select2-container .select2-selection--single .select2-selection__arrow {
-            height: 36px !important;
-        }
-
-    /* ── Consistent card-body row spacing ── */
     .card-body .row.form-row-item {
-        margin-bottom: 16px;
+        margin-bottom: 14px;
     }
 
         .card-body .row.form-row-item:last-child {
             margin-bottom: 0;
         }
 
-    .card-header {
-        background: linear-gradient(314deg, #0b0f14, #1a3e66);
+    .form-control,
+    .form-control:focus {
+        background-color: var(--pf-field) !important;
+        border: 1px solid var(--pf-line) !important;
+        border-radius: var(--pf-radius-sm);
+        color: var(--pf-ink);
+        min-height: 38px;
+        font-size: 14px;
+        transition: border-color .15s, box-shadow .15s, background-color .15s;
     }
 
-
-    .btn {
-        border-radius: 8px;
-        height: 43px;
-        font-weight: 600;
-        transition: .3s;
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-    }
-
-    .btn-danger {
-        background: #dc3545;
-        border: none;
-    }
-
-        .btn-danger:hover {
-            background: #bb2d3b;
-            transform: translateY(-2px);
+        .form-control:hover {
+            border-color: #b8c3d1 !important;
         }
 
-    /* ── Services table — matches Tax Invoice's Item Details table ── */
+        .form-control:focus {
+            background-color: #fff !important;
+            border-color: var(--pf-accent) !important;
+            box-shadow: 0 0 0 3px rgba(14,143,131,.18);
+            outline: 0;
+        }
+
+        .form-control[readonly],
+        .form-control:disabled {
+            background-color: #eceff3 !important;
+            color: var(--pf-muted);
+            cursor: default;
+        }
+
+    textarea.form-control {
+        min-height: 64px;
+    }
+
+    .select2-container .select2-selection--single {
+        background-color: var(--pf-field) !important;
+        border: 1px solid var(--pf-line) !important;
+        border-radius: var(--pf-radius-sm) !important;
+        height: 38px !important;
+    }
+
+        .select2-container .select2-selection--single .select2-selection__rendered {
+            line-height: 36px !important;
+            color: var(--pf-ink) !important;
+        }
+
+        .select2-container .select2-selection--single .select2-selection__arrow {
+            height: 36px !important;
+        }
+
+    /* validation */
+    .field-error {
+        border-color: var(--pf-danger) !important;
+        background-color: #fff6f7 !important;
+        box-shadow: 0 0 0 3px rgba(211,58,74,.14);
+    }
+
+    .err-msg {
+        font-size: 12px;
+        color: var(--pf-danger);
+        display: block;
+        margin-top: 3px;
+    }
+
+    /* ───────── Company search dropdown ───────── */
+    .service-wrapper {
+        position: relative;
+    }
+
+    .service-dropdown {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 9999;
+        background: #fff;
+        border: 1px solid var(--pf-line);
+        border-radius: var(--pf-radius-sm);
+        max-height: 220px;
+        overflow-y: auto;
+        list-style: none;
+        margin: 4px 0 0;
+        padding: 4px;
+        box-shadow: 0 10px 24px rgba(20,38,61,.16);
+    }
+
+        .service-dropdown li {
+            padding: 8px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+            .service-dropdown li:hover,
+            .service-dropdown li.active {
+                background: var(--pf-brand-soft);
+                color: var(--pf-brand);
+            }
+
+    /* ───────── Service table ───────── */
     .invoice-table {
         width: 100%;
-        border-collapse: collapse;
+        min-height: 170px;
+        border-collapse: separate;
+        border-spacing: 0;
         table-layout: fixed;
+        min-width: 1000px;
     }
 
         .invoice-table th,
         .invoice-table td {
-            border: 1px solid #dee2e6;
-            padding: 4px 6px;
+            border-bottom: 1px solid var(--pf-line);
+            border-right: 1px solid #edf0f4;
+            padding: 6px 8px;
             vertical-align: middle;
             text-align: center;
         }
 
+            .invoice-table th:last-child,
+            .invoice-table td:last-child {
+                border-right: 0;
+            }
+
         .invoice-table th {
-            background: linear-gradient(314deg, #0b0f14, #1a3e66);
+            background: var(--pf-brand);
             color: #fff;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
+            border-right-color: rgba(255,255,255,.14);
             white-space: normal;
         }
 
+        .invoice-table tbody tr:nth-child(even) td {
+            background: #fafbfd;
+        }
+
+        .invoice-table tbody tr:hover td {
+            background: var(--pf-brand-soft);
+        }
+
         .invoice-table td input,
+        .invoice-table td select,
         .invoice-table td textarea {
             width: 100%;
-            font-size: 11px;
-            border: 1px solid gray;
-            border-radius: 3px;
-            padding: 2px 4px;
-            background: #f4f5f6;
-            color: #444;
+            font-size: 13px;
+            border: 1px solid var(--pf-line);
+            border-radius: 4px;
+            padding: 4px 6px;
+            background: #fff;
+            color: var(--pf-ink);
+            font-variant-numeric: tabular-nums;
         }
+
+            .invoice-table td input:focus,
+            .invoice-table td select:focus,
+            .invoice-table td textarea:focus {
+                border-color: var(--pf-accent);
+                box-shadow: 0 0 0 3px rgba(14,143,131,.16);
+                outline: 0;
+            }
 
             .invoice-table td input[readonly],
             .invoice-table td input:disabled {
-                background: #e8eaeb !important;
-                color: #6c757d;
+                background: #eceff3 !important;
+                color: var(--pf-muted);
                 cursor: default;
             }
 
         .invoice-table td textarea {
-            min-height: 38px;
+            min-height: 60px;
             resize: vertical;
         }
 
-    .col-action {
-        width: 50px;
-    }
-
-    .col-desc {
-        width: 200px;
-    }
-
-    .col-sac {
-        width: 85px;
+    .col-sn {
+        width: 44px;
     }
 
     .col-qty {
-        width: 65px;
+        width: 110px;
     }
 
     .col-rate {
-        width: 85px;
+        width: 95px;
+    }
+
+    .col-taxable {
+        width: 100px;
     }
 
     .col-tax {
         width: 120px;
     }
 
-    .col-taxable {
-        width: 95px;
+    .col-total {
+        width: 105px;
     }
 
-    .col-total {
-        width: 100px;
+    .col-action {
+        width: 44px;
     }
 
     .tax-pair {
         display: grid;
         grid-template-columns: 46px 1fr;
-        gap: 3px;
+        gap: 4px;
     }
 
-    /* ── Summary block, matches Tax Invoice's Summary card ── */
-    .summary-right .summary-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: 1px solid #dee2e6;
-        padding: 8px 14px;
-        font-size: 13px;
-        font-weight: 600;
+    .invoice-table tfoot .tfoot-row td {
+        background: var(--pf-brand-soft);
+        font-weight: 700;
+        border-top: 2px solid var(--pf-brand);
+        border-bottom: 0;
     }
 
-        .summary-right .summary-row:last-child {
-            border-bottom: none;
-        }
+    .invoice-table tfoot input {
+        background: transparent !important;
+        border: 0 !important;
+        font-weight: 700;
+        color: var(--pf-brand);
+        text-align: right;
+    }
 
-        .summary-right .summary-row input {
-            width: 160px;
-            text-align: right;
-            border: 1px solid #ced4da;
-            border-radius: 3px;
-            background: #e8eaeb !important;
-            color: #444;
+    .sd-top {
+        display: grid;
+        grid-template-columns: 1fr 100px;
+        border-bottom: 1px solid var(--pf-line);
+    }
+
+    .sd-service {
+        padding: 6px 8px;
+        border-right: 1px solid var(--pf-line);
+    }
+
+    .sd-sac {
+        padding: 6px 8px;
+    }
+
+    .sd-bottom {
+        padding: 6px 8px;
+    }
+
+    .remove-row {
+        color: var(--pf-danger);
+        cursor: pointer;
+    }
+
+    /* ───────── Payment ───────── */
+    #tblAccountDetails,
+    #tblBankDetail {
+        border-radius: var(--pf-radius-sm);
+        overflow: hidden;
+        background: #fff;
+    }
+
+        #tblBankDetail thead th {
+            background: var(--pf-brand);
+            color: #fff;
             font-size: 12px;
-            padding: 4px 8px;
-            height: 32px;
+            font-weight: 600;
+            border-color: rgba(255,255,255,.14);
         }
 
-            .summary-right .summary-row input.numeric {
-                background: #f4f5f6 !important;
+        #tblAccountDetails td {
+            vertical-align: middle;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--pf-ink);
+            padding: 6px 10px;
+        }
+
+            #tblAccountDetails td .form-control {
+                text-align: right;
+                font-variant-numeric: tabular-nums;
             }
 
-</style>
-<style>
-    #tblDetails thead th {
+            #tblAccountDetails td[style*="194462"] {
+                padding: 1px !important;
+                background: var(--pf-line) !important;
+            }
+
+    #txtTotalAmountBalance {
+        font-weight: 700;
+        color: var(--pf-brand);
+        background: var(--pf-brand-soft) !important;
+    }
+
+    /* ───────── Bank / payment rows ───────── */
+    #tblBankDetail tbody td {
+        vertical-align: middle;
+        font-size: 13px;
+        padding: 8px 10px;
+        border-color: #edf0f4;
+        font-variant-numeric: tabular-nums;
+    }
+
+    #tblBankDetail tbody tr:hover td {
+        background: var(--pf-brand-soft);
+    }
+
+    #tblBankDetail td:first-child {
         text-align: center;
+        width: 90px;
+    }
+
+    .bank-select {
+        width: 17px;
+        height: 17px;
+        accent-color: var(--pf-accent);
+        cursor: pointer;
         vertical-align: middle;
-        padding: 5px 4px;
-        border: 1px solid #000;
+    }
+
+    .btn-pdf-view {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
         font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .3px;
+        color: #b4232f;
+        background: #fdecee;
+        border: 1px solid #f3b9bf;
+        border-radius: 999px;
+        cursor: pointer;
+        line-height: 1.2;
+        transition: background-color .15s, color .15s, box-shadow .15s, transform .05s;
     }
 
-    #tblDetails thead tr:first-child th {
-        font-weight: bold;
-        height: 28px;
+        .btn-pdf-view i {
+            font-size: 14px;
+        }
+
+        .btn-pdf-view:hover {
+            background: #d33a4a;
+            border-color: #d33a4a;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(211,58,74,.28);
+        }
+
+        .btn-pdf-view:active {
+            transform: translateY(1px);
+        }
+
+        .btn-pdf-view:focus-visible {
+            outline: 3px solid rgba(211,58,74,.35);
+            outline-offset: 2px;
+        }
+
+    /* ───────── Buttons ───────── */
+    .btn {
+        border-radius: var(--pf-radius-sm);
+        font-weight: 600;
+        letter-spacing: .1px;
+        transition: background-color .15s, box-shadow .15s, transform .05s;
     }
 
-    #tblDetails thead tr:nth-child(2) th {
-        font-size: 11px;
-        padding: 3px 4px;
-        height: 22px;
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn:focus-visible {
+            outline: 3px solid rgba(14,143,131,.35);
+            outline-offset: 2px;
+        }
+
+    .btn-primary {
+        background: var(--pf-brand);
+        border-color: var(--pf-brand);
     }
 
-    #tblDetails tbody td {
-        border: 1px solid #000;
-        padding: 4px;
-        vertical-align: middle;
+        .btn-primary:hover {
+            background: #143257;
+            border-color: #143257;
+        }
+
+    .btn-success {
+        background: var(--pf-accent);
+        border-color: var(--pf-accent);
+    }
+
+        .btn-success:hover {
+            background: #0b7369;
+            border-color: #0b7369;
+        }
+
+    .btn-danger {
+        background: var(--pf-danger);
+        border-color: var(--pf-danger);
+    }
+
+    .action-btns {
+        position: sticky;
+        bottom: 0;
+        z-index: 50;
+        background: rgba(238,241,245,.92);
+        backdrop-filter: blur(6px);
+        padding: 12px 0;
+        margin: 0 !important;
+        border-top: 1px solid var(--pf-line);
+    }
+
+        .action-btns .btn {
+            min-width: 130px;
+            padding: 9px 22px;
+        }
+
+    /* ───────── Small screens ───────── */
+    @@media (max-width: 767px) {
+        #frmTaxInvoice .card-body {
+            padding: 16px;
+        }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        * {
+            transition: none !important;
+        }
+    }
+
+    /* ───────── Print ───────── */
+    @@media print {
+        .add-row-btn, .remove-row, .action-btns {
+            display: none !important;
+        }
+
+        .card {
+            box-shadow: none;
+        }
+
+        @@page {
+            size: A4 landscape;
+            margin: 8mm;
+        }
     }
 </style>
-<form id="WorkOrderform">
-    <div id="loader" style="display:none;">
-        <div class="text-center">
-            <img src="~/assets/images/loader.gif"
-                 class="loader-gif"
-                 alt="Loading..." />
-        </div>
-    </div>
 
-    <!-- ══════════════ PROFORMA HEADER ══════════════ -->
+<form id="frmTaxInvoice">
+
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" id="invoiceId" value="@invoiceId" />
+
+    <!-- ══════════════ INVOICE HEADER ══════════════ -->
     <div class="card">
         <div class="card-header d-flex align-items-center justify-content-between"
-             style="background:  linear-gradient(314deg, #0b0f14, #1a3e66);">
-            <h5 style="margin:0; color:#fff;">Create Proforma</h5>
+             style="background: linear-gradient(314deg, #0b0f14, #1a3e66);">
+            <h5 style="margin:0; color:#fff;">@(isEdit ? "Edit Proforma Invoice" : "Proforma Invoice")</h5>
             <button type="button" class="btn btn-primary btn-sm" onclick="window.history.back();">
                 <i class="fa fa-arrow-left"></i> Back
             </button>
         </div>
 
         <div class="card-body">
-
             <div class="row form-row-item">
                 <div class="col-md-6">
                     <div class="form-group row">
-                        <label class="col-md-4 col-form-label font-weight-bold required">Proforma Date</label>
+                        <label class="col-md-4 col-form-label font-weight-bold required">Invoice Date</label>
                         <div class="col-md-8">
-                            <input type="date"
-                                   class="form-control"
-                                   id="txtProformaDate"
-                                   name="txtProformaDate"
-                                   readonly />
+                            <input asp-for="main.invoiceno" type="text" class="form-control d-none" id="invoiceNo"
+                                   placeholder="Invoice No" readonly />
+                            <input asp-for="main.invoicedate" type="date" class="form-control" id="invoiceDate" />
+                            <span class="err-msg" id="err-invoiceDate"></span>
                         </div>
                     </div>
                 </div>
+
+
                 <div class="col-md-6">
                     <div class="form-group row">
-                        <label class="col-md-4 col-form-label font-weight-bold required">Reverse Charge (Y/N)</label>
+                        <label class="col-md-4 col-form-label font-weight-bold">Reverse Charge</label>
                         <div class="col-md-8">
-                            <select class="form-control" id="ddlReverseCharge" name="ddlReverseCharge">
+                            <select asp-for="main.reversecharge" class="form-control" id="reverseCharge">
                                 <option value="N">N</option>
                                 <option value="Y">Y</option>
                             </select>
@@ -279,20 +612,14 @@
                     </div>
                 </div>
             </div>
-
-         
-
-            <input type="hidden" id="ID" name="ID" />
-
         </div>
     </div>
 
     <!-- ══════════════ BILL TO ══════════════ -->
     <div class="card mt-3">
-        <div class="card-header">
-            <h5>Bill To</h5>
+        <div class="card-header" style="background: linear-gradient(314deg, #0b0f14, #1a3e66);">
+            <h5 style="margin:0; color:#fff;">Bill To</h5>
         </div>
-
         <div class="card-body">
 
             <div class="row form-row-item">
@@ -300,20 +627,22 @@
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label font-weight-bold required">Company Name</label>
                         <div class="col-md-8">
-                            <select class="form-control ddlselect" id="ddlCompanyname" name="ddlCompanyname">
-                            </select>
+                            <input type="hidden" id="companyCode" name="companyCode" value="">
+
+                            <div class="service-wrapper">
+                                <input asp-for="main.companyName" type="text" class="form-control" id="companyName"
+                                       placeholder="Search company..." autocomplete="off" />
+                                <ul class="service-dropdown" id="companyDropdown"></ul>
+                            </div>
+                            <span class="err-msg" id="err-companyName"></span>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group row">
-                        <label class="col-md-4 col-form-label font-weight-bold required">GSTIN</label>
+                        <label class="col-md-4 col-form-label font-weight-bold">Billing GST</label>
                         <div class="col-md-8">
-                            <input type="text"
-                                   class="form-control"
-                                   id="txtGSTNo"
-                                   name="txtGSTNo"
-                                   readonly />
+                            <input asp-for="main.gstIn" type="text" class="form-control" id="gstin" placeholder="Billing GST" />
                         </div>
                     </div>
                 </div>
@@ -322,23 +651,17 @@
             <div class="row form-row-item">
                 <div class="col-md-6">
                     <div class="form-group row">
-                        <label class="col-md-4 col-form-label font-weight-bold required">Address</label>
+                        <label class="col-md-4 col-form-label font-weight-bold">Billing Address</label>
                         <div class="col-md-8">
-                            <textarea class="form-control"
-                                      id="txtAddress"
-                                      name="txtAddress"
-                                      rows="2"
-                                      readonly></textarea>
+                            <textarea asp-for="main.Address" class="form-control" id="address" rows="2" placeholder="Billing Address"></textarea>
                         </div>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group row">
-                        <label class="col-md-4 col-form-label font-weight-bold required">State</label>
+                        <label class="col-md-4 col-form-label font-weight-bold">Billing Location</label>
                         <div class="col-md-8">
-                            <select class="form-control ddlselect" id="ddlBillState" name="ddlBillState">
-                                <option value="">-- Select --</option>
-                            </select>
+                            <input asp-for="main.Location" type="text" class="form-control" id="Location" placeholder="Billing Location" />
                         </div>
                     </div>
                 </div>
@@ -347,9 +670,39 @@
             <div class="row form-row-item">
                 <div class="col-md-6">
                     <div class="form-group row">
-                        <label class="col-md-4 col-form-label font-weight-bold required">Against By</label>
+                        <label class="col-md-4 col-form-label font-weight-bold">Pincode</label>
                         <div class="col-md-8">
-                            <select class="form-control" id="ddlAgainstBy" name="ddlAgainstBy">
+                            <input asp-for="main.PinCode" type="text" class="form-control" id="billingPincode" placeholder="Pincode" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold">Billing State</label>
+                        <div class="col-md-8">
+                            <input asp-for="main.state" type="text" class="form-control" id="billingState" placeholder="Billing State" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row form-row-item">
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold">Billing State Code</label>
+                        <div class="col-md-8">
+                            <input asp-for="main.statecode" type="text" class="form-control" id="billingStateCode" placeholder="State Code" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row form-row-item">
+                <div class="col-md-6">
+                    <div class="form-group row">
+                        <label class="col-md-4 col-form-label font-weight-bold">Against By</label>
+                        <div class="col-md-8">
+                            <select asp-for="main.AgainstBy" class="form-control" id="AgainstBy">
                                 <option value="Direct">Direct</option>
                                 <option value="Quotation">Quotation</option>
                             </select>
@@ -358,140 +711,214 @@
                 </div>
                 <div class="col-md-6">
                     <div class="form-group row">
-                        <label class="col-md-4 col-form-label font-weight-bold required">Against No.</label>
+                        <label class="col-md-4 col-form-label font-weight-bold">Against By Value</label>
                         <div class="col-md-8">
-                            <select class="form-control ddlselect" id="ddlAgainstNo" name="ddlAgainstNo">
-                                <option value="">-- Select --</option>
-                            </select>
+                            <select asp-for="main.AgainstByValue" class="form-control" id="AgainstByValue"></select>
                         </div>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 
     <!-- ══════════════ ITEM DETAILS ══════════════ -->
     <div class="card mt-3">
-        <div class="card-header">
-            <h5><i class="fa fa-list-alt"></i> Item Details</h5>
+        <div class="card-header" style="background: linear-gradient(314deg, #0b0f14, #1a3e66);">
+            <h5 style="margin:0; color:#fff;">Service Details</h5>
         </div>
-
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card-body">
-
-                    <input type="hidden" id="rowID" value="" />
-                    <div class="table-responsive">
-                        <!-- Service Entry Table -->
-                        <table id="tbldetails"
-                               class="invoice-table"
-                               style="width:100%;">
-
-                            <thead>
-                                <tr>
-                                    <th class="col-action" rowspan="2">Action</th>
-                                    <th class="col-service" rowspan="2">Service Name</th>
-                                    <th class="col-desc" rowspan="2">Description</th>
-                                    <th class="col-sac" rowspan="2">SAC Code</th>
-                                    <th class="col-qty" rowspan="2">QTY</th>
-                                    <th class="col-rate" rowspan="2">Rate</th>
-
-                                    <!-- GST GROUPS -->
-                                    <th class="col-tax" colspan="2">CGST %</th>
-                                    <th class="col-tax" colspan="2">SGST %</th>
-                                    <th class="col-tax" colspan="2">IGST %</th>
-
-                                    <th class="col-taxable" rowspan="2">Amount</th>
-                                    <th class="col-total" rowspan="2">All Total</th>
-                                </tr>
-
-                                <!-- SUB HEADER -->
-                                <tr>
-                                    <th class="col-tax">Rate</th>
-                                    <th class="col-tax">Amount</th>
-
-                                    <th class="col-tax">Rate</th>
-                                    <th class="col-tax">Amount</th>
-
-                                    <th class="col-tax">Rate</th>
-                                    <th class="col-tax">Amount</th>
-                                </tr>
-                            </thead>
-
-                            <tbody id="tblDetailsBody">
-                                <!-- rows added by JS -->
-                            </tbody>
-
-                        </table>
-                    </div>
-                    <div class="col-md-12 text-center pt-2">
-                        <input type="button"
-                               class="btn btn-primary btn-sm btnAddRow"
-                               value="Add Service"
-                               id="btnAddRow" />
-                    </div>
-                </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="invoice-table" id="invoiceTable">
+                    <thead>
+                        <tr>
+                            <th class="col-sn" rowspan="3">S.No</th>
+                            <th colspan="2" style="width:280px;"></th>
+                            <th class="col-qty" rowspan="3">Service Till</th>
+                            <th class="col-rate" rowspan="3">Rate</th>
+                            <th class="col-taxable" rowspan="3">Taxable Value</th>
+                            <th class="col-tax" rowspan="3">CGST % | Amt</th>
+                            <th class="col-tax" rowspan="3">SGST % | Amt</th>
+                            <th class="col-tax" rowspan="3">IGST % | Amt</th>
+                            <th class="col-total" rowspan="3">Total</th>
+                            <th class="col-action" rowspan="3">#</th>
+                        </tr>
+                        <tr>
+                            <th style="width:160px; border-right:1px solid rgba(255,255,255,0.2); border-bottom:1px solid rgba(255,255,255,0.2); font-size:10px; letter-spacing:.5px;">SERVICE</th>
+                            <th style="width:100px; border-bottom:1px solid rgba(255,255,255,0.2); font-size:10px; letter-spacing:.5px;">SAC CODE</th>
+                        </tr>
+                        <tr>
+                            <th colspan="2" style="font-size:10px; letter-spacing:.5px;">SERVICE DESCRIPTION</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoiceItems"></tbody>
+                    <tfoot>
+                        <tr class="tfoot-row">
+                            <td></td>
+                            <td colspan="3" style="text-align:right; padding-right:10px; font-weight:700;">TOTAL</td>
+                            <td></td>
+                            <td><input type="text" id="totalTaxable" readonly class="form-control form-control-sm text-right" /></td>
+                            <td><input type="text" id="totalCGST" readonly class="form-control form-control-sm text-right" /></td>
+                            <td><input type="text" id="totalSGST" readonly class="form-control form-control-sm text-right" /></td>
+                            <td><input type="text" id="totalIGST" readonly class="form-control form-control-sm text-right" /></td>
+                            <td><input type="text" id="grandTotalTable" readonly class="form-control form-control-sm text-right" /></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="p-2 pt-3">
+                <button type="button" id="btnAddRow" class="btn btn-success btn-sm add-row-btn">
+                    + Add New Row
+                </button>
+                <span class="err-msg d-inline-block ml-2" id="err-items"></span>
             </div>
         </div>
     </div>
 
-    <!-- ══════════════ SUMMARY ══════════════ -->
-    <div class="card mt-3">
-        <div class="card-header">
-            <h5>Summary</h5>
+    <!-- ══════════════ PAYMENT ══════════════ -->
+    <div class="card">
+        <div class="card-header" style="background: linear-gradient(314deg, #0b0f14, #1a3e66);">
+            <h5 style="margin:0; color:#fff;">Payment</h5>
         </div>
-        <div class="card-body p-0">
-            <div class="summary-right">
-                <div class="summary-row">
-                    <span>Basic Amount</span>
-                    <input class="numeric" value="0" id="txtTotalDealBasicAmount" name="txtTotalDealBasicAmount" />
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-md-3 font-weight-bold spancls">Payment Mode  :</div>
+                        <div class="col-md-6">
+                            <select class="form-control ddlselect" id="ddlPaymentMode" name="ddlPaymentMode">
+                                <option value="">--Select Payment Mode--</option>
+                                <option value="Online / UPI">Online / UPI</option>
+                                <option value="Cheque">Cheque</option>
+                                <option value="Cash">Cash</option>
+                                <option value="Credit Card">Credit Card</option>
+                                <option value="Debit Card">Debit Card</option>
+                                <option value="NEFT">NEFT</option>
+                                <option value="RTGS">RTGS</option>
+                                <option value="IMPS">IMPS</option>
+                                <option value="Bank Transfer">Bank Transfer</option>
+                            </select>
+                        </div>
+                    </div>
+                    <br />
+
+                    <div class="form-group row">
+                        <div class="col-md-2">
+                            <label class="form-label font-weight-bold">Bank Name:</label>
+                            <input type="text" class="form-control" id="txtBankName" placeholder="Bank Name" name="txtBankName">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label font-weight-bold">Cheque No./Transaction No.:</label>
+                            <input type="text" class="form-control numeric" placeholder="Cheque No./Transaction No." id="txtChequeNo" name="txtChequeNo">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label font-weight-bold">Date:</label>
+                            <div class="input-group date">
+                                <input type="date" class="form-control Date" id="txtChequedate" name="txtChequedate">
+                                <div class="input-group-addon">
+                                    <span class="glyphicon glyphicon-th"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label font-weight-bold">Amount:</label>
+                            <input type="text" class="form-control numeric" id="txtAmount" placeholder="Amount" name="txtAmount">
+                        </div>
+                        <div class="col-md-1" style="margin-top:20px;">
+                            <input type="button" class="btn btn-primary btn-sm add-row" value="ADD">
+                        </div>
+                    </div>
+                    <br />
+                    <div class="table-responsive" style="display:none;" id="divtable">
+                        <table id="tblBankDetail" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0">
+                            <thead class="clsthead">
+                                <tr>
+                                    <th>Select</th>
+                                    <th>Mode</th>
+                                    <th>Bank Name</th>
+                                    <th>Cheque No./Transaction No.</th>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <button type="button" class="btn btn-danger btn-sm delete-row"><i class="fa fa-trash"></i></button>
+                    </div>
                 </div>
-                <div class="summary-row">
-                    <span>GST Amount</span>
-                    <input value="0" id="txtTotalDealGSTAmount" name="txtTotalDealGSTAmount" readonly />
-                </div>
-                <div class="summary-row">
-                    <span>Total Amount</span>
-                    <input id="txtTotalAmountBalance" name="txtTotalAmountBalance" readonly />
+
+                <div class="col-md-4">
+                    <div class="table-responsive">
+                        <table style="width:100%!important" id="tblAccountDetails" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0">
+                            <thead class="clsthead"></thead>
+                            <tbody>
+                                <tr>
+                                    <td id="lblTotalDealBasicAmount">Total Deal Basic Amount</td>
+                                    <td><input class="form-control numeric" value="0" id="txtTotalDealBasicAmount" name="txtTotalDealBasicAmount" /></td>
+                                </tr>
+                                <tr id="trTotalDealGSTAmount">
+                                    <td>Total Deal GST Amount (<span id="spnGSTper"></span>%) </td>
+                                    <td><input class="form-control" value="0" id="txtTotalDealGSTAmount" name="txtTotalDealGSTAmount" readonly /></td>
+                                </tr>
+                                <tr><td style="background-color:#194462;"></td><td style="background-color:#194462;"></td></tr>
+                                <tr>
+                                    <td>Received Basic Amount</td>
+                                    <td><input class="form-control numeric" id="txtBasicAmountReceived" name="txtBasicAmountReceived" value="0" /></td>
+                                </tr>
+                                <tr id="trGSTAmountReceived">
+                                    <td>Received GST Amount</td>
+                                    <td><input class="form-control numeric" id="txtGSTAmountReceived" name="txtGSTAmountReceived" value="0" /></td>
+                                </tr>
+                                <tr><td style="background-color:#194462;"></td><td style="background-color:#194462;"></td></tr>
+                                <tr>
+                                    <td>Balance Basic Amount</td>
+                                    <td><input class="form-control" id="txtBalanceBasicAmount" name="txtBalanceBasicAmount" value="0" readonly /></td>
+                                </tr>
+                                <tr id="trBalanceGSTAmount">
+                                    <td>Balance GST Amount </td>
+                                    <td><input class="form-control" id="txtBalanceGSTAmount" name="txtBalanceGSTAmount" value="0" readonly /></td>
+                                </tr>
+                                <tr><td style="background-color:#194462;"></td><td style="background-color:#194462;"></td></tr>
+                                <tr id="trtdsPer">
+                                    <td>TDS Per(%) </td>
+                                    <td><input class="form-control" id="txtTdsAmount" name="txtTdsAmount" value="0" /></td>
+                                </tr>
+                                <tr id="trTDSAmount">
+                                    <td>TDS Amount </td>
+                                    <td><input class="form-control" id="txtTDSAmount" name="txtTDSAmount" value="0" readonly /></td>
+                                </tr>
+                                <tr><td style="background-color:#194462;"></td><td style="background-color:#194462;"></td></tr>
+                                <tr>
+                                    <td>Balance Total Amount</td>
+                                    <td><input class="form-control" id="txtTotalAmountBalance" name="txtTotalAmountBalance" readonly /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- ══════════════ ACTION BUTTONS ══════════════ -->
-    <div class="row justify-content-center mt-3 mb-4">
+    <div class="row justify-content-center mt-3 mb-4 action-btns">
         <div class="col-auto">
-            <button type="submit" id="btnSubmit" class="btn btn-primary px-4">
-                <i class="fa fa-save"></i> Save
+            <button type="button" id="saveBtn" class="btn btn-primary px-4">
+                @(isEdit ? "Update" : "Save")
             </button>
         </div>
         <div class="col-auto">
-            <a href="~/Proforma/Index">
-                <input type="button" id="btnCancel" value="Cancel" class="btn btn-danger px-4" />
-            </a>
+            <button type="button" id="btnClear" class="btn btn-danger px-4">
+                @(isEdit ? "Reset" : "Clear")
+            </button>
         </div>
     </div>
 
 </form>
-<script>
-    $(document).ready(function () {
 
-        $('.ddlselect').select2({
-            selectOnClose: true,
-            width: '100%'
-        });
-
-    });
+@* Razor -> JS bridge *@
+<script src="~/js/Proforma.js" asp-append-version="true"></script>
+<script type="text/javascript">
+    GetProformaForm.init(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(pfConfig)));
 </script>
-@section Scripts {
-
-    <script src="~/js/Proforma.js"></script>
-    <script type="text/javascript">
-
-        $(document).ready(function ($) {
-
-            GetProformaForm.init();
-        });
-    </script>
-
-}

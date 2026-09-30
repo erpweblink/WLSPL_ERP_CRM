@@ -3,27 +3,31 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System.Data;
 using WEBLINK_CRM.Models;
-using static WEBLINK_CRM.Models.VM_Proforma;
+using WLSPL_ERP_CRM.Models;
+using static WLSPL_ERP_CRM.Models.ProformaInvoice;
 
 namespace WEBLINK_CRM.repository
 {
     public interface IProforma
     {
-        Task<List<VM_Proforma>> GetProformaList(string size,string sessionname);
-        Task<List<ProformaDetailVM>> GetDetailsById(string wono);
-        Task<List<object>> GetCompanyList(string Status, string sessionname);
-        Task<List<object>> GetStateList(string Status);
-        Task<List<object>> GetQuotationNoList(string Companyname);
-        Task<List<object>> GetCompanyByCode(string Code);
-        Task<List<object>> GetDetailsByQuotationNo(string Code);
- 
-        Task<VM_Proforma> GetProformaById(string ID);   
 
-        Task<int> Save(VM_Proforma model);
+        Task<List<ProformaInvoice.ProformaInvoiceCreate>> GetProformaList(string size, string sessionname);
 
-        Task<bool> Delete(int id);
+        Task<ProformaInvoice.ProformaInvoiceCreate?> GetBlankModelWithinvoiceno();
+
+        Task<List<ProformaInvoiceCreate>> Getcompany();
+        Task<List<dynamic>> GetQuotationsByCompany(string cname, string type);
+        Task<object> GetQuotationProformaDetails(int id, string type);
+        Task<ProformaInvoiceCreate> Getcompanybycname(string cname);
+
+        Task<List<InvoiceDetails>> SearchServices(string cname);
+
+        Task<bool> UpdateSave(ProformaInvoiceCreateVM model, string Action);
+
+        Task<dynamic> Getinvoicebyid(int ID);
+
+        Task<bool> DeleteInvoiceDetails(int id, string name);
+
         byte[] ProformaPdf(int id);
-
-
     }
 }

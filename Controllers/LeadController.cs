@@ -13,8 +13,7 @@ namespace WEBLINK_CRM.Controllers
         private readonly IinquiryRepo _inquiryRepository;
 
         public LeadController(
-            IinquiryRepo inquiryRepo,
-            ILeadRepository leadRepository)
+            IinquiryRepo inquiryRepo,ILeadRepository leadRepository)
         {
             _inquiryRepository = inquiryRepo;
             _leadRepository = leadRepository;
@@ -243,6 +242,60 @@ namespace WEBLINK_CRM.Controllers
                 }
 
                 int result = await _inquiryRepository.AssignSalesPerson(
+                    inquiryId,
+                    salesEmpCode, Action
+                );
+
+                if (result > 0)
+                {
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Sales person assigned successfully."
+                    });
+                }
+
+                return Json(new
+                {
+                    success = false,
+                    message = "Inquiry not found or assignment failed."
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> RevokeSalesPerson(int inquiryId, string salesEmpCode, string Action)
+        {
+            try
+            {
+                if (inquiryId <= 0)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Invalid inquiry ID."
+                    });
+                }
+
+                if (string.IsNullOrWhiteSpace(salesEmpCode))
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Please select a sales person."
+                    });
+                }
+
+                int result = await _inquiryRepository.Revokesalespersons(
                     inquiryId,
                     salesEmpCode, Action
                 );
