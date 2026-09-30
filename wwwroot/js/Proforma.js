@@ -128,6 +128,13 @@ var GetProformaForm = function () {
             .on('input.pfRow', '.igst-rate', function () { taxChanged(this, 'IGST'); })
             .on('click.pfRow', '.remove-row', function () { removeRow(this); });
 
+        // Bank table: open tax invoice PDF
+        $('#tblBankDetail')
+            .off('.pfBank')
+            .on('click.pfBank', '.btn-pdf-view', function () {
+                openTaxInvoicePdf($(this).data('id'));
+            });
+
         $('#btnAddRow').off('click.pf').on('click.pf', function () { addInvoiceRow(); });
         $('#saveBtn').off('click.pf').on('click.pf', function () { saveInvoice(); });
         $('#btnClear').off('click.pf').on('click.pf', function () { clearInvoice(); });
@@ -657,7 +664,8 @@ var GetProformaForm = function () {
                 bankName: pick(b, 'bankName', 'BankName') || '',
                 chequeNo: pick(b, 'chequeNo', 'ChequeNo', 'transactionNo', 'TransactionNo') || '',
                 date: String(pick(b, 'date', 'Date', 'transactionDate', 'TransactionDate') || '').substring(0, 10),
-                amount: parseFloat(pick(b, 'amount', 'Amount')) || 0
+                amount: parseFloat(pick(b, 'amount', 'Amount')) || 0,
+                taxinvoiceid: String(pick(b, 'taxinvoiceid', 'taxInvoiceId', 'TaxInvoiceid')) || '0'
             });
         });
 
@@ -850,32 +858,61 @@ var GetProformaForm = function () {
 
     function appendBankRow(b) {
 
+        const parsedId = parseInt(b.taxinvoiceid, 10);
+        const hasTaxInvoice = Number.isInteger(parsedId) && parsedId > 0;
+        const taxInvoiceId = hasTaxInvoice ? parsedId : '';
+
+        const firstCell = hasTaxInvoice
+            ? `<button type="button" class="btn btn-sm btn-primary" data-id="${taxInvoiceId}" title="View Tax Invoice PDF">
+               <i class="fa fa-file-pdf"></i><span>PDF</span>
+           </button>`
+            : `<input type="checkbox" class="bank-select">`;
+
         const row = `
-            <tr>
-                <td class="text-center">
-                    <input type="checkbox" class="bank-select">
-                </td>
-                <td>
-                    <input type="text" class="form-control mode" value="${escapeHtml(b.mode)}" readonly>
-                </td>
-                <td>
-                    <input type="text" class="form-control bank-name" value="${escapeHtml(b.bankName)}" readonly>
-                </td>
-                <td>
-                    <input type="text" class="form-control bank-cheque-no" value="${escapeHtml(b.chequeNo)}" readonly>
-                </td>
-                <td>
-                    <input type="text" class="form-control bank-date" value="${escapeHtml(b.date)}" readonly>
-                </td>
-                <td>
-                    <input type="text" class="form-control bank-amount text-right" value="${Number(b.amount).toFixed(2)}" readonly>
-                </td>
-            </tr>
-        `;
+        <tr>
+            <td class="text-center">
+                <input type="hidden" class="tax-invoice-id" value="${taxInvoiceId}">
+                ${firstCell}
+            </td>
+            <td><input type="text" class="form-control mode" value="${escapeHtml(b.mode)}" readonly></td>
+            <td><input type="text" class="form-control bank-name" value="${escapeHtml(b.bankName)}" readonly></td>
+            <td><input type="text" class="form-control bank-cheque-no" value="${escapeHtml(b.chequeNo)}" readonly></td>
+            <td><input type="text" class="form-control bank-date" value="${escapeHtml(b.date)}" readonly></td>
+            <td><input type="text" class="form-control bank-amount text-right" value="${Number(b.amount).toFixed(2)}" readonly></td>
+        </tr>
+    `;
 
         $('#tblBankDetail tbody').append(row);
     }
 
+ 
+    function openTaxInvoicePdf(id) {
+
+        // open the tab first (inside the click) so the popup blocker allows it
+        const win = window.open('', '_blank');
+
+        $.ajax({
+            url: pfUrls.taxInvoicePdf,
+            type: 'POST',
+            data: { id: id },
+            headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+
+            success: function (res) {
+                if (res && res.success && res.url) {
+                    if (win) win.location.href = res.url;
+                    else window.open(res.url, '_blank');
+                } else {
+                    if (win) win.close();
+                    showToast('Unable to open tax invoice PDF.', 'error');
+                }
+            },
+
+            error: function () {
+                if (win) win.close();
+                showToast('Error while opening tax invoice PDF.', 'error');
+            }
+        });
+    }
     function addBankDetail() {
 
         const mode = ($('#ddlPaymentMode').val() || '').trim();
@@ -1322,6 +1359,7 @@ var GetProformaForm = function () {
 
         $('#tblBankDetail tbody tr').each(function () {
 
+            const taxInvoiceIdVal = ($(this).find('.tax-invoice-id').val() || '').trim();
             const mode = $(this).find('.mode').val() || '';
             const bankName = $(this).find('.bank-name').val() || '';
             const chequeNo = $(this).find('.bank-cheque-no').val() || '';
@@ -1330,6 +1368,7 @@ var GetProformaForm = function () {
 
             if (mode || bankName || chequeNo || date || amount > 0) {
                 bankDetails.push({
+                    taxInvoiceId: taxInvoiceIdVal !== '' ? taxInvoiceIdVal : null,
                     mode: mode.trim() || null,
                     bankName: bankName.trim() || null,
                     chequeNo: chequeNo.trim() || null,
@@ -1338,6 +1377,7 @@ var GetProformaForm = function () {
                 });
             }
         });
+
 
         // ---- Main ----
         const main = {
@@ -1479,10 +1519,9 @@ var GetProformaForm = function () {
             url: isEdit ? pfUrls.update : pfUrls.save,
             type: 'POST',
             contentType: 'application/json; charset=utf-8',
-            dataType: 'json',
-            headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+            dataType: 'json',         
             data: JSON.stringify(payload),
-
+            headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
             success: function (response) {
 
                 console.log('Save Response:', response);

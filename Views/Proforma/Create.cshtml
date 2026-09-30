@@ -31,7 +31,8 @@
             searchServices = Url.Action("SearchServices", "Proforma"),
             save = Url.Action("SaveInvoice", "Proforma"),
             update = Url.Action("UpdateInvoice", "Proforma"),
-            index = Url.Action("Index", "Proforma")
+            index = Url.Action("Index", "Proforma"),
+            taxInvoicePdf = Url.Action("ViewTaxInvoicePDF", "Proforma")
         },
         main = isEdit ? Model.main : null,
         details = isEdit ? invoiceDetails : null,
@@ -40,159 +41,154 @@
 }
 
 <style type="text/css">
-    .required::after {
-        content: " *";
-        color: red;
+    /* ───────── Tokens ───────── */
+    :root {
+        --pf-ink: #14263d;
+        --pf-brand: #1a3e66;
+        --pf-brand-soft: #e8eff7;
+        --pf-accent: #0e8f83;
+        --pf-page: #eef1f5;
+        --pf-card: #ffffff;
+        --pf-line: #d9dfe7;
+        --pf-field: #f7f9fb;
+        --pf-muted: #6b7889;
+        --pf-danger: #d33a4a;
+        --pf-radius: 10px;
+        --pf-radius-sm: 6px;
     }
 
-    .form-control {
-        border: 1px solid gray !important;
+    body, .content-wrapper, .page-content {
+        background: var(--pf-page);
     }
 
-        .form-control,
-        .form-control:focus {
-            background-color: #f4f5f6 !important;
-            border: 1px solid #ced4da;
-            color: #444;
-            border-radius: 3px;
+    #frmTaxInvoice {
+        font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+        color: var(--pf-ink);
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 8px 4px 24px;
+    }
+
+        /* ───────── Cards ───────── */
+        #frmTaxInvoice .card {
+            background: var(--pf-card);
+            border: 1px solid var(--pf-line);
+            border-radius: var(--pf-radius);
+            box-shadow: 0 1px 2px rgba(20,38,61,.05);
+            margin-bottom: 18px;
+            overflow: hidden;
         }
 
-            .form-control[readonly],
-            .form-control:disabled {
-                background-color: #e8eaeb !important;
-                color: #6c757d;
-                cursor: default;
+        #frmTaxInvoice .card-header {
+            background: var(--pf-card) !important;
+            border-bottom: 1px solid var(--pf-line);
+            border-left: 4px solid var(--pf-accent);
+            padding: 12px 20px;
+        }
+
+            #frmTaxInvoice .card-header h5 {
+                color: var(--pf-ink) !important;
+                font-size: 16px;
+                font-weight: 650;
+                letter-spacing: .1px;
             }
 
-    .select2-container .select2-selection--single {
-        background-color: #f4f5f6 !important;
-        border: 1px solid #343434 !important;
-        border-radius: 3px !important;
-        height: 38px !important;
+        #frmTaxInvoice .card-body {
+            padding: 22px 24px;
+        }
+
+            #frmTaxInvoice .card-body.p-0 {
+                padding: 0;
+            }
+
+        /* ───────── Labels & fields ───────── */
+        #frmTaxInvoice .col-form-label,
+        #frmTaxInvoice .form-label {
+            color: var(--pf-muted);
+            font-size: 13px;
+            font-weight: 600 !important;
+        }
+
+    .required::after {
+        content: " *";
+        color: var(--pf-danger);
     }
 
-        .select2-container .select2-selection--single .select2-selection__rendered {
-            line-height: 36px !important;
-            color: #444 !important;
-        }
-
-        .select2-container .select2-selection--single .select2-selection__arrow {
-            height: 36px !important;
-        }
-
     .card-body .row.form-row-item {
-        margin-bottom: 16px;
+        margin-bottom: 14px;
     }
 
         .card-body .row.form-row-item:last-child {
             margin-bottom: 0;
         }
 
-    .invoice-table {
-        width: 100%;
-        height: 170px;
-        border-collapse: collapse;
-        table-layout: fixed;
+    .form-control,
+    .form-control:focus {
+        background-color: var(--pf-field) !important;
+        border: 1px solid var(--pf-line) !important;
+        border-radius: var(--pf-radius-sm);
+        color: var(--pf-ink);
+        min-height: 38px;
+        font-size: 14px;
+        transition: border-color .15s, box-shadow .15s, background-color .15s;
     }
 
-        .invoice-table th,
-        .invoice-table td {
-            border: 1px solid #dee2e6;
-            padding: 4px 6px;
-            vertical-align: middle;
-            text-align: center;
+        .form-control:hover {
+            border-color: #b8c3d1 !important;
         }
 
-        .invoice-table th {
-            background: linear-gradient(314deg, #0b0f14, #1a3e66);
-            color: #fff;
-            font-size: 11px;
-            font-weight: 600;
-            white-space: normal;
+        .form-control:focus {
+            background-color: #fff !important;
+            border-color: var(--pf-accent) !important;
+            box-shadow: 0 0 0 3px rgba(14,143,131,.18);
+            outline: 0;
         }
 
-        .invoice-table td input,
-        .invoice-table td select,
-        .invoice-table td textarea {
-            width: 100%;
-            font-size: 11px;
-            border: 1px solid gray;
-            border-radius: 3px;
-            padding: 2px 4px;
-            background: #f4f5f6;
-            color: #444;
+        .form-control[readonly],
+        .form-control:disabled {
+            background-color: #eceff3 !important;
+            color: var(--pf-muted);
+            cursor: default;
         }
 
-            .invoice-table td input[readonly],
-            .invoice-table td input:disabled {
-                background: #e8eaeb !important;
-                color: #6c757d;
-                cursor: default;
-            }
-
-        .invoice-table td textarea {
-            min-height: 60px;
-            resize: vertical;
-        }
-
-    .col-sn { width: 35px; }
-    .col-qty { width: 100px; }
-    .col-rate { width: 90px; }
-    .col-taxable { width: 90px; }
-    .col-tax { width: 110px; }
-    .col-total { width: 95px; }
-    .col-action { width: 36px; }
-
-    .tax-pair {
-        display: grid;
-        grid-template-columns: 44px 1fr;
-        gap: 3px;
+    textarea.form-control {
+        min-height: 64px;
     }
 
-    .tfoot-row td {
-        background: #f1f3f5;
-        font-weight: 600;
+    .select2-container .select2-selection--single {
+        background-color: var(--pf-field) !important;
+        border: 1px solid var(--pf-line) !important;
+        border-radius: var(--pf-radius-sm) !important;
+        height: 38px !important;
     }
 
+        .select2-container .select2-selection--single .select2-selection__rendered {
+            line-height: 36px !important;
+            color: var(--pf-ink) !important;
+        }
+
+        .select2-container .select2-selection--single .select2-selection__arrow {
+            height: 36px !important;
+        }
+
+    /* validation */
     .field-error {
-        border-color: #dc3545 !important;
-        background-color: #fff5f5 !important;
-        box-shadow: 0 0 0 0.15rem rgba(220,53,69,.15);
+        border-color: var(--pf-danger) !important;
+        background-color: #fff6f7 !important;
+        box-shadow: 0 0 0 3px rgba(211,58,74,.14);
     }
 
     .err-msg {
-        font-size: 10px;
-        color: #dc3545;
+        font-size: 12px;
+        color: var(--pf-danger);
         display: block;
-        margin-top: 2px;
+        margin-top: 3px;
     }
 
-    @@media print {
-        .add-row-btn, .remove-row, .action-btns {
-            display: none !important;
-        }
-
-        @@page {
-            size: A4 landscape;
-            margin: 8mm;
-        }
+    /* ───────── Company search dropdown ───────── */
+    .service-wrapper {
+        position: relative;
     }
-
-    .sd-top {
-        display: grid;
-        grid-template-columns: 1fr 100px;
-        border-bottom: 1px solid #dee2e6;
-    }
-
-    .sd-service {
-        padding: 6px 8px;
-        border-right: 1px solid #dee2e6;
-    }
-
-    .sd-sac { padding: 6px 8px; }
-    .sd-bottom { padding: 6px 8px; }
-
-    .service-wrapper { position: relative; }
 
     .service-dropdown {
         display: none;
@@ -202,14 +198,301 @@
         right: 0;
         z-index: 9999;
         background: #fff;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        max-height: 200px;
+        border: 1px solid var(--pf-line);
+        border-radius: var(--pf-radius-sm);
+        max-height: 220px;
         overflow-y: auto;
         list-style: none;
-        margin: 2px 0 0;
-        padding: 0;
-        box-shadow: 0 4px 12px rgba(0,0,0,.12);
+        margin: 4px 0 0;
+        padding: 4px;
+        box-shadow: 0 10px 24px rgba(20,38,61,.16);
+    }
+
+        .service-dropdown li {
+            padding: 8px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+            .service-dropdown li:hover,
+            .service-dropdown li.active {
+                background: var(--pf-brand-soft);
+                color: var(--pf-brand);
+            }
+
+    /* ───────── Service table ───────── */
+    .invoice-table {
+        width: 100%;
+        min-height: 170px;
+        border-collapse: separate;
+        border-spacing: 0;
+        table-layout: fixed;
+        min-width: 1000px;
+    }
+
+        .invoice-table th,
+        .invoice-table td {
+            border-bottom: 1px solid var(--pf-line);
+            border-right: 1px solid #edf0f4;
+            padding: 6px 8px;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+            .invoice-table th:last-child,
+            .invoice-table td:last-child {
+                border-right: 0;
+            }
+
+        .invoice-table th {
+            background: var(--pf-brand);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            border-right-color: rgba(255,255,255,.14);
+            white-space: normal;
+        }
+
+        .invoice-table tbody tr:nth-child(even) td {
+            background: #fafbfd;
+        }
+
+        .invoice-table tbody tr:hover td {
+            background: var(--pf-brand-soft);
+        }
+
+        .invoice-table td input,
+        .invoice-table td select,
+        .invoice-table td textarea {
+            width: 100%;
+            font-size: 13px;
+            border: 1px solid var(--pf-line);
+            border-radius: 4px;
+            padding: 4px 6px;
+            background: #fff;
+            color: var(--pf-ink);
+            font-variant-numeric: tabular-nums;
+        }
+
+            .invoice-table td input:focus,
+            .invoice-table td select:focus,
+            .invoice-table td textarea:focus {
+                border-color: var(--pf-accent);
+                box-shadow: 0 0 0 3px rgba(14,143,131,.16);
+                outline: 0;
+            }
+
+            .invoice-table td input[readonly],
+            .invoice-table td input:disabled {
+                background: #eceff3 !important;
+                color: var(--pf-muted);
+                cursor: default;
+            }
+
+        .invoice-table td textarea {
+            min-height: 60px;
+            resize: vertical;
+        }
+
+    .col-sn {
+        width: 44px;
+    }
+
+    .col-qty {
+        width: 110px;
+    }
+
+    .col-rate {
+        width: 95px;
+    }
+
+    .col-taxable {
+        width: 100px;
+    }
+
+    .col-tax {
+        width: 120px;
+    }
+
+    .col-total {
+        width: 105px;
+    }
+
+    .col-action {
+        width: 44px;
+    }
+
+    .tax-pair {
+        display: grid;
+        grid-template-columns: 46px 1fr;
+        gap: 4px;
+    }
+
+    .invoice-table tfoot .tfoot-row td {
+        background: var(--pf-brand-soft);
+        font-weight: 700;
+        border-top: 2px solid var(--pf-brand);
+        border-bottom: 0;
+    }
+
+    .invoice-table tfoot input {
+        background: transparent !important;
+        border: 0 !important;
+        font-weight: 700;
+        color: var(--pf-brand);
+        text-align: right;
+    }
+
+    .sd-top {
+        display: grid;
+        grid-template-columns: 1fr 100px;
+        border-bottom: 1px solid var(--pf-line);
+    }
+
+    .sd-service {
+        padding: 6px 8px;
+        border-right: 1px solid var(--pf-line);
+    }
+
+    .sd-sac {
+        padding: 6px 8px;
+    }
+
+    .sd-bottom {
+        padding: 6px 8px;
+    }
+
+    .remove-row {
+        color: var(--pf-danger);
+        cursor: pointer;
+    }
+
+    /* ───────── Payment ───────── */
+    #tblAccountDetails,
+    #tblBankDetail {
+        border-radius: var(--pf-radius-sm);
+        overflow: hidden;
+        background: #fff;
+    }
+
+        #tblBankDetail thead th {
+            background: var(--pf-brand);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            border-color: rgba(255,255,255,.14);
+        }
+
+        #tblAccountDetails td {
+            vertical-align: middle;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--pf-ink);
+            padding: 6px 10px;
+        }
+
+            #tblAccountDetails td .form-control {
+                text-align: right;
+                font-variant-numeric: tabular-nums;
+            }
+
+            #tblAccountDetails td[style*="194462"] {
+                padding: 1px !important;
+                background: var(--pf-line) !important;
+            }
+
+    #txtTotalAmountBalance {
+        font-weight: 700;
+        color: var(--pf-brand);
+        background: var(--pf-brand-soft) !important;
+    }
+
+    /* ───────── Buttons ───────── */
+    .btn {
+        border-radius: var(--pf-radius-sm);
+        font-weight: 600;
+        letter-spacing: .1px;
+        transition: background-color .15s, box-shadow .15s, transform .05s;
+    }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        .btn:focus-visible {
+            outline: 3px solid rgba(14,143,131,.35);
+            outline-offset: 2px;
+        }
+
+    .btn-primary {
+        background: var(--pf-brand);
+        border-color: var(--pf-brand);
+    }
+
+        .btn-primary:hover {
+            background: #143257;
+            border-color: #143257;
+        }
+
+    .btn-success {
+        background: var(--pf-accent);
+        border-color: var(--pf-accent);
+    }
+
+        .btn-success:hover {
+            background: #0b7369;
+            border-color: #0b7369;
+        }
+
+    .btn-danger {
+        background: var(--pf-danger);
+        border-color: var(--pf-danger);
+    }
+
+    .action-btns {
+        position: sticky;
+        bottom: 0;
+        z-index: 50;
+        background: rgba(238,241,245,.92);
+        backdrop-filter: blur(6px);
+        padding: 12px 0;
+        margin: 0 !important;
+        border-top: 1px solid var(--pf-line);
+    }
+
+        .action-btns .btn {
+            min-width: 130px;
+            padding: 9px 22px;
+        }
+
+    /* ───────── Small screens ───────── */
+    @@media (max-width: 767px) {
+        #frmTaxInvoice .card-body {
+            padding: 16px;
+        }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        * {
+            transition: none !important;
+        }
+    }
+
+    /* ───────── Print ───────── */
+    @@media print {
+        .add-row-btn, .remove-row, .action-btns {
+            display: none !important;
+        }
+
+        .card {
+            box-shadow: none;
+        }
+
+        @@page {
+            size: A4 landscape;
+            margin: 8mm;
+        }
     }
 </style>
 
@@ -233,25 +516,16 @@
             <div class="row form-row-item">
                 <div class="col-md-6">
                     <div class="form-group row">
-                        <label class="col-md-4 col-form-label font-weight-bold required">Invoice No</label>
-                        <div class="col-md-8">
-                            <input asp-for="main.invoiceno" type="text" class="form-control" id="invoiceNo"
-                                   placeholder="Invoice No" readonly />
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="form-group row">
                         <label class="col-md-4 col-form-label font-weight-bold required">Invoice Date</label>
                         <div class="col-md-8">
+                            <input asp-for="main.invoiceno" type="text" class="form-control d-none" id="invoiceNo"
+                                   placeholder="Invoice No" readonly />
                             <input asp-for="main.invoicedate" type="date" class="form-control" id="invoiceDate" />
                             <span class="err-msg" id="err-invoiceDate"></span>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="row form-row-item">
                 <div class="col-md-6">
                     <div class="form-group row">
                         <label class="col-md-4 col-form-label font-weight-bold">Reverse Charge</label>
