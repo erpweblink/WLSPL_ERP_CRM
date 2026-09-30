@@ -849,29 +849,6 @@ GETDATE(),
             return results;
         }
 
-        public async Task<List<ProformaInvoiceCreate>> GetProformaList(string size, string sessionname)
-        {
-            using var connection = new SqlConnection(
-       _configuration.GetConnectionString("Conn_Stringg"));
-
-            const string sql = @"
-        SELECT p.*
-        FROM [WLSPLCRM].[dbo].[tbl_ProformaInvoiceMain] p
-        WHERE p.IsDeleted = 0
-          AND EXISTS
-          (
-              SELECT 1
-              FROM dbo.FN_EmployeeHierarchy(@SessionName) h
-              WHERE h.empcode = p.sessionname
-          )
-        ORDER BY p.Id DESC;";
-
-            var proformas = await connection.QueryAsync<ProformaInvoiceCreate>(
-                sql,
-                new { SessionName = sessionname });
-
-            return proformas.ToList();
-        }
 
 
         public byte[] ProformaPdf(int id)
@@ -1584,6 +1561,265 @@ GETDATE(),
 
                 throw;
             }
+        }
+
+
+        public async Task<List<ProformaInvoice.ProformaInvoiceCreate>> GetFinancialYearSummary(string financialYear, string? salesManager, string empCode, string empRole)
+        {
+            var result = new List<ProformaInvoice.ProformaInvoiceCreate>();
+
+            if (string.IsNullOrWhiteSpace(financialYear))
+                return result;
+
+            var parts = financialYear.Split('-');
+
+            if (parts.Length != 2)
+                return result;
+
+            int startYear = Convert.ToInt32(parts[0]);
+            int endYear = 2000 + Convert.ToInt32(parts[1]);
+
+            DateTime startDate = new DateTime(startYear, 4, 1);
+            DateTime endDate = new DateTime(endYear, 3, 31);
+
+            string connectionString =
+                _configuration.GetConnectionString("Conn_Stringg");
+
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                await con.OpenAsync();
+
+                string query = @"
+                    SELECT 
+                            MONTH(invoicedate) AS Mon,
+
+                            COUNT(invoiceno) AS TotalInvoice,
+
+                            ISNULL(
+                                SUM(
+                                    CAST(totalamtbeforetax AS DECIMAL(18,2))
+                                ), 0
+                            ) AS TotalTaxableValue,
+
+                            ISNULL(
+                                SUM(
+                                    CAST(ISNULL(cgstamt, 0) AS DECIMAL(18,2))
+                                    +
+                                    CAST(ISNULL(sgstamt, 0) AS DECIMAL(18,2))
+                                    +
+                                    CAST(ISNULL(igstamt, 0) AS DECIMAL(18,2))
+                                ), 0
+                            ) AS TotalTaxAmount,
+
+                            ISNULL(
+                                SUM(
+                                    CAST(totalamtaftertax AS DECIMAL(18,2))
+                                ), 0
+                            ) AS GrandTotal
+
+                        FROM tbl_ProformaInvoiceMain
+
+                        WHERE 
+                            e_invoice_cancel_status IS NULL
+                            AND invoicedate >= @StartDate
+                            AND invoicedate < DATEADD(DAY, 1, @EndDate)
+                            AND (@SalesManager IS NULL OR sessionname  = @SalesManager)                     
+                                      AND EXISTS
+        (
+            SELECT 1
+            FROM dbo.FN_EmployeeHierarchy(@CurrentUser) h
+            WHERE h.empcode = sessionname
+        )
+
+                        GROUP BY MONTH(invoicedate)
+
+                        ORDER BY
+                            CASE
+                                WHEN MONTH(invoicedate) = 4 THEN 1
+                                WHEN MONTH(invoicedate) = 5 THEN 2
+                                WHEN MONTH(invoicedate) = 6 THEN 3
+                                WHEN MONTH(invoicedate) = 7 THEN 4
+                                WHEN MONTH(invoicedate) = 8 THEN 5
+                                WHEN MONTH(invoicedate) = 9 THEN 6
+                                WHEN MONTH(invoicedate) = 10 THEN 7
+                                WHEN MONTH(invoicedate) = 11 THEN 8
+                                WHEN MONTH(invoicedate) = 12 THEN 9
+                                WHEN MONTH(invoicedate) = 1 THEN 10
+                                WHEN MONTH(invoicedate) = 2 THEN 11
+                                WHEN MONTH(invoicedate) = 3 THEN 12
+                            END;
+
+                    ";
+
+                using (SqlCommand cmd =
+                       new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@StartDate", startDate);
+                    cmd.Parameters.AddWithValue("@EndDate", endDate);
+                    cmd.Parameters.AddWithValue("@SalesManager", string.IsNullOrWhiteSpace(salesManager) ? DBNull.Value : salesManager);
+                    cmd.Parameters.AddWithValue("@CurrentUser", empCode);
+                    cmd.Parameters.AddWithValue("@CurrentRole", empRole);
+
+                    using (SqlDataReader reader =
+                           await cmd.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            result.Add(
+                                new ProformaInvoice.ProformaInvoiceCreate
+                                {
+                                    mon = Convert.ToInt32(
+                                        reader["Mon"]),
+
+                                    TotalInvoice = Convert.ToInt32(
+                                        reader["TotalInvoice"]),
+
+                                    TotalTaxableValue = Convert.ToDecimal(
+                                        reader["TotalTaxableValue"]),
+
+                                    TotalTaxAmount = Convert.ToDecimal(
+                                        reader["TotalTaxAmount"]),
+
+                                    GrandTotal = Convert.ToDecimal(
+                                        reader["GrandTotal"])
+                                });
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<dynamic> GetSalesPersonList(string empCode, string empRole)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
+                {
+                    await connection.OpenAsync();
+                    string query = @"  SELECT empcode as UserCode, name as FullName 
+              FROM dbo.FN_EmployeeHierarchy(@CurrentUser) 
+              WHERE isdeleted=0 And status=1";
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@CurrentUser", empCode);           
+                    using (var multi = await connection.QueryMultipleAsync(query, parameters))
+                    {
+                        var salesManagers = (await multi.ReadAsync<dynamic>()).ToList();
+                        return new
+                        {
+                            SalesManagers = salesManagers
+                        };
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<ProformaInvoice.ProformaInvoiceCreate>> GetInfo(string financialYear, int? month, string? salesManager, string empCode, string empRole)
+        {
+            using var connection = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg"));
+
+            int startYear = int.Parse(financialYear.Substring(0, 4));
+
+            DateTime startDate;
+            DateTime endDate;
+
+            // Month = 0 or null => Full financial year
+            if (!month.HasValue || month.Value == 0)
+            {
+                startDate = new DateTime(startYear, 4, 1);
+                endDate = new DateTime(startYear + 1, 4, 1);
+            }
+            else
+            {
+                int selectedMonth = month.Value;
+
+                int year = selectedMonth >= 4
+                    ? startYear
+                    : startYear + 1;
+
+                startDate = new DateTime(year, selectedMonth, 1);
+                endDate = startDate.AddMonths(1);
+            }
+
+            const string query = @"
+                        SELECT
+                            pm.id,
+                            invoicedate,
+                            invoiceno,
+                            companyname,
+                            Remarks,
+                            cgstin AS gstin,
+
+                            ISNULL(
+                                TRY_CAST(totalamtbeforetax AS DECIMAL(18,2)),
+                                0
+                            ) AS totalamtbeforetax,
+
+                            ISNULL(
+                                TRY_CAST(sgstamt AS DECIMAL(18,2)),
+                                0
+                            )
+                            +
+                            ISNULL(
+                                TRY_CAST(cgstamt AS DECIMAL(18,2)),
+                                0
+                            )
+                            +
+                            ISNULL(
+                                TRY_CAST(igstamt AS DECIMAL(18,2)),
+                                0
+                            ) AS total_tax_amount,
+
+                            ISNULL(
+                                TRY_CAST(totalamtaftertax AS DECIMAL(18,2)),
+                                0
+                            ) AS totalamtaftertax,
+          ISNULL(
+                                TRY_CAST(TotalAmountReceived AS DECIMAL(18,2)),
+                                0
+                            ) AS TotalAmountReceived,
+                              ISNULL(
+                                TRY_CAST(FinalPendingAmount AS DECIMAL(18,2)),
+                                0
+                            ) AS FinalPendingAmount,
+                            isapprove,
+                            isreject,
+                            ExportInvoiceNo,
+                            NAME
+
+                        FROM tbl_ProformaInvoiceMain as pm
+                        INNER JOIN employees as e on e.empcode=pm.sessionname
+
+                        WHERE invoicedate >= @StartDate
+                          AND invoicedate < @EndDate
+                          AND (@SalesManager IS NULL OR empcode = @SalesManager)                        
+                               AND EXISTS
+          (
+              SELECT 1
+              FROM dbo.FN_EmployeeHierarchy(@CurrentUser) h
+              WHERE h.empcode = pm.sessionname
+          )
+
+                        ORDER BY invoicedate ASC;
+                    ";
+
+            var parameters = new DynamicParameters();
+
+            parameters.Add("@StartDate", startDate);
+            parameters.Add("@EndDate", endDate);
+            parameters.Add("@SalesManager", string.IsNullOrWhiteSpace(salesManager) ? null : salesManager, DbType.String);
+            parameters.Add("@CurrentUser", empCode);
+            parameters.Add("@CurrentRole", empRole);
+
+            var result = await connection.QueryAsync<ProformaInvoice.ProformaInvoiceCreate>(query, parameters);
+
+            return result.ToList();
         }
 
     }

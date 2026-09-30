@@ -10,8 +10,11 @@ namespace WEBLINK_CRM.repository
 {
     public interface IProforma
     {
+        Task<List<ProformaInvoice.ProformaInvoiceCreate>> GetInfo(string financialYear, int? month, string? salesManager, string empCode, string empRole);
 
-        Task<List<ProformaInvoice.ProformaInvoiceCreate>> GetProformaList(string size, string sessionname);
+        Task<List<ProformaInvoice.ProformaInvoiceCreate>> GetFinancialYearSummary(string financialYear, string? salesManager, string empCode, string empRole);
+
+        Task<dynamic> GetSalesPersonList(string empCode, string empRole);
 
         Task<ProformaInvoice.ProformaInvoiceCreate?> GetBlankModelWithinvoiceno();
 

@@ -1,489 +1,1848 @@
 ﻿@model IEnumerable<WLSPL_ERP_CRM.Models.ProformaInvoice.ProformaInvoiceCreate>
 @using WEBLINK_CRM.Helpers
 @{
-    ViewData["Title"] = "Proforma";
+    ViewData["Title"] = "Proforma Invoice List";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+    var isAdmin = Context.Session.GetString("Role")?.ToString() == "Admin";
+
+    var invoiceList = Model?.ToList() ?? new List<WLSPL_ERP_CRM.Models.ProformaInvoice.ProformaInvoiceCreate>();
+    var today = DateTime.Now;
+    var inCulture = System.Globalization.CultureInfo.GetCultureInfo("en-IN");
+
+    var currentFinancialYear = today.Month >= 4
+        ? $"{today.Year}-{(today.Year + 1).ToString().Substring(2)}"
+        : $"{today.Year - 1}-{today.Year.ToString().Substring(2)}";
+
+    var currentMonth = today.ToString("MM");
+
+    var selectedFinancialYear = ViewBag.SelectedFinancialYear?.ToString() ?? currentFinancialYear;
+
+    var selectedMonthNumber = ViewBag.SelectedMonth != null
+        ? Convert.ToInt32(ViewBag.SelectedMonth)
+        : Convert.ToInt32(currentMonth);
+
+    var selectedMonth = selectedMonthNumber == 0 ? "all" : selectedMonthNumber.ToString("00");
+
+    var financialYearSummary = ViewBag.FinancialYearSummary as List<WLSPL_ERP_CRM.Models.ProformaInvoice.ProformaInvoiceCreate>
+        ?? new List<WLSPL_ERP_CRM.Models.ProformaInvoice.ProformaInvoiceCreate>();
+
+    var financialYearTotal = financialYearSummary.Sum(x => x.GrandTotal ?? 0m);
+    var financialYearTaxTotal = financialYearSummary.Sum(x => x.TotalTaxAmount ?? 0m);
+    var financialYearInvoiceCount = financialYearSummary.Sum(x => x.TotalInvoice ?? 0);
+
+    var selectedMonthSummary = selectedMonthNumber == 0
+        ? null
+        : financialYearSummary.FirstOrDefault(x => x.mon == selectedMonthNumber);
+
+    var selectedMonthGrandTotal = selectedMonthNumber == 0 ? financialYearTotal : selectedMonthSummary?.GrandTotal ?? 0m;
+    var selectedMonthTaxTotal = selectedMonthNumber == 0 ? financialYearTaxTotal : selectedMonthSummary?.TotalTaxAmount ?? 0m;
+    var selectedMonthInvoiceCount = selectedMonthNumber == 0 ? financialYearInvoiceCount : selectedMonthSummary?.TotalInvoice ?? 0;
+
+    var selectedMonthName = selectedMonthNumber == 0
+        ? "All Months"
+        : inCulture.DateTimeFormat.GetMonthName(selectedMonthNumber);
+
+    // Dynamic FY list: starts at 2021-22, runs up to next financial year
+    int firstFyStart = 2021;
+    int currentFyStart = today.Month >= 4 ? today.Year : today.Year - 1;
+    int lastFyStart = currentFyStart + 1;
+
+    // if the URL asks for a later FY, still show it
+    int selectedFyStart = 0;
+    if (selectedFinancialYear.Length >= 4 && int.TryParse(selectedFinancialYear.Substring(0, 4), out selectedFyStart))
+    {
+        lastFyStart = Math.Max(lastFyStart, selectedFyStart);
+    }
 }
-<style>
-    :root {
-        --pf-ink: #1f2a37;
-        --pf-muted: #6b7686;
-        --pf-line: #e3e8ef;
-        --pf-surface: #ffffff;
-        --pf-head: #f3f6fa;
-        --pf-accent: #1d5f8a;
-        --pf-accent-soft: #e6f0f7;
-        --pf-danger: #b42318;
-        --pf-danger-soft: #fdecea;
-        --pf-ok: #1a7f4b;
-        --pf-ok-soft: #e4f5ec;
-    }
-    .active-status {
-        background-color: #198754 !important;
-        color: #ffffff !important;
-        padding: 10px 12px !important;
-        border-radius: 20px !important;
-        font-size: 11px !important;
-        font-weight: 600 !important;
-        display: inline-block;
-    }
 
-    .inactive-status {
-        background-color: #dc3545 !important;
-        color: #ffffff !important;
-        padding: 10px 12px !important;
-        border-radius: 20px !important;
-        font-size: 11px !important;
-        font-weight: 600 !important;
-        display: inline-block;
-    }
-</style>
-<style>
-    /* =========================================
-                       MAIN PROFORMA TABLE
-                       ========================================= */
-
-    .proforma-main-table-wrapper {
-        height: 600px;
-        overflow-y: auto;
-        overflow-x: auto;
-        position: relative;
-    }
-
-    #tblProforma {
+<style type="text/css">
+    .invoice-page {
         width: 100%;
-        margin-bottom: 0 !important;
-        border-collapse: separate;
-        border-spacing: 0;
+        padding: 0;
     }
 
-        #tblProforma thead th {
-            position: sticky;
-            top: 0;
-            z-index: 20;
-            background-color: #f8f9fa !important;
-            color: #212529;
-            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.12);
-            white-space: nowrap;
-        }
-
-        #tblProforma tbody td {
-            white-space: nowrap;
-        }
-
-    /* Main table scrollbar */
-    .proforma-main-table-wrapper::-webkit-scrollbar {
-        width: 7px;
-        height: 7px;
+    .invoice-card {
+        width: 100%;
+        border: 0;
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 2px 14px rgba(16, 24, 40, .06);
+        overflow: hidden;
     }
 
-    .proforma-main-table-wrapper::-webkit-scrollbar-thumb {
-        background: #aaa;
+    .invoice-header {
+        padding: 16px 20px;
+        background: #fff;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .page-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #344054;
+        margin: 0;
+    }
+
+        .page-title i {
+            color: #0d6efd;
+            margin-right: 7px;
+        }
+
+    .filter-section {
+        padding: 16px 18px;
+        background: #fff;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .filter-label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 7px;
+        color: #526174;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+        .filter-label i {
+            color: #6b7cff;
+            font-size: 13px;
+        }
+
+    .search-wrapper {
+        display: flex;
+        width: 100%;
+    }
+
+    .search-icon {
+        height: 38px;
+        min-width: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #d0d5dd;
+        border-right: 0;
+        border-radius: 10px 0 0 10px;
+        background: #fff;
+    }
+
+    .search-box {
+        height: 36px;
+        border: 1px solid #d0d5dd;
+        border-radius: 10px 0 10px 0;
+        font-size: 13px;
+        width: 100%;
+    }
+
+        .search-box:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 .15rem rgba(13,110,253,.10);
+        }
+
+    .clear-filter-btn {
+        height: 38px;
+        border-radius: 7px;
+        font-size: 12px;
+        padding: 0 13px;
+        width: 100%;
+    }
+
+    .current-filter-info {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        color: #087443;
+        background: #e8fff2;
+        border: 1px solid #b8f0d0;
+        border-radius: 7px;
+        padding: 3px 8px;
+        font-size: 12px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .summary-filter-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .summary-filter-select {
+        height: 26px;
+        min-width: 100px;
+        padding: 2px 24px 2px 7px;
+        border: none !important;
+        border-radius: 6px;
+        background: #e8fff2;
+        color: #087443;
+        font-size: 11px;
+        font-weight: 600;
+        outline: none;
+        cursor: pointer;
+    }
+
+        .summary-filter-select:focus {
+            border-color: #087443;
+            box-shadow: 0 0 0 2px rgba(8, 116, 67, .08);
+        }
+
+        .summary-filter-select option {
+            background: #fff;
+            color: #344054;
+            font-size: 12px;
+        }
+
+    .summary-filter-separator {
+        color: #087443;
+        font-size: 11px;
+        font-weight: 600;
+        opacity: .6;
+    }
+
+    .summary-section {
+        padding: 16px 18px 5px;
+    }
+
+    .summary-card {
         border-radius: 10px;
+        padding: 15px 18px;
+        background: #fff;
+        border: 1px solid #edf0f5;
+        box-shadow: 0 2px 8px rgba(0,0,0,.04);
+        height: 100%;
+        min-height: 105px;
     }
 
-    .proforma-main-table-wrapper::-webkit-scrollbar-track {
-        background: #f1f1f1;
+    .summary-title {
+        font-size: 12px;
+        color: #667085;
+        font-weight: 600;
+        margin-bottom: 5px;
     }
 
-
-    /* =========================================
-                       PROFORMA DETAILS MODAL
-                       ========================================= */
-
-    #ProformaModal .proforma-table-wrapper {
-        max-height: 500px;
-        overflow-y: auto;
-        overflow-x: auto;
-        position: relative;
+    .summary-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #344054;
+        line-height: 1.3;
     }
 
-    #ProformaModal #tblProformaList {
+    .summary-subtitle {
+        font-size: 11px;
+        color: #98a2b3;
+        margin-top: 4px;
+    }
+
+    .summary-fy {
+        border-left: 4px solid #0d6efd;
+    }
+
+    .summary-filtered {
+        border-left: 4px solid #087443;
+    }
+
+    .summary-tax {
+        border-left: 4px solid #b54708;
+    }
+
+    .summary-invoice {
+        border-left: 4px solid #6f42c1;
+    }
+
+    .fy-summary-header {
+        padding: 12px 15px;
+        background: #f8fafc;
+        border-bottom: 1px solid #edf0f5;
+    }
+
+    .fy-summary-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #344054;
+        margin: 0;
+    }
+
+        .fy-summary-title i {
+            color: #0d6efd;
+            margin-right: 6px;
+        }
+
+    .fy-month-wrapper {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .fy-month-card {
+        min-width: 0;
         width: 100%;
+        border: 1px solid #e4e7ec;
+        border-radius: 8px;
+        padding: 10px 12px;
+        background: #fff;
+        transition: all .2s ease;
+        cursor: pointer;
+        overflow: hidden;
+    }
+
+        .fy-month-card:hover {
+            border-color: #0d6efd;
+            background: #f8fbff;
+            transform: translateY(-1px);
+        }
+
+        .fy-month-card.active {
+            border-color: #0d6efd;
+            background: #eef5ff;
+            box-shadow: 0 0 0 1px rgba(13,110,253,.05);
+        }
+
+    .fy-month-name {
+        font-size: 11px;
+        color: #667085;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .fy-month-value {
+        font-size: 13px;
+        color: #087443;
+        font-weight: 700;
+        margin-top: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .fy-month-count {
+        font-size: 10px;
+        color: #98a2b3;
+        margin-top: 3px;
+    }
+
+    .record-section {
+        padding: 0 18px 10px;
+    }
+
+    .record-info {
+        font-size: 12px;
+        color: #667085;
+    }
+
+    .table-container {
+        width: 100%;
+        padding: 0 18px;
+        overflow: visible;
+    }
+
+    #invoiceTable {
+        width: 100% !important;
+        table-layout: fixed;
+        border-collapse: collapse;
         margin-bottom: 0;
-        border-collapse: separate;
-        border-spacing: 0;
     }
 
-        #ProformaModal #tblProformaList thead th {
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            background-color: #f8f9fa !important;
-            color: #212529;
-            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.08);
-            white-space: nowrap;
+        #invoiceTable thead th {
+            background: linear-gradient(314deg, #23262a, #1a4373) !important;
+            color: #fff !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            vertical-align: middle;
+            border: 1px solid #d9e2ec !important;
+            padding: 9px 6px !important;
+            white-space: normal;
+            word-break: break-word;
         }
 
-    #ProformaModal .proforma-table-wrapper::-webkit-scrollbar {
-        width: 7px;
-        height: 7px;
+        #invoiceTable tbody td {
+            background: #fff;
+            color: #344054;
+            font-size: 12px;
+            padding: 8px 6px;
+            border: 1px solid #d7dee8;
+            vertical-align: middle;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            white-space: normal;
+        }
+
+        #invoiceTable tbody tr:hover td {
+            background: #f7fbff;
+        }
+
+        #invoiceTable th:nth-child(1), #invoiceTable td:nth-child(1) {
+            width: 4%;
+        }
+
+        #invoiceTable th:nth-child(2), #invoiceTable td:nth-child(2) {
+            width: 9%;
+        }
+
+        #invoiceTable th:nth-child(3), #invoiceTable td:nth-child(3) {
+            width: 9%;
+        }
+
+        #invoiceTable th:nth-child(4), #invoiceTable td:nth-child(4) {
+            width: 20%;
+        }
+
+        #invoiceTable th:nth-child(5), #invoiceTable td:nth-child(5) {
+            width: 10%;
+        }
+
+        #invoiceTable th:nth-child(6), #invoiceTable td:nth-child(6) {
+            width: 10%;
+        }
+
+        #invoiceTable th:nth-child(7), #invoiceTable td:nth-child(7) {
+            width: 9%;
+        }
+
+        #invoiceTable th:nth-child(8), #invoiceTable td:nth-child(8) {
+            width: 10%;
+        }
+
+        #invoiceTable th:nth-child(9), #invoiceTable td:nth-child(11) {
+            width: 14%;
+        }
+
+    .invoice-status-btn {
+        background: #159957;
+        color: #fff;
+        cursor: pointer;
     }
 
-    #ProformaModal .proforma-table-wrapper::-webkit-scrollbar-thumb {
-        background: #aaa;
+        .invoice-status-btn:hover {
+            background: #0f7a45;
+            color: #fff;
+        }
+
+    .invoice-upload-btn {
+        background: #7f56d9;
+        color: #fff;
+        cursor: pointer;
+    }
+
+        .invoice-upload-btn:hover {
+            background: #6941c6;
+            color: #fff;
+        }
+
+    .invoice-lock-btn {
+        background: #e4e7ec;
+        color: #98a2b3;
+        cursor: not-allowed;
+    }
+
+    .inv-modal .modal-content {
+        border: 0;
+        border-radius: 14px;
+        box-shadow: 0 10px 40px rgba(16,24,40,.18);
+    }
+
+    .inv-modal .modal-header {
+        border-bottom: 1px solid #edf0f5;
+        padding: 16px 20px;
+    }
+
+    .inv-modal .modal-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #344054;
+    }
+
+    .inv-modal .modal-body {
+        padding: 18px 20px;
+    }
+
+    .inv-modal .modal-footer {
+        border-top: 1px solid #edf0f5;
+        padding: 12px 20px;
+    }
+
+    .inv-info {
+        background: #f8fafc;
+        border: 1px solid #edf0f5;
         border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 14px;
+        font-size: 13px;
     }
 
-    #ProformaModal .proforma-table-wrapper::-webkit-scrollbar-track {
-        background: #f1f1f1;
+        .inv-info .lbl {
+            color: #667085;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .inv-info .val {
+            color: #344054;
+            font-weight: 600;
+        }
+
+    .status-option {
+        flex: 1;
+        border: 2px solid #e4e7ec;
+        border-radius: 10px;
+        padding: 12px;
+        text-align: center;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 13px;
+        transition: all .2s ease;
+        background: #fff;
+    }
+
+        .status-option i {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .status-option.opt-approve {
+            color: #087443;
+        }
+
+        .status-option.opt-reject {
+            color: #b42318;
+        }
+
+        .status-option.opt-approve:hover, .status-option.opt-approve.selected {
+            border-color: #159957;
+            background: #e8fff2;
+        }
+
+        .status-option.opt-reject:hover, .status-option.opt-reject.selected {
+            border-color: #d92d20;
+            background: #fff1f0;
+        }
+
+    .drop-zone {
+        border: 2px dashed #c7cfdb;
+        border-radius: 10px;
+        padding: 22px;
+        text-align: center;
+        color: #667085;
+        cursor: pointer;
+        transition: all .2s ease;
+    }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: #7f56d9;
+            background: #f9f5ff;
+        }
+
+        .drop-zone i {
+            font-size: 26px;
+            color: #7f56d9;
+            margin-bottom: 6px;
+        }
+
+    .doc-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 10px;
+        border: 1px solid #edf0f5;
+        border-radius: 8px;
+        margin-top: 6px;
+        font-size: 12px;
+    }
+
+        .doc-item a {
+            color: #0d6efd;
+            text-decoration: none;
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+
+    .row-number {
+        color: #667085;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .invoice-no {
+        color: #0d6efd;
+        font-weight: 600;
+        display: block;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .company-name {
+        color: #344054;
+        font-weight: 600;
+        display: block;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .gstin {
+        font-size: 11px;
+        color: #667085;
+        display: block;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .amount {
+        font-weight: 500;
+        color: #344054;
+    }
+
+    .tax-amount {
+        color: #b54708;
+        font-weight: 600;
+    }
+
+    .grand-total {
+        color: #087443;
+        font-weight: 700;
+    }
+
+    .salesperson {
+        color: #344054;
+        font-weight: 500;
+        display: block;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .status-column {
+        text-align: center;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 5px 8px;
+        border-radius: 50px;
+        font-size: 10px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    .status-approved {
+        color: #087443;
+        background: #e8fff2;
+        border: 1px solid #b8f0d0;
+    }
+
+        .status-approved .status-dot {
+            background: #159957;
+        }
+
+    .status-rejected {
+        color: #b42318;
+        background: #fff1f0;
+        border: 1px solid #fecdca;
+    }
+
+        .status-rejected .status-dot {
+            background: #d92d20;
+        }
+
+    .status-pending {
+        color: #9a6700;
+        background: #fff8e6;
+        border: 1px solid #f5df9a;
+    }
+
+        .status-pending .status-dot {
+            background: #d99b00;
+        }
+
+    .action-column {
+        text-align: center;
+    }
+
+    .invoice-action-btn {
+        width: 28px;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        border: none;
+        text-decoration: none;
+        margin: 1px;
+        font-size: 11px;
+        transition: all .2s ease;
+    }
+
+    .invoice-pdf-btn {
+        background: #dc3545;
+        color: #fff;
+    }
+
+        .invoice-pdf-btn:hover {
+            background: #b02a37;
+            color: #fff;
+        }
+
+    .invoice-edit-btn {
+        background: #0d6efd;
+        color: #fff;
+    }
+
+        .invoice-edit-btn:hover {
+            background: #0b5ed7;
+            color: #fff;
+        }
+
+    .invoice-delete-btn {
+        background: #6c757d;
+        color: #fff;
+    }
+
+        .invoice-delete-btn:hover {
+            background: #495057;
+            color: #fff;
+        }
+
+    .no-record {
+        text-align: center;
+        padding: 45px !important;
+        color: #777;
+    }
+
+        .no-record i {
+            color: #98a2b3;
+            margin-bottom: 10px;
+        }
+
+    .no-record-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #667085;
+    }
+
+    .no-record-text {
+        font-size: 12px;
+        color: #98a2b3;
+        margin-top: 3px;
+    }
+
+    .pagination-wrapper {
+        padding: 18px;
+    }
+
+    .pagination {
+        margin-bottom: 0;
+        gap: 4px;
+    }
+
+        .pagination .page-link {
+            border: 1px solid #dee2e6;
+            color: #0d6efd;
+            background: #fff;
+            border-radius: 7px;
+            font-size: 12px;
+            padding: 6px 10px;
+        }
+
+        .pagination .page-item.active .page-link {
+            background: #0d6efd;
+            border-color: #0d6efd;
+            color: #fff;
+        }
+
+    @@media (max-width: 991.98px) {
+        .fy-month-wrapper {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+
+        .table-container {
+            padding: 0 10px;
+        }
+
+        #invoiceTable, #invoiceTable tbody, #invoiceTable tr, #invoiceTable td {
+            display: block;
+            width: 100% !important;
+        }
+
+            #invoiceTable thead {
+                display: none;
+            }
+
+            #invoiceTable tbody {
+                width: 100%;
+            }
+
+                #invoiceTable tbody tr.invoice-row {
+                    position: relative;
+                    background: #fff;
+                    border: 1px solid #e4e7ec;
+                    border-radius: 12px;
+                    margin-bottom: 12px;
+                    padding: 12px;
+                    box-shadow: 0 2px 8px rgba(16, 24, 40, .05);
+                }
+
+                    #invoiceTable tbody tr.invoice-row:hover {
+                        box-shadow: 0 4px 12px rgba(16, 24, 40, .08);
+                    }
+
+                #invoiceTable tbody td {
+                    border: 0 !important;
+                    border-bottom: 1px solid #f0f2f5 !important;
+                    padding: 8px 4px !important;
+                    display: grid;
+                    grid-template-columns: 38% 62%;
+                    align-items: center;
+                    text-align: left !important;
+                    min-height: 36px;
+                    font-size: 12px !important;
+                }
+
+                    #invoiceTable tbody td:last-child {
+                        border-bottom: 0 !important;
+                    }
+
+                    #invoiceTable tbody td::before {
+                        content: attr(data-label);
+                        font-size: 11px;
+                        font-weight: 600;
+                        color: #667085;
+                        padding-right: 10px;
+                    }
+
+                    #invoiceTable tbody td.row-number {
+                        background: #f8fafc;
+                        border-radius: 7px;
+                        color: #0d6efd;
+                        font-weight: 700;
+                        text-align: left !important;
+                    }
+
+                        #invoiceTable tbody td.row-number::before {
+                            content: "Invoice #";
+                        }
+
+                    #invoiceTable tbody td .invoice-no, #invoiceTable tbody td .company-name, #invoiceTable tbody td .gstin, #invoiceTable tbody td .salesperson {
+                        width: 100%;
+                    }
+
+                    #invoiceTable tbody td.text-end {
+                        text-align: left !important;
+                    }
+
+        .status-column {
+            text-align: left !important;
+        }
+
+        .status-badge {
+            justify-self: start;
+        }
+
+        .action-column {
+            text-align: left !important;
+        }
+
+        #invoiceTable tbody td:last-child {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+            padding-top: 10px !important;
+        }
+
+            #invoiceTable tbody td:last-child::before {
+                width: 38%;
+            }
+
+        .invoice-action-btn {
+            width: 34px;
+            height: 34px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .invoice-header {
+            padding: 14px;
+        }
+
+        .page-title {
+            font-size: 17px;
+        }
+
+        .filter-section {
+            padding: 12px;
+        }
+
+        .summary-section {
+            padding: 12px 10px 4px;
+        }
+
+        .summary-card {
+            min-height: 95px;
+            margin-bottom: 8px;
+        }
+
+        .summary-value {
+            font-size: 17px;
+        }
+
+        .fy-summary-header {
+            padding: 11px;
+        }
+
+        .fy-summary-title {
+            font-size: 12px;
+        }
+
+        .fy-month-wrapper {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            padding: 10px;
+        }
+
+        .fy-month-card {
+            padding: 9px;
+        }
+
+        .fy-month-value {
+            font-size: 12px;
+        }
+
+        .table-container {
+            padding: 0 8px;
+        }
+
+        #invoiceTable tbody tr.invoice-row {
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        #invoiceTable tbody td {
+            grid-template-columns: 40% 60%;
+            font-size: 11px !important;
+            padding: 7px 3px !important;
+            line-height: 1.35;
+        }
+
+            #invoiceTable tbody td::before {
+                font-size: 10px;
+            }
+
+        .invoice-no {
+            font-size: 11px;
+        }
+
+        .company-name {
+            font-size: 11px;
+        }
+
+        .gstin {
+            font-size: 10px;
+        }
+
+        .salesperson {
+            font-size: 11px;
+        }
+
+        .status-badge {
+            font-size: 9px;
+            padding: 4px 7px;
+        }
+
+        .invoice-action-btn {
+            width: 32px;
+            height: 32px;
+            font-size: 11px;
+        }
+
+        .record-section {
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
+        .record-info {
+            font-size: 11px;
+        }
+
+        .pagination-wrapper {
+            padding: 15px 8px;
+        }
+
+        .pagination .page-link {
+            font-size: 10px;
+            padding: 5px 7px;
+        }
+    }
+
+    @@media (max-width: 575.98px) {
+        .current-filter-info {
+            width: 100%;
+            font-size: 10px;
+        }
+
+        .fy-month-wrapper {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        #invoiceTable tbody tr.invoice-row {
+            padding: 8px;
+            margin-bottom: 9px;
+        }
+
+        #invoiceTable tbody td {
+            grid-template-columns: 42% 58%;
+            font-size: 10px !important;
+            min-height: 32px;
+        }
+
+            #invoiceTable tbody td::before {
+                font-size: 9px;
+            }
+
+        .invoice-no, .company-name, .salesperson {
+            font-size: 10px;
+        }
+
+        .gstin {
+            font-size: 9px;
+        }
+
+        .amount, .tax-amount, .grand-total {
+            font-size: 10px;
+        }
+
+        .invoice-action-btn {
+            width: 30px;
+            height: 30px;
+        }
+
+        .showing-info {
+            display: block;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+    }
+
+    #dynamicEmptyRow td, #initialEmptyRow td {
+        text-align: center !important;
+    }
+
+    @@media (max-width: 991.98px) {
+        #dynamicEmptyRow, #initialEmptyRow {
+            display: block !important;
+            width: 100% !important;
+        }
+
+            #dynamicEmptyRow td, #initialEmptyRow td {
+                display: block !important;
+                width: 100% !important;
+                padding: 40px 10px !important;
+            }
+
+                #dynamicEmptyRow td::before, #initialEmptyRow td::before {
+                    display: none !important;
+                    content: none !important;
+                }
+    }
+
+    /* ── Filter / summary toggles ── */
+    .btn-filter-toggle {
+        background: #fff;
+        border: 1px solid #d0d5dd;
+        color: #344054;
+        padding: 6px 14px;
+        border-radius: 7px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+        .btn-filter-toggle:hover {
+            background: #f9fafb;
+            border-color: #98a2b3;
+        }
+
+    #filterCard {
+        overflow: hidden;
+        max-height: 1000px;
+        opacity: 1;
+        transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.35s ease;
+    }
+
+        #filterCard.filter-collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            border-bottom: none !important;
+        }
+
+    #summaryCard {
+        overflow: hidden;
+        max-height: 1000px;
+        opacity: 1;
+        transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.35s ease;
+    }
+
+        #summaryCard.filter-collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+    .section-toggle-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 18px;
+        background: #f8fafc;
+        border-top: 1px solid #edf0f5;
+        border-bottom: 1px solid #edf0f5;
+        user-select: none;
+        transition: background 0.2s ease;
+    }
+
+    .section-toggle-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #475467;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+    }
+
+        .section-toggle-label i {
+            font-size: 14px;
+            color: #0d6efd;
+        }
+
+    .section-toggle-icon {
+        font-size: 12px;
+        color: #98a2b3;
+        transition: transform 0.3s ease;
+    }
+
+    .section-toggle-bar.open .section-toggle-icon {
+        transform: rotate(180deg);
     }
 </style>
-<!-- Loader -->
-<div id="loader" style="display:none;">
-    <div class="text-center">
-        <img src="~/assets/images/loader.gif"
-             class="loader-gif"
-             alt="Loading..." />
-    </div>
-</div>
 
-<div class="card">
-    <div class="card-header d-flex align-items-center justify-content-between">
-        <h3 class="mb-0 text-uppercase">
-            <i class="fa-jelly-fill fa-regular fa-file"></i>
-            Proforma List
-        </h3>
+<style type="text/css">
+    .select2-container {
+        width: 100% !important;
+    }
 
-        <a asp-controller="Proforma"
-           asp-action="Create"
-           class="btn btn-primary btn-sm">
-            <i class="fa fa-plus me-1"></i>
-            Create
-        </a>
+        .select2-container .select2-selection--single {
+            height: 38px !important;
+            border: 1px solid #d0d5dd !important;
+            border-radius: 7px !important;
+            background: #fff !important;
+            display: flex !important;
+            align-items: center !important;
+            transition: all .2s ease;
+        }
 
-    </div>
-    <div class="card-body">
+            .select2-container .select2-selection--single:hover {
+                border-color: #b9c4d2 !important;
+            }
 
-        <!-- Search / Record Information -->
-        <div class="row align-items-center mb-3">
+    .select2-container--open .select2-selection--single {
+        border-color: #6b7cff !important;
+        box-shadow: 0 0 0 3px rgba(107,124,255,.10);
+    }
+</style>
 
-            <div class="col-md-4 mb-2 mb-md-0">
-
-                <input type="text"
-                       id="searchInput"
-                       class="form-control"
-                       placeholder="Search Proforma..." />
-
+<div class="invoice-page">
+    <div class="invoice-card">
+        <div class="invoice-header">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <h3 class="page-title">
+                    <i class="fa fa-file-invoice"></i>
+                    Proforma Invoice List
+                </h3>
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" id="btnToggleFilter" class="btn-filter-toggle">
+                        <i class="fa fa-filter-circle-xmark"></i>
+                        <span>Hide Filters</span>
+                    </button>
+                
+                        <a asp-action="Create" class="btn btn-primary add-btn btn-sm">
+                            <i class="fa fa-plus"></i>
+                            Create Proforma
+                        </a>
+                    
+                </div>
             </div>
-
-            <div class="col-md-8 text-md-end">
-
-                <span class="record-info">
-
-                    Show
-
-                    <select id="ddlStatus"
-                            class="form-select form-select-sm d-inline-block"
-                            style="width:auto;">
-
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                        <option value="50">50</option>
-                        <option value="100" selected>100</option>
-                        <option value="all">All</option>
-
-                    </select>
-
-                    &nbsp;&nbsp;
-
-                    Total Records :
-                    <strong id="totalRecords">
-                        @(Model?.Count() ?? 0)
-                    </strong>
-
-                </span>
-
-            </div>
-
         </div>
 
+        <!-- ── List filters (client-side, list only) ── -->
+        <div id="filterCard" class="filter-section">
+            <div class="row align-items-end">
+                <div class="col-lg-3 col-md-3">
+                    <label class="filter-label">Search</label>
+                    <div class="search-wrapper">
+                        <span class="search-icon"><i class="fa fa-search text-muted"></i></span>
+                        <input type="text" id="searchInput" class="form-control search-box" placeholder="Search invoice, company, GST..." />
+                    </div>
+                </div>
 
-        <!-- ================= TABLE ================= -->
-        <div class="proforma-main-table-wrapper">
+                <div class="col-lg-4 col-md-4">
+                    <div class="row gx-2">
+                        <div class="col-6">
+                            <label class="filter-label"><i class="fa-solid fa-calendar-days"></i> From Date</label>
+                            <input type="date" id="fromDate" class="form-control search-box" />
+                        </div>
+                        <div class="col-6">
+                            <label class="filter-label"><i class="fa-solid fa-calendar-days"></i> To Date</label>
+                            <input type="date" id="toDate" class="form-control search-box" />
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-3">
+                    <label class="modern-label">
+                        <i class="fa-solid fa-user-tie"></i> Sales Manager
+                    </label>
 
-            <table id="tblProforma"
-                   class="table table-bordered table-hover align-middle"
-                   style="width:100%;">
+                    <select id="ddlTeamuser" class="form-control">
+                        <option value="">All Sales Managers</option>
 
-                <thead class="table-light">
+                        @if (ViewBag.SalesManagers != null)
+                        {
+                            string selectedManager = ViewBag.SelectedSalesManager?.ToString() ?? "";
 
+                            foreach (var mgr in (IEnumerable<dynamic>)ViewBag.SalesManagers)
+                            {
+                                string userCode = mgr.UserCode;
+
+                                <option value="@userCode"
+                                        selected="@(userCode == selectedManager ? "selected" : null)">
+                                    @mgr.FullName
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="col-lg-1 col-md-1">
+                    <button type="button" id="clearFilter" class="btn btn-outline-secondary clear-filter-btn" title="Clear search and dates">
+                        <i class="fa fa-rotate-left"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Summary toggle bar (FY + Month server filters) ── -->
+        <div class="section-toggle-bar" id="summaryBar">
+            <div class="d-flex align-items-center gap-2">
+                <span class="section-toggle-label">
+                    <i class="fa fa-chart-pie"></i>
+                    YearWise Summary
+                </span>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <span class="current-filter-info" id="summaryToggleBar">
+                    <i class="fa fa-calendar-check"></i>
+                    <span class="summary-filter-item">
+                        <select id="financialYearFilter" class="summary-filter-select">
+                            @for (int y = firstFyStart; y <= lastFyStart; y++)
+                            {
+                                var fyValue = $"{y}-{(y + 1).ToString().Substring(2)}";
+                                <option value="@fyValue">FY @fyValue</option>
+                            }
+                        </select>
+                    </span>
+                    <span class="summary-filter-separator">|</span>
+                    <span class="summary-filter-item">
+                        <select id="monthFilter" class="summary-filter-select">
+                            <option value="all">All Months</option>
+                            <option value="04">April</option>
+                            <option value="05">May</option>
+                            <option value="06">June</option>
+                            <option value="07">July</option>
+                            <option value="08">August</option>
+                            <option value="09">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                            <option value="01">January</option>
+                            <option value="02">February</option>
+                            <option value="03">March</option>
+                        </select>
+                    </span>
+                </span>
+
+                <button type="button"
+                        class="btn btn-sm btn-light"
+                        onclick="toggleSection('summaryCard','summaryBar')"
+                        title="Toggle Summary">
+                    <i class="fa fa-chevron-down section-toggle-icon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ── Summary cards (server data only) ── -->
+        <div id="summaryCard" class="summary-section filter-collapsed">
+            <div class="row">
+                <div class="col-lg-3 col-md-6 mb-2">
+                    <div class="summary-card summary-fy">
+                        <div class="summary-title">Financial Year Total</div>
+                        <div class="summary-value">
+                            @financialYearTotal.ToString("C2", inCulture)
+                        </div>
+                        <div class="summary-subtitle">FY @selectedFinancialYear</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-2">
+                    <div class="summary-card summary-filtered">
+                        <div class="summary-title">Selected Period Total</div>
+                        <div class="summary-value">
+                            @selectedMonthGrandTotal.ToString("C2", inCulture)
+                        </div>
+                        <div class="summary-subtitle">@selectedMonthName</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-2">
+                    <div class="summary-card summary-tax">
+                        <div class="summary-title">Tax Amount</div>
+                        <div class="summary-value">
+                            @selectedMonthTaxTotal.ToString("C2", inCulture)
+                        </div>
+                        <div class="summary-subtitle">@selectedMonthName</div>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 mb-2">
+                    <div class="summary-card summary-invoice">
+                        <div class="summary-title">Invoice Count</div>
+                        <div class="summary-value">@selectedMonthInvoiceCount</div>
+                        <div class="summary-subtitle">@selectedMonthName</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="fy-summary-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="fy-summary-title">
+                            <i class="fa fa-chart-column"></i>
+                            Financial Year Summary Monthly Breakdown - FY
+                            <span class="text-primary">@selectedFinancialYear</span>
+                        </h6>
+                        <small class="text-muted">April - March</small>
+                    </div>
+                </div>
+
+                <div class="fy-month-wrapper">
+                    @{
+                        int[] fyMonths = { 4, 5, 6, 7, 8, 9, 10, 11, 12, 1, 2, 3 };
+                    }
+                    @foreach (var monthNumber in fyMonths)
+                    {
+                        var monthData = financialYearSummary.FirstOrDefault(x => x.mon == monthNumber);
+                        var monthTotal = monthData?.GrandTotal ?? 0m;
+                        var monthInvoiceCount = monthData?.TotalInvoice ?? 0;
+                        var monthName = inCulture.DateTimeFormat.GetMonthName(monthNumber);
+                        var monthValue = monthNumber.ToString("00");
+                        var activeClass = selectedMonth == monthValue ? "active" : "";
+
+                        <div class="fy-month-card @activeClass" data-month-card="@monthValue" onclick="selectMonth('@monthValue')">
+                            <div class="fy-month-name">@monthName</div>
+                            <div class="fy-month-value">@monthTotal.ToString("C2", inCulture)</div>
+                            <div class="fy-month-count">@monthInvoiceCount invoice(s)</div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="record-section mt-2">
+            <div class="row">
+                <div class="col-md-6">
+                    <span class="record-info">Total Records : <strong id="totalRecords">@invoiceList.Count</strong></span>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <span class="record-info">Filtered Records : <strong id="filteredRecords">@invoiceList.Count</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="table table-bordered table-hover" id="invoiceTable">
+                <thead>
                     <tr>
-
-                        <th>Sr.No.</th>
-
-                        <th>Created Date</th>
-
+                        <th class="text-center">#</th>
+                        <th>Proforma Date</th>
                         <th>Proforma No.</th>
-
-                        <th>Company Name</th>
-
-                        <th>Basic Amount</th>
-
-                        <th>GST Amount</th>
-
-                        <th class="text-center"
-                            style="width:120px;">
-                            Action
-                        </th>
-
+                        <th>Company Name</th>  
+                        <th class="text-end">Grand Total</th>
+                        <th class="text-center">Received</th>
+                        <th class="text-center">Balance</th>
+                        <th>Salesperson</th>                      
+                        <th class="text-center">Action</th>
                     </tr>
-
                 </thead>
-
-                <tbody>
-
-                    @if (Model != null && Model.Any())
+                <tbody id="invoiceTableBody">
+                    @if (invoiceList.Any())
                     {
                         int count = 1;
-
-                        foreach (var item in Model)
+                        foreach (var item in invoiceList)
                         {
-                            <tr>
+                            decimal parsedTaxAmount = 0m;
+                            decimal.TryParse(item.total_tax_amount, out parsedTaxAmount);
 
-                                <td class="row-number">
-                                    @count
+                            <tr class="invoice-row"
+                                data-invoice-date="@(item.invoicedate?.ToString("yyyy-MM-dd") ?? "")"
+                                data-taxable="@(item.totalamtbeforetax ?? 0m)"
+                                data-tax="@parsedTaxAmount"
+                                data-grandtotal="@(item.totalamtaftertax ?? 0m)">
+
+                                <td class="row-number" data-label="Invoice #">@count</td>
+
+                                <td data-label="Invoice Date">
+                                    @(item.invoicedate.HasValue? item.invoicedate.Value.ToString("dd-MMM-yyyy") : "-")
                                 </td>
 
-                                <td>
-                                    @(item.createddate.HasValue
-                                                                ? item.createddate.Value.ToString("dd/MM/yyyy")
-                                                                : "")
-                        </td>
-                        <td>
-                            <strong>
-                                @item.invoiceno
-                            </strong>
-                        </td>
+                                <td data-label="Invoice No."><span class="invoice-no">@(item.invoiceno ?? "-")</span></td>
 
-                                <td>
-                                    @item.companyName
+                                <td data-label="Company Name"><span class="company-name">@(item.companyName ?? "-")</span></td>
+
+                                <td class="text-end" data-label="Grand Total">
+                                    <span class="grand-total">@((item.totalamtaftertax ?? 0m).ToString("C2", inCulture))</span>
                                 </td>
-
-                                <td class="text-end">
-                                    @item.totalamtbeforetax
+                                <td class="text-end" data-label="Received">
+                                    <span class="Received">@((item.TotalAmountReceived ?? 0m).ToString("C2", inCulture))</span>
                                 </td>
-
-                                <td class="text-end">
-                                    @item.totalamtaftertax
+                                <td class="text-end" data-label="Balance">
+                                    <span class="Balance">@((item.FinalPendingAmount ?? 0m).ToString("C2", inCulture))</span>
                                 </td>
+                                <td data-label="Salesperson"><span class="salesperson">@(item.NAME ?? "-")</span></td>
+                              
+                                <td class="action-column" data-label="Action">
 
-                                <td>
-
-                                    <div class="d-flex justify-content-center gap-1">
-
-                                        <!-- Edit -->
-                                        <a asp-controller="Proforma"
-                                           asp-action="Create"
-                                           asp-route-ID="@EncryptionHelper.Encrypt(item.Id)"
-                                           class="btn btn-sm btn-secondary"
-                                           title="Edit">
-                                            <i class="fa fa-edit"></i>
-                                        </a>
-                                        <!-- Delete -->
-                                        <button type="button"
+                                    <a href="@Url.Action("Create", "Proforma", new { id = EncryptionHelper.Encrypt(item.Id) })" class="invoice-action-btn invoice-edit-btn" title="Edit Invoice">
+                                        <i class="fa fa-edit"></i>
+                                    </a>
+                                  <button type="button"
                                                 class="btn btn-sm btn-danger"
                                                 title="Delete"
                                                 onclick="DeleteProforma('@item.Id')">
 
                                             <i class="fa fa-trash"></i>
 
-                                        </button>
-
-                                        <button type="button"
-                                                class="btn btn-sm btn-success"
-                                                title="Send PDF"
-                                                onclick="ViewPDF('@item.Id')">
-                                            <i class="fa fa-file-pdf"></i>
-                                        </button>
-                                        <a asp-controller="Taxinvoice"
-                                           asp-action="Create"
-                                           asp-route-ID="@EncryptionHelper.Encrypt(item.Id)"
-                                           class="btn btn-sm btn-info"
-                                           title="Create Tax Invoice">
-                                            <i class="fa fa-plus"></i>
-                                        </a>
-                                    </div>
-
+                                        </button>                               
+                                    <button type="button"
+                                            class="btn btn-sm btn-success"
+                                            title="Send PDF"
+                                            onclick="ViewPDF('@item.Id')">
+                                        <i class="fa fa-file-pdf"></i>
+                                    </button>
+                                    <a asp-controller="Taxinvoice"
+                                       asp-action="Create"
+                                       asp-route-ID="@EncryptionHelper.Encrypt(item.Id)"
+                                       class="btn btn-sm btn-info"
+                                       title="Create Tax Invoice">
+                                        <i class="fa fa-plus"></i>
+                                    </a>
                                 </td>
-
                             </tr>
-
-                                        count++;
+                            count++;
                         }
                     }
                     else
                     {
-                        <tr id="noDataRow">
-
-                            <td colspan="8"
-                                class="text-center py-4">
-
-                                <i class="fa fa-info-circle me-2"></i>
-
-                                No Proforma records found.
-
+                        <tr id="initialEmptyRow">
+                            <td colspan="11" class="no-record">
+                                <i class="fa fa-file-invoice fa-2x"></i>
+                                <div class="no-record-title">No invoices found.</div>
+                                <div class="no-record-text">There are no tax invoices available for the selected period.</div>
                             </td>
-
                         </tr>
                     }
-
                 </tbody>
-
             </table>
-
         </div>
 
-        <nav>
-            <ul class="pagination justify-content-center mt-3"
-                id="pagination">
-            </ul>
-
-        </nav>
-
+        <div class="row align-items-center pagination-wrapper">
+            <div class="col-md-5">
+                <span class="showing-info">
+                    Showing <strong id="showingFrom">0</strong> to <strong id="showingTo">0</strong> of <strong id="showingTotal">0</strong> records
+                </span>
+            </div>
+            <div class="col-md-7">
+                <nav><ul class="pagination justify-content-md-end justify-content-center" id="pagination"></ul></nav>
+            </div>
+        </div>
     </div>
+
+    <div id="afToken">@Html.AntiForgeryToken()</div>
 
 </div>
 
+<script type="text/javascript">
+    (function () {
+        try {
+            if (localStorage.getItem('invoiceFilterCollapsed') === '1') {
+                document.getElementById('filterCard').classList.add('filter-collapsed');
+                var btn = document.getElementById('btnToggleFilter');
+                btn.querySelector('span').textContent = 'Show Filters';
+                btn.querySelector('i').className = 'fa fa-filter';
+            }
+        } catch (e) { }
+    })();
+</script>
 
-<script>
-    const searchInput = document.getElementById("searchInput");
-    const pagination = document.getElementById("pagination");
-    const totalRecords = document.getElementById("totalRecords");
-    const pageSizeDropdown = document.getElementById("ddlStatus");
-
-    const table = document.getElementById("tblProforma");
-    const tbody = table.querySelector("tbody");
-
+<script type="text/javascript">
+    const rowsPerPage = 20;
+    let currentPage = 1;
     let allRows = [];
     let filteredRows = [];
-    let currentPage = 1;
-    let rowsPerPage = 100;
 
+    // values coming from the server (what was actually loaded)
+    const selectedFY = "@selectedFinancialYear";
+    const selectedMonth = "@selectedMonth";   // "all" or "04".."03"
 
-    function loadRows() {
-        allRows = Array.from(tbody.querySelectorAll("tr")).filter(row => !row.id);
-        filteredRows = allRows;
-        updateTotalRecords();
-        displayTable(1);
-    }
+      // ── Filter panel toggle (state is remembered across reloads) ──
+    document.getElementById('btnToggleFilter').addEventListener('click', function () {
+        const card = document.getElementById('filterCard');
+        card.classList.toggle('filter-collapsed');
+        const collapsed = card.classList.contains('filter-collapsed');
 
+        this.querySelector('span').textContent = collapsed ? 'Show Filters' : 'Hide Filters';
+        this.querySelector('i').className = collapsed ? 'fa fa-filter' : 'fa fa-filter-circle-xmark';
 
-    function updateTotalRecords() {
-        totalRecords.innerText = filteredRows.length;
-    }
+        try { localStorage.setItem('invoiceFilterCollapsed', collapsed ? '0' : '1'); } catch (e) { }
+    });
 
+      // ── Summary panel toggle (state is remembered across reloads) ──
+    function toggleSection(cardId, barId) {
+        const card = document.getElementById(cardId);
+        const bar = document.getElementById(barId);
 
-    function displayTable(page) {
-        currentPage = page;
+        const isCurrentlyOpen = !card.classList.contains("filter-collapsed");
+        const shouldOpen = !isCurrentlyOpen;
 
-        allRows.forEach(function (row) {
-            row.style.display = "none";
-        });
-
-        let start = 0;
-        if (rowsPerPage !== "all") {
-            start = (page - 1) * parseInt(rowsPerPage);
+        if (shouldOpen) {
+            card.classList.remove("filter-collapsed");
+            bar.classList.add("open");
+        } else {
+            card.classList.add("filter-collapsed");
+            bar.classList.remove("open");
         }
 
-        let end = rowsPerPage === "all"
-            ? filteredRows.length
-            : start + parseInt(rowsPerPage);
-
-        filteredRows.slice(start, end).forEach(function (row, index) {
-            row.style.display = "";
-            let numberCell = row.querySelector(".row-number");
-            if (numberCell) {
-                numberCell.innerText = start + index + 1;
-            }
-        });
-
-        createPagination();
+        // Save state
+        try {
+            localStorage.setItem(
+                "invoiceSummaryOpen",
+                shouldOpen ? "1" : "0"
+            );
+        } catch (e) {
+            console.warn("Unable to save summary state:", e);
+        }
     }
 
 
-    function createPagination() {
-        pagination.innerHTML = "";
+    document.addEventListener("DOMContentLoaded", function () {
+        // show the loaded FY / month in the dropdowns
+        document.getElementById("financialYearFilter").value = selectedFY;
+        document.getElementById("monthFilter").value = selectedMonth;
 
-        if (rowsPerPage === "all") {
+        setDateLimits();
+
+        $("#ddlTeamuser").select2({ placeholder: "Select Sales Manager", allowClear: true, width: "100%" });
+        $("#ddlTeamuser").on("change", loadServerData);
+
+        allRows = Array.from(document.querySelectorAll("#invoiceTableBody .invoice-row"));
+        filteredRows = [...allRows];
+        applyFilters();
+
+        const summaryCard = document.getElementById("summaryCard");
+        const summaryBar = document.getElementById("summaryBar");
+
+        try {
+            const savedSummaryState =
+                localStorage.getItem("invoiceSummaryOpen");
+
+            if (savedSummaryState === "1") {
+                // Previously OPEN
+                summaryCard.classList.remove("filter-collapsed");
+                summaryBar.classList.add("open");
+            } else {
+                // Default / previously COLLAPSED
+                summaryCard.classList.add("filter-collapsed");
+                summaryBar.classList.remove("open");
+
+                // Store default state
+                localStorage.setItem("invoiceSummaryOpen", "0");
+            }
+
+        } catch (e) {
+            // If localStorage is unavailable, default to collapsed
+            summaryCard.classList.add("filter-collapsed");
+            summaryBar.classList.remove("open");
+        }
+    });
+
+    // ── Server-side filters (summary + list data) ──
+    document.getElementById("financialYearFilter").addEventListener("change", loadServerData);
+    document.getElementById("monthFilter").addEventListener("change", loadServerData);
+
+    function selectMonth(month) {
+        document.getElementById("monthFilter").value = month;
+        loadServerData();
+    }
+
+    function loadServerData() {
+        const financialYear = document.getElementById("financialYearFilter").value;
+        const month = document.getElementById("monthFilter").value;
+        const manager = $("#ddlTeamuser").val();
+
+        const params = new URLSearchParams();
+        if (financialYear) params.append("financialYear", financialYear);
+        params.append("month", (month === "all" || !month) ? "0" : month);
+        if (manager) params.append("salesManager", manager);
+
+        window.location.href = '@Url.Action("Index", "Proforma")' + "?" + params.toString();
+    }
+
+    // ── Client-side filters (list only) ──
+    document.getElementById("searchInput").addEventListener("input", function () {
+        currentPage = 1;
+        applyFilters();
+    });
+    document.getElementById("fromDate").addEventListener("change", function () {
+        currentPage = 1;
+        applyFilters();
+    });
+    document.getElementById("toDate").addEventListener("change", function () {
+        currentPage = 1;
+        applyFilters();
+    });
+
+    const currentFY = "@currentFinancialYear";
+    const currentMonthValue = "@currentMonth";
+
+    document.getElementById("clearFilter").addEventListener("click", function () {
+        // clear list filters
+        document.getElementById("searchInput").value = "";
+        document.getElementById("fromDate").value = "";
+        document.getElementById("toDate").value = "";
+
+         window.location.href = '@Url.Action("Index", "Proforma")';
+            return;
+    });
+
+    function applyFilters() {
+        const search = document.getElementById("searchInput").value.toLowerCase().trim();
+        const from = document.getElementById("fromDate").value;   // yyyy-MM-dd
+        const to = document.getElementById("toDate").value;
+
+        filteredRows = allRows.filter(function (row) {
+            const matchesSearch = !search || row.innerText.toLowerCase().includes(search);
+
+            const d = row.getAttribute("data-invoice-date") || "";
+            const matchesFrom = !from || (d && d >= from);
+            const matchesTo = !to || (d && d <= to);
+
+            return matchesSearch && matchesFrom && matchesTo;
+        });
+
+        renderTable();
+    }
+
+    // limit the date pickers to the loaded FY / month
+    function setDateLimits() {
+        const startYear = parseInt(selectedFY.substring(0, 4), 10);
+        let start, end;
+
+        if (selectedMonth === "all") {
+            start = new Date(startYear, 3, 1);
+            end = new Date(startYear + 1, 3, 0);
+        } else {
+            const m = parseInt(selectedMonth, 10);
+            const y = m >= 4 ? startYear : startYear + 1;
+            start = new Date(y, m - 1, 1);
+            end = new Date(y, m, 0);
+        }
+
+        const fromEl = document.getElementById("fromDate");
+        const toEl = document.getElementById("toDate");
+        fromEl.min = toEl.min = toISO(start);
+        fromEl.max = toEl.max = toISO(end);
+    }
+
+    function toISO(d) {
+        return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+
+    // ── Table rendering ──
+    function updateTotalRecords() {
+        document.getElementById("totalRecords").innerText = allRows.length;
+        document.getElementById("filteredRecords").innerText = filteredRows.length;
+    }
+
+    function renderTable() {
+        removeDynamicEmptyRow();
+        allRows.forEach(function (row) { row.style.display = "none"; });
+
+        if (filteredRows.length === 0) {
+            if (allRows.length > 0) {
+                showEmptyRow();
+            }
+            updateShowingInfo(0, 0, 0);
+            createPagination();
+            updateTotalRecords();
             return;
         }
 
-        const totalPages = Math.ceil(filteredRows.length / parseInt(rowsPerPage));
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+        if (currentPage > totalPages) {
+            currentPage = totalPages;
+        }
 
+        const startIndex = (currentPage - 1) * rowsPerPage;
+        const endIndex = Math.min(startIndex + rowsPerPage, filteredRows.length);
+        const pageRows = filteredRows.slice(startIndex, endIndex);
+
+        pageRows.forEach(function (row) { row.style.display = ""; });
+        pageRows.forEach(function (row, index) {
+            const numberCell = row.querySelector(".row-number");
+            if (numberCell) {
+                numberCell.innerText = startIndex + index + 1;
+            }
+        });
+
+        updateShowingInfo(startIndex + 1, endIndex, filteredRows.length);
+        createPagination();
+        updateTotalRecords();
+    }
+
+    function updateShowingInfo(from, to, total) {
+        document.getElementById("showingFrom").innerText = from;
+        document.getElementById("showingTo").innerText = to;
+        document.getElementById("showingTotal").innerText = total;
+    }
+
+    function createPagination() {
+        const pagination = document.getElementById("pagination");
+        pagination.innerHTML = "";
+
+        const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
         if (totalPages <= 1) {
             return;
         }
 
-        // Previous
-        const previousLi = document.createElement("li");
-        previousLi.className = "page-item " + (currentPage === 1 ? "disabled" : "");
-        previousLi.innerHTML = `
-            <a class="page-link" href="javascript:void(0)">
-                <i class="fa fa-chevron-left"></i>
-            </a>
-        `;
-        previousLi.onclick = function () {
+        const previous = document.createElement("li");
+        previous.className = "page-item " + (currentPage === 1 ? "disabled" : "");
+        previous.innerHTML = `<a class="page-link" href="javascript:void(0)"><i class="fa fa-chevron-left"></i> Previous</a>`;
+        previous.onclick = function () {
             if (currentPage > 1) {
-                displayTable(currentPage - 1);
+                currentPage--;
+                renderTable();
+                window.scrollTo({ top: 0, behavior: "smooth" });
             }
         };
-        pagination.appendChild(previousLi);
+        pagination.appendChild(previous);
 
-        // Page Numbers
-        for (let i = 1; i <= totalPages; i++) {
-            const li = document.createElement("li");
-            li.className = "page-item " + (i === currentPage ? "active" : "");
-            li.innerHTML = `
-                <a class="page-link" href="javascript:void(0)">
-                    ${i}
-                </a>
-            `;
-            li.onclick = function () {
-                displayTable(i);
-            };
-            pagination.appendChild(li);
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
 
-        // Next
-        const nextLi = document.createElement("li");
-        nextLi.className = "page-item " + (currentPage === totalPages ? "disabled" : "");
-        nextLi.innerHTML = `
-            <a class="page-link" href="javascript:void(0)">
-                <i class="fa fa-chevron-right"></i>
-            </a>
-        `;
-        nextLi.onclick = function () {
+        if (startPage > 1) {
+            addPageButton(1, pagination);
+            if (startPage > 2) {
+                addDots(pagination);
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            addPageButton(i, pagination);
+        }
+
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                addDots(pagination);
+            }
+            addPageButton(totalPages, pagination);
+        }
+
+        const next = document.createElement("li");
+        next.className = "page-item " + (currentPage === totalPages ? "disabled" : "");
+        next.innerHTML = `<a class="page-link" href="javascript:void(0)">Next <i class="fa fa-chevron-right"></i></a>`;
+        next.onclick = function () {
             if (currentPage < totalPages) {
-                displayTable(currentPage + 1);
+                currentPage++;
+                renderTable();
+                window.scrollTo({ top: 0, behavior: "smooth" });
             }
         };
-        pagination.appendChild(nextLi);
+        pagination.appendChild(next);
     }
 
+    function addPageButton(pageNumber, pagination) {
+        const li = document.createElement("li");
+        li.className = "page-item " + (pageNumber === currentPage ? "active" : "");
+        li.innerHTML = `<a class="page-link" href="javascript:void(0)">${pageNumber}</a>`;
+        li.onclick = function () {
+            currentPage = pageNumber;
+            renderTable();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        };
+        pagination.appendChild(li);
+    }
 
-    searchInput.addEventListener("keyup", function () {
-        const value = this.value.toLowerCase().trim();
-        filteredRows = allRows.filter(function (row) {
-            return row.textContent.toLowerCase().includes(value);
-        });
-        updateTotalRecords();
-        currentPage = 1;
-        displayTable(1);
-    });
+    function addDots(pagination) {
+        const li = document.createElement("li");
+        li.className = "page-item disabled";
+        li.innerHTML = `<span class="page-link">...</span>`;
+        pagination.appendChild(li);
+    }
 
-    pageSizeDropdown.addEventListener("change", function () {
-        rowsPerPage = this.value === "all" ? "all" : parseInt(this.value);
-        currentPage = 1;
-        displayTable(1);
-    });
+    function showEmptyRow() {
+        const tbody = document.getElementById("invoiceTableBody");
+        const emptyRow = document.createElement("tr");
+        emptyRow.id = "dynamicEmptyRow";
+        emptyRow.innerHTML = `
+            <td colspan="11" class="no-record">
+                <i class="fa fa-search fa-2x"></i>
+                <div class="no-record-title">No matching invoices found.</div>
+                <div class="no-record-text">Try changing the search text or date range.</div>
+            </td>`;
+        tbody.appendChild(emptyRow);
+    }
 
+    function removeDynamicEmptyRow() {
+        const emptyRow = document.getElementById("dynamicEmptyRow");
+        if (emptyRow) {
+            emptyRow.remove();
+        }
+    }
 
-    $(document).ready(function () {
-        loadRows();
-    });
-
-    function DeleteProforma(id) {
+      function DeleteProforma(id) {
         if (!id || id === "" || id === "0") {
             showToast("Invalid Proforma ID.", "error");
             return;
@@ -549,4 +1908,6 @@
             }
         });
     }
+
+
 </script>

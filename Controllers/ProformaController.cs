@@ -19,14 +19,46 @@ namespace WEBLINK_CRM.Controllers
         {
             objProforma = proforma;
         }
-        public async Task<IActionResult> Index(string? financialYear, int? month)
+        public async Task<IActionResult> Index(string? financialYear, int? month, string? salesManager)
         {
             try
             {
-                var loginId = HttpContext.Session.GetString("EmpCode");
-                string pageSize = "10";
-                var list = await objProforma.GetProformaList(pageSize, loginId);
-                return View(list);
+                string SessionName = HttpContext.Session.GetString("EmpCode")?.ToString() ?? "NA";
+                string SessionRole = HttpContext.Session.GetString("Role")?.ToString() ?? "NA";
+
+                var today = DateTime.Now;
+
+                // ============================================
+                // DEFAULT FINANCIAL YEAR
+                // ============================================
+
+                if (string.IsNullOrEmpty(financialYear))
+                {
+                    financialYear = today.Month >= 4
+                        ? $"{today.Year}-{(today.Year + 1).ToString().Substring(2)}"
+                        : $"{today.Year - 1}-{today.Year.ToString().Substring(2)}";
+                }
+
+                if (!month.HasValue)
+                {
+                    month = today.Month;
+                }
+
+
+                var data = await objProforma.GetInfo(financialYear, month, salesManager, SessionName, SessionRole);
+
+                var financialYearSummary = await objProforma.GetFinancialYearSummary(financialYear, salesManager, SessionName, SessionRole);
+
+
+                var personLists = await objProforma.GetSalesPersonList(SessionName, SessionRole);
+
+                ViewBag.SalesManagers = personLists.SalesManagers;
+                ViewBag.SelectedSalesManager = salesManager;
+                ViewBag.SelectedFinancialYear = financialYear;
+                ViewBag.SelectedMonth = month;
+                ViewBag.FinancialYearSummary = financialYearSummary;
+
+                return View(data);
             }
             catch (Exception ex)
             {
@@ -185,7 +217,7 @@ namespace WEBLINK_CRM.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int ID)
+        public async Task<IActionResult> Deleteinvoice(int ID)
         {
             try
             {
