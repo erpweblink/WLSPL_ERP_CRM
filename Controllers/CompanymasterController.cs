@@ -6,8 +6,9 @@ using WEBLINK_CRM.Helpers;
 using WEBLINK_CRM.Models;
 using WEBLINK_CRM.repository;
 
-/* In [dbo].[SP_Company] add lead code field to save company master 
- * Also alter compnay master add LeadCode nvarchar(max) null */
+/* In [dbo].[SP_Company] add lead code field to save company master  @LeadCode nvarchar(max) =null,@ConstitutionofBusiness nvarchar(max) =null,
+ * Also alter compnay master 
+ * ALTER TABLE Company ADD ConstitutionofBusiness NVARCHAR(MAX) NULL, LeadCode nvarchar(max) null*/
 
 namespace WEBLINK_CRM.Controllers
 {
