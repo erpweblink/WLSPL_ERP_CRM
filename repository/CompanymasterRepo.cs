@@ -72,7 +72,7 @@ namespace WEBLINK_CRM.repository
                      IsUpdated, RequestedBy, RequestOn, Billing_location AS BillingLocation, Billing_pincode AS BillingPincode,
                      Billing_statecode AS BillingStateCode, Shipping_location AS ShippingLocation, Shipping_pincode AS ShippingPincode,
                      Shipping_statecode AS ShippingStateCode, E_inv_Typeof_supply AS EInvTypeOfSupply, CountryCode, CountryName,
-                     Address AS BillingAddress,BDE FROM Company WHERE Id = @id and isdeleted=0 ";
+                     Address AS BillingAddress,BDE,ConstitutionofBusiness FROM Company WHERE Id = @id and isdeleted=0 ";
 
                 var data = await connection.QueryFirstOrDefaultAsync<dynamic>(query,parameters);
 
@@ -94,6 +94,7 @@ namespace WEBLINK_CRM.repository
                     Category = data.Category,
                     GSTNo = data.gstno,
                     VisitDate = data.visitdate,
+                    ConstitutionofBusiness= data.ConstitutionofBusiness,
 
                     Address = data.address,
                     ShippingAddress = data.shippingaddress,
@@ -322,6 +323,7 @@ namespace WEBLINK_CRM.repository
                     parameters.Add("@Shipping_pincode", Model.ShippingPincode?.ToString()?.Trim());
                     parameters.Add("@Shipping_statecode", Model.ShippingStateCode?.ToString()?.Trim());
                     parameters.Add("@LeadCode", Model.LeadCode?.ToString()?.Trim());
+                    parameters.Add("@ConstitutionofBusiness", Model.ConstitutionofBusiness?.ToString()?.Trim());
                     parameters.Add("@sessionname", Model.CreatedBy);
                     parameters.Add("@BDE", Model.BDE);
                     parameters.Add("@Action", Action);

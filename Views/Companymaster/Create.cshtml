@@ -87,10 +87,6 @@
                 <input type="hidden"
                        asp-for="LeadCode" />
 
-
-
-                <!-- Register Type -->
-
                 <div class="col-md-4 mb-3">
                     <label class="form-label">
                         Register Type
@@ -653,19 +649,37 @@
 
 
 
-                @*            <div class="col-md-4 mb-3">
+                           <div class="col-md-4 mb-3">
 
                         <label class="form-label">
-                            Country Code
+                        Constitution of Business
                         </label>
 
 
-                        <input asp-for="CountryCode"
-                               class="form-control"
-                               placeholder="Country Code" />
+                    <select asp-for="ConstitutionofBusiness"
+                            id="ConstitutionofBusiness"
+                            class="form-select">
+
+                        <option value="">
+                            -- Select Business Constitution --
+                        </option>
+
+                        <option value="PVT LTD">
+                            PVT LTD
+                        </option>
+
+                        <option value="Partnership">
+                            Partnership
+                        </option>
+
+                        <option value="Proprietor">
+                            Proprietor
+                        </option>
+
+                    </select>
 
 
-                    </div> *@
+                    </div>
 
 
                 <!-- Address -->
