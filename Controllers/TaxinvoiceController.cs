@@ -14,7 +14,7 @@ using static WLSPL_ERP_CRM.Models.Taxinvoice;
         @TdsAmt nvarchar(MAX) = null,@companyCode nvarchar(MAX) = null, @Remarks nvarchar(MAX) = null,
         @newinvoiceno nvarchar(900) = null output
    4.Alter table InvoiceMain add TotalPayable nvarchar(max) null, TdsPer nvarchar(max) null, TdsAmt nvarchar(max) null
-   5.Alter table InvoiceMain add compCode nvarchar(max) null
+   5.Alter table InvoiceMain add compCode nvarchar(max) null,UploadedFilePath nvarchar(max) null
  */
 
 namespace WLSPL_ERP_CRM.Controllers
@@ -24,10 +24,12 @@ namespace WLSPL_ERP_CRM.Controllers
     public class TaxinvoiceController : Controller
     {
         private readonly ITaxinvoiceRepo _TaxinvoiceRepo;
+        private readonly IWebHostEnvironment _env;
 
-        public TaxinvoiceController(ITaxinvoiceRepo taxinvoiceRepo)
+        public TaxinvoiceController(ITaxinvoiceRepo taxinvoiceRepo, IWebHostEnvironment env)
         {
             _TaxinvoiceRepo = taxinvoiceRepo;
+            _env = env;
         }
 
         public async Task<IActionResult> Index(string? financialYear, int? month, string? salesManager)
@@ -242,92 +244,128 @@ namespace WLSPL_ERP_CRM.Controllers
             return Json(new { success = true, invoiceNo = model.main.invoiceno });
         }
 
-        public async Task<IActionResult> ApprovalList()
-        {
-            var list = await _TaxinvoiceRepo.GetApprovelList();
-            return View(list);
-        }
 
         [HttpPost]
-        public async Task<IActionResult> Approve(int ID)
+        public async Task<IActionResult> UpdateStatus(string id, string status)
         {
-            try
-            {
-                if (ID <= 0)
-                {
-                    return Json(new
-                    {
-                        success = false,
-                        message = "Invalid  ID."
-                    });
-                }
-                var EmpCode = HttpContext.Session.GetString("EmpCode")?.ToString();
-                var result = await _TaxinvoiceRepo.Approve(ID, EmpCode);
-
-                if (result)
-                {
-                    return Json(new
-                    {
-                        success = true,
-                        message = "Approved successfully."
-                    });
-                }
-
+            if (HttpContext.Session.GetString("Role") != "Admin")
                 return Json(new
                 {
                     success = false,
-                    message = "Invoice could not be Approve."
+                    message = "Only admin can approve or reject invoices."
                 });
-            }
-            catch (Exception ex)
-            {
+
+            if (status != "approve" && status != "reject")
                 return Json(new
                 {
                     success = false,
-                    message = ex.Message
+                    message = "Invalid status."
                 });
-            }
+
+            int invoiceId = Convert.ToInt32(
+                EncryptionHelper.Decrypt(id)
+            );
+
+            string empCode = HttpContext.Session.GetString("EmpCode") ?? "NA";
+
+            bool ok = await _TaxinvoiceRepo.Approve(invoiceId, empCode);
+
+            return Json(new
+            {
+                success = ok,
+                message = ok
+                    ? (status == "approve"
+                        ? "Invoice approved."
+                        : "Invoice rejected.")
+                    : "Could not update the invoice."
+            });
         }
 
+
         [HttpPost]
-        public async Task<IActionResult> Reject(int ID)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadDocument(string id, IFormFile file)
         {
+            if (file == null || file.Length == 0)
+                return Json(new { success = false, message = "No file selected." });
+
+            int invoiceId;
+            try { invoiceId = Convert.ToInt32(EncryptionHelper.Decrypt(id)); }
+            catch { return Json(new { success = false, message = "Invalid invoice." }); }
+
+            string empCode = HttpContext.Session.GetString("EmpCode") ?? "NA";
+
+            string ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!new[] { ".jpg", ".jpeg", ".png", ".pdf" }.Contains(ext))
+                return Json(new { success = false, message = "Only JPG, PNG or PDF files are allowed." });
+            if (file.Length > 5 * 1024 * 1024)
+                return Json(new { success = false, message = "File is larger than 5 MB." });
+
+            string folder = Path.Combine(_env.WebRootPath, "TaxInvoicedocumnet");
+            Directory.CreateDirectory(folder);
+
+            string savedName = $"{Guid.NewGuid()}{ext}";
+            string fullPath = Path.Combine(folder, savedName);
+
+            using (var stream = new FileStream(fullPath, FileMode.Create))
+                await file.CopyToAsync(stream);
+
+            string? oldPath;
             try
             {
-                if (ID <= 0)
-                {
-                    return Json(new
-                    {
-                        success = false,
-                        message = "Invalid Tax Invoice."
-                    });
-                }
-                var EmpCode = HttpContext.Session.GetString("EmpCode")?.ToString();
-                var result = await _TaxinvoiceRepo.Reject(ID, EmpCode);
-
-                if (result)
-                {
-                    return Json(new
-                    {
-                        success = true,
-                        message = " Rejected successfully."
-                    });
-                }
-
-                return Json(new
-                {
-                    success = false,
-                    message = "Tax-Invoice could not be Reject."
-                });
+                oldPath = await _TaxinvoiceRepo.SaveDocument(invoiceId, $"/TaxInvoicedocumnet/{savedName}", empCode);
             }
-            catch (Exception ex)
+            catch
             {
-                return Json(new
-                {
-                    success = false,
-                    message = ex.Message
-                });
+                if (System.IO.File.Exists(fullPath)) System.IO.File.Delete(fullPath);
+                throw;
             }
+
+            // remove the replaced file (only inside the document folder)
+            if (!string.IsNullOrWhiteSpace(oldPath))
+            {
+                string oldFull = Path.Combine(_env.WebRootPath,
+                    oldPath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+
+                if (oldFull.StartsWith(folder, StringComparison.OrdinalIgnoreCase) && System.IO.File.Exists(oldFull))
+                    System.IO.File.Delete(oldFull);
+            }
+
+            return Json(new
+            {
+                success = true,
+                message = string.IsNullOrWhiteSpace(oldPath) ? "Document uploaded." : "Document replaced."
+            });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetDocuments(string id)
+        {
+            int invoiceId;
+            try { invoiceId = Convert.ToInt32(EncryptionHelper.Decrypt(id)); }
+            catch { return Json(new { success = false, data = (object?)null }); }
+
+            string? path = await _TaxinvoiceRepo.GetDocument(invoiceId);
+
+            if (string.IsNullOrWhiteSpace(path))
+                return Json(new { success = true, data = (object?)null });
+
+            string fullPath = Path.Combine(_env.WebRootPath,
+                path.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+
+            if (!System.IO.File.Exists(fullPath))
+                return Json(new { success = true, data = (object?)null });
+
+            return Json(new
+            {
+                success = true,
+                data = new
+                {
+                    fileName = "Invoice document" + Path.GetExtension(path),
+                    url = Url.Content("~" + path),            // works even if the app runs in a virtual directory
+                    uploadedOn = System.IO.File.GetLastWriteTime(fullPath).ToString("dd-MMM-yyyy")
+                }
+            });
         }
 
         [HttpGet]

@@ -314,13 +314,13 @@ namespace WLSPL_ERP_CRM.repository
 
                         WHERE invoicedate >= @StartDate
                           AND invoicedate < @EndDate
-                            AND (@SalesManager IS NULL OR empcode = @SalesManager)
-                              AND (
-                                      @CurrentRole = 'Admin'
-                                      OR empcode = @CurrentUser
-                                      OR empcode IN (SELECT empcode FROM [dbo].[employees]
-                                                     WHERE TL_Manager = @CurrentUser AND status = '1' AND isdeleted = '0')
-                                  )
+                          AND (@SalesManager IS NULL OR empcode = @SalesManager)
+                          AND (
+                                @CurrentRole = 'Admin'
+                                 OR empcode = @CurrentUser
+                                 OR empcode IN (SELECT empcode FROM [dbo].[employees]
+                                 WHERE TL_Manager = @CurrentUser AND status = '1' AND isdeleted = '0')
+                            )
 
                         ORDER BY invoicedate ASC;
                     ";
@@ -724,47 +724,12 @@ namespace WLSPL_ERP_CRM.repository
             );
         }
 
-        public async Task<List<TaxInvoiceCreate>> GetApprovelList()
-        {
-            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
-
-            const string companySql = @" SELECT [WLSPL].[FN_GenerateTaxInvoiceNo]() AS InvoiceNo";
-
-            var result = await connection.QueryAsync<TaxInvoiceCreate>(companySql);
-
-            return result.ToList();
-
-        }
-
         public async Task<bool> Approve(int id, string user)
         {
             using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
             {
                 string query = @"UPDATE InvoiceMain
                          SET IsApprove = 1,
-                             ApprovedRejectedBy = @Createdby
-                         WHERE ID = @ID";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@ID", id);
-                    cmd.Parameters.AddWithValue("@Createdby", user);
-
-                    await con.OpenAsync();
-
-                    int result = await cmd.ExecuteNonQueryAsync();
-
-                    return result > 0;
-                }
-            }
-        }
-
-        public async Task<bool> Reject(int id, string user)
-        {
-            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
-            {
-                string query = @"UPDATE InvoiceMain
-                         SET IsReject = 1,
                              ApprovedRejectedBy = @Createdby
                          WHERE ID = @ID";
 
@@ -902,6 +867,31 @@ namespace WLSPL_ERP_CRM.repository
         }
 
 
+        public async Task<string?> SaveDocument(int invoiceId, string filePath, string empCode)
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+
+            const string sql = @"
+                DECLARE @old nvarchar(max) =
+                    (SELECT UploadedFilePath FROM [dbo].[InvoiceMain] WHERE id = @InvoiceId);
+
+                UPDATE [dbo].[InvoiceMain]
+                SET UploadedFilePath = @FilePath
+                WHERE id = @InvoiceId;
+
+                SELECT @old;";
+
+            return await connection.ExecuteScalarAsync<string?>(sql, new { InvoiceId = invoiceId, FilePath = filePath });
+        }
+
+        public async Task<string?> GetDocument(int invoiceId)
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+
+            const string sql = @"SELECT UploadedFilePath FROM [dbo].[InvoiceMain] WHERE id = @InvoiceId";
+
+            return await connection.QueryFirstOrDefaultAsync<string?>(sql, new { InvoiceId = invoiceId });
+        }
 
         // PDF Methods
 

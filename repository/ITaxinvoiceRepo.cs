@@ -8,8 +8,6 @@ namespace WLSPL_ERP_CRM.repository
     {
         Task<List<Taxinvoice.TaxInvoiceCreate>> GetInfo(string financialYear, int? month, string? salesManager, string empCode, string empRole);
 
-        Task<List<Taxinvoice.TaxInvoiceCreate>> GetApprovelList();
-
         Task<List<Taxinvoice.TaxInvoiceCreate>> GetFinancialYearSummary(string financialYear, string? salesManager, string empCode, string empRole);
 
         Task<dynamic> GetSalesPersonList(string empCode, string empRole);
@@ -37,8 +35,8 @@ namespace WLSPL_ERP_CRM.repository
 
         Task<bool> Approve(int id, string user);
 
-        Task<bool> Reject(int id, string user);
-
+        Task<string?> SaveDocument(int invoiceId, string filePath, string empCode);
+        Task<string?> GetDocument(int invoiceId);
 
         TaxInvoicePdfResult GenerateInvoicePdf(int invoiceId);
     }
