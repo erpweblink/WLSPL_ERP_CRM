@@ -4,6 +4,9 @@
     ViewData["Title"] = "Tax Invoice List";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
+
+    var isAdmin = Context.Session.GetString("Role")?.ToString() == "Admin";
+
     var invoiceList = Model?.ToList() ?? new List<WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreate>();
     var today = DateTime.Now;
     var inCulture = System.Globalization.CultureInfo.GetCultureInfo("en-IN");
@@ -411,8 +414,159 @@
         }
 
         #invoiceTable th:nth-child(11), #invoiceTable td:nth-child(11) {
-            width: 6%;
+            width: 14%;
         }
+
+    .invoice-status-btn {
+        background: #159957;
+        color: #fff;
+        cursor: pointer;
+    }
+
+        .invoice-status-btn:hover {
+            background: #0f7a45;
+            color: #fff;
+        }
+
+    .invoice-upload-btn {
+        background: #7f56d9;
+        color: #fff;
+        cursor: pointer;
+    }
+
+        .invoice-upload-btn:hover {
+            background: #6941c6;
+            color: #fff;
+        }
+
+    .invoice-lock-btn {
+        background: #e4e7ec;
+        color: #98a2b3;
+        cursor: not-allowed;
+    }
+
+    .inv-modal .modal-content {
+        border: 0;
+        border-radius: 14px;
+        box-shadow: 0 10px 40px rgba(16,24,40,.18);
+    }
+
+    .inv-modal .modal-header {
+        border-bottom: 1px solid #edf0f5;
+        padding: 16px 20px;
+    }
+
+    .inv-modal .modal-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #344054;
+    }
+
+    .inv-modal .modal-body {
+        padding: 18px 20px;
+    }
+
+    .inv-modal .modal-footer {
+        border-top: 1px solid #edf0f5;
+        padding: 12px 20px;
+    }
+
+    .inv-info {
+        background: #f8fafc;
+        border: 1px solid #edf0f5;
+        border-radius: 10px;
+        padding: 12px 14px;
+        margin-bottom: 14px;
+        font-size: 13px;
+    }
+
+        .inv-info .lbl {
+            color: #667085;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .inv-info .val {
+            color: #344054;
+            font-weight: 600;
+        }
+
+    .status-option {
+        flex: 1;
+        border: 2px solid #e4e7ec;
+        border-radius: 10px;
+        padding: 12px;
+        text-align: center;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 13px;
+        transition: all .2s ease;
+        background: #fff;
+    }
+
+        .status-option i {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 4px;
+        }
+
+        .status-option.opt-approve {
+            color: #087443;
+        }
+
+        .status-option.opt-reject {
+            color: #b42318;
+        }
+
+        .status-option.opt-approve:hover, .status-option.opt-approve.selected {
+            border-color: #159957;
+            background: #e8fff2;
+        }
+
+        .status-option.opt-reject:hover, .status-option.opt-reject.selected {
+            border-color: #d92d20;
+            background: #fff1f0;
+        }
+
+    .drop-zone {
+        border: 2px dashed #c7cfdb;
+        border-radius: 10px;
+        padding: 22px;
+        text-align: center;
+        color: #667085;
+        cursor: pointer;
+        transition: all .2s ease;
+    }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: #7f56d9;
+            background: #f9f5ff;
+        }
+
+        .drop-zone i {
+            font-size: 26px;
+            color: #7f56d9;
+            margin-bottom: 6px;
+        }
+
+    .doc-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 10px;
+        border: 1px solid #edf0f5;
+        border-radius: 8px;
+        margin-top: 6px;
+        font-size: 12px;
+    }
+
+        .doc-item a {
+            color: #0d6efd;
+            text-decoration: none;
+            font-weight: 600;
+            word-break: break-all;
+        }
+
 
     .row-number {
         color: #667085;
@@ -1006,7 +1160,7 @@
 
         .select2-container .select2-selection--single {
             height: 38px !important;
-            border: 1px solid #1e2022 !important;
+            border: 1px solid #d0d5dd !important;
             border-radius: 7px !important;
             background: #fff !important;
             display: flex !important;
@@ -1315,14 +1469,54 @@
                                     }
                                 </td>
 
+                                @{
+                                    var encId = EncryptionHelper.Encrypt(item.Id);
+                                    var isApproved = item.IsApprove == true;
+                                    var isRejected = item.IsReject == true;
+                                }
+
                                 <td class="action-column" data-label="Action">
-                                    <a href="@Url.Action("GetPdf", "Taxinvoice", new { id = EncryptionHelper.Encrypt(item.Id) })" class="invoice-action-btn invoice-pdf-btn" title="Download PDF">
-                                        <i class="fa fa-file-pdf"></i>
-                                    </a>
-                                    <a href="@Url.Action("Edit", "Taxinvoice", new { id = EncryptionHelper.Encrypt(item.Id) })" class="invoice-action-btn invoice-edit-btn" title="Edit Invoice">
+
+                                    @* PDF: admin always, others only when approved *@
+                                    @if (isAdmin || isApproved)
+                                    {
+                                        <a href="@Url.Action("TaxInvoicePDF", "Taxinvoice", new { id = encId })" class="invoice-action-btn invoice-pdf-btn" title="Download PDF">
+                                            <i class="fa fa-file-pdf"></i>
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="invoice-action-btn invoice-lock-btn" title="PDF available after approval">
+                                            <i class="fa fa-lock"></i>
+                                        </span>
+                                    }
+
+                                    @* Approve / Reject: admin only *@
+                                    @if (isAdmin)
+                                    {
+                                        <button type="button" class="invoice-action-btn invoice-status-btn" title="Approve / Reject"
+                                                data-id="@encId"
+                                                data-invoice-no="@item.invoiceno"
+                                                data-company="@item.companyName"
+                                                data-remark="@item.Remarks"
+                                                data-amount="@((item.totalamtaftertax ?? 0m).ToString("C2", inCulture))"
+                                                data-status="@(isApproved ? "approved" : isRejected ? "rejected" : "pending")"
+                                                onclick="openStatusModal(this)">
+                                            <i class="fa fa-check-double"></i>
+                                        </button>
+                                    }
+
+                                    @* Upload documents *@
+                                    <button type="button" class="invoice-action-btn invoice-upload-btn" title="Upload / View Documents"
+                                            data-id="@encId" data-invoice-no="@item.invoiceno"
+                                            onclick="openUploadModal(this)">
+                                        <i class="fa fa-paperclip"></i>
+                                    </button>
+
+                                    <a href="@Url.Action("Edit", "Taxinvoice", new { id = encId })" class="invoice-action-btn invoice-edit-btn" title="Edit Invoice">
                                         <i class="fa fa-edit"></i>
                                     </a>
-                                    <a href="@Url.Action("Deleteinvoice", "Taxinvoice", new { id = EncryptionHelper.Encrypt(item.Id) })" class="invoice-action-btn invoice-delete-btn" title="Delete Invoice" onclick="return deleteInvoice(event, this);">
+                                    <a href="@Url.Action("Deleteinvoice", "Taxinvoice", new { id = encId })" class="invoice-action-btn invoice-delete-btn" title="Delete Invoice" onclick="return deleteInvoice(event, this);">
                                         <i class="fa fa-trash"></i>
                                     </a>
                                 </td>
@@ -1352,6 +1546,80 @@
             </div>
             <div class="col-md-7">
                 <nav><ul class="pagination justify-content-md-end justify-content-center" id="pagination"></ul></nav>
+            </div>
+        </div>
+    </div>
+
+    <div id="afToken">@Html.AntiForgeryToken()</div>
+
+    <!-- Approve / Reject modal -->
+    <div class="modal fade inv-modal" id="statusModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa fa-check-double text-success me-2"></i>Approve / Reject Invoice</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="inv-info">
+                        <div class="row g-2">
+                            <div class="col-6"><div class="lbl">Invoice No.</div><div class="val" id="stInvoiceNo">-</div></div>
+                            <div class="col-6"><div class="lbl">Grand Total</div><div class="val" id="stAmount">-</div></div>
+                            <div class="col-12"><div class="lbl">Company</div><div class="val" id="stCompany">-</div></div>
+                            <div class="col-12"><div class="lbl">Current Status</div><div class="val" id="stCurrent">-</div></div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 mb-3">
+                        <div class="status-option opt-approve" data-status="approve" onclick="pickStatus('approve')">
+                            <i class="fa fa-circle-check"></i>Approve
+                        </div>
+                        <div class="status-option opt-reject" data-status="reject" onclick="pickStatus('reject')">
+                            <i class="fa fa-circle-xmark"></i>Reject
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="filter-label"><i class="fa fa-comment-dots"></i> Invoice Remark</div>
+                        <div class="remark-view" id="stExistingRemark">-</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnSubmitStatus" onclick="submitStatus()">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload modal -->
+    <div class="modal fade inv-modal" id="uploadModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fa fa-paperclip me-2" style="color:#7f56d9"></i>Documents <small class="text-muted" id="upInvoiceNo"></small></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="drop-zone" id="dropZone" onclick="document.getElementById('docFiles').click()">
+                        <i class="fa fa-cloud-arrow-up"></i>
+                        <div><strong>Click to choose</strong> or drag files here</div>
+                        <small>JPG, PNG, PDF · max 5 MB each</small>
+                        <input type="file" id="docFiles" class="d-none" multiple accept=".jpg,.jpeg,.png,.pdf" />
+                    </div>
+                    <div id="selectedFiles" class="mt-2 small text-muted"></div>
+
+                    <div class="mt-3">
+                        <div class="filter-label">Uploaded documents</div>
+                        <div id="docList"><div class="text-muted small">Loading...</div></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light btn-sm" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnUpload" onclick="submitUpload()">
+                        <i class="fa fa-upload"></i> Upload
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1726,5 +1994,125 @@
             function () { showToast("Delete cancelled.", "warning"); }
         );
         return false;
+    }
+
+
+    let statusInvoiceId = null, selectedStatus = null, uploadInvoiceId = null;
+
+    function getToken() { return $('#afToken input[name="__RequestVerificationToken"]').val(); }
+    function showModal(id) { bootstrap.Modal.getOrCreateInstance(document.getElementById(id)).show(); }
+    function hideModal(id) { bootstrap.Modal.getOrCreateInstance(document.getElementById(id)).hide(); }
+
+    // ── Approve / Reject ──
+    function openStatusModal(btn) {
+        statusInvoiceId = btn.dataset.id;
+        selectedStatus = null;
+        $("#stInvoiceNo").text(btn.dataset.invoiceNo || "-");
+        $("#stCompany").text(btn.dataset.company || "-");
+        $("#stAmount").text(btn.dataset.amount || "-");
+        $("#stCurrent").text(btn.dataset.status.charAt(0).toUpperCase() + btn.dataset.status.slice(1));
+       const remark = (btn.dataset.remark || "").trim();
+        $("#stExistingRemark").text(remark || "No remark added").toggleClass("empty", !remark);
+        $("#stRemarksReq").addClass("d-none");
+        $(".status-option").removeClass("selected");
+        showModal("statusModal");
+    }
+
+    function pickStatus(s) {
+        selectedStatus = s;
+        $(".status-option").removeClass("selected");
+        $('.status-option[data-status="' + s + '"]').addClass("selected");
+        $("#stRemarksReq").toggleClass("d-none", s !== "reject");
+    }
+
+    function submitStatus() {
+        const remarks = $("#stRemarks").val().trim();
+        if (!selectedStatus) { showToast("Please choose Approve or Reject.", "warning"); return; }
+        if (selectedStatus === "reject" && !remarks) { showToast("Remarks are required to reject.", "warning"); return; }
+
+        $("#btnSubmitStatus").prop("disabled", true);
+        $.ajax({
+            url: '@Url.Action("UpdateStatus", "Taxinvoice")',
+            type: "POST",
+            headers: { "RequestVerificationToken": getToken() },
+            data: { id: statusInvoiceId, status: selectedStatus, remarks: remarks },
+            success: function (res) {
+                if (res.success) {
+                    hideModal("statusModal");
+                    showToast(res.message, "success");
+                    setTimeout(function () { location.reload(); }, 700);
+                } else {
+                    showToast(res.message, "error");
+                }
+            },
+            error: function () { showToast("Something went wrong.", "error"); },
+            complete: function () { $("#btnSubmitStatus").prop("disabled", false); }
+        });
+    }
+
+    // ── Upload documents ──
+    function openUploadModal(btn) {
+        uploadInvoiceId = btn.dataset.id;
+        $("#upInvoiceNo").text("· " + (btn.dataset.invoiceNo || ""));
+        $("#docFiles").val("");
+        $("#selectedFiles").text("");
+        loadDocs();
+        showModal("uploadModal");
+    }
+
+    function loadDocs() {
+        $("#docList").html('<div class="text-muted small">Loading...</div>');
+        $.get('@Url.Action("GetDocuments", "Taxinvoice")', { id: uploadInvoiceId }, function (res) {
+            if (!res.success || !res.data || res.data.length === 0) {
+                $("#docList").html('<div class="text-muted small">No documents uploaded yet.</div>');
+                return;
+            }
+            $("#docList").html(res.data.map(function (d) {
+                return '<div class="doc-item"><a href="' + d.url + '" target="_blank"><i class="fa fa-file me-1"></i>' +
+                       $("<div>").text(d.fileName).html() + '</a><span class="text-muted">' + d.uploadedOn + '</span></div>';
+            }).join(""));
+        });
+    }
+
+    document.getElementById("docFiles").addEventListener("change", function () {
+        const names = Array.from(this.files).map(f => f.name).join(", ");
+        $("#selectedFiles").text(this.files.length ? this.files.length + " file(s): " + names : "");
+    });
+
+    const dz = document.getElementById("dropZone");
+    ["dragenter", "dragover"].forEach(e => dz.addEventListener(e, function (ev) { ev.preventDefault(); dz.classList.add("dragover"); }));
+    ["dragleave", "drop"].forEach(e => dz.addEventListener(e, function (ev) { ev.preventDefault(); dz.classList.remove("dragover"); }));
+    dz.addEventListener("drop", function (ev) {
+        document.getElementById("docFiles").files = ev.dataTransfer.files;
+        document.getElementById("docFiles").dispatchEvent(new Event("change"));
+    });
+
+    function submitUpload() {
+        const files = document.getElementById("docFiles").files;
+        if (!files.length) { showToast("Please choose at least one file.", "warning"); return; }
+
+        const fd = new FormData();
+        fd.append("id", uploadInvoiceId);
+        for (const f of files) {
+            if (f.size > 5 * 1024 * 1024) { showToast(f.name + " is larger than 5 MB.", "warning"); return; }
+            fd.append("files", f);
+        }
+
+        $("#btnUpload").prop("disabled", true);
+        $.ajax({
+            url: '@Url.Action("UploadDocument", "Taxinvoice")',
+            type: "POST",
+            headers: { "RequestVerificationToken": getToken() },
+            data: fd, processData: false, contentType: false,
+            success: function (res) {
+                if (res.success) {
+                    showToast(res.message, "success");
+                    $("#docFiles").val(""); $("#selectedFiles").text("");
+                    loadDocs();
+                } else { showToast(res.message, "error"); }
+            },
+            error: function () { showToast("Upload failed.", "error"); },
+            complete: function () { $("#btnUpload").prop("disabled", false); }
+        });
     }
 </script>

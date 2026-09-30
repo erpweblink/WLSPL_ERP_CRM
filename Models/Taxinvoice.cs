@@ -183,5 +183,14 @@
             public List<TaxInvoiceCreate> companies { get; set; }
                 = new List<TaxInvoiceCreate>();
         }
+
+        public enum PdfStatus { Ok, NotFound, Forbidden }
+
+        public class TaxInvoicePdfResult
+        {
+            public PdfStatus Status { get; set; }
+            public byte[]? Bytes { get; set; }
+            public string FileName { get; set; } = "TaxInvoice.pdf";
+        }
     }
 }
