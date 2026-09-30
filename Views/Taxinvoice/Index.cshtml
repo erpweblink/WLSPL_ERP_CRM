@@ -107,9 +107,10 @@
     }
 
         .filter-label i {
-        color: #6b7cff;
-        font-size: 13px;
-    }
+            color: #6b7cff;
+            font-size: 13px;
+        }
+
     .search-wrapper {
         display: flex;
         width: 100%;
@@ -1492,7 +1493,7 @@
                                     }
 
                                     @* Approve / Reject: admin only *@
-                                    @if (isAdmin)
+                                    @if (isAdmin && !isApproved)
                                     {
                                         <button type="button" class="invoice-action-btn invoice-status-btn" title="Approve / Reject"
                                                 data-id="@encId"
@@ -2026,16 +2027,13 @@
     }
 
     function submitStatus() {
-        const remarks = $("#stRemarks").val().trim();
         if (!selectedStatus) { showToast("Please choose Approve or Reject.", "warning"); return; }
-        if (selectedStatus === "reject" && !remarks) { showToast("Remarks are required to reject.", "warning"); return; }
 
         $("#btnSubmitStatus").prop("disabled", true);
         $.ajax({
             url: '@Url.Action("UpdateStatus", "Taxinvoice")',
             type: "POST",
-            headers: { "RequestVerificationToken": getToken() },
-            data: { id: statusInvoiceId, status: selectedStatus, remarks: remarks },
+            data: { id: statusInvoiceId, status: selectedStatus},
             success: function (res) {
                 if (res.success) {
                     hideModal("statusModal");
@@ -2045,8 +2043,7 @@
                     showToast(res.message, "error");
                 }
             },
-            error: function () { showToast("Something went wrong.", "error"); },
-            complete: function () { $("#btnSubmitStatus").prop("disabled", false); }
+            error: function () { showToast("Something went wrong.", "error"); }
         });
     }
 
@@ -2062,15 +2059,29 @@
 
     function loadDocs() {
         $("#docList").html('<div class="text-muted small">Loading...</div>');
+        $("#replaceNote").addClass("d-none");
+
         $.get('@Url.Action("GetDocuments", "Taxinvoice")', { id: uploadInvoiceId }, function (res) {
-            if (!res.success || !res.data || res.data.length === 0) {
-                $("#docList").html('<div class="text-muted small">No documents uploaded yet.</div>');
+            const d = res.success ? res.data : null;
+
+            if (!d) {
+                $("#docList").html('<div class="text-muted small">No document uploaded yet.</div>');
+                $("#btnUpload").html('<i class="fa fa-upload"></i> Upload');
                 return;
             }
-            $("#docList").html(res.data.map(function (d) {
-                return '<div class="doc-item"><a href="' + d.url + '" target="_blank"><i class="fa fa-file me-1"></i>' +
-                       $("<div>").text(d.fileName).html() + '</a><span class="text-muted">' + d.uploadedOn + '</span></div>';
-            }).join(""));
+
+            $("#docList").html(
+                '<div class="doc-item">' +
+                    '<a href="' + d.url + '" target="_blank"><i class="fa fa-file me-1"></i>' +
+                        $("<div>").text(d.fileName).html() +
+                    '</a>' +
+                    '<span class="text-muted">' + d.uploadedOn + '</span>' +
+                '</div>');
+
+            $("#replaceNote").removeClass("d-none");
+            $("#btnUpload").html('<i class="fa fa-rotate"></i> Replace');
+        }).fail(function () {
+            $("#docList").html('<div class="text-danger small">Could not load the document.</div>');
         });
     }
 

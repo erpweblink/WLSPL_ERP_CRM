@@ -2,7 +2,6 @@
 {
     public class Taxinvoice
     {
-
         public class TaxInvoiceCreate
         {
             public string? Id { get; set; }
@@ -128,6 +127,8 @@
             public decimal? TotalTaxAmount { get; set; }
 
             public decimal? GrandTotal { get; set; }
+
+            public string? UploadedFilePath { get; set; }
 
         }
 

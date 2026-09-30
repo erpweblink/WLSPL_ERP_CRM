@@ -251,10 +251,8 @@ namespace WEBLINK_CRM.Controllers
             string encId = EncryptionHelper.Encrypt(id.ToString());
 
             var url = Url.Action(
-     "TaxInvoicePDF",
-     "TaxInvoice",
-     null
- ) + "?ID=" + Uri.EscapeDataString(encId);
+                 "TaxInvoicePDF",
+                 "TaxInvoice") + "?id=" + Uri.EscapeDataString(encId);
 
 
             return Json(new

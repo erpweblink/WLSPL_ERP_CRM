@@ -338,7 +338,6 @@ namespace WLSPL_ERP_CRM.repository
             return result.ToList();
         }
 
-
         public async Task<dynamic> Getinvoicebyid(int ID)
         {
             using var con = new SqlConnection(
@@ -383,7 +382,6 @@ namespace WLSPL_ERP_CRM.repository
             };
         }
 
-
         public async Task<Taxinvoice.TaxInvoiceCreate?> Getinvoiceno()
         {
             try
@@ -401,7 +399,6 @@ namespace WLSPL_ERP_CRM.repository
                 throw;
             }
         }
-
 
         public async Task<bool> UpdateSave(TaxInvoiceCreateVM model, string Action)
         {
@@ -633,7 +630,7 @@ namespace WLSPL_ERP_CRM.repository
             Check("Company Name", oldMain.companyName, newMain.companyName);
             Check("GST No", oldMain.gstIn, newMain.gstIn);
             Check("Address", oldMain.Address, newMain.Address);
-            Check("Billing Location", oldMain.BillingLocation, newMain.BillingLocation);
+            Check("Billing Location", oldMain.BillingLocation, newMain.Location);
             Check("Pincode", oldMain.PinCode, newMain.PinCode);
             Check("State", oldMain.state, newMain.state);
             Check("State Code", oldMain.statecode, newMain.statecode);
@@ -679,6 +676,7 @@ namespace WLSPL_ERP_CRM.repository
                 Check($"{prefix} Description", od.productdescription, nd.productdescription);
                 Check($"{prefix} SAC Code", od.saccode, nd.saccode);
                 Check($"{prefix} Rate", od.rate, nd.rate);
+                Check($"{prefix} Service For", od.serviceTill, nd.serviceTill);
                 Check($"{prefix} CGST %", od.cgstrate, nd.cgstrate);
                 Check($"{prefix} SGST %", od.sgstrate, nd.sgstrate);
                 Check($"{prefix} IGST %", od.igstrate, nd.igstrate);
@@ -723,19 +721,8 @@ namespace WLSPL_ERP_CRM.repository
                 }
             );
         }
-
-        public async Task<List<TaxInvoiceCreate>> GetApprovelList()
-        {
-            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
-
-            const string companySql = @" SELECT [WLSPL].[FN_GenerateTaxInvoiceNo]() AS InvoiceNo";
-
-            var result = await connection.QueryAsync<TaxInvoiceCreate>(companySql);
-
-            return result.ToList();
-
-        }
-
+        
+        
         public async Task<bool> Approve(int id, string user)
         {
             using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
@@ -759,28 +746,6 @@ namespace WLSPL_ERP_CRM.repository
             }
         }
 
-        public async Task<bool> Reject(int id, string user)
-        {
-            using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
-            {
-                string query = @"UPDATE InvoiceMain
-                         SET IsReject = 1,
-                             ApprovedRejectedBy = @Createdby
-                         WHERE ID = @ID";
-
-                using (SqlCommand cmd = new SqlCommand(query, con))
-                {
-                    cmd.Parameters.AddWithValue("@ID", id);
-                    cmd.Parameters.AddWithValue("@Createdby", user);
-
-                    await con.OpenAsync();
-
-                    int result = await cmd.ExecuteNonQueryAsync();
-
-                    return result > 0;
-                }
-            }
-        }
 
         public async Task<List<InvoiceDetails>> SearchServices(string q)
         {
@@ -902,9 +867,35 @@ namespace WLSPL_ERP_CRM.repository
         }
 
 
+        public async Task<string?> SaveDocument(int invoiceId, string filePath, string empCode)
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+
+            const string sql = @"
+                DECLARE @old nvarchar(max) =
+                    (SELECT UploadedFilePath FROM [dbo].[InvoiceMain] WHERE id = @InvoiceId);
+
+                UPDATE [dbo].[InvoiceMain]
+                SET UploadedFilePath = @FilePath
+                WHERE id = @InvoiceId;
+
+                SELECT @old;";
+
+            return await connection.ExecuteScalarAsync<string?>(sql, new { InvoiceId = invoiceId, FilePath = filePath });
+        }
+
+        public async Task<string?> GetDocument(int invoiceId)
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+
+            const string sql = @"SELECT UploadedFilePath FROM [dbo].[InvoiceMain] WHERE id = @InvoiceId";
+
+            return await connection.QueryFirstOrDefaultAsync<string?>(sql, new { InvoiceId = invoiceId });
+        }
+
+
 
         // PDF Methods
-
 
         public TaxInvoicePdfResult GenerateInvoicePdf(int invoiceId)
         {
