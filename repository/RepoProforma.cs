@@ -1517,7 +1517,7 @@ GETDATE(),
                CAST(CGSTRate as float) as CGSTRate, CGSTAmt, CAST(SGSTRate as float) as SGSTRate,
                SGSTAmt,CAST(IGSTRate as float) as  IGSTRate, IGSTAmt, Total
         FROM [tbl_ProformaInvoiceDetails]      
-        WHERE invoiceid = 15
+        WHERE invoiceid = @ID
         ORDER BY ID;";
 
                 using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
