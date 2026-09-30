@@ -80,18 +80,28 @@
         }
 
         #frmTaxInvoice .card-header {
-            background: var(--pf-card) !important;
-            border-bottom: 1px solid var(--pf-line);
-            border-left: 4px solid var(--pf-accent);
-            padding: 12px 20px;
+            background: linear-gradient(120deg, #10233f 0%, #1a3e66 55%, #167a86 100%) !important;
+            border-bottom: 3px solid var(--pf-accent);
+            padding: 13px 22px;
         }
 
             #frmTaxInvoice .card-header h5 {
-                color: var(--pf-ink) !important;
+                color: #fff !important;
                 font-size: 16px;
                 font-weight: 650;
-                letter-spacing: .1px;
+                letter-spacing: .2px;
             }
+
+            #frmTaxInvoice .card-header .btn-primary {
+                background: rgba(255,255,255,.14);
+                border: 1px solid rgba(255,255,255,.4);
+                color: #fff;
+            }
+
+                #frmTaxInvoice .card-header .btn-primary:hover {
+                    background: rgba(255,255,255,.26);
+                    border-color: #fff;
+                }
 
         #frmTaxInvoice .card-body {
             padding: 22px 24px;
@@ -408,6 +418,69 @@
         background: var(--pf-brand-soft) !important;
     }
 
+    /* ───────── Bank / payment rows ───────── */
+    #tblBankDetail tbody td {
+        vertical-align: middle;
+        font-size: 13px;
+        padding: 8px 10px;
+        border-color: #edf0f4;
+        font-variant-numeric: tabular-nums;
+    }
+
+    #tblBankDetail tbody tr:hover td {
+        background: var(--pf-brand-soft);
+    }
+
+    #tblBankDetail td:first-child {
+        text-align: center;
+        width: 90px;
+    }
+
+    .bank-select {
+        width: 17px;
+        height: 17px;
+        accent-color: var(--pf-accent);
+        cursor: pointer;
+        vertical-align: middle;
+    }
+
+    .btn-pdf-view {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .3px;
+        color: #b4232f;
+        background: #fdecee;
+        border: 1px solid #f3b9bf;
+        border-radius: 999px;
+        cursor: pointer;
+        line-height: 1.2;
+        transition: background-color .15s, color .15s, box-shadow .15s, transform .05s;
+    }
+
+        .btn-pdf-view i {
+            font-size: 14px;
+        }
+
+        .btn-pdf-view:hover {
+            background: #d33a4a;
+            border-color: #d33a4a;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(211,58,74,.28);
+        }
+
+        .btn-pdf-view:active {
+            transform: translateY(1px);
+        }
+
+        .btn-pdf-view:focus-visible {
+            outline: 3px solid rgba(211,58,74,.35);
+            outline-offset: 2px;
+        }
+
     /* ───────── Buttons ───────── */
     .btn {
         border-radius: var(--pf-radius-sm);
@@ -525,6 +598,7 @@
                         </div>
                     </div>
                 </div>
+
 
                 <div class="col-md-6">
                     <div class="form-group row">

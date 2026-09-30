@@ -283,6 +283,13 @@
                                                 onclick="ViewPDF('@item.Id')">
                                             <i class="fa fa-file-pdf"></i>
                                         </button>
+                                        <a asp-controller="Taxinvoice"
+                                           asp-action="Create"
+                                           asp-route-ID="@EncryptionHelper.Encrypt(item.Id)"
+                                           class="btn btn-sm btn-primary"
+                                           title="Edit">
+                                            <i class="fa fa-plus"></i>
+                                        </a>
                                     </div>
 
                                 </td>
