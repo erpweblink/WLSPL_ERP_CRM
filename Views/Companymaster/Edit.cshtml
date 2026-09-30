@@ -564,6 +564,10 @@
                     <select asp-for="EInvTypeOfSupply"
                             class="form-select">
 
+                        <option value="">
+                            Select Type of Supply
+                        </option>
+
                         <option value="B2B">
                             B2B
                         </option>
@@ -836,7 +840,7 @@
 </div>
 
 
-<script>
+<script type="text/javascript">
 
     // ============================================
     // VALIDATION
@@ -1327,13 +1331,6 @@
 
     $(document).ready(function () {
 
-
-
-
-        // ========================================
-        // Country / State
-        // ========================================
-
         let existingCountry =
             $("#CountryName").val();
 
@@ -1373,19 +1370,6 @@
             }
 
         }
-
-
-        // ========================================
-        // Default Supply Type
-        // ========================================
-
-        if (!$("#EInvTypeOfSupply").val()) {
-
-            $("#EInvTypeOfSupply")
-                .val("B2B");
-
-        }
-
 
     });
 

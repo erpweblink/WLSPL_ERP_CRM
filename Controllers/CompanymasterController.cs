@@ -48,7 +48,7 @@ namespace WEBLINK_CRM.Controllers
 
                 var companymaster = new Companymaster
                 {
-                    SessionName = filter.TryGetProperty("SessionName", out var sm)? sm.GetString() : null,
+                    SessionName = filter.TryGetProperty("SessionName", out var sm) ? sm.GetString() : null,
                     typess = filter.TryGetProperty("typess", out var ts) ? ts.GetString() : null,
                     CName = filter.TryGetProperty("CName", out var cn) ? cn.GetString() : null,
                     empcode = empCode
@@ -56,7 +56,8 @@ namespace WEBLINK_CRM.Controllers
 
                 var companyList = await _companymaster.GetFilteredcompanyList(companymaster);
 
-                var data = companyList.Select(c => new {
+                var data = companyList.Select(c => new
+                {
                     id = EncryptionHelper.Encrypt(c.Id),
                     cCode = c.CCode,
                     cName = c.CName,
@@ -167,7 +168,7 @@ namespace WEBLINK_CRM.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Create(string? leadCode,string? mobile,string? email,string? ownerName, string? assignedName)
+        public async Task<IActionResult> Create(string? leadCode, string? mobile, string? email, string? ownerName, string? assignedName)
         {
             var model = new Companymaster();
 
@@ -183,7 +184,7 @@ namespace WEBLINK_CRM.Controllers
             model.OName = ownerName;
 
             // Find requested person in BDE list
-            var bde = result.FirstOrDefault(x =>x.empcode == assignedName);
+            var bde = result.FirstOrDefault(x => x.empcode == assignedName);
 
             // Automatically select matching BDE
             model.BDE = bde?.empcode;
@@ -343,21 +344,22 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-
                 string userName = HttpContext.Session.GetString("EmpCode");
 
                 model.CreatedBy = userName;
                 model.Id = EncryptionHelper.Decrypt(model.Id);
 
+                var oldCompany = await _companymaster.GetcompanybyId(model.Id);
 
                 var result = await _companymaster.SubmitDetails(model, "Update");
 
 
                 if (result == -1)
                 {
+
                     TempData["ToastMessage"] = "Company already exists.";
                     TempData["ToastType"] = "warning";
-           
+
                     return RedirectToAction("Index", "Companymaster");
 
                 }
@@ -365,8 +367,22 @@ namespace WEBLINK_CRM.Controllers
 
                 if (result > 0)
                 {
+                    if (oldCompany != null)
+                    {
+                        var changes = _companymaster.BuildCompanyChangeComment(oldCompany, model);
+
+                        if (!string.IsNullOrEmpty(changes))
+                        {
+                            await _companymaster.SaveCompanyChangeHistory(
+                                sessionName: userName ?? "System",
+                                compnayCode: oldCompany.CCode ?? model.CCode,
+                                message: changes);
+                        }
+
+                    }
+
                     TempData["ToastMessage"] = "Company Updated successfully.";
-                    TempData["ToastType"] = "success";          
+                    TempData["ToastType"] = "success";
 
                     return RedirectToAction("Index", "Companymaster");
 
