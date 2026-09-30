@@ -14,11 +14,7 @@ namespace WLSPL_ERP_CRM.repository
 
         Task<dynamic> GetSalesPersonList(string empCode, string empRole);
 
-        Task<Taxinvoice.TaxInvoiceCreateVM?> GetInvoiceForPdfAsync(int id);
-
-        Task<Taxinvoice.TaxInvoiceCreateVM?> Getinvoiceno();
-
-        Task<Taxinvoice.TaxInvoiceCreate?> Getinvoicenoss();
+        Task<Taxinvoice.TaxInvoiceCreate?> Getinvoiceno();
 
         Task<Taxinvoice.TaxInvoiceCreateVM?> GetProformaDetails(string ProformaId);
 
@@ -42,5 +38,8 @@ namespace WLSPL_ERP_CRM.repository
         Task<bool> Approve(int id, string user);
 
         Task<bool> Reject(int id, string user);
+
+
+        TaxInvoicePdfResult GenerateInvoicePdf(int invoiceId);
     }
 }

@@ -1,7 +1,6 @@
-﻿using iTextSharp.text;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Channels;
+using System.Data;
 using WEBLINK_CRM.Helpers;
 using WLSPL_ERP_CRM.Models;
 using WLSPL_ERP_CRM.repository;
@@ -12,7 +11,8 @@ using static WLSPL_ERP_CRM.Models.Taxinvoice;
    2.Alter table invoicedetails add column ServiceName Nvarchar(500) null and ServiceId nvarchar(500) null and ValidateTill nvarchar(500) null 
    3.ADD parameters in [dbo].[SP_AddInvoice] for InvoiceMain  @AgainstBy nvarchar(MAX) = null,
         @AgainstByValue nvarchar(MAX) = null, @TotalPayable nvarchar(MAX) = null, @TdsPer nvarchar(MAX) = null,
-        @TdsAmt nvarchar(MAX) = null,@companyCode nvarchar(MAX) = null, @Remarks nvarchar(MAX) = null
+        @TdsAmt nvarchar(MAX) = null,@companyCode nvarchar(MAX) = null, @Remarks nvarchar(MAX) = null,
+        @newinvoiceno nvarchar(900) = null output
    4.Alter table InvoiceMain add TotalPayable nvarchar(max) null, TdsPer nvarchar(max) null, TdsAmt nvarchar(max) null
    5.Alter table InvoiceMain add compCode nvarchar(max) null
  */
@@ -79,20 +79,6 @@ namespace WLSPL_ERP_CRM.Controllers
             }
         }
 
-        public async Task<IActionResult> GetPdf(string id)
-        {
-            if (Convert.ToInt32(EncryptionHelper.Decrypt(id)) <= 0)
-                return BadRequest("Invalid invoice ID.");
-
-            var invoice = await _TaxinvoiceRepo.GetInvoiceForPdfAsync(Convert.ToInt32(EncryptionHelper.Decrypt(id)));
-
-            if (invoice == null)
-                return NotFound("Invoice not found.");
-
-            return View(invoice);
-
-
-        }
 
         [HttpGet]
         public async Task<IActionResult> Create(string? ProformaId)
@@ -108,7 +94,7 @@ namespace WLSPL_ERP_CRM.Controllers
             }
             else
             {
-                var invoiceMain = await _TaxinvoiceRepo.Getinvoicenoss()
+                var invoiceMain = await _TaxinvoiceRepo.Getinvoiceno()
                                   ?? new TaxInvoiceCreate();
 
                 model = new TaxInvoiceCreateVM
@@ -341,6 +327,44 @@ namespace WLSPL_ERP_CRM.Controllers
                     success = false,
                     message = ex.Message
                 });
+            }
+        }
+
+        [HttpGet]
+        public IActionResult TaxInvoicePDF(string id)
+        {
+            int invoiceId;
+            try
+            {
+                if (!int.TryParse(EncryptionHelper.Decrypt(id), out invoiceId) || invoiceId <= 0)
+                    return BadRequest("Invalid invoice ID.");
+            }
+            catch
+            {
+                return BadRequest("Invalid invoice ID.");
+            }
+
+            bool isAdmin = HttpContext.Session.GetString("Role") == "Admin";
+
+            try
+            {
+                var result = _TaxinvoiceRepo.GenerateInvoicePdf(invoiceId);
+
+                switch (result.Status)
+                {
+                    case PdfStatus.NotFound:
+                        return NotFound("Invoice not found.");
+                    case PdfStatus.Forbidden:
+                        return Forbid();   // or: return Content("PDF is available only after approval.");
+                }
+
+                Response.Headers["Content-Disposition"] = $"inline; filename=\"{result.FileName}\"";
+                return File(result.Bytes!, "application/pdf");
+            }
+            catch (Exception)
+            {
+                // log ex here (ILogger) instead of sending internals to the browser
+                return StatusCode(500, "PDF generation failed.");
             }
         }
     }
