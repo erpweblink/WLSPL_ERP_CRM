@@ -314,13 +314,13 @@ namespace WLSPL_ERP_CRM.repository
 
                         WHERE invoicedate >= @StartDate
                           AND invoicedate < @EndDate
-                            AND (@SalesManager IS NULL OR empcode = @SalesManager)
-                              AND (
-                                      @CurrentRole = 'Admin'
-                                      OR empcode = @CurrentUser
-                                      OR empcode IN (SELECT empcode FROM [dbo].[employees]
-                                                     WHERE TL_Manager = @CurrentUser AND status = '1' AND isdeleted = '0')
-                                  )
+                          AND (@SalesManager IS NULL OR empcode = @SalesManager)
+                          AND (
+                                @CurrentRole = 'Admin'
+                                 OR empcode = @CurrentUser
+                                 OR empcode IN (SELECT empcode FROM [dbo].[employees]
+                                 WHERE TL_Manager = @CurrentUser AND status = '1' AND isdeleted = '0')
+                            )
 
                         ORDER BY invoicedate ASC;
                     ";
@@ -721,8 +721,7 @@ namespace WLSPL_ERP_CRM.repository
                 }
             );
         }
-        
-        
+
         public async Task<bool> Approve(int id, string user)
         {
             using (SqlConnection con = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
@@ -867,32 +866,31 @@ namespace WLSPL_ERP_CRM.repository
         }
 
 
-        public async Task<string?> SaveDocument(int invoiceId, string filePath, string empCode)
-        {
-            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+      public async Task<string?> SaveDocument(int invoiceId, string filePath, string empCode)
+       {
+           using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
 
-            const string sql = @"
-                DECLARE @old nvarchar(max) =
-                    (SELECT UploadedFilePath FROM [dbo].[InvoiceMain] WHERE id = @InvoiceId);
+           const string sql = @"
+               DECLARE @old nvarchar(max) =
+                   (SELECT UploadedFilePath FROM [dbo].[InvoiceMain] WHERE id = @InvoiceId);
 
-                UPDATE [dbo].[InvoiceMain]
-                SET UploadedFilePath = @FilePath
-                WHERE id = @InvoiceId;
+               UPDATE [dbo].[InvoiceMain]
+               SET UploadedFilePath = @FilePath
+               WHERE id = @InvoiceId;
 
-                SELECT @old;";
+               SELECT @old;";
 
-            return await connection.ExecuteScalarAsync<string?>(sql, new { InvoiceId = invoiceId, FilePath = filePath });
-        }
+           return await connection.ExecuteScalarAsync<string?>(sql, new { InvoiceId = invoiceId, FilePath = filePath });
+       }
 
         public async Task<string?> GetDocument(int invoiceId)
-        {
-            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+           {
+               using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
 
-            const string sql = @"SELECT UploadedFilePath FROM [dbo].[InvoiceMain] WHERE id = @InvoiceId";
+               const string sql = @"SELECT UploadedFilePath FROM [dbo].[InvoiceMain] WHERE id = @InvoiceId";
 
-            return await connection.QueryFirstOrDefaultAsync<string?>(sql, new { InvoiceId = invoiceId });
-        }
-
+               return await connection.QueryFirstOrDefaultAsync<string?>(sql, new { InvoiceId = invoiceId });
+           }
 
 
         // PDF Methods

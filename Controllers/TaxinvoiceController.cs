@@ -249,6 +249,92 @@ namespace WLSPL_ERP_CRM.Controllers
         public async Task<IActionResult> UpdateStatus(string id, string status)
         {
             if (HttpContext.Session.GetString("Role") != "Admin")
+                return Json(new
+                {
+                    success = false,
+                    message = "Only admin can approve or reject invoices."
+                });
+
+            if (status != "approve" && status != "reject")
+                return Json(new
+                {
+                    success = false,
+                    message = "Invalid status."
+                });
+
+            int invoiceId = Convert.ToInt32(
+                EncryptionHelper.Decrypt(id)
+            );
+
+            string empCode = HttpContext.Session.GetString("EmpCode") ?? "NA";
+
+            bool ok = await _TaxinvoiceRepo.Approve(invoiceId, empCode);
+
+            return Json(new
+            {
+                success = ok,
+                message = ok
+                    ? (status == "approve"
+                        ? "Invoice approved."
+                        : "Invoice rejected.")
+                    : "Could not update the invoice."
+            });
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadDocument(string id, IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return Json(new { success = false, message = "No file selected." });
+
+            int invoiceId;
+            try { invoiceId = Convert.ToInt32(EncryptionHelper.Decrypt(id)); }
+            catch { return Json(new { success = false, message = "Invalid invoice." }); }
+
+            string empCode = HttpContext.Session.GetString("EmpCode") ?? "NA";
+
+            string ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!new[] { ".jpg", ".jpeg", ".png", ".pdf" }.Contains(ext))
+                return Json(new { success = false, message = "Only JPG, PNG or PDF files are allowed." });
+            if (file.Length > 5 * 1024 * 1024)
+                return Json(new { success = false, message = "File is larger than 5 MB." });
+
+            string folder = Path.Combine(_env.WebRootPath, "TaxInvoicedocumnet");
+            Directory.CreateDirectory(folder);
+
+            string savedName = $"{Guid.NewGuid()}{ext}";
+            string fullPath = Path.Combine(folder, savedName);
+
+            using (var stream = new FileStream(fullPath, FileMode.Create))
+                await file.CopyToAsync(stream);
+
+            string? oldPath;
+            try
+            {
+                oldPath = await _TaxinvoiceRepo.SaveDocument(invoiceId, $"/TaxInvoicedocumnet/{savedName}", empCode);
+            }
+            catch
+            {
+                if (System.IO.File.Exists(fullPath)) System.IO.File.Delete(fullPath);
+                throw;
+            }
+
+            // remove the replaced file (only inside the document folder)
+            if (!string.IsNullOrWhiteSpace(oldPath))
+            {
+                string oldFull = Path.Combine(_env.WebRootPath,
+                    oldPath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+
+                if (oldFull.StartsWith(folder, StringComparison.OrdinalIgnoreCase) && System.IO.File.Exists(oldFull))
+                    System.IO.File.Delete(oldFull);
+            }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateStatus(string id, string status)
+        {
+            if (HttpContext.Session.GetString("Role") != "Admin")
                 return Json(new { success = false, message = "Only admin can approve or reject invoices." });
 
             if (status != "approve" && status != "reject")
@@ -314,6 +400,31 @@ namespace WLSPL_ERP_CRM.Controllers
                 if (oldFull.StartsWith(folder, StringComparison.OrdinalIgnoreCase) && System.IO.File.Exists(oldFull))
                     System.IO.File.Delete(oldFull);
             }
+
+            return Json(new
+            {
+                success = true,
+                message = string.IsNullOrWhiteSpace(oldPath) ? "Document uploaded." : "Document replaced."
+            });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetDocuments(string id)
+        {
+            int invoiceId;
+            try { invoiceId = Convert.ToInt32(EncryptionHelper.Decrypt(id)); }
+            catch { return Json(new { success = false, data = (object?)null }); }
+
+            string? path = await _TaxinvoiceRepo.GetDocument(invoiceId);
+
+            if (string.IsNullOrWhiteSpace(path))
+                return Json(new { success = true, data = (object?)null });
+
+            string fullPath = Path.Combine(_env.WebRootPath,
+                path.TrimStart('/').Replace('/', Path.DirectorySeparatorChar));
+
+            if (!System.IO.File.Exists(fullPath))
+                return Json(new { success = true, data = (object?)null });
 
             return Json(new
             {

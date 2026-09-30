@@ -8,7 +8,6 @@ namespace WLSPL_ERP_CRM.repository
     {
         Task<List<Taxinvoice.TaxInvoiceCreate>> GetInfo(string financialYear, int? month, string? salesManager, string empCode, string empRole);
 
-
         Task<List<Taxinvoice.TaxInvoiceCreate>> GetFinancialYearSummary(string financialYear, string? salesManager, string empCode, string empRole);
 
         Task<dynamic> GetSalesPersonList(string empCode, string empRole);
