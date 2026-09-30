@@ -83,15 +83,15 @@ namespace WLSPL_ERP_CRM.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> Create(string? ProformaId)
+        public async Task<IActionResult> Create(string? ID)
         {
             var companies = await _TaxinvoiceRepo.Getcompany();
 
             TaxInvoiceCreateVM model;
 
-            if (!string.IsNullOrEmpty(ProformaId))
+            if (!string.IsNullOrEmpty(ID))
             {
-                model = await _TaxinvoiceRepo.GetProformaDetails(ProformaId)
+                model = await _TaxinvoiceRepo.GetProformaDetails(EncryptionHelper.Decrypt(ID))
                         ?? new TaxInvoiceCreateVM();
             }
             else
