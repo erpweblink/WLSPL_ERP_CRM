@@ -8,7 +8,6 @@ using static WEBLINK_CRM.Models.Company;
 
 namespace WEBLINK_CRM.repository
 {
-
     public class CompanymasterRepo : IcomapnymasterRepo
     {
         private readonly IConfiguration _configuration;
