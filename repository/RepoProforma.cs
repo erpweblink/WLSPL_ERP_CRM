@@ -852,15 +852,25 @@ GETDATE(),
         public async Task<List<ProformaInvoiceCreate>> GetProformaList(string size, string sessionname)
         {
             using var connection = new SqlConnection(
-           _configuration.GetConnectionString("Conn_Stringg"));
+       _configuration.GetConnectionString("Conn_Stringg"));
 
+            const string sql = @"
+        SELECT p.*
+        FROM [WLSPLCRM].[dbo].[tbl_ProformaInvoiceMain] p
+        WHERE p.IsDeleted = 0
+          AND EXISTS
+          (
+              SELECT 1
+              FROM dbo.FN_EmployeeHierarchy(@SessionName) h
+              WHERE h.empcode = p.sessionname
+          )
+        ORDER BY p.Id DESC;";
 
-            const string companySql = @"SELECT  *
-  FROM [WLSPLCRM].[dbo].[tbl_ProformaInvoiceMain] WHERE IsDeleted=0";
+            var proformas = await connection.QueryAsync<ProformaInvoiceCreate>(
+                sql,
+                new { SessionName = sessionname });
 
-            var companies = await connection.QueryAsync<ProformaInvoiceCreate>(companySql);
-
-            return companies.ToList();
+            return proformas.ToList();
         }
 
 
