@@ -1481,7 +1481,7 @@
                                     @* PDF: admin always, others only when approved *@
                                     @if (isAdmin || isApproved)
                                     {
-                                        <a href="@Url.Action("TaxInvoicePDF", "Taxinvoice", new { id = encId })" class="invoice-action-btn invoice-pdf-btn" title="Download PDF">
+                                        <a href="@Url.Action("TaxInvoicePDF", "Taxinvoice", new { id = encId })" target="_blank" class="invoice-action-btn invoice-pdf-btn" title="Download PDF">
                                             <i class="fa fa-file-pdf"></i>
                                         </a>
                                     }
