@@ -58,9 +58,7 @@ namespace WEBLINK_CRM.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetEmployeePerformance(
-     string empCode,
-     string month)
+        public async Task<IActionResult> GetEmployeePerformance(string empCode,DateTime fromDate,DateTime toDate)
         {
             if (string.IsNullOrWhiteSpace(empCode))
             {
@@ -71,7 +69,7 @@ namespace WEBLINK_CRM.Controllers
                 });
             }
 
-            var currentEmpCode = HttpContext.Session.GetString("EmpCode");
+            var currentEmpCode =HttpContext.Session.GetString("EmpCode");
 
             if (string.IsNullOrWhiteSpace(currentEmpCode))
             {
@@ -82,18 +80,20 @@ namespace WEBLINK_CRM.Controllers
                 });
             }
 
-            if (!DateTime.TryParse(
-                $"{month}-01",
-                out DateTime selectedMonth))
+            fromDate = fromDate.Date;
+            toDate = toDate.Date;
+
+            if (fromDate > toDate)
             {
                 return Json(new
                 {
                     success = false,
-                    message = "Invalid month."
+                    message = "From Date cannot be greater than To Date."
                 });
             }
 
-            var hierarchy = _repo.GetEmployeeHierarchy(currentEmpCode);
+            var hierarchy =
+                _repo.GetEmployeeHierarchy(currentEmpCode);
 
             var self = hierarchy.FirstOrDefault(e =>
                 string.Equals(
@@ -116,6 +116,7 @@ namespace WEBLINK_CRM.Controllers
                 });
             }
 
+            // Keep your existing security check
             if (string.IsNullOrWhiteSpace(self.HierarchyPath) ||
                 string.IsNullOrWhiteSpace(target.HierarchyPath) ||
                 !target.HierarchyPath.StartsWith(
@@ -129,9 +130,7 @@ namespace WEBLINK_CRM.Controllers
                 });
             }
 
-            var result = await _repo.GetEmployeePerformance(
-                empCode,
-                selectedMonth);
+            var result = await _repo.GetEmployeePerformance(currentEmpCode,empCode,fromDate,toDate);
 
             return Json(new
             {

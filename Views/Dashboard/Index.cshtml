@@ -779,14 +779,15 @@
             border: 1px solid #a7f3d0
         }
 </style>
+
 <style>
     .employee-performance-section {
         width: 100%;
         background: #fff;
-        border: 1px solid #e6eaf1;
-        border-radius: 16px;
-        padding: 16px;
-        box-shadow: 0 8px 24px rgba(16, 30, 54, .08);
+        border: 1px solid #dfe5ee;
+        border-radius: 18px;
+        padding: 20px;
+        box-shadow: 0 12px 34px rgba(16, 30, 54, .08);
     }
 
     .performance-header {
@@ -794,24 +795,26 @@
         align-items: center;
         justify-content: space-between;
         gap: 15px;
-        margin-bottom: 14px;
+        margin-bottom: 18px;
     }
 
     .performance-title {
         margin: 0;
         color: #1b2333;
-        font-size: 15px;
+        font-size: 16px;
         font-weight: 800;
+        letter-spacing: -.2px;
     }
 
         .performance-title i {
             color: #2563eb;
+            font-size: 15px;
         }
 
     .performance-subtitle {
-        margin-top: 4px;
-        color: #7b869a;
-        font-size: 11px;
+        margin-top: 5px;
+        color: #64748b;
+        font-size: 12px;
         font-weight: 600;
     }
 
@@ -822,122 +825,259 @@
     }
 
         .performance-date label {
-            color: #64748b;
-            font-size: 11px;
+            color: #475569;
+            font-size: 12px;
             font-weight: 700;
             white-space: nowrap;
         }
 
         .performance-date .form-control {
-            width: 145px;
-            height: 34px;
-            font-size: 11px;
-            border-radius: 8px;
+            width: 150px;
+            height: 38px;
+            padding: 6px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            background: #fff;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, .05);
+            transition: all .2s ease;
         }
 
+            .performance-date .form-control:hover {
+                border-color: #94a3b8;
+            }
+
+            .performance-date .form-control:focus {
+                border-color: #2563eb;
+                box-shadow: 0 0 0 3px rgba(37, 99, 235, .15);
+                outline: none;
+            }
+
+    /* ==============================
+           TABLE WRAPPER (clear outer border)
+           ============================== */
     .performance-table-wrapper {
         width: 100%;
         max-height: 450px;
         overflow: auto;
-        border: 1px solid #e8ecf2;
-        border-radius: 10px;
+        border: 1px solid #cfd8e5;
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, .06);
     }
+
+        .performance-table-wrapper::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        .performance-table-wrapper::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+
+        .performance-table-wrapper::-webkit-scrollbar-thumb {
+            background: #b6c2d3;
+            border-radius: 10px;
+        }
+
+            .performance-table-wrapper::-webkit-scrollbar-thumb:hover {
+                background: #8294ac;
+            }
 
     .employee-performance-table {
         width: 100%;
+        min-width: 850px;
         margin: 0;
         border-collapse: separate;
         border-spacing: 0;
-        font-size: 12px;
+        font-size: 13px;
     }
 
+        /* ---------- HEADER (background unchanged) ---------- */
         .employee-performance-table thead th {
             position: sticky;
             top: 0;
             z-index: 5;
-            padding: 10px;
+            padding: 13px 14px;
             background: linear-gradient(314deg, #0b0f14, #1a3e66);
             color: #fff;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: .06em;
             white-space: nowrap;
+            text-align: center;
+            border: 0;
+            border-right: 1px solid rgba(255, 255, 255, .14);
+            border-bottom: 2px solid #2563eb;
+            box-shadow: 0 3px 8px rgba(15, 23, 42, .15);
         }
 
+            .employee-performance-table thead th:last-child {
+                border-right: 0;
+            }
+
+            .employee-performance-table thead th:nth-child(2) {
+                text-align: left;
+            }
+
+        /* ---------- BODY (visible cell borders) ---------- */
         .employee-performance-table tbody td {
-            padding: 10px;
+            padding: 12px 14px;
+            height: 62px;
             background: #fff;
-            color: #475569;
-            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+            text-align: center;
+            border-right: 1px solid #e3e9f1;
+            border-bottom: 1px solid #e3e9f1;
             white-space: nowrap;
             vertical-align: middle;
+            transition: background-color .18s ease, color .18s ease;
         }
 
+            .employee-performance-table tbody td:last-child {
+                border-right: 0;
+            }
+
+            .employee-performance-table tbody td:nth-child(2) {
+                text-align: left;
+            }
+
+        .employee-performance-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        /* zebra stripes */
+        .employee-performance-table tbody tr:nth-child(even) td {
+            background: #f8fafd;
+        }
+
+        /* hover with blue accent bar */
         .employee-performance-table tbody tr:hover td {
-            background: #f8fafc;
+            background: #eaf2ff;
+        }
+
+            .employee-performance-table tbody tr:hover td:first-child {
+                color: #2563eb;
+                font-weight: 800;
+                box-shadow: inset 4px 0 0 #2563eb;
+            }
+
+        .employee-performance-table tbody td:first-child {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 700;
+            width: 50px;
         }
 
     .performance-employee {
         display: flex;
         flex-direction: column;
-        gap: 2px;
+        gap: 3px;
+        min-width: 160px;
     }
 
         .performance-employee strong {
-            color: #1b2333;
-            font-size: 12px;
+            color: #0f172a;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.25;
         }
 
         .performance-employee small {
-            color: #94a3b8;
-            font-size: 10px;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .02em;
         }
 
+    /* ---------- BADGES (stronger, more visible) ---------- */
     .performance-badge {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-width: 35px;
-        padding: 4px 9px;
-        border-radius: 20px;
-        font-size: 10px;
+        min-width: 42px;
+        min-height: 30px;
+        padding: 5px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1;
+        border: 1px solid transparent;
+        transition: transform .15s ease, box-shadow .15s ease;
+    }
+
+    .employee-performance-table tbody tr:hover .performance-badge {
+        transform: translateY(-1px);
+    }
+
+    .performance-badge.fresh {
+        color: #1d4ed8;
+        background: #dbeafe;
+        border-color: #93c5fd;
+    }
+
+    .performance-badge.followup {
+        color: #6d28d9;
+        background: #ede9fe;
+        border-color: #c4b5fd;
+    }
+
+    .performance-badge.service {
+        color: #0e7490;
+        background: #cffafe;
+        border-color: #67e8f9;
+    }
+
+    .performance-badge.company {
+        color: #047857;
+        background: #d1fae5;
+        border-color: #6ee7b7;
+    }
+
+    .performance-badge.invoice {
+        color: #c2410c;
+        background: #ffedd5;
+        border-color: #fdba74;
+    }
+
+    .performance-badge.proforma {
+        color: #be185d;
+        background: #fce7f3;
+        border-color: #f9a8d4;
+    }
+
+    .employee-performance-table tbody td strong {
+        color: #0f172a;
+        font-size: 13px;
         font-weight: 800;
     }
 
-        .performance-badge.fresh {
-            color: #2563eb;
-            background: #eff6ff;
-        }
+    .employee-performance-table tbody tr:hover td strong {
+        color: #1d4ed8;
+    }
 
-        .performance-badge.followup {
-            color: #7c3aed;
-            background: #f5f3ff;
-        }
-
-        .performance-badge.service {
-            color: #0891b2;
-            background: #ecfeff;
-        }
-
-        .performance-badge.company {
-            color: #059669;
-            background: #ecfdf5;
-        }
-
-        .performance-badge.invoice {
-            color: #ea580c;
-            background: #fff7ed;
-        }
-
-        .performance-badge.proforma {
-            color: #db2777;
-            background: #fdf2f8;
-        }
+    #employeePerformanceBody td[colspan] {
+        height: 120px;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 600;
+        background: #fff !important;
+    }
 
     @@media (max-width: 768px) {
+
+        .employee-performance-section {
+            padding: 14px;
+            border-radius: 14px;
+        }
+
         .performance-header {
             align-items: flex-start;
             flex-direction: column;
+            margin-bottom: 14px;
         }
 
         .performance-date {
@@ -948,8 +1088,42 @@
             .performance-date .form-control {
                 width: 160px;
             }
+
+        .performance-table-wrapper {
+            border-radius: 10px;
+        }
+
+        .employee-performance-table {
+            min-width: 850px;
+        }
+
+            .employee-performance-table thead th {
+                padding: 11px;
+                font-size: 10px;
+            }
+
+            .employee-performance-table tbody td {
+                padding: 10px;
+            }
+
+        .performance-badge {
+            min-width: 38px;
+            min-height: 27px;
+            padding: 4px 10px;
+        }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+
+        .employee-performance-table tbody tr,
+        .employee-performance-table tbody td,
+        .performance-badge,
+        .performance-date .form-control {
+            transition: none !important;
+        }
     }
 </style>
+
 
 @functions {
     private string Safe(object value)
@@ -1078,12 +1252,25 @@ else
                 </div>
 
                 <div class="performance-date">
-                    <label for="performanceMonth">Month</label>
-                    <input type="month"
-                           id="performanceMonth"
+                    <label for="performanceFromDate">From Date</label>
+                    <input type="date"
+                           id="performanceFromDate"
                            class="form-control"
-                           value="@DateTime.Now.ToString("yyyy-MM")"
+                           value="@DateTime.Now.ToString("yyyy-MM-dd")"
                            onchange="loadEmployeePerformance()" />
+
+                    <label for="performanceToDate">To Date</label>
+                    <input type="date"
+                           id="performanceToDate"
+                           class="form-control"
+                           value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                           onchange="loadEmployeePerformance()" />
+
+                    <button type="button"
+                            class="btn btn-danger btn-sm"
+                            onclick="resetPerformanceDates()">
+                        <i class="fas fa-undo-alt text-white-50"></i>
+                    </button>
                 </div>
             </div>
 
@@ -1214,6 +1401,12 @@ else
 </script>
 
 <script type="text/javascript">
+    function resetPerformanceDates() {
+        const currentDate = new Date().toISOString().split('T')[0];
+        document.getElementById("performanceFromDate").value = currentDate;
+        document.getElementById("performanceToDate").value = currentDate;
+        loadEmployeePerformance();
+    }
 
      function selectEmployeePerformance(element) {
          const empCode = element.getAttribute("data-empcode");
@@ -1231,81 +1424,103 @@ else
      }
 
      function loadEmployeePerformance() {
-         const empCode = window.selectedPerformanceEmployee || document.getElementById("currentEmpCode")?.value?.trim();
-         const month = document.getElementById("performanceMonth")?.value;
+        const empCode = window.selectedPerformanceEmployee || document.getElementById("currentEmpCode")?.value?.trim();
+        const fromDate = document.getElementById("performanceFromDate")?.value;
+        const toDate = document.getElementById("performanceToDate")?.value;
 
-         if (!empCode) {
-             showToast("Employee code not found.", "error");
-             return;
-         }
-         if (!month) {
-             showToast("Please select a month.", "error");
-             return;
-         }
-         $("#employeePerformanceBody").html(`
-             <tr>
-                 <td colspan="9" class="text-center py-4">
-                     <i class="fas fa-spinner fa-spin me-2"></i>
-                     Loading performance...
-                 </td>
-             </tr>
-         `);
-         $.ajax({
-             url: '@Url.Action("GetEmployeePerformance", "Dashboard")',
-             type: "GET",
-             data: {
-                 empCode: empCode,
-                 month: month
-             },
-             success: function (response) {
-                 if (!response.success) {
-                     $("#employeePerformanceBody").html(`
-                         <tr>
-                             <td colspan="9"
-                                 class="text-center text-danger py-4">
-                                 ${escapeHtml(
-                                     response.message ||
-                                     "Unable to load data."
-                                 )}
-                             </td>
-                         </tr>
-                     `);
-                     return;
-                 }
-                 const data = response.data || [];
-                 if (!data.length) {
-                     $("#performanceEmployeeName").text("No performance data");
-                     $("#employeePerformanceBody").html(`
-                         <tr>
-                             <td colspan="9"
-                                 class="text-center text-muted py-4">
-                                 No performance data found.
-                             </td>
-                         </tr>
-                     `);
-                     return;
-                 }
-                 // First record can represent the selected employee
-                 const selectedEmployee = data[0];
-                 $("#performanceEmployeeName").text(
-                     `${selectedEmployee.employeeName}
-                      (${selectedEmployee.employeeCode})`
-                 );
-                 renderEmployeePerformanceTable(data);
-             },
-             error: function (xhr) {
+        if (!empCode) {
+            showToast("Employee code not found.", "error");
+            return;
+        }
+
+        if (!fromDate || !toDate) {
+            showToast("Please select From Date and To Date.", "error");
+            return;
+        }
+
+        if (fromDate > toDate) {
+            showToast("From Date cannot be greater than To Date.", "error");
+            return;
+        }
+        $("#employeePerformanceBody").html(`
+            <tr>
+                <td colspan="9" class="text-center py-4">
+                    <i class="fas fa-spinner fa-spin me-2"></i>
+                    Loading performance...
+                </td>
+            </tr>
+        `);
+
+        $.ajax({
+            url: '@Url.Action("GetEmployeePerformance", "Dashboard")',
+            type: "GET",
+            data: {
+                empCode: empCode,
+                fromDate: fromDate,
+                toDate: toDate
+            },
+            success: function (response) {
+
+                if (!response.success) {
+
+                    $("#employeePerformanceBody").html(`
+                        <tr>
+                            <td colspan="9"
+                                class="text-center text-danger py-4">
+                                ${escapeHtml(
+                                    response.message ||
+                                    "Unable to load data."
+                                )}
+                            </td>
+                        </tr>
+                    `);
+
+                    return;
+                }
+
+                const data = response.data || [];
+                if (!data.length) {
+
+                    $("#performanceEmployeeName")
+                        .text("No performance data");
+
+                    $("#employeePerformanceBody").html(`
+                        <tr>
+                            <td colspan="9"
+                                class="text-center text-muted py-4">
+                                No performance data found.
+                            </td>
+                        </tr>
+                    `);
+                    return;
+                }
+
+                const selectedEmployee =
+                    data.find(function (x) {
+                        return String(x.employeeCode).toLowerCase() ===
+                               String(empCode).toLowerCase();
+                    }) || data[0];
+                $("#performanceEmployeeName").text(
+                    `${selectedEmployee.employeeName}
+                     (${selectedEmployee.employeeCode})`
+                );
+                // KEEP YOUR EXISTING BINDING
+                renderEmployeePerformanceTable(data);
+            },
+            error: function (xhr) {
                 console.error(xhr);
-                 $("#employeePerformanceBody").html(`
-                     <tr>
-                         <td colspan="9"
-                             class="text-center text-danger py-4">
-                             Unable to load employee performance.
-                         </td>
-                     </tr>
-                 `);
-             }
-         });
-     }
+                $("#employeePerformanceBody").html(`
+                    <tr>
+                        <td colspan="9"
+                            class="text-center text-danger py-4">
+                            Unable to load employee performance.
+                        </td>
+                    </tr>
+                `);
+            }
+        });
+    }
+
 
 
     function renderEmployeePerformanceTable(data) {
