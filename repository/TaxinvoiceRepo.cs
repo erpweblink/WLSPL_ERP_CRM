@@ -866,11 +866,11 @@ namespace WLSPL_ERP_CRM.repository
         }
 
 
-      public async Task<string?> SaveDocument(int invoiceId, string filePath, string empCode)
-       {
-           using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+        public async Task<string?> SaveDocument(int invoiceId, string filePath, string empCode)
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
 
-           const string sql = @"
+            const string sql = @"
                DECLARE @old nvarchar(max) =
                    (SELECT UploadedFilePath FROM [dbo].[InvoiceMain] WHERE id = @InvoiceId);
 
@@ -880,17 +880,17 @@ namespace WLSPL_ERP_CRM.repository
 
                SELECT @old;";
 
-           return await connection.ExecuteScalarAsync<string?>(sql, new { InvoiceId = invoiceId, FilePath = filePath });
-       }
+            return await connection.ExecuteScalarAsync<string?>(sql, new { InvoiceId = invoiceId, FilePath = filePath });
+        }
 
         public async Task<string?> GetDocument(int invoiceId)
-           {
-               using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
+        {
+            using var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg"));
 
-               const string sql = @"SELECT UploadedFilePath FROM [dbo].[InvoiceMain] WHERE id = @InvoiceId";
+            const string sql = @"SELECT UploadedFilePath FROM [dbo].[InvoiceMain] WHERE id = @InvoiceId";
 
-               return await connection.QueryFirstOrDefaultAsync<string?>(sql, new { InvoiceId = invoiceId });
-           }
+            return await connection.QueryFirstOrDefaultAsync<string?>(sql, new { InvoiceId = invoiceId });
+        }
 
 
         // PDF Methods
@@ -1054,7 +1054,8 @@ namespace WLSPL_ERP_CRM.repository
             // 6. CREATE PDF MEMORY STREAM
             // =========================================================
             byte[] pdfBytes;
-            using (MemoryStream stream = new MemoryStream())
+            using (MemoryStream stream =
+               new MemoryStream())
             {
                 Document document = new Document(
                     PageSize.A4,
@@ -1065,19 +1066,13 @@ namespace WLSPL_ERP_CRM.repository
                 );
 
 
-                PdfWriter writer =
-                    PdfWriter.GetInstance(
-                        document,
-                        stream
-                    );
+                PdfWriter writer = PdfWriter.GetInstance(document, stream);
+
+                // Apply border to every page
+                writer.PageEvent = new A4BorderPageEvent();
 
 
                 document.Open();
-
-
-                // =====================================================
-                // FONTS
-                // =====================================================
 
                 iTextSharp.text.Font boldFont =
                     FontFactory.GetFont(
@@ -1145,8 +1140,8 @@ namespace WLSPL_ERP_CRM.repository
                 companyHeader.SetWidths(
                     new float[]
                     {
-                    25f,
-                    75f
+                 25f,
+                 75f
                     }
                 );
 
@@ -1188,8 +1183,8 @@ namespace WLSPL_ERP_CRM.repository
                     Path.Combine(
                         Directory.GetCurrentDirectory(),
                         "wwwroot",
-                        "assets",
-                        "images",
+                         "assets",
+                         "images",
                         "WLSPL_logo.png"
                     );
 
@@ -1449,7 +1444,6 @@ namespace WLSPL_ERP_CRM.repository
                 );
 
 
-
                 iTextSharp.text.Font titleFont =
                     new iTextSharp.text.Font(
                         bookBold2,
@@ -1489,8 +1483,8 @@ namespace WLSPL_ERP_CRM.repository
                 invoiceInfo.SetWidths(
                     new float[]
                     {
-                    50f,
-                    50f
+                 50f,
+                 50f
                     }
                 );
 
@@ -1528,8 +1522,8 @@ namespace WLSPL_ERP_CRM.repository
                     einvoiceTable.SetWidths(
                         new float[]
                         {
-                        50f,
-                        50f
+                     50f,
+                     50f
                         }
                     );
 
@@ -1583,8 +1577,8 @@ namespace WLSPL_ERP_CRM.repository
                 customerTable.SetWidths(
                     new float[]
                     {
-                    50f,
-                    50f
+                 50f,
+                 50f
                     }
                 );
 
@@ -2058,37 +2052,87 @@ namespace WLSPL_ERP_CRM.repository
                 // AMOUNT IN WORDS
                 // =====================================================
 
-                PdfPTable amountTable =
+                PdfPTable amountWordsTable =
                     new PdfPTable(1);
 
-                amountTable.WidthPercentage = 100;
+                amountWordsTable.WidthPercentage = 100f;
 
-
-                AddCell(
-                    amountTable,
-                    "Amount in Words: " +
+                string amountInWords =
                     GetValue(
                         invoice,
                         "amtinwords"
-                    ),
-                    boldFont
+                    );
+
+                PdfPCell amountWordsCell =
+                    new PdfPCell(
+                        new Phrase(
+                            "Amount in Words: " + amountInWords,
+                            boldFont
+                        )
+                    );
+
+                amountWordsCell.Border =
+                    Rectangle.BOX;
+
+                amountWordsCell.PaddingTop = 5f;
+                amountWordsCell.PaddingBottom = 5f;
+                amountWordsCell.PaddingLeft = 5f;
+                amountWordsCell.PaddingRight = 5f;
+
+                amountWordsCell.HorizontalAlignment =
+                    Element.ALIGN_LEFT;
+
+                amountWordsTable.AddCell(
+                    amountWordsCell
                 );
 
-
                 document.Add(
-                    amountTable
-                );
-
-
-                document.Add(
-                    new Paragraph(" ")
+                    amountWordsTable
                 );
 
 
                 // =====================================================
-                // BANK DETAILS
+                // BANK DETAILS + SIGNATURE
+                // BOTH WILL STAY IN SAME ROW
                 // =====================================================
 
+                PdfPTable bottomTable =
+                    new PdfPTable(2);
+
+                bottomTable.WidthPercentage = 100f;
+
+                bottomTable.SetWidths(
+                    new float[]
+                    {
+                         55f,    // Bank Details
+                         45f     // Signature
+                    }
+                );
+
+
+                // =====================================================
+                // LEFT - BANK DETAILS
+                // =====================================================
+
+                PdfPCell bankCell =
+                    new PdfPCell();
+
+                bankCell.Border =
+                    Rectangle.NO_BORDER;
+
+                bankCell.VerticalAlignment =
+                    Element.ALIGN_TOP;
+
+                bankCell.HorizontalAlignment =
+                    Element.ALIGN_LEFT;
+
+                bankCell.PaddingTop = 20f;
+                bankCell.PaddingBottom = 5f;
+                bankCell.PaddingLeft = 0f;
+                bankCell.PaddingRight = 10f;
+
+
+                // Bank title
                 Paragraph bankTitle =
                     new Paragraph(
                         "Bank Details :",
@@ -2098,105 +2142,58 @@ namespace WLSPL_ERP_CRM.repository
                 bankTitle.SpacingBefore = 0f;
                 bankTitle.SpacingAfter = 5f;
 
-                document.Add(bankTitle);
+                bankCell.AddElement(
+                    bankTitle
+                );
 
 
-                document.Add(
+                // Bank A/C
+                Paragraph bankAccount =
                     new Paragraph(
                         "Bank A/C :- 916020085136854",
                         smallFont
-                    )
+                    );
+
+                bankAccount.SpacingBefore = 0f;
+                bankAccount.SpacingAfter = 2f;
+
+                bankCell.AddElement(
+                    bankAccount
                 );
 
 
-                document.Add(
+                // Bank IFSC
+                Paragraph bankIFSC =
                     new Paragraph(
                         "Bank IFSC :- UTIB0001641",
                         smallFont
-                    )
+                    );
+
+                bankIFSC.SpacingBefore = 0f;
+                bankIFSC.SpacingAfter = 2f;
+
+                bankCell.AddElement(
+                    bankIFSC
                 );
 
 
-                document.Add(
+                // Bank Name
+                Paragraph bankName =
                     new Paragraph(
                         "Axis Bank Ltd - Rahatani Branch, Pune",
                         smallFont
-                    )
-                );
-
-
-                document.Add(
-                    new Paragraph(" ")
-                );
-
-
-                // =====================================================
-                // GST DECLARATION / REMARK
-                // =====================================================
-
-                string remarks =
-                    GetValue(
-                        invoice,
-                        "Remarks"
                     );
 
-                if (!string.IsNullOrWhiteSpace(remarks))
-                {
-                    Paragraph remarkParagraph = new Paragraph();
+                bankName.SpacingBefore = 0f;
+                bankName.SpacingAfter = 0f;
 
-                    remarkParagraph.Add(
-                        new Chunk(
-                            "Remark : ",
-                            boldFont
-                        )
-                    );
-
-                    remarkParagraph.Add(
-                        new Chunk(
-                            remarks,
-                            smallFont
-                        )
-                    );
-
-                    document.Add(
-                        remarkParagraph
-                    );
-                }
-
-                document.Add(
-                    new Paragraph(" ")
-                );
-                // =====================================================
-                // SIGNATURE TABLE
-                // =====================================================
-
-                PdfPTable signatureTable =
-                    new PdfPTable(2);
-
-                signatureTable.WidthPercentage = 100f;
-
-                signatureTable.SetWidths(
-                    new float[]
-                    {
-                    55f,
-                    45f
-                    }
+                bankCell.AddElement(
+                    bankName
                 );
 
 
                 // =====================================================
-                // LEFT EMPTY CELL
-                // =====================================================
-
-                PdfPCell emptyCell =
-                    new PdfPCell();
-
-                emptyCell.Border =
-                    Rectangle.NO_BORDER;
-
-
-                // =====================================================
-                // SIGNATURE CELL
+                // RIGHT - SIGNATURE / STAMP
                 // =====================================================
 
                 PdfPCell signatureCell =
@@ -2209,13 +2206,12 @@ namespace WLSPL_ERP_CRM.repository
                     Element.ALIGN_CENTER;
 
                 signatureCell.VerticalAlignment =
-                    Element.ALIGN_MIDDLE;
+                    Element.ALIGN_TOP;
 
                 signatureCell.PaddingTop = 5f;
                 signatureCell.PaddingBottom = 5f;
                 signatureCell.PaddingLeft = 0f;
                 signatureCell.PaddingRight = 0f;
-
 
 
                 // =====================================================
@@ -2240,15 +2236,15 @@ namespace WLSPL_ERP_CRM.repository
 
 
                 // =====================================================
-                // LOGO / STAMP
+                // STAMP
                 // =====================================================
 
                 string stampPath =
                     Path.Combine(
                         Directory.GetCurrentDirectory(),
                         "wwwroot",
-                        "assets",
-                        "images",
+                         "assets",
+                         "images",
                         "WLSPL_Stamp.png"
                     );
 
@@ -2260,14 +2256,14 @@ namespace WLSPL_ERP_CRM.repository
 
                     stamp.ScaleToFit(
                         100f,
-                        70f
+                        75f
                     );
 
                     stamp.Alignment =
                         Element.ALIGN_CENTER;
 
                     stamp.SpacingBefore = 0f;
-                    stamp.SpacingAfter = 3f;
+                    stamp.SpacingAfter = 1f;
 
                     signatureCell.AddElement(
                         stamp
@@ -2279,6 +2275,27 @@ namespace WLSPL_ERP_CRM.repository
                         "STAMP NOT FOUND: " + stampPath
                     );
                 }
+
+
+                // =====================================================
+                // COMMON SEAL
+                // =====================================================
+
+                Paragraph commonSeal =
+                    new Paragraph(
+                        "Common Seal",
+                        smallFont
+                    );
+
+                commonSeal.Alignment =
+                    Element.ALIGN_CENTER;
+
+                commonSeal.SpacingBefore = 0f;
+                commonSeal.SpacingAfter = 3f;
+
+                signatureCell.AddElement(
+                    commonSeal
+                );
 
 
                 // =====================================================
@@ -2294,7 +2311,7 @@ namespace WLSPL_ERP_CRM.repository
                 authorizedSignatory.Alignment =
                     Element.ALIGN_CENTER;
 
-                authorizedSignatory.SpacingBefore = 2f;
+                authorizedSignatory.SpacingBefore = 0f;
                 authorizedSignatory.SpacingAfter = 0f;
 
                 signatureCell.AddElement(
@@ -2303,25 +2320,74 @@ namespace WLSPL_ERP_CRM.repository
 
 
                 // =====================================================
-                // ADD CELLS
+                // ADD BOTH CELLS
                 // =====================================================
 
-                signatureTable.AddCell(
-                    emptyCell
+                bottomTable.AddCell(
+                    bankCell
                 );
 
-                signatureTable.AddCell(
+                bottomTable.AddCell(
                     signatureCell
                 );
 
 
                 // =====================================================
-                // ADD TO DOCUMENT
+                // ADD BANK + SIGNATURE TABLE
                 // =====================================================
 
                 document.Add(
-                    signatureTable
+                    bottomTable
                 );
+
+
+                // =====================================================
+                // REMARK
+                // =====================================================
+
+                string remarks =
+                    GetValue(
+                        invoice,
+                        "Remarks"
+                    );
+
+
+                if (!string.IsNullOrWhiteSpace(remarks))
+                {
+                    Paragraph remarkParagraph =
+                        new Paragraph();
+
+                    remarkParagraph.SpacingBefore = 8f;
+                    remarkParagraph.SpacingAfter = 0f;
+
+                    remarkParagraph.Add(
+                        new Chunk(
+                            "Remark : ",
+                            boldFont
+                        )
+                    );
+
+                    remarkParagraph.Add(
+                        new Chunk(
+                            remarks,
+                            smallFont
+                        )
+                    );
+
+                    document.Add(
+                        remarkParagraph
+                    );
+                }
+
+
+                // =====================================================
+                // BOTTOM SPACE
+                // =====================================================
+
+                document.Add(
+                    new Paragraph(" ")
+                );
+
 
 
                 document.Add(
@@ -2381,7 +2447,8 @@ namespace WLSPL_ERP_CRM.repository
                         Path.Combine(
                             Directory.GetCurrentDirectory(),
                             "wwwroot",
-                            "image",
+                            "assets",
+                            "images",
                             "CancelInvoice.png"
                         );
 
@@ -2452,7 +2519,6 @@ namespace WLSPL_ERP_CRM.repository
 
                 document.Close();
 
-
                 pdfBytes = stream.ToArray();
             }
 
@@ -2469,7 +2535,9 @@ namespace WLSPL_ERP_CRM.repository
 
         }
 
-
+        // ============================================================
+        // PROFESSIONAL CGST + SGST ITEM TABLE
+        // ============================================================
         private PdfPTable CreateCGSTSGSTItemTable(
             DataTable detailTable,
             iTextSharp.text.Font boldFont,
@@ -2481,17 +2549,17 @@ namespace WLSPL_ERP_CRM.repository
 
             table.SetWidths(new float[]
             {
-        5f,     // Sr
-        25f,    // Description
-        9f,     // HSN/SAC
-        7f,     // Qty
-        9f,     // Rate
-        11f,    // Taxable
-        6f,     // CGST %
-        9f,     // CGST Amt
-        6f,     // SGST %
-        9f,     // SGST Amt
-        11f     // Total
+   5f,     // Sr
+   25f,    // Description
+   9f,     // HSN/SAC
+   7f,     // Qty
+   9f,     // Rate
+   11f,    // Taxable
+   6f,     // CGST %
+   9f,     // CGST Amt
+   6f,     // SGST %
+   9f,     // SGST Amt
+   11f     // Total
             });
 
             table.HeaderRows = 1;
@@ -2600,7 +2668,7 @@ namespace WLSPL_ERP_CRM.repository
 
             table.AddCell(HeaderCell("Sr."));
             table.AddCell(HeaderCell("Description"));
-            table.AddCell(HeaderCell("HSN/SAC"));
+            table.AddCell(HeaderCell("SAC"));
             table.AddCell(HeaderCell("Qty"));
             table.AddCell(HeaderCell("Rate"));
             table.AddCell(HeaderCell("Taxable Value"));
@@ -3174,15 +3242,15 @@ namespace WLSPL_ERP_CRM.repository
 
             table.SetWidths(new float[]
             {
-        5f,     // Sr
-        31f,    // Description
-        10f,    // HSN/SAC
-        8f,     // Qty
-        10f,    // Rate
-        12f,    // Taxable
-        7f,     // IGST %
-        9f,     // IGST Amount
-        11f     // Total
+   5f,     // Sr
+   31f,    // Description
+   10f,    // HSN/SAC
+   8f,     // Qty
+   10f,    // Rate
+   12f,    // Taxable
+   7f,     // IGST %
+   9f,     // IGST Amount
+   11f     // Total
             });
 
             table.HeaderRows = 1;
@@ -4168,6 +4236,40 @@ namespace WLSPL_ERP_CRM.repository
 
 
             return Convert.ToString(value);
+        }
+
+
+
+        public class A4BorderPageEvent : PdfPageEventHelper
+        {
+            public override void OnEndPage(PdfWriter writer, Document document)
+            {
+                PdfContentByte canvas = writer.DirectContent;
+
+                canvas.SaveState();
+
+                // Light grey border
+                canvas.SetColorStroke(
+                    new BaseColor(190, 195, 200)
+                );
+
+                // Thin professional line
+                canvas.SetLineWidth(0.7f);
+
+                // Border inset from A4 edge
+                float borderInset = 12f;
+
+                canvas.Rectangle(
+                    document.PageSize.Left + borderInset,
+                    document.PageSize.Bottom + borderInset,
+                    document.PageSize.Width - (borderInset * 2),
+                    document.PageSize.Height - (borderInset * 2)
+                );
+
+                canvas.Stroke();
+
+                canvas.RestoreState();
+            }
         }
 
     }
