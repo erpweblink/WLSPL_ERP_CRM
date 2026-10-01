@@ -11,23 +11,32 @@
         public string Status { get; set; } = string.Empty;
         public string ParentCode { get; set; } = string.Empty;
         public string SalesTLManager { get; set; } = string.Empty;
+        public string ProfileImagePath { get; set; } = string.Empty;
+        public string SelfCompnaies { get; set; } = string.Empty;
+        public string PaidCompanies { get; set; } = string.Empty;
+        public string UnPaidCompanies { get; set; } = string.Empty;
+        public string TeamTotalCompanies { get; set; } = string.Empty;
         public int HierarchyLevel { get; set; }
         public string HierarchyPath { get; set; } = string.Empty;
         public List<EmployeeNode> Children { get; set; } = new List<EmployeeNode>();
         public int InvoiceRenewal { get; set; }
     }
+
     public class EmployeeNodeInfo
     {
         public string EmployeeName { get; set; } = string.Empty;
         public string EmployeeCode { get; set; } = string.Empty;
-        public string TotalCompanies { get; set; } = string.Empty;
-        public string PaidCompanies { get; set; } = string.Empty;
-        public string UnPaidCompanies { get; set; } = string.Empty;
         public string Fresh { get; set; } = string.Empty;
         public string FollowUp { get; set; } = string.Empty;
         public string Service { get; set; } = string.Empty;
-        public string Total { get; set; } = string.Empty;
+        public string Total { get; set; } = string.Empty;   
+        public string NewCompanies { get; set; } = string.Empty;   
+        public string NewInvoice { get; set; } = string.Empty;   
+        public string NewProforma { get; set; } = string.Empty;   
+
+
     }
+
     public class InvoiceRenewalModel
     {
         public int Id { get; set; }

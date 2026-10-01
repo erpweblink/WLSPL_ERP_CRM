@@ -6,7 +6,7 @@ namespace WEBLINK_CRM.Repositories
     {
         List<EmployeeNode> GetEmployeeHierarchy(string employeeCode);
 
-        Task<EmployeeNodeInfo> GetEmployeeCompanies(string sessionName);
+        Task<List<EmployeeNodeInfo>> GetEmployeePerformance(string sessionName,DateTime selectedMonth);
 
         List<InvoiceRenewalModel> GetInvoiceRenewals(string employeeCode, bool isAdmin);
     }
