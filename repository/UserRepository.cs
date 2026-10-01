@@ -426,11 +426,10 @@ namespace WEBLINK_CRM.repository
                 _configuration.GetConnectionString("Conn_Stringg"));
 
             string query = @"
-        SELECT empcode, name
-        FROM employees
-        WHERE Sales_TL_Manager = 1
-        AND isdeleted = 0
-        ORDER BY name";
+                SELECT empcode, name
+                FROM employees
+                WHERE  isdeleted = 0 and status = 1
+                ORDER BY name";
 
             SqlCommand cmd = new SqlCommand(query, con);
 

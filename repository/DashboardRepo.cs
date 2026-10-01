@@ -10,54 +10,83 @@ namespace WEBLINK_CRM.Repositories
             _connectionString = configuration.GetConnectionString("Conn_Stringg")
                 ?? throw new Exception("Connection string 'Conn_Stringg' not found.");
         }
+
         public List<EmployeeNode> GetEmployeeHierarchy(string employeeCode)
         {
             var list = new List<EmployeeNode>();
             const string sql = @"
-IF OBJECT_ID('tempdb..#FilteredHierarchy') IS NOT NULL DROP TABLE #FilteredHierarchy;
-;WITH EmployeeHierarchy AS
-(
-    SELECT e.empcode, e.name, e.role, e.status, e.TL_Manager AS ParentCode,
-           ISNULL(e.Sales_TL_Manager, 0) AS SalesTLManager,
-           0 AS HierarchyLevel,
-           CAST('/' + e.empcode + '/' AS VARCHAR(MAX)) AS HierarchyPath
-    FROM employees e
-    WHERE e.isdeleted = 0 AND e.status = 1 AND e.TL_Manager = e.empcode
-    UNION ALL
-    SELECT c.empcode, c.name, c.role, c.status, c.TL_Manager AS ParentCode,
-           ISNULL(c.Sales_TL_Manager, 0) AS SalesTLManager,
-           p.HierarchyLevel + 1 AS HierarchyLevel,
-           CAST(p.HierarchyPath + c.empcode + '/' AS VARCHAR(MAX)) AS HierarchyPath
-    FROM employees c
-    INNER JOIN EmployeeHierarchy p ON c.TL_Manager = p.empcode
-    WHERE c.isdeleted = 0 AND c.status = 1 AND c.empcode <> c.TL_Manager
-),
-RoleHierarchy AS
-(
-    SELECT e.*, LTRIM(RTRIM(e.role)) AS CustRole
-    FROM EmployeeHierarchy e
-)
-SELECT *
-INTO #FilteredHierarchy
-FROM RoleHierarchy e
-WHERE e.empcode = @EmployeeCode
-   OR e.HierarchyPath LIKE (SELECT HierarchyPath + '%' FROM EmployeeHierarchy WHERE empcode = @EmployeeCode)
-   OR (SELECT HierarchyPath FROM EmployeeHierarchy WHERE empcode = @EmployeeCode) LIKE e.HierarchyPath + '%'
-OPTION (MAXRECURSION 100);
-SELECT empcode, name, role, status, ParentCode, SalesTLManager, HierarchyLevel, CustRole, HierarchyPath
-FROM #FilteredHierarchy
-ORDER BY HierarchyPath;
-DECLARE @LoggedInPath VARCHAR(MAX);
-DECLARE @LoggedInRole VARCHAR(50);
-SELECT @LoggedInPath = HierarchyPath, @LoggedInRole = CustRole
-FROM #FilteredHierarchy
-WHERE empcode = @EmployeeCode;
-SELECT ISNULL(COUNT(*), 0) AS InvoiceRenewal
-FROM InvoiceMain I
-WHERE DATEADD(MONTH, 11, I.invoicedate) BETWEEN CAST(GETDATE() AS DATE) AND DATEADD(DAY, 30, CAST(GETDATE() AS DATE))
-  AND (@LoggedInRole = 'CEO'
-       OR EXISTS (SELECT 1 FROM #FilteredHierarchy E
-                  WHERE E.HierarchyPath LIKE @LoggedInPath + '%' AND E.empcode = I.sessionname));";
+                IF OBJECT_ID('tempdb..#FilteredHierarchy') IS NOT NULL DROP TABLE #FilteredHierarchy;
+                ;WITH EmployeeHierarchy AS
+                (
+                    SELECT e.empcode, e.name, e.role, e.status, e.ProfileImagePath, e.TL_Manager AS ParentCode,
+                           ISNULL(e.Sales_TL_Manager, 0) AS SalesTLManager,
+                           0 AS HierarchyLevel,
+                           CAST('/' + e.empcode + '/' AS VARCHAR(MAX)) AS HierarchyPath
+                    FROM employees e
+                    WHERE e.isdeleted = 0 AND e.status = 1 AND e.TL_Manager = e.empcode
+                    UNION ALL
+                    SELECT c.empcode, c.name, c.role, c.status, c.ProfileImagePath, c.TL_Manager AS ParentCode,
+                           ISNULL(c.Sales_TL_Manager, 0) AS SalesTLManager,
+                           p.HierarchyLevel + 1 AS HierarchyLevel,
+                           CAST(p.HierarchyPath + c.empcode + '/' AS VARCHAR(MAX)) AS HierarchyPath
+                    FROM employees c
+                    INNER JOIN EmployeeHierarchy p ON c.TL_Manager = p.empcode
+                    WHERE c.isdeleted = 0 AND c.status = 1 AND c.empcode <> c.TL_Manager
+                ),
+                CompanyCounts AS
+                (
+                    SELECT
+                        c.sessionname AS EmpCode,
+                        COUNT(c.sessionname) AS TotalCompanies,
+                        SUM(CASE WHEN LOWER(c.type) = 'paid'   THEN 1 ELSE 0 END) AS PaidCompanies,
+                        SUM(CASE WHEN LOWER(c.type) = 'unpaid' THEN 1 ELSE 0 END) AS UnPaidCompanies
+                    FROM Company c
+                    WHERE c.status = 1
+                    GROUP BY c.sessionname
+                ),
+                RoleHierarchy AS
+                (
+                    SELECT e.*, LTRIM(RTRIM(e.role)) AS CustRole
+                    FROM EmployeeHierarchy e
+                )
+                SELECT  e.*,
+                    ISNULL(cc.TotalCompanies, 0) AS TotalCompanies,
+                    ISNULL(cc.PaidCompanies, 0) AS PaidCompanies,
+                    ISNULL(cc.UnPaidCompanies, 0) AS UnPaidCompanies,
+                    ISNULL(
+                        (
+                            SELECT SUM(cc2.TotalCompanies)
+                            FROM EmployeeHierarchy h
+                            INNER JOIN CompanyCounts cc2
+                                ON cc2.EmpCode = h.empcode
+                            WHERE h.HierarchyPath LIKE e.HierarchyPath + '%'
+                              AND h.empcode <> e.empcode
+                        ),
+                        0
+                    ) AS HierarchyTotalCompanies
+                INTO #FilteredHierarchy
+                FROM RoleHierarchy e
+                LEFT JOIN CompanyCounts cc
+                    ON cc.EmpCode = e.empcode
+                WHERE e.empcode = @EmployeeCode
+                   OR e.HierarchyPath LIKE (SELECT HierarchyPath + '%' FROM EmployeeHierarchy WHERE empcode = @EmployeeCode)
+                   OR (SELECT HierarchyPath FROM EmployeeHierarchy WHERE empcode = @EmployeeCode) LIKE e.HierarchyPath + '%'
+                OPTION (MAXRECURSION 100);
+                SELECT empcode, name, role, status, ProfileImagePath, ParentCode, SalesTLManager, HierarchyLevel, 
+                CustRole, HierarchyPath,TotalCompanies,PaidCompanies,UnPaidCompanies,HierarchyTotalCompanies
+                FROM #FilteredHierarchy
+                ORDER BY HierarchyPath;
+                DECLARE @LoggedInPath VARCHAR(MAX);
+                DECLARE @LoggedInRole VARCHAR(50);
+                SELECT @LoggedInPath = HierarchyPath, @LoggedInRole = CustRole
+                FROM #FilteredHierarchy
+                WHERE empcode = @EmployeeCode;
+                SELECT ISNULL(COUNT(*), 0) AS InvoiceRenewal
+                FROM InvoiceMain I
+                WHERE DATEADD(MONTH, 11, I.invoicedate) BETWEEN CAST(GETDATE() AS DATE) AND DATEADD(DAY, 30, CAST(GETDATE() AS DATE))
+                  AND (@LoggedInRole = 'CEO'
+                       OR EXISTS (SELECT 1 FROM #FilteredHierarchy E
+               WHERE E.HierarchyPath LIKE @LoggedInPath + '%' AND E.empcode = I.sessionname));";
             using var con = new SqlConnection(_connectionString);
             using var cmd = new SqlCommand(sql, con);
             cmd.Parameters.AddWithValue("@EmployeeCode", employeeCode);
@@ -77,6 +106,11 @@ WHERE DATEADD(MONTH, 11, I.invoicedate) BETWEEN CAST(GETDATE() AS DATE) AND DATE
                     SalesTLManager = reader["SalesTLManager"] == DBNull.Value ? "0" : reader["SalesTLManager"].ToString(),
                     HierarchyLevel = reader["HierarchyLevel"] == DBNull.Value ? 0 : Convert.ToInt32(reader["HierarchyLevel"]),
                     HierarchyPath = reader["HierarchyPath"] == DBNull.Value ? null : reader["HierarchyPath"].ToString(),
+                    ProfileImagePath = reader["ProfileImagePath"] == DBNull.Value ? null : reader["ProfileImagePath"].ToString(),
+                    SelfCompnaies = reader["TotalCompanies"] == DBNull.Value ? null : reader["TotalCompanies"].ToString(),
+                    PaidCompanies = reader["PaidCompanies"] == DBNull.Value ? null : reader["PaidCompanies"].ToString(),
+                    UnPaidCompanies = reader["UnPaidCompanies"] == DBNull.Value ? null : reader["UnPaidCompanies"].ToString(),
+                    TeamTotalCompanies = reader["HierarchyTotalCompanies"] == DBNull.Value ? null : reader["HierarchyTotalCompanies"].ToString(),
                     Children = new List<EmployeeNode>()
                 });
             }
@@ -86,52 +120,255 @@ WHERE DATEADD(MONTH, 11, I.invoicedate) BETWEEN CAST(GETDATE() AS DATE) AND DATE
             }
             return list;
         }
-        public Task<EmployeeNodeInfo> GetEmployeeCompanies(string sessionName)
+
+        public async Task<List<EmployeeNodeInfo>> GetEmployeePerformance(string currentEmpCode, string selectedEmpCode, DateTime fromDate, DateTime toDate)
         {
-            var info = new EmployeeNodeInfo();
+            var result = new List<EmployeeNodeInfo>();
+
             const string sql = @"
-SELECT e.empcode AS EmployeeCode, e.name AS EmployeeName, COUNT(c.sessionname) AS TotalCompanies,
-       SUM(CASE WHEN LOWER(c.type) = 'paid' THEN 1 ELSE 0 END) AS PaidCompanies,
-       SUM(CASE WHEN LOWER(c.type) = 'unpaid' THEN 1 ELSE 0 END) AS UnPaidCompanies
-FROM employees e
-LEFT JOIN Company c ON c.sessionname = e.empcode AND c.status = 1
-WHERE e.empcode = @SessionName AND e.isdeleted = 0 AND e.status = 1
-GROUP BY e.empcode, e.name, e.role;
-SELECT name, DATENAME(month, GETDATE()) AS CurrentMonth,
-       SUM(CASE WHEN Type = 'Fresh' THEN MeetingNo ELSE 0 END) AS FreshMeetings,
-       SUM(CASE WHEN Type = 'Follow-up' THEN MeetingNo ELSE 0 END) AS FollowupMeetings,
-       SUM(CASE WHEN Type = 'Services' THEN MeetingNo ELSE 0 END) AS ServicesMeetings,
-       SUM(MeetingNo) AS AllMeetings
-FROM (SELECT COUNT(cname) AS MeetingNo, name, Type
-      FROM stswlspl.VW_FollowUpRpt
-      WHERE sessionname = @SessionName
-        AND commentdatetime >= DATEADD(month, DATEDIFF(month, 0, GETDATE()), 0)
-        AND commentdatetime < DATEADD(month, DATEDIFF(month, 0, GETDATE()) + 1, 0)
-        AND Updatefor = 'Meeting'
-      GROUP BY name, Type) AS CombinedResults
-GROUP BY name;";
+                DECLARE @StartDate DATE = @FromDate;
+                DECLARE @EndDate DATE = DATEADD(DAY, 1, @ToDate);
+
+                ;WITH EmployeeHierarchy AS
+                (
+                    -- CURRENT LOGGED-IN USER
+                    SELECT
+                        e.empcode,
+                        e.name,
+                        e.TL_Manager AS ParentCode,
+                        CAST('/' + e.empcode + '/' AS VARCHAR(MAX)) AS HierarchyPath
+                    FROM employees e
+                    WHERE e.isdeleted = 0
+                      AND e.status = 1
+                      AND e.empcode = @CurrentEmpCode
+
+                    UNION ALL
+
+                    -- CURRENT USER'S COMPLETE HIERARCHY
+                    SELECT
+                        c.empcode,
+                        c.name,
+                        c.TL_Manager AS ParentCode,
+                        CAST(
+                            p.HierarchyPath + c.empcode + '/'
+                            AS VARCHAR(MAX)
+                        ) AS HierarchyPath
+                    FROM employees c
+                    INNER JOIN EmployeeHierarchy p
+                        ON c.TL_Manager = p.empcode
+                    WHERE c.isdeleted = 0
+                      AND c.status = 1
+                      AND c.empcode <> c.TL_Manager
+                ),
+
+                SelectedEmployee AS
+                (
+                    SELECT
+                        HierarchyPath
+                    FROM EmployeeHierarchy
+                    WHERE empcode = @SelectedEmpCode
+                ),
+
+                PerformanceEmployees AS
+                (
+                    /*
+                     * ALWAYS INCLUDE CURRENT USER
+                     */
+                    SELECT
+                        h.empcode,
+                        h.name,
+                        h.HierarchyPath
+                    FROM EmployeeHierarchy h
+                    WHERE h.empcode = @CurrentEmpCode
+
+                    UNION
+
+                    /*
+                     * INCLUDE SELECTED USER + SELECTED USER'S TEAM
+                     */
+                    SELECT
+                        h.empcode,
+                        h.name,
+                        h.HierarchyPath
+                    FROM EmployeeHierarchy h
+                    INNER JOIN SelectedEmployee s
+                        ON h.HierarchyPath LIKE s.HierarchyPath + '%'
+                ),
+
+                Meetings AS
+                (
+                    SELECT
+                        sessionname AS EmpCode,
+
+                        SUM(
+                            CASE
+                                WHEN Type = 'Fresh'
+                                THEN 1
+                                ELSE 0
+                            END
+                        ) AS FreshMeetings,
+
+                        SUM(
+                            CASE
+                                WHEN Type = 'Follow-up'
+                                THEN 1
+                                ELSE 0
+                            END
+                        ) AS FollowupMeetings,
+
+                        SUM(
+                            CASE
+                                WHEN Type = 'Services'
+                                THEN 1
+                                ELSE 0
+                            END
+                        ) AS ServicesMeetings,
+
+                        COUNT(*) AS AllMeetings
+
+                    FROM stswlspl.VW_FollowUpRpt
+
+                    WHERE commentdatetime >= @StartDate
+                      AND commentdatetime < @EndDate
+                      AND Updatefor = 'Meeting'
+
+                    GROUP BY sessionname
+                ),
+
+                Companies AS
+                (
+                    SELECT
+                        sessionname AS EmpCode,
+                        COUNT(*) AS NewCompanies
+
+                    FROM Company
+
+                    WHERE status = 1
+                      AND regdate >= @StartDate
+                      AND regdate < @EndDate
+
+                    GROUP BY sessionname
+                ),
+
+                Invoices AS
+                (
+                    SELECT
+                        sessionname AS EmpCode,
+                        COUNT(*) AS TotalInvoices
+
+                    FROM InvoiceMain
+
+                    WHERE createddate >= @StartDate
+                      AND createddate < @EndDate
+
+                    GROUP BY sessionname
+                ),
+
+                Proformas AS
+                (
+                    SELECT
+                        sessionname AS EmpCode,
+                        COUNT(*) AS TotalProformas
+
+                    FROM tbl_ProformaInvoiceMain
+
+                    WHERE createddate >= @StartDate
+                      AND createddate < @EndDate
+
+                    GROUP BY sessionname
+                )
+
+                SELECT
+                    h.empcode,
+                    h.name,
+
+                    ISNULL(m.FreshMeetings, 0) AS FreshMeetings,
+                    ISNULL(m.FollowupMeetings, 0) AS FollowupMeetings,
+                    ISNULL(m.ServicesMeetings, 0) AS ServicesMeetings,
+                    ISNULL(m.AllMeetings, 0) AS AllMeetings,
+
+                    ISNULL(c.NewCompanies, 0) AS NewCompanies,
+
+                    ISNULL(i.TotalInvoices, 0) AS TotalInvoices,
+
+                    ISNULL(p.TotalProformas, 0) AS TotalProformas
+
+                FROM PerformanceEmployees h
+
+                LEFT JOIN Meetings m
+                    ON m.EmpCode = h.empcode
+
+                LEFT JOIN Companies c
+                    ON c.EmpCode = h.empcode
+
+                LEFT JOIN Invoices i
+                    ON i.EmpCode = h.empcode
+
+                LEFT JOIN Proformas p
+                    ON p.EmpCode = h.empcode
+
+                ORDER BY
+                    CASE
+                        WHEN h.empcode = @CurrentEmpCode THEN 0
+                        ELSE 1
+                    END,
+                    h.HierarchyPath
+
+                OPTION (MAXRECURSION 100);
+            ";
+
             using var con = new SqlConnection(_connectionString);
             using var cmd = new SqlCommand(sql, con);
-            cmd.Parameters.AddWithValue("@SessionName", sessionName);
-            con.Open();
-            using var reader = cmd.ExecuteReader();
-            if (reader.Read())
+
+            cmd.Parameters.AddWithValue(
+                "@CurrentEmpCode",
+                currentEmpCode);
+
+            cmd.Parameters.AddWithValue(
+                "@SelectedEmpCode",
+                selectedEmpCode);
+
+            cmd.Parameters.AddWithValue(
+                "@FromDate",
+                fromDate.Date);
+
+            cmd.Parameters.AddWithValue(
+                "@ToDate",
+                toDate.Date);
+
+            await con.OpenAsync();
+
+            using var reader = await cmd.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
             {
-                info.EmployeeCode = reader["EmployeeCode"] == DBNull.Value ? "0" : reader["EmployeeCode"].ToString();
-                info.EmployeeName = reader["EmployeeName"] == DBNull.Value ? "0" : reader["EmployeeName"].ToString();
-                info.TotalCompanies = reader["TotalCompanies"] == DBNull.Value ? "0" : reader["TotalCompanies"].ToString();
-                info.PaidCompanies = reader["PaidCompanies"] == DBNull.Value ? "0" : reader["PaidCompanies"].ToString();
-                info.UnPaidCompanies = reader["UnPaidCompanies"] == DBNull.Value ? "0" : reader["UnPaidCompanies"].ToString();
+                result.Add(new EmployeeNodeInfo
+                {
+                    EmployeeCode =
+                        reader["empcode"]?.ToString() ?? "",
+
+                    EmployeeName =
+                        reader["name"]?.ToString() ?? "",
+                    Fresh =
+                        reader["FreshMeetings"]?.ToString() ?? "0",
+                    FollowUp =
+                        reader["FollowupMeetings"]?.ToString() ?? "0",
+                    Service =
+                        reader["ServicesMeetings"]?.ToString() ?? "0",
+                    Total =
+                        reader["AllMeetings"]?.ToString() ?? "0",
+                    NewCompanies =
+                        reader["NewCompanies"]?.ToString() ?? "0",
+                    NewInvoice =
+                        reader["TotalInvoices"]?.ToString() ?? "0",
+                    NewProforma =
+                        reader["TotalProformas"]?.ToString() ?? "0"
+                });
             }
-            if (reader.NextResult() && reader.Read())
-            {
-                info.Fresh = reader["FreshMeetings"] == DBNull.Value ? "0" : reader["FreshMeetings"].ToString();
-                info.FollowUp = reader["FollowupMeetings"] == DBNull.Value ? "0" : reader["FollowupMeetings"].ToString();
-                info.Service = reader["ServicesMeetings"] == DBNull.Value ? "0" : reader["ServicesMeetings"].ToString();
-                info.Total = reader["AllMeetings"] == DBNull.Value ? "0" : reader["AllMeetings"].ToString();
-            }
-            return Task.FromResult(info);
+
+            return result;
         }
+
         public List<InvoiceRenewalModel> GetInvoiceRenewals(string employeeCode, bool isAdmin)
         {
             var list = new List<InvoiceRenewalModel>();

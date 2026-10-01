@@ -13,6 +13,7 @@ namespace WEBLINK_CRM.Controllers
         {
             _repo = repo;
         }
+
         public ActionResult Index()
         {
             var currentEmpCode = HttpContext.Session.GetString("EmpCode");
@@ -36,6 +37,7 @@ namespace WEBLINK_CRM.Controllers
             }
             return View(new List<EmployeeNode> { root });
         }
+
         private static void BuildTree(List<EmployeeNode> employees)
         {
             foreach (var emp in employees)
@@ -44,33 +46,100 @@ namespace WEBLINK_CRM.Controllers
                 .Where(e => !string.IsNullOrWhiteSpace(e.EmpCode))
                 .GroupBy(e => e.EmpCode.Trim(), StringComparer.OrdinalIgnoreCase)
                 .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
-            foreach (var emp in employees)
-            {
-                if (string.IsNullOrWhiteSpace(emp.ParentCode))
-                    continue;
-                if (string.Equals(emp.EmpCode?.Trim(), emp.ParentCode?.Trim(), StringComparison.OrdinalIgnoreCase))
-                    continue;
-                if (lookup.TryGetValue(emp.ParentCode.Trim(), out var parent))
-                    parent.Children.Add(emp);
-            }
+                foreach (var emp in employees)
+                {
+                    if (string.IsNullOrWhiteSpace(emp.ParentCode))
+                        continue;
+                    if (string.Equals(emp.EmpCode?.Trim(), emp.ParentCode?.Trim(), StringComparison.OrdinalIgnoreCase))
+                        continue;
+                    if (lookup.TryGetValue(emp.ParentCode.Trim(), out var parent))
+                        parent.Children.Add(emp);
+                }
         }
+
         [HttpGet]
-        public async Task<IActionResult> GetEmployeeInfo(string empCode)
+        public async Task<IActionResult> GetEmployeePerformance(string empCode,DateTime fromDate,DateTime toDate)
         {
             if (string.IsNullOrWhiteSpace(empCode))
-                return BadRequest(new { success = false, message = "Employee code is required." });
-            var currentEmpCode = HttpContext.Session.GetString("EmpCode");
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Employee code is required."
+                });
+            }
+
+            var currentEmpCode =HttpContext.Session.GetString("EmpCode");
+
             if (string.IsNullOrWhiteSpace(currentEmpCode))
-                return Json(new { success = false, message = "Employee session not found." });
-            var hierarchy = _repo.GetEmployeeHierarchy(currentEmpCode);
-            var self = hierarchy.FirstOrDefault(e => string.Equals(e.EmpCode?.Trim(), currentEmpCode.Trim(), StringComparison.OrdinalIgnoreCase));
-            var target = hierarchy.FirstOrDefault(e => string.Equals(e.EmpCode?.Trim(), empCode.Trim(), StringComparison.OrdinalIgnoreCase));
-            if (self == null || target == null || string.IsNullOrEmpty(self.HierarchyPath) || string.IsNullOrEmpty(target.HierarchyPath)
-                || !target.HierarchyPath.StartsWith(self.HierarchyPath, StringComparison.OrdinalIgnoreCase))
-                return Json(new { success = false, message = "You are not allowed to view this employee." });
-            var result = await _repo.GetEmployeeCompanies(empCode);
-            return Json(new { success = true, data = result });
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Employee session not found."
+                });
+            }
+
+            fromDate = fromDate.Date;
+            toDate = toDate.Date;
+
+            if (fromDate > toDate)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "From Date cannot be greater than To Date."
+                });
+            }
+
+            var hierarchy =
+                _repo.GetEmployeeHierarchy(currentEmpCode);
+
+            var self = hierarchy.FirstOrDefault(e =>
+                string.Equals(
+                    e.EmpCode?.Trim(),
+                    currentEmpCode.Trim(),
+                    StringComparison.OrdinalIgnoreCase));
+
+            var target = hierarchy.FirstOrDefault(e =>
+                string.Equals(
+                    e.EmpCode?.Trim(),
+                    empCode.Trim(),
+                    StringComparison.OrdinalIgnoreCase));
+
+            if (self == null || target == null)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Employee not found."
+                });
+            }
+
+            // Keep your existing security check
+            if (string.IsNullOrWhiteSpace(self.HierarchyPath) ||
+                string.IsNullOrWhiteSpace(target.HierarchyPath) ||
+                !target.HierarchyPath.StartsWith(
+                    self.HierarchyPath,
+                    StringComparison.OrdinalIgnoreCase))
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "You are not allowed to view this employee."
+                });
+            }
+
+            var result = await _repo.GetEmployeePerformance(currentEmpCode,empCode,fromDate,toDate);
+
+            return Json(new
+            {
+                success = true,
+                data = result
+            });
         }
+
+
         [HttpGet]
         public IActionResult GetInvoiceRenewals()
         {
