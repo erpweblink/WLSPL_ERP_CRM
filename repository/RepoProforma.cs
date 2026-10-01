@@ -48,7 +48,7 @@ namespace WEBLINK_CRM.repository
                   SELECT qm.id, Quotationno AS displayText 
                     FROM stswlspl.tblQuotationMain as qm
                     LEFT JOIN [WLSPLCRM].[dbo].[tbl_ProformaInvoiceMain] as pm ON pm.AgainstByValue=qm.id
-                    WHERE qm.companyname = @cname  AND qm.isdeleted = 0
+                    WHERE qm.companyname = @cname  
                    AND  pm.id is null
                     ORDER BY id DESC
                ";
@@ -778,15 +778,9 @@ GETDATE(),
                 string historyMessage;
            
 
-                // logged-in employee: sessionname holds the emp code
-                string updatedByName = await GetEmployeeNameAsync(connection, transaction, model.main.sessionname);
-
                 if (isUpdate)
                 {
-                    // original creator: CreatedBy column holds the emp code
-                    string createdByCode = GetOldText(oldValues, "CreatedBy");
-                    string createdByName = await GetEmployeeNameAsync(connection, transaction, createdByCode);
-                    string createdDate = GetOldDate(oldValues, "CreatedDate");
+                  
                     var newValues = new (string Label, string Column, object? Value)[]
                                  {
         ("Invoice Date",        "invoicedate",         model.main.invoicedate),
@@ -794,7 +788,7 @@ GETDATE(),
         ("Company Name",        "companyname",         model.main.companyName),
         ("GST No",              "cgstin",              model.main.gstIn),
         ("Address",             "address",             model.main.Address),
-        ("State",               "billstate",           model.main.state),
+        ("State",               "state",               model.main.state),
         ("Service Description", "servicedescription",  model.main.servicedescription),
         ("Taxable Value",       "taxablevalue",        model.main.taxablevalue ?? 0),
         ("CGST Amount",         "cgstamt",             model.main.cgstamt ?? 0),
@@ -809,7 +803,7 @@ GETDATE(),
                     var changes = BuildChangeList(oldValues, newValues);
 
                     string header =
-                        $"Proforma Invoice {model.main.invoiceno} | Created By: {createdByName} | Created Date: {createdDate} | Updated By: {updatedByName} | Updated On: {now}";
+                        $"Proforma Invoice {model.main.invoiceno} |  Updated On: {now}";
 
                     historyMessage = changes.Count > 0
                         ? $"{header} | Changes: {string.Join("; ", changes)}"
@@ -818,7 +812,7 @@ GETDATE(),
                 else
                 {
                     historyMessage =
-                        $"Proforma Invoice {model.main.invoiceno} | Created By: {updatedByName} | Created Date: {now}";
+                        $"Proforma Invoice {model.main.invoiceno} | Created Date: {now}";
                 }
 
                 // keep within column size (adjust to your column length / use NVARCHAR(MAX))
@@ -856,35 +850,6 @@ GETDATE(),
             }
         }
 
-        private async Task<string> GetEmployeeNameAsync(SqlConnection connection,DbTransaction transaction, string? empCode)
-        {
-            if (string.IsNullOrWhiteSpace(empCode))
-                return "-";
-
-            var name = await connection.ExecuteScalarAsync<string?>(
-                @"SELECT TOP 1 name
-          FROM Employees
-          WHERE empcode = @empcode",
-                new { empcode = empCode.Trim() },
-                transaction);
-
-            // fall back to the code if no name is found
-            return string.IsNullOrWhiteSpace(name) ? empCode.Trim() : name.Trim();
-        }
-
-        private static string GetOldText(Dictionary<string, object?> old, string column)
-        {
-            if (old != null && old.TryGetValue(column, out var v) && v != null && v != DBNull.Value)
-                return v.ToString()!.Trim();
-            return "-";
-        }
-
-        private static string GetOldDate(Dictionary<string, object?> old, string column)
-        {
-            if (old != null && old.TryGetValue(column, out var v) && v is DateTime d)
-                return d.ToString("dd-MMM-yyyy hh:mm tt");
-            return "-";
-        }
         private static List<string> BuildChangeList(Dictionary<string, object?> oldValues,IEnumerable<(string Label, string Column, object? Value)> newValues)
         {
             var changes = new List<string>();
@@ -935,12 +900,9 @@ GETDATE(),
          _configuration.GetConnectionString("Conn_Stringg"));
 
             const string sql = @"
-        UPDATE [WLSPLCRM].[dbo].[tbl_ProformaInvoiceMain] 
-        SET 
-            IsDeleted = 1,
-            DeletedBy = @deletedBy,
-            DeletedOn = GETDATE()
-        WHERE id = @invoiceId;";
+        DELETE tbl_ProformaInvoiceMain  WHERE id = @invoiceId
+DELETE tbl_ProformaInvoiceDetails  WHERE invoiceid = @invoiceId
+DELETE tbl_ProformaInvoiceBankDetails  WHERE InvoiceMainId = @invoiceId";
 
             await connection.OpenAsync();
 
@@ -988,8 +950,6 @@ GETDATE(),
 
             return results;
         }
-
-
 
         public byte[] ProformaPdf(int id)
         {
@@ -1931,7 +1891,16 @@ GETDATE(),
                             isapprove,
                             isreject,
                             ExportInvoiceNo,
-                            NAME
+                            NAME, CASE
+        WHEN EXISTS (
+            SELECT 1
+            FROM tbl_ProformaInvoiceBankDetails d
+            WHERE d.InvoiceMainId = pm.id
+            AND TaxInvoiceID IS NULL
+        )
+        THEN 'Open'
+        ELSE 'Close'
+    END AS Status
 
                         FROM tbl_ProformaInvoiceMain as pm
                         INNER JOIN employees as e on e.empcode=pm.sessionname
