@@ -1,10 +1,13 @@
 ﻿using Dapper;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Data.Common;
 using System.Net;
+using System.Threading.Channels;
 using WEBLINK_CRM.Models;
 using WLSPL_ERP_CRM.Models;
 using static WEBLINK_CRM.Models.VM_Proforma;
@@ -184,6 +187,24 @@ namespace WEBLINK_CRM.repository
 
             try
             {
+                bool isUpdate = Action.Equals("updateolddata", StringComparison.OrdinalIgnoreCase);
+
+                Dictionary<string, object?> oldValues = null;
+
+                if (isUpdate)
+                {
+                    var oldRow = await connection.QueryFirstOrDefaultAsync(
+                        "SELECT * FROM tbl_ProformaInvoiceMain WHERE id = @id",
+                        new { id = model.main.Id },
+                        transaction);
+
+                    if (oldRow != null)
+                    {
+                        oldValues = new Dictionary<string, object?>(
+                            (IDictionary<string, object>)oldRow,
+                            StringComparer.OrdinalIgnoreCase);
+                    }
+                }
                 // =========================================================
                 // MAIN INVOICE PARAMETERS
                 // =========================================================
@@ -247,7 +268,7 @@ namespace WEBLINK_CRM.repository
 
                 parameters.Add(
                     "@state",
-                    "Maharashtra");
+                    model.main.state);
 
                 parameters.Add(
                     "@billstate",
@@ -256,27 +277,6 @@ namespace WEBLINK_CRM.repository
                 parameters.Add(
                     "@BillingStatecode",
                     model.main.statecode);
-
-
-                // =========================================================
-                // TRANSACTION
-                // =========================================================
-
-                parameters.Add(
-                    "@TransMode",
-                    model.main.TransMode);
-
-                parameters.Add(
-                    "@TransNo",
-                    model.main.TransNo);
-
-                parameters.Add(
-                    "@TransDate",
-                    model.main.TransDate);
-
-                parameters.Add(
-                    "@TransAmt",
-                    model.main.TransAmt);
 
 
                 // =========================================================
@@ -773,8 +773,75 @@ GETDATE(),
                 // COMMIT EVERYTHING
                 // =========================================================
 
-                await transaction.CommitAsync();
 
+                string now = DateTime.Now.ToString("dd-MMM-yyyy hh:mm tt");
+                string historyMessage;
+           
+
+                // logged-in employee: sessionname holds the emp code
+                string updatedByName = await GetEmployeeNameAsync(connection, transaction, model.main.sessionname);
+
+                if (isUpdate)
+                {
+                    // original creator: CreatedBy column holds the emp code
+                    string createdByCode = GetOldText(oldValues, "CreatedBy");
+                    string createdByName = await GetEmployeeNameAsync(connection, transaction, createdByCode);
+                    string createdDate = GetOldDate(oldValues, "CreatedDate");
+                    var newValues = new (string Label, string Column, object? Value)[]
+                                 {
+        ("Invoice Date",        "invoicedate",         model.main.invoicedate),
+        ("Invoice Type",        "InvoiceType",         model.main.InvoiceType),
+        ("Company Name",        "companyname",         model.main.companyName),
+        ("GST No",              "cgstin",              model.main.gstIn),
+        ("Address",             "address",             model.main.Address),
+        ("State",               "billstate",           model.main.state),
+        ("Service Description", "servicedescription",  model.main.servicedescription),
+        ("Taxable Value",       "taxablevalue",        model.main.taxablevalue ?? 0),
+        ("CGST Amount",         "cgstamt",             model.main.cgstamt ?? 0),
+        ("SGST Amount",         "sgstamt",             model.main.sgstamt ?? 0),
+        ("IGST Amount",         "igstamt",             model.main.igstamt ?? 0),
+        ("Total Amount",        "totalamtaftertax",    model.main.totalamtaftertax ?? 0),
+        ("Amount Received",     "TotalAmountReceived", model.main.TotalAmountReceived ?? 0),
+        ("TDS Amount",          "TDSAmount",           model.main.TDSAmount ?? 0),
+        ("Pending Amount",      "FinalPendingAmount",  model.main.FinalPendingAmount ?? 0),
+                                 };
+
+                    var changes = BuildChangeList(oldValues, newValues);
+
+                    string header =
+                        $"Proforma Invoice {model.main.invoiceno} | Created By: {createdByName} | Created Date: {createdDate} | Updated By: {updatedByName} | Updated On: {now}";
+
+                    historyMessage = changes.Count > 0
+                        ? $"{header} | Changes: {string.Join("; ", changes)}"
+                        : $"{header} | No field changes";
+                }
+                else
+                {
+                    historyMessage =
+                        $"Proforma Invoice {model.main.invoiceno} | Created By: {updatedByName} | Created Date: {now}";
+                }
+
+                // keep within column size (adjust to your column length / use NVARCHAR(MAX))
+                if (historyMessage.Length > 4000)
+                    historyMessage = historyMessage.Substring(0, 3997) + "...";
+
+                const string historySql = @"
+    INSERT INTO [dbo].[CommentHistory]
+        (sessionname, ccode, commentdatetime, message)
+    VALUES
+        (@sessionname, @ccode, @commentdatetime, @message)";
+
+                await connection.ExecuteAsync(
+                    historySql,
+                    new
+                    {
+                        sessionname = model.main.sessionname,
+                        ccode = model.main.companyCode,
+                        commentdatetime = DateTime.Now,
+                        message = historyMessage
+                    },
+                    transaction);
+                await transaction.CommitAsync();
                 return true;
             }
             catch (Exception ex)
@@ -787,6 +854,79 @@ GETDATE(),
 
                 throw ex;
             }
+        }
+
+        private async Task<string> GetEmployeeNameAsync(SqlConnection connection,DbTransaction transaction, string? empCode)
+        {
+            if (string.IsNullOrWhiteSpace(empCode))
+                return "-";
+
+            var name = await connection.ExecuteScalarAsync<string?>(
+                @"SELECT TOP 1 name
+          FROM Employees
+          WHERE empcode = @empcode",
+                new { empcode = empCode.Trim() },
+                transaction);
+
+            // fall back to the code if no name is found
+            return string.IsNullOrWhiteSpace(name) ? empCode.Trim() : name.Trim();
+        }
+
+        private static string GetOldText(Dictionary<string, object?> old, string column)
+        {
+            if (old != null && old.TryGetValue(column, out var v) && v != null && v != DBNull.Value)
+                return v.ToString()!.Trim();
+            return "-";
+        }
+
+        private static string GetOldDate(Dictionary<string, object?> old, string column)
+        {
+            if (old != null && old.TryGetValue(column, out var v) && v is DateTime d)
+                return d.ToString("dd-MMM-yyyy hh:mm tt");
+            return "-";
+        }
+        private static List<string> BuildChangeList(Dictionary<string, object?> oldValues,IEnumerable<(string Label, string Column, object? Value)> newValues)
+        {
+            var changes = new List<string>();
+            if (oldValues == null) return changes;
+
+            foreach (var (label, column, newVal) in newValues)
+            {
+                oldValues.TryGetValue(column, out var oldVal);
+
+                if (!AreEqual(oldVal, newVal))
+                {
+                    changes.Add($"{label}: '{Display(oldVal)}' → '{Display(newVal)}'");
+                }
+            }
+
+            return changes;
+        }
+
+        private static bool AreEqual(object? a, object? b)
+        {
+            a = a == DBNull.Value ? null : a;
+            b = b == DBNull.Value ? null : b;
+
+            if (a == null && b == null) return true;
+            if (a == null) return string.IsNullOrWhiteSpace(b?.ToString());
+            if (b == null) return string.IsNullOrWhiteSpace(a.ToString());
+
+            if (a is DateTime da && b is DateTime db) return da.Date == db.Date;
+
+            if (decimal.TryParse(a.ToString(), out var na) &&
+                decimal.TryParse(b.ToString(), out var nb))
+                return Math.Round(na, 2) == Math.Round(nb, 2);
+
+            return string.Equals(a.ToString()?.Trim(), b.ToString()?.Trim(),
+                                 StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string Display(object? value)
+        {
+            if (value == null || value == DBNull.Value) return "-";
+            if (value is DateTime d) return d.ToString("dd-MMM-yyyy");
+            return value.ToString()?.Trim() ?? "-";
         }
 
         public async Task<bool> DeleteInvoiceDetails(int id, string name)
@@ -849,29 +989,6 @@ GETDATE(),
             return results;
         }
 
-        public async Task<List<ProformaInvoiceCreate>> GetProformaList(string size, string sessionname)
-        {
-            using var connection = new SqlConnection(
-       _configuration.GetConnectionString("Conn_Stringg"));
-
-            const string sql = @"
-        SELECT p.*
-        FROM [WLSPLCRM].[dbo].[tbl_ProformaInvoiceMain] p
-        WHERE p.IsDeleted = 0
-          AND EXISTS
-          (
-              SELECT 1
-              FROM dbo.FN_EmployeeHierarchy(@SessionName) h
-              WHERE h.empcode = p.sessionname
-          )
-        ORDER BY p.Id DESC;";
-
-            var proformas = await connection.QueryAsync<ProformaInvoiceCreate>(
-                sql,
-                new { SessionName = sessionname });
-
-            return proformas.ToList();
-        }
 
 
         public byte[] ProformaPdf(int id)
@@ -1584,6 +1701,265 @@ GETDATE(),
 
                 throw;
             }
+        }
+
+
+        public async Task<List<ProformaInvoice.ProformaInvoiceCreate>> GetFinancialYearSummary(string financialYear, string? salesManager, string empCode, string empRole)
+        {
+            var result = new List<ProformaInvoice.ProformaInvoiceCreate>();
+
+            if (string.IsNullOrWhiteSpace(financialYear))
+                return result;
+
+            var parts = financialYear.Split('-');
+
+            if (parts.Length != 2)
+                return result;
+
+            int startYear = Convert.ToInt32(parts[0]);
+            int endYear = 2000 + Convert.ToInt32(parts[1]);
+
+            DateTime startDate = new DateTime(startYear, 4, 1);
+            DateTime endDate = new DateTime(endYear, 3, 31);
+
+            string connectionString =
+                _configuration.GetConnectionString("Conn_Stringg");
+
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                await con.OpenAsync();
+
+                string query = @"
+                    SELECT 
+                            MONTH(invoicedate) AS Mon,
+
+                            COUNT(invoiceno) AS TotalInvoice,
+
+                            ISNULL(
+                                SUM(
+                                    CAST(totalamtbeforetax AS DECIMAL(18,2))
+                                ), 0
+                            ) AS TotalTaxableValue,
+
+                            ISNULL(
+                                SUM(
+                                    CAST(ISNULL(cgstamt, 0) AS DECIMAL(18,2))
+                                    +
+                                    CAST(ISNULL(sgstamt, 0) AS DECIMAL(18,2))
+                                    +
+                                    CAST(ISNULL(igstamt, 0) AS DECIMAL(18,2))
+                                ), 0
+                            ) AS TotalTaxAmount,
+
+                            ISNULL(
+                                SUM(
+                                    CAST(totalamtaftertax AS DECIMAL(18,2))
+                                ), 0
+                            ) AS GrandTotal
+
+                        FROM tbl_ProformaInvoiceMain
+
+                        WHERE 
+                            e_invoice_cancel_status IS NULL
+                            AND invoicedate >= @StartDate
+                            AND invoicedate < DATEADD(DAY, 1, @EndDate)
+                            AND (@SalesManager IS NULL OR sessionname  = @SalesManager)                     
+                                      AND EXISTS
+        (
+            SELECT 1
+            FROM dbo.FN_EmployeeHierarchy(@CurrentUser) h
+            WHERE h.empcode = sessionname
+        )
+
+                        GROUP BY MONTH(invoicedate)
+
+                        ORDER BY
+                            CASE
+                                WHEN MONTH(invoicedate) = 4 THEN 1
+                                WHEN MONTH(invoicedate) = 5 THEN 2
+                                WHEN MONTH(invoicedate) = 6 THEN 3
+                                WHEN MONTH(invoicedate) = 7 THEN 4
+                                WHEN MONTH(invoicedate) = 8 THEN 5
+                                WHEN MONTH(invoicedate) = 9 THEN 6
+                                WHEN MONTH(invoicedate) = 10 THEN 7
+                                WHEN MONTH(invoicedate) = 11 THEN 8
+                                WHEN MONTH(invoicedate) = 12 THEN 9
+                                WHEN MONTH(invoicedate) = 1 THEN 10
+                                WHEN MONTH(invoicedate) = 2 THEN 11
+                                WHEN MONTH(invoicedate) = 3 THEN 12
+                            END;
+
+                    ";
+
+                using (SqlCommand cmd =
+                       new SqlCommand(query, con))
+                {
+                    cmd.Parameters.AddWithValue("@StartDate", startDate);
+                    cmd.Parameters.AddWithValue("@EndDate", endDate);
+                    cmd.Parameters.AddWithValue("@SalesManager", string.IsNullOrWhiteSpace(salesManager) ? DBNull.Value : salesManager);
+                    cmd.Parameters.AddWithValue("@CurrentUser", empCode);
+                    cmd.Parameters.AddWithValue("@CurrentRole", empRole);
+
+                    using (SqlDataReader reader =
+                           await cmd.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            result.Add(
+                                new ProformaInvoice.ProformaInvoiceCreate
+                                {
+                                    mon = Convert.ToInt32(
+                                        reader["Mon"]),
+
+                                    TotalInvoice = Convert.ToInt32(
+                                        reader["TotalInvoice"]),
+
+                                    TotalTaxableValue = Convert.ToDecimal(
+                                        reader["TotalTaxableValue"]),
+
+                                    TotalTaxAmount = Convert.ToDecimal(
+                                        reader["TotalTaxAmount"]),
+
+                                    GrandTotal = Convert.ToDecimal(
+                                        reader["GrandTotal"])
+                                });
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public async Task<dynamic> GetSalesPersonList(string empCode, string empRole)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(_configuration.GetConnectionString("Conn_Stringg")))
+                {
+                    await connection.OpenAsync();
+                    string query = @"  SELECT empcode as UserCode, name as FullName 
+              FROM dbo.FN_EmployeeHierarchy(@CurrentUser) 
+              WHERE isdeleted=0 And status=1";
+                    var parameters = new DynamicParameters();
+                    parameters.Add("@CurrentUser", empCode);           
+                    using (var multi = await connection.QueryMultipleAsync(query, parameters))
+                    {
+                        var salesManagers = (await multi.ReadAsync<dynamic>()).ToList();
+                        return new
+                        {
+                            SalesManagers = salesManagers
+                        };
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public async Task<List<ProformaInvoice.ProformaInvoiceCreate>> GetInfo(string financialYear, int? month, string? salesManager, string empCode, string empRole)
+        {
+            using var connection = new SqlConnection(
+                _configuration.GetConnectionString("Conn_Stringg"));
+
+            int startYear = int.Parse(financialYear.Substring(0, 4));
+
+            DateTime startDate;
+            DateTime endDate;
+
+            // Month = 0 or null => Full financial year
+            if (!month.HasValue || month.Value == 0)
+            {
+                startDate = new DateTime(startYear, 4, 1);
+                endDate = new DateTime(startYear + 1, 4, 1);
+            }
+            else
+            {
+                int selectedMonth = month.Value;
+
+                int year = selectedMonth >= 4
+                    ? startYear
+                    : startYear + 1;
+
+                startDate = new DateTime(year, selectedMonth, 1);
+                endDate = startDate.AddMonths(1);
+            }
+
+            const string query = @"
+                        SELECT
+                            pm.id,
+                            invoicedate,
+                            invoiceno,
+                            companyname,
+                            Remarks,
+                            cgstin AS gstin,
+
+                            ISNULL(
+                                TRY_CAST(totalamtbeforetax AS DECIMAL(18,2)),
+                                0
+                            ) AS totalamtbeforetax,
+
+                            ISNULL(
+                                TRY_CAST(sgstamt AS DECIMAL(18,2)),
+                                0
+                            )
+                            +
+                            ISNULL(
+                                TRY_CAST(cgstamt AS DECIMAL(18,2)),
+                                0
+                            )
+                            +
+                            ISNULL(
+                                TRY_CAST(igstamt AS DECIMAL(18,2)),
+                                0
+                            ) AS total_tax_amount,
+
+                            ISNULL(
+                                TRY_CAST(totalamtaftertax AS DECIMAL(18,2)),
+                                0
+                            ) AS totalamtaftertax,
+          ISNULL(
+                                TRY_CAST(TotalAmountReceived AS DECIMAL(18,2)),
+                                0
+                            ) AS TotalAmountReceived,
+                              ISNULL(
+                                TRY_CAST(FinalPendingAmount AS DECIMAL(18,2)),
+                                0
+                            ) AS FinalPendingAmount,
+                            isapprove,
+                            isreject,
+                            ExportInvoiceNo,
+                            NAME
+
+                        FROM tbl_ProformaInvoiceMain as pm
+                        INNER JOIN employees as e on e.empcode=pm.sessionname
+
+                        WHERE invoicedate >= @StartDate
+                          AND invoicedate < @EndDate
+                          AND (@SalesManager IS NULL OR empcode = @SalesManager)                        
+                               AND EXISTS
+          (
+              SELECT 1
+              FROM dbo.FN_EmployeeHierarchy(@CurrentUser) h
+              WHERE h.empcode = pm.sessionname
+          )
+
+                        ORDER BY id DESC;
+                    ";
+
+            var parameters = new DynamicParameters();
+
+            parameters.Add("@StartDate", startDate);
+            parameters.Add("@EndDate", endDate);
+            parameters.Add("@SalesManager", string.IsNullOrWhiteSpace(salesManager) ? null : salesManager, DbType.String);
+            parameters.Add("@CurrentUser", empCode);
+            parameters.Add("@CurrentRole", empRole);
+
+            var result = await connection.QueryAsync<ProformaInvoice.ProformaInvoiceCreate>(query, parameters);
+
+            return result.ToList();
         }
 
     }

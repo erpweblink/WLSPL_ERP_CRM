@@ -771,6 +771,8 @@ var GetProformaForm = function () {
 
     function calculateAll() {
 
+        const round2 = n => Math.round((n + Number.EPSILON) * 100) / 100;
+
         let totalTaxable = 0, totalCGST = 0, totalSGST = 0, totalIGST = 0, grandTotal = 0;
 
         document.querySelectorAll('.invoice-item-row').forEach(function (row) {
@@ -781,7 +783,13 @@ var GetProformaForm = function () {
             grandTotal += getRowNumber(row, '.row-total');
         });
 
-        const totalGST = totalCGST + totalSGST + totalIGST;
+        totalTaxable = round2(totalTaxable);
+        totalCGST = round2(totalCGST);
+        totalSGST = round2(totalSGST);
+        totalIGST = round2(totalIGST);
+        grandTotal = round2(grandTotal);
+
+        const totalGST = round2(totalCGST + totalSGST + totalIGST);
 
         // Invoice totals
         $('#totalTaxable').val(totalTaxable.toFixed(2));
@@ -790,28 +798,41 @@ var GetProformaForm = function () {
         $('#totalIGST').val(totalIGST.toFixed(2));
         $('#grandTotalTable').val(grandTotal.toFixed(2));
 
-        // Payment totals
+        // Deal totals
         $('#txtTotalDealBasicAmount').val(totalTaxable.toFixed(2));
         $('#txtTotalDealGSTAmount').val(totalGST.toFixed(2));
 
-        // Received (bank rows = basic received)
-        const bankTotal = getBankTotal();
-        $('#txtBasicAmountReceived').val(bankTotal.toFixed(2));
+        // =========================================================
+        // PAYMENT ALLOCATION: bank total -> Basic first, rest -> GST
+        // =========================================================
+        const bankTotal = round2(getBankTotal());
 
-        const gstReceived = getNumber('txtGSTAmountReceived');
+        const basicReceived = round2(Math.min(bankTotal, totalTaxable));
+        const gstReceived = round2(Math.min(Math.max(bankTotal - totalTaxable, 0), totalGST));
 
-        // Balances
-        $('#txtBalanceBasicAmount').val(Math.max(totalTaxable - bankTotal, 0).toFixed(2));
-        $('#txtBalanceGSTAmount').val(Math.max(totalGST - gstReceived, 0).toFixed(2));
+        const balanceBasic = round2(Math.max(totalTaxable - basicReceived, 0));
+        const balanceGST = round2(Math.max(totalGST - gstReceived, 0));
 
-        // TDS
+        $('#txtBasicAmountReceived').val(basicReceived.toFixed(2));
+        $('#txtGSTAmountReceived').val(gstReceived.toFixed(2));
+        $('#txtBalanceBasicAmount').val(balanceBasic.toFixed(2));
+        $('#txtBalanceGSTAmount').val(balanceGST.toFixed(2));
+
+        // TDS (on taxable value). txtTdsAmount is the TDS Per(%) input
         const tdsPercentage = getNumber('txtTdsAmount');
-        const tdsAmount = totalTaxable * tdsPercentage / 100;
+        const tdsAmount = round2(totalTaxable * tdsPercentage / 100);
         $('#txtTDSAmount').val(tdsAmount.toFixed(2));
 
         // Final balance
-        const finalBalance = grandTotal - bankTotal - gstReceived - tdsAmount;
-        $('#txtTotalAmountBalance').val(Math.max(finalBalance, 0).toFixed(2));
+        const finalBalance = round2(Math.max(grandTotal - bankTotal - tdsAmount, 0));
+        $('#txtTotalAmountBalance').val(finalBalance.toFixed(2));
+
+        // =========================================================
+        // HIDDEN VALUES USED ON SAVE
+        // =========================================================
+        $('#hdnTotalAmountReceived').val(round2(basicReceived + gstReceived).toFixed(2));
+        $('#hdnPendingAmountBeforeTDS').val(round2(balanceBasic + balanceGST).toFixed(2));
+        $('#hdnBankAmountReceived').val(bankTotal.toFixed(2));
 
         updateAmountInWords();
     }
@@ -1326,7 +1347,13 @@ var GetProformaForm = function () {
     // ============================================================
     // SAVE / UPDATE
     // ============================================================
-
+    function getBankTotal() {
+        let total = 0;
+        $('#tblBankDetail tbody tr').each(function () {
+            total += parseFloat($(this).find('.bank-amount').val()) || 0;
+        });
+        return total;
+    }
     function saveInvoice() {
 
         calculateAll();
@@ -1338,21 +1365,23 @@ var GetProformaForm = function () {
         const totalCGST = getNumber('totalCGST');
         const totalSGST = getNumber('totalSGST');
         const totalIGST = getNumber('totalIGST');
-        const totalGST = totalCGST + totalSGST + totalIGST;
         const grandTotal = getNumber('grandTotalTable');
 
-        // ---- Payment ----
+        // ---- Deal / Payment (all read straight from the textboxes) ----
+        const totalGST = getNumber('txtTotalDealGSTAmount');
         const basicReceived = getNumber('txtBasicAmountReceived');
         const gstReceived = getNumber('txtGSTAmountReceived');
-        const tdsPercentage = getNumber('txtTdsAmount');
-        const tdsAmount = getNumber('txtTDSAmount');
         const balanceBasic = getNumber('txtBalanceBasicAmount');
         const balanceGST = getNumber('txtBalanceGSTAmount');
+        const tdsPercentage = getNumber('txtTdsAmount');            // TDS Per(%)
+        const tdsAmount = getNumber('txtTDSAmount');            // TDS Amount
+        const finalBalance = getNumber('txtTotalAmountBalance');   // Balance Total Amount
 
-        const totalAmountReceived = basicReceived + gstReceived;
-        const pendingAmountBeforeTDS = balanceBasic + balanceGST;
-        const bankAmountReceived = getBankTotal();
-        const finalPendingAmount = Math.max(pendingAmountBeforeTDS - tdsAmount, 0);
+        // ---- Fields with no visible textbox: use hidden inputs ----
+        const totalAmountReceived = getNumber('hdnTotalAmountReceived');
+        const pendingAmountBeforeTDS = getNumber('hdnPendingAmountBeforeTDS');
+        const bankAmountReceived = getNumber('hdnBankAmountReceived');
+        const finalPendingAmount = finalBalance;   // same value as Balance Total Amount
 
         // ---- Bank rows ----
         const bankDetails = [];

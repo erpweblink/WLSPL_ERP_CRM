@@ -855,7 +855,7 @@
                             <tbody>
                                 <tr>
                                     <td id="lblTotalDealBasicAmount">Total Deal Basic Amount</td>
-                                    <td><input class="form-control numeric" value="0" id="txtTotalDealBasicAmount" name="txtTotalDealBasicAmount" /></td>
+                                    <td><input class="form-control numeric" value="0" id="txtTotalDealBasicAmount" name="txtTotalDealBasicAmount" readonly /></td>
                                 </tr>
                                 <tr id="trTotalDealGSTAmount">
                                     <td>Total Deal GST Amount (<span id="spnGSTper"></span>%) </td>
@@ -864,11 +864,11 @@
                                 <tr><td style="background-color:#194462;"></td><td style="background-color:#194462;"></td></tr>
                                 <tr>
                                     <td>Received Basic Amount</td>
-                                    <td><input class="form-control numeric" id="txtBasicAmountReceived" name="txtBasicAmountReceived" value="0" /></td>
+                                    <td><input class="form-control numeric" id="txtBasicAmountReceived" name="txtBasicAmountReceived" value="0" readonly /></td>
                                 </tr>
                                 <tr id="trGSTAmountReceived">
                                     <td>Received GST Amount</td>
-                                    <td><input class="form-control numeric" id="txtGSTAmountReceived" name="txtGSTAmountReceived" value="0" /></td>
+                                    <td><input class="form-control numeric" id="txtGSTAmountReceived" name="txtGSTAmountReceived" value="0" readonly /></td>
                                 </tr>
                                 <tr><td style="background-color:#194462;"></td><td style="background-color:#194462;"></td></tr>
                                 <tr>
@@ -893,6 +893,9 @@
                                     <td>Balance Total Amount</td>
                                     <td><input class="form-control" id="txtTotalAmountBalance" name="txtTotalAmountBalance" readonly /></td>
                                 </tr>
+                                <input type="hidden" id="hdnTotalAmountReceived" />
+                                <input type="hidden" id="hdnPendingAmountBeforeTDS" />
+                                <input type="hidden" id="hdnBankAmountReceived" />
                             </tbody>
                         </table>
                     </div>
