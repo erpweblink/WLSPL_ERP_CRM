@@ -1440,14 +1440,15 @@
                                     <a href="@Url.Action("Create", "Proforma", new { id = EncryptionHelper.Encrypt(item.Id) })" class="invoice-action-btn invoice-edit-btn" title="Edit Invoice">
                                         <i class="fa fa-edit"></i>
                                     </a>
-                                  <button type="button"
+                                    @if (item.Status == "Open")
+                                    {
+                                        <button type="button"
                                                 class="btn btn-sm btn-danger"
                                                 title="Delete"
                                                 onclick="DeleteProforma('@item.Id')">
-
                                             <i class="fa fa-trash"></i>
-
-                                        </button>                               
+                                        </button>
+                                    }
                                     <button type="button"
                                             class="btn btn-sm btn-success"
                                             title="Send PDF"
