@@ -1179,11 +1179,7 @@
                     <i class="fa fa-file-invoice"></i>
                     Proforma Invoice List
                 </h3>
-                <div class="d-flex align-items-center gap-2">
-                    <button type="button" id="btnToggleFilter" class="btn-filter-toggle">
-                        <i class="fa fa-filter-circle-xmark"></i>
-                        <span>Hide Filters</span>
-                    </button>
+                <div class="d-flex align-items-center gap-2">                  
                 
                         <a asp-action="Create" class="btn btn-primary add-btn btn-sm">
                             <i class="fa fa-plus"></i>
@@ -1501,19 +1497,6 @@
 </div>
 
 <script type="text/javascript">
-    (function () {
-        try {
-            if (localStorage.getItem('invoiceFilterCollapsed') === '1') {
-                document.getElementById('filterCard').classList.add('filter-collapsed');
-                var btn = document.getElementById('btnToggleFilter');
-                btn.querySelector('span').textContent = 'Show Filters';
-                btn.querySelector('i').className = 'fa fa-filter';
-            }
-        } catch (e) { }
-    })();
-</script>
-
-<script type="text/javascript">
     const rowsPerPage = 20;
     let currentPage = 1;
     let allRows = [];
@@ -1523,18 +1506,7 @@
     const selectedFY = "@selectedFinancialYear";
     const selectedMonth = "@selectedMonth";   // "all" or "04".."03"
 
-      // ── Filter panel toggle (state is remembered across reloads) ──
-    document.getElementById('btnToggleFilter').addEventListener('click', function () {
-        const card = document.getElementById('filterCard');
-        card.classList.toggle('filter-collapsed');
-        const collapsed = card.classList.contains('filter-collapsed');
-
-        this.querySelector('span').textContent = collapsed ? 'Show Filters' : 'Hide Filters';
-        this.querySelector('i').className = collapsed ? 'fa fa-filter' : 'fa fa-filter-circle-xmark';
-
-        try { localStorage.setItem('invoiceFilterCollapsed', collapsed ? '0' : '1'); } catch (e) { }
-    });
-
+  
       // ── Summary panel toggle (state is remembered across reloads) ──
     function toggleSection(cardId, barId) {
         const card = document.getElementById(cardId);

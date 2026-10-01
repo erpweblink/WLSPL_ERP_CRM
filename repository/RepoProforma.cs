@@ -1,10 +1,13 @@
 ﻿using Dapper;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Data.Common;
 using System.Net;
+using System.Threading.Channels;
 using WEBLINK_CRM.Models;
 using WLSPL_ERP_CRM.Models;
 using static WEBLINK_CRM.Models.VM_Proforma;
@@ -184,6 +187,24 @@ namespace WEBLINK_CRM.repository
 
             try
             {
+                bool isUpdate = Action.Equals("updateolddata", StringComparison.OrdinalIgnoreCase);
+
+                Dictionary<string, object?> oldValues = null;
+
+                if (isUpdate)
+                {
+                    var oldRow = await connection.QueryFirstOrDefaultAsync(
+                        "SELECT * FROM tbl_ProformaInvoiceMain WHERE id = @id",
+                        new { id = model.main.Id },
+                        transaction);
+
+                    if (oldRow != null)
+                    {
+                        oldValues = new Dictionary<string, object?>(
+                            (IDictionary<string, object>)oldRow,
+                            StringComparer.OrdinalIgnoreCase);
+                    }
+                }
                 // =========================================================
                 // MAIN INVOICE PARAMETERS
                 // =========================================================
@@ -247,7 +268,7 @@ namespace WEBLINK_CRM.repository
 
                 parameters.Add(
                     "@state",
-                    "Maharashtra");
+                    model.main.state);
 
                 parameters.Add(
                     "@billstate",
@@ -256,27 +277,6 @@ namespace WEBLINK_CRM.repository
                 parameters.Add(
                     "@BillingStatecode",
                     model.main.statecode);
-
-
-                // =========================================================
-                // TRANSACTION
-                // =========================================================
-
-                parameters.Add(
-                    "@TransMode",
-                    model.main.TransMode);
-
-                parameters.Add(
-                    "@TransNo",
-                    model.main.TransNo);
-
-                parameters.Add(
-                    "@TransDate",
-                    model.main.TransDate);
-
-                parameters.Add(
-                    "@TransAmt",
-                    model.main.TransAmt);
 
 
                 // =========================================================
@@ -773,8 +773,75 @@ GETDATE(),
                 // COMMIT EVERYTHING
                 // =========================================================
 
-                await transaction.CommitAsync();
 
+                string now = DateTime.Now.ToString("dd-MMM-yyyy hh:mm tt");
+                string historyMessage;
+           
+
+                // logged-in employee: sessionname holds the emp code
+                string updatedByName = await GetEmployeeNameAsync(connection, transaction, model.main.sessionname);
+
+                if (isUpdate)
+                {
+                    // original creator: CreatedBy column holds the emp code
+                    string createdByCode = GetOldText(oldValues, "CreatedBy");
+                    string createdByName = await GetEmployeeNameAsync(connection, transaction, createdByCode);
+                    string createdDate = GetOldDate(oldValues, "CreatedDate");
+                    var newValues = new (string Label, string Column, object? Value)[]
+                                 {
+        ("Invoice Date",        "invoicedate",         model.main.invoicedate),
+        ("Invoice Type",        "InvoiceType",         model.main.InvoiceType),
+        ("Company Name",        "companyname",         model.main.companyName),
+        ("GST No",              "cgstin",              model.main.gstIn),
+        ("Address",             "address",             model.main.Address),
+        ("State",               "billstate",           model.main.state),
+        ("Service Description", "servicedescription",  model.main.servicedescription),
+        ("Taxable Value",       "taxablevalue",        model.main.taxablevalue ?? 0),
+        ("CGST Amount",         "cgstamt",             model.main.cgstamt ?? 0),
+        ("SGST Amount",         "sgstamt",             model.main.sgstamt ?? 0),
+        ("IGST Amount",         "igstamt",             model.main.igstamt ?? 0),
+        ("Total Amount",        "totalamtaftertax",    model.main.totalamtaftertax ?? 0),
+        ("Amount Received",     "TotalAmountReceived", model.main.TotalAmountReceived ?? 0),
+        ("TDS Amount",          "TDSAmount",           model.main.TDSAmount ?? 0),
+        ("Pending Amount",      "FinalPendingAmount",  model.main.FinalPendingAmount ?? 0),
+                                 };
+
+                    var changes = BuildChangeList(oldValues, newValues);
+
+                    string header =
+                        $"Proforma Invoice {model.main.invoiceno} | Created By: {createdByName} | Created Date: {createdDate} | Updated By: {updatedByName} | Updated On: {now}";
+
+                    historyMessage = changes.Count > 0
+                        ? $"{header} | Changes: {string.Join("; ", changes)}"
+                        : $"{header} | No field changes";
+                }
+                else
+                {
+                    historyMessage =
+                        $"Proforma Invoice {model.main.invoiceno} | Created By: {updatedByName} | Created Date: {now}";
+                }
+
+                // keep within column size (adjust to your column length / use NVARCHAR(MAX))
+                if (historyMessage.Length > 4000)
+                    historyMessage = historyMessage.Substring(0, 3997) + "...";
+
+                const string historySql = @"
+    INSERT INTO [dbo].[CommentHistory]
+        (sessionname, ccode, commentdatetime, message)
+    VALUES
+        (@sessionname, @ccode, @commentdatetime, @message)";
+
+                await connection.ExecuteAsync(
+                    historySql,
+                    new
+                    {
+                        sessionname = model.main.sessionname,
+                        ccode = model.main.companyCode,
+                        commentdatetime = DateTime.Now,
+                        message = historyMessage
+                    },
+                    transaction);
+                await transaction.CommitAsync();
                 return true;
             }
             catch (Exception ex)
@@ -787,6 +854,79 @@ GETDATE(),
 
                 throw ex;
             }
+        }
+
+        private async Task<string> GetEmployeeNameAsync(SqlConnection connection,DbTransaction transaction, string? empCode)
+        {
+            if (string.IsNullOrWhiteSpace(empCode))
+                return "-";
+
+            var name = await connection.ExecuteScalarAsync<string?>(
+                @"SELECT TOP 1 name
+          FROM Employees
+          WHERE empcode = @empcode",
+                new { empcode = empCode.Trim() },
+                transaction);
+
+            // fall back to the code if no name is found
+            return string.IsNullOrWhiteSpace(name) ? empCode.Trim() : name.Trim();
+        }
+
+        private static string GetOldText(Dictionary<string, object?> old, string column)
+        {
+            if (old != null && old.TryGetValue(column, out var v) && v != null && v != DBNull.Value)
+                return v.ToString()!.Trim();
+            return "-";
+        }
+
+        private static string GetOldDate(Dictionary<string, object?> old, string column)
+        {
+            if (old != null && old.TryGetValue(column, out var v) && v is DateTime d)
+                return d.ToString("dd-MMM-yyyy hh:mm tt");
+            return "-";
+        }
+        private static List<string> BuildChangeList(Dictionary<string, object?> oldValues,IEnumerable<(string Label, string Column, object? Value)> newValues)
+        {
+            var changes = new List<string>();
+            if (oldValues == null) return changes;
+
+            foreach (var (label, column, newVal) in newValues)
+            {
+                oldValues.TryGetValue(column, out var oldVal);
+
+                if (!AreEqual(oldVal, newVal))
+                {
+                    changes.Add($"{label}: '{Display(oldVal)}' → '{Display(newVal)}'");
+                }
+            }
+
+            return changes;
+        }
+
+        private static bool AreEqual(object? a, object? b)
+        {
+            a = a == DBNull.Value ? null : a;
+            b = b == DBNull.Value ? null : b;
+
+            if (a == null && b == null) return true;
+            if (a == null) return string.IsNullOrWhiteSpace(b?.ToString());
+            if (b == null) return string.IsNullOrWhiteSpace(a.ToString());
+
+            if (a is DateTime da && b is DateTime db) return da.Date == db.Date;
+
+            if (decimal.TryParse(a.ToString(), out var na) &&
+                decimal.TryParse(b.ToString(), out var nb))
+                return Math.Round(na, 2) == Math.Round(nb, 2);
+
+            return string.Equals(a.ToString()?.Trim(), b.ToString()?.Trim(),
+                                 StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string Display(object? value)
+        {
+            if (value == null || value == DBNull.Value) return "-";
+            if (value is DateTime d) return d.ToString("dd-MMM-yyyy");
+            return value.ToString()?.Trim() ?? "-";
         }
 
         public async Task<bool> DeleteInvoiceDetails(int id, string name)
@@ -1806,7 +1946,7 @@ GETDATE(),
               WHERE h.empcode = pm.sessionname
           )
 
-                        ORDER BY invoicedate ASC;
+                        ORDER BY id DESC;
                     ";
 
             var parameters = new DynamicParameters();
