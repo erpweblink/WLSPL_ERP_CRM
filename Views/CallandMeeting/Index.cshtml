@@ -390,7 +390,7 @@
             $("#ddlregbypopup").val(res.commentId.CreatedBy);
 
             const SessionRole = "@Context.Session.GetString("Role")";
-            if (SessionRole && (SessionRole === 'Admin' || SessionRole === 'Sub Admin')) {
+            if (SessionRole && (SessionRole === 'CEO')) {
             $("#ddlregbypopup").prop("disabled", false);
             } else {
             $("#ddlregbypopup").prop("disabled", true);

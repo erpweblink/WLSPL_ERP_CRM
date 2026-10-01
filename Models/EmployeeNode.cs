@@ -14,31 +14,20 @@
         public int HierarchyLevel { get; set; }
         public string HierarchyPath { get; set; } = string.Empty;
         public List<EmployeeNode> Children { get; set; } = new List<EmployeeNode>();
-
-        // Renewal property
         public int InvoiceRenewal { get; set; }
     }
-
     public class EmployeeNodeInfo
     {
         public string EmployeeName { get; set; } = string.Empty;
         public string EmployeeCode { get; set; } = string.Empty;
-
-        //Employee Compnaies Properties
         public string TotalCompanies { get; set; } = string.Empty;
         public string PaidCompanies { get; set; } = string.Empty;
         public string UnPaidCompanies { get; set; } = string.Empty;
-
-        //Meeting Properties
         public string Fresh { get; set; } = string.Empty;
         public string FollowUp { get; set; } = string.Empty;
         public string Service { get; set; } = string.Empty;
         public string Total { get; set; } = string.Empty;
-
-
     }
-
-
     public class InvoiceRenewalModel
     {
         public int Id { get; set; }
@@ -51,5 +40,4 @@
         public int DaysRemaining { get; set; }
         public decimal TotalAmount { get; set; }
     }
-
 }

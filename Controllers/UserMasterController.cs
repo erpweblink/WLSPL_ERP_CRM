@@ -40,8 +40,8 @@ namespace WEBLINK_CRM.Controllers
         {
             try
             {
-                var data = _repository.GetFilteredUsers(
-                    filter.ManagerEmpCode, filter.Status, filter.Search);
+                string managerName = string.IsNullOrEmpty(filter.ManagerEmpCode) ? HttpContext.Session.GetString("EmpCode").ToString() : filter.ManagerEmpCode;
+                var data = _repository.GetFilteredUsers(managerName, filter.Status, filter.Search);
 
                 var result = data.Select(u => new {
                     u.id,

@@ -799,7 +799,7 @@
 </form>
 
 <script type="text/javascript">
-    const isAdmin = @(Context.Session.GetString("Role").ToString() == "Admin" ? "true" : "false");
+    const isAdmin = @(Context.Session.GetString("Role").ToString() == "CEO" ? "true" : "false");
     let rowCounter = 0;
     const preloadedDetails = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.details ?? new List<Taxinvoice.InvoiceDetails>()));
     const receivedAmt = parseFloat(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.main.TransAmt ?? "0"))) || 0;

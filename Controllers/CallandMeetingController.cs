@@ -129,7 +129,7 @@ namespace WEBLINK_CRM.Controllers
 
             string role = HttpContext.Session.GetString("Role") ?? "NA";
 
-            if (role != "Admin" && role != "Sub Admin")
+            if (role != "CEO")
             {
                 return Json(new { success = false, message = "You are not authorized to edit this." });
             }

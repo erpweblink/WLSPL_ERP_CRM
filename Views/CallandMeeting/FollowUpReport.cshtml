@@ -1179,7 +1179,7 @@
 
 <script type="text/javascript">
     const currentUserRole = "@Context.Session.GetString("Role")";
-    const isAdmin = (currentUserRole === "Admin" || currentUserRole === "Sub Admin");
+    const isAdmin = (currentUserRole === "CEO");
 
     const rowsPerPage = 20;
     let currentPage = 1;
@@ -1457,7 +1457,7 @@
                 $("#ddlregbypopup").val(res.commentId[0].sessionname);
 
                 const SessionRole = "@Context.Session.GetString("Role")";
-                const isAdminRole = (SessionRole === "Admin" || SessionRole === "Sub Admin");
+                const isAdminRole = (SessionRole === "CEO");
                 $("#ddlregbypopup").prop("disabled", !isAdminRole);
                 isAdminRole ? $("#btnChange").show() : $("#btnChange").hide();
 

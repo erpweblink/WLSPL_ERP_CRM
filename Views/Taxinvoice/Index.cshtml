@@ -5,7 +5,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 
 
-    var isAdmin = Context.Session.GetString("Role")?.ToString() == "Admin";
+    var isAdmin = Context.Session.GetString("Role")?.ToString() == "CEO";
 
     var invoiceList = Model?.ToList() ?? new List<WLSPL_ERP_CRM.Models.Taxinvoice.TaxInvoiceCreate>();
     var today = DateTime.Now;
@@ -1192,7 +1192,7 @@
                         <i class="fa fa-filter-circle-xmark"></i>
                         <span>Hide Filters</span>
                     </button>
-                    @if (Context.Session.GetString("Role")?.ToString() == "Admin")
+                    @if (Context.Session.GetString("Role")?.ToString() == "CEO")
                     {
                         <a asp-action="Create" class="btn btn-primary add-btn btn-sm">
                             <i class="fa fa-plus"></i>

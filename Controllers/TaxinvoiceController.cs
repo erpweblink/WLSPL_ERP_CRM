@@ -248,7 +248,7 @@ namespace WLSPL_ERP_CRM.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateStatus(string id, string status)
         {
-            if (HttpContext.Session.GetString("Role") != "Admin")
+            if (HttpContext.Session.GetString("Role") != "CEO")
                 return Json(new
                 {
                     success = false,
@@ -382,7 +382,7 @@ namespace WLSPL_ERP_CRM.Controllers
                 return BadRequest("Invalid invoice ID.");
             }
 
-            bool isAdmin = HttpContext.Session.GetString("Role") == "Admin";
+            bool isAdmin = HttpContext.Session.GetString("Role") == "CEO";
 
             try
             {

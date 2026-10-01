@@ -390,7 +390,7 @@
             });
 
             const SessionRole = "@Context.Session.GetString("Role")";
-            const isAdminRole = (SessionRole === 'Admin' || SessionRole === 'Sub Admin');
+            const isAdminRole = (SessionRole === 'CEO');
             ddl.prop("disabled", !isAdminRole);
         });
 
@@ -589,7 +589,7 @@
         }
 
         const SessionRole = "@Context.Session.GetString("Role")";
-        const isAdminRole = (SessionRole === 'Admin' || SessionRole === 'Sub Admin');
+        const isAdminRole = (SessionRole === 'CEO');
 
         if (!isAdminRole) {
             showToast("Only Admin can change the Sales Manager.", "warning");

@@ -139,7 +139,7 @@ namespace WLSPL_ERP_CRM.repository
                             AND invoicedate < DATEADD(DAY, 1, @EndDate)
                             AND (@SalesManager IS NULL OR sessionname  = @SalesManager)
                             AND (
-                                        @CurrentRole = 'Admin'
+                                        @CurrentRole = 'CEO'
                                         OR sessionname  = @CurrentUser
                                         OR sessionname  IN (SELECT empcode FROM [dbo].[employees]
                                                        WHERE TL_Manager = @CurrentUser AND status = '1' AND isdeleted = '0')
@@ -213,7 +213,7 @@ namespace WLSPL_ERP_CRM.repository
                     await connection.OpenAsync();
                     string query = @"SELECT empcode as UserCode, name as FullName FROM [dbo].[employees] 
                                      WHERE status = '1' AND isdeleted = '0' 
-                                     AND (@CurrentRole = 'Admin' OR empcode = @CurrentUser OR TL_Manager = @CurrentUser) 
+                                     AND (@CurrentRole = 'CEO' OR empcode = @CurrentUser OR TL_Manager = @CurrentUser) 
                                      ORDER BY  CASE WHEN empcode = @CurrentUser THEN 0 ELSE 1 END, name;
          
                                      SELECT empcode as UserCode, name as FullName 
@@ -316,7 +316,7 @@ namespace WLSPL_ERP_CRM.repository
                           AND invoicedate < @EndDate
                           AND (@SalesManager IS NULL OR empcode = @SalesManager)
                           AND (
-                                @CurrentRole = 'Admin'
+                                @CurrentRole = 'CEO'
                                  OR empcode = @CurrentUser
                                  OR empcode IN (SELECT empcode FROM [dbo].[employees]
                                  WHERE TL_Manager = @CurrentUser AND status = '1' AND isdeleted = '0')
