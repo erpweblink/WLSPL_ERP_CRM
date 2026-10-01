@@ -243,7 +243,7 @@
                                             <i class="fa fa-trash"></i>
 
                                         </button>
-                                @if (User.IsInRole("Admin") && item.Status != "2")
+                                @if (User.IsInRole("CEO") && item.Status != "2")
                                         {
                                             <button type="button"
                                                     class="btn btn-sm btn-success"

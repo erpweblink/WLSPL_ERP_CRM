@@ -342,7 +342,7 @@ namespace WEBLINK_CRM.repository
                     await connection.OpenAsync();
                     string query = @"SELECT empcode as UserCode, name as FullName FROM [dbo].[employees] 
                                      WHERE status = '1' AND isdeleted = '0' 
-                                     AND (@CurrentRole = 'Admin' OR empcode = @CurrentUser OR TL_Manager = @CurrentUser) 
+                                     AND (@CurrentRole = 'CEO' OR empcode = @CurrentUser OR TL_Manager = @CurrentUser) 
                                      ORDER BY  CASE WHEN empcode = @CurrentUser THEN 0 ELSE 1 END, name;
          
                                      SELECT empcode as UserCode, name as FullName 
@@ -381,7 +381,7 @@ namespace WEBLINK_CRM.repository
                     await connection.OpenAsync();
 
                     string effectiveSalesManager = filter.SalesManager;
-                    if (!string.Equals(filter.Role, "Admin", StringComparison.OrdinalIgnoreCase)
+                    if (!string.Equals(filter.Role, "CEO", StringComparison.OrdinalIgnoreCase)
                         && string.IsNullOrEmpty(effectiveSalesManager))
                     {
                         effectiveSalesManager = filter.EmpCode;

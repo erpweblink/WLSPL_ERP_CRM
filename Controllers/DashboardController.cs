@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using WEBLINK_CRM.Repositories;
 using WLSPL_ERP_CRM.Models;
-
 namespace WEBLINK_CRM.Controllers
 {
     [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
@@ -10,99 +9,68 @@ namespace WEBLINK_CRM.Controllers
     public class DashboardController : Controller
     {
         private readonly IDashboardRepo _repo;
-
         public DashboardController(IDashboardRepo repo)
         {
             _repo = repo;
         }
-
         public ActionResult Index()
         {
             var currentEmpCode = HttpContext.Session.GetString("EmpCode");
             if (string.IsNullOrWhiteSpace(currentEmpCode))
                 return View(new List<EmployeeNode>());
-
             var employees = _repo.GetEmployeeHierarchy(currentEmpCode);
             if (employees == null || employees.Count == 0)
                 return View(new List<EmployeeNode>());
-
             BuildTree(employees);
-
             var selfNode = employees.FirstOrDefault(e =>
-                string.Equals(e.EmpCode?.Trim(), currentEmpCode.Trim(),
-                    StringComparison.OrdinalIgnoreCase));
-
+                string.Equals(e.EmpCode?.Trim(), currentEmpCode.Trim(), StringComparison.OrdinalIgnoreCase));
             EmployeeNode root;
-
-            if (selfNode == null)
-            {
-                var minLevel = employees.Min(x => x.HierarchyLevel);
-                root = employees.First(x => x.HierarchyLevel == minLevel);
-            }
-            else if (selfNode.CustRole == "Admin")
+            if (selfNode != null && string.Equals(selfNode.CustRole, "CEO", StringComparison.OrdinalIgnoreCase))
             {
                 root = selfNode;
             }
             else
             {
                 var minLevel = employees.Min(x => x.HierarchyLevel);
-                root = employees.FirstOrDefault(x => x.HierarchyLevel == minLevel)
-                       ?? selfNode;
+                root = employees.FirstOrDefault(x => x.HierarchyLevel == minLevel) ?? selfNode;
             }
-
             return View(new List<EmployeeNode> { root });
         }
-
         private static void BuildTree(List<EmployeeNode> employees)
         {
             foreach (var emp in employees)
                 emp.Children = new List<EmployeeNode>();
-
             var lookup = employees
                 .Where(e => !string.IsNullOrWhiteSpace(e.EmpCode))
-                .GroupBy(
-                    e => e.EmpCode.Trim(),
-                    StringComparer.OrdinalIgnoreCase)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.First(),
-                    StringComparer.OrdinalIgnoreCase);
-
+                .GroupBy(e => e.EmpCode.Trim(), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
             foreach (var emp in employees)
             {
                 if (string.IsNullOrWhiteSpace(emp.ParentCode))
                     continue;
-
-                if (string.Equals(emp.EmpCode?.Trim(), emp.ParentCode?.Trim(),
-                    StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(emp.EmpCode?.Trim(), emp.ParentCode?.Trim(), StringComparison.OrdinalIgnoreCase))
                     continue;
-
                 if (lookup.TryGetValue(emp.ParentCode.Trim(), out var parent))
                     parent.Children.Add(emp);
             }
         }
-
         [HttpGet]
         public async Task<IActionResult> GetEmployeeInfo(string empCode)
         {
             if (string.IsNullOrWhiteSpace(empCode))
-            {
-                return BadRequest(new
-                {
-                    success = false,
-                    message = "Employee code is required."
-                });
-            }
-
+                return BadRequest(new { success = false, message = "Employee code is required." });
+            var currentEmpCode = HttpContext.Session.GetString("EmpCode");
+            if (string.IsNullOrWhiteSpace(currentEmpCode))
+                return Json(new { success = false, message = "Employee session not found." });
+            var hierarchy = _repo.GetEmployeeHierarchy(currentEmpCode);
+            var self = hierarchy.FirstOrDefault(e => string.Equals(e.EmpCode?.Trim(), currentEmpCode.Trim(), StringComparison.OrdinalIgnoreCase));
+            var target = hierarchy.FirstOrDefault(e => string.Equals(e.EmpCode?.Trim(), empCode.Trim(), StringComparison.OrdinalIgnoreCase));
+            if (self == null || target == null || string.IsNullOrEmpty(self.HierarchyPath) || string.IsNullOrEmpty(target.HierarchyPath)
+                || !target.HierarchyPath.StartsWith(self.HierarchyPath, StringComparison.OrdinalIgnoreCase))
+                return Json(new { success = false, message = "You are not allowed to view this employee." });
             var result = await _repo.GetEmployeeCompanies(empCode);
-
-            return Json(new
-            {
-                success = true,
-                data = result
-            });
+            return Json(new { success = true, data = result });
         }
-
         [HttpGet]
         public IActionResult GetInvoiceRenewals()
         {
@@ -110,39 +78,16 @@ namespace WEBLINK_CRM.Controllers
             {
                 var currentEmpCode = HttpContext.Session.GetString("EmpCode");
                 var currentEmpRole = HttpContext.Session.GetString("Role");
-
                 if (string.IsNullOrWhiteSpace(currentEmpCode))
-                {
-                    return Json(new
-                    {
-                        success = false,
-                        message = "Employee session not found."
-                    });
-                }
-
-                bool isAdmin = string.Equals(
-                    currentEmpRole,
-                    "admin",
-                    StringComparison.OrdinalIgnoreCase
-                );
-
+                    return Json(new { success = false, message = "Employee session not found." });
+                bool isAdmin = string.Equals(currentEmpRole, "CEO", StringComparison.OrdinalIgnoreCase);
                 var data = _repo.GetInvoiceRenewals(currentEmpCode, isAdmin);
-
-                return Json(new
-                {
-                    success = true,
-                    data = data
-                });
+                return Json(new { success = true, data = data });
             }
             catch (Exception ex)
             {
-                return Json(new
-                {
-                    success = false,
-                    message = ex.Message
-                });
+                return Json(new { success = false, message = ex.Message });
             }
         }
-
     }
 }

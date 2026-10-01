@@ -403,7 +403,7 @@ namespace WEBLINK_CRM.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "CEO")]
         public async Task<IActionResult> AdminApproveWorkOrder(int ID)
         {
             try

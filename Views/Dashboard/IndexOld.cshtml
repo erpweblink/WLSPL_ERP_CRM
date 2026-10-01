@@ -6,24 +6,33 @@
     ViewData["Title"] = "Employee Hierarchy";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var root = Model?.FirstOrDefault();
-    string currentCode = (Context.Session.GetString("EmpCode") ?? "").Trim();
+    string rootRole = root != null ? DataRole(root.CustRole) : "ceo";
 }
 <style type="text/css">
-    @@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    @@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
     :root {
-        --connector: #c9d2df;
-        --ink: #1b2333;
-        --muted: #7b869a;
-        --line-c: #e6eaf1;
-        --c-ceo: #3d322c;
-        --c-branch: #e2492a;
-        --c-cluster: #f5a623;
-        --c-manager: #1fa2d8;
-        --c-exec: #7cb342;
-        --font: 'Plus Jakarta Sans','Inter',system-ui,sans-serif;
-        --line: 2px;
-        --gap: 30px
+        --page-bg: #F4F6FA;
+        --surface: #FFFFFF;
+        --surface-soft: #F9FAFB;
+        --border: #E8ECF2;
+        --connector: #CBD5E1;
+        --text-primary: #1A2035;
+        --text-secondary: #5C6B82;
+        --text-muted: #9BAABF;
+        --c-admin: #1a80e1;
+        --c-manager: #D97706;
+        --c-assimanager: #1d3a58;
+        --c-lead: #7843e7;
+        --c-exec: #059669;
+        --r-sm: 8px;
+        --r-md: 14px;
+        --r-lg: 18px;
+        --shadow-card: 0 2px 8px rgba(16,30,54,.07),0 1px 2px rgba(16,30,54,.04);
+        --shadow-hover: 0 8px 28px rgba(16,30,54,.13),0 2px 6px rgba(16,30,54,.06);
+        --shadow-admin: 0 8px 28px rgba(224,57,75,.18);
+        --line-w: 2px;
+        --font: 'Plus Jakarta Sans','Inter',system-ui,sans-serif
     }
 
     *, *::before, *::after {
@@ -31,7 +40,7 @@
     }
 
     body {
-        background: #fff
+        background: var(--page-bg)
     }
 
     .tree-page {
@@ -39,378 +48,522 @@
         font-family: var(--font)
     }
 
-    .org-legend {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin: 0 0 14px
-    }
-
-        .org-legend span {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            padding: 5px 12px;
-            background: #fff;
-            border: 1px solid var(--line-c);
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--ink)
-        }
-
-        .org-legend i {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--rc)
-        }
-
-        .org-legend span[data-role="ceo"], .person[data-role="ceo"] {
-            --rc: var(--c-ceo)
-        }
-
-        .org-legend span[data-role="manager"], .person[data-role="manager"] {
-            --rc: var(--c-branch)
-        }
-
-        .org-legend span[data-role="assimanager"], .person[data-role="assimanager"] {
-            --rc: var(--c-cluster)
-        }
-
-        .org-legend span[data-role="team-lead"], .person[data-role="team-lead"] {
-            --rc: var(--c-manager)
-        }
-
-        .org-legend span[data-role="executive"], .person[data-role="executive"] {
-            --rc: var(--c-exec)
-        }
-
-    .org-wrap {
+    .tree {
         width: 100%;
-        overflow: auto;
-        padding: 44px 28px 64px;
-        background: radial-gradient(circle at 1px 1px,#d8dfea 1px,transparent 0) 0 0/22px 22px,#f7f9fc;
-        border: 1px solid var(--line-c);
+        max-width: 1800px;
+        margin: 0 auto;
+        padding: 48px 32px 80px;
+        position: relative;
+        overflow-x: auto;
+        overflow-y: visible;
         border-radius: 20px;
-        box-shadow: 0 12px 32px -18px rgba(16,30,54,.18);
-        -webkit-overflow-scrolling: touch
+        background: #F8FAFD;
+        border: 1px solid var(--border);
+        box-shadow: 0 2px 12px rgba(16,30,54,.05)
     }
 
-    .org-tree {
+    .level {
         display: flex;
         justify-content: center;
-        width: max-content;
-        min-width: 100%
-    }
-
-        .org-tree ul {
-            list-style: none;
-            margin: 0;
-            padding: var(--gap) 0 0;
-            display: flex;
-            justify-content: center;
-            position: relative;
-            animation: openIn .26s ease both
-        }
-
-        .org-tree > ul {
-            padding-top: 0;
-            animation: none
-        }
-
-        .org-tree li {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: var(--gap) 9px 0
-        }
-
-        .org-tree > ul > li {
-            padding-top: 0
-        }
-
-        .org-tree li::before, .org-tree li::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            right: 50%;
-            width: 50%;
-            height: var(--gap);
-            border-top: var(--line) solid var(--connector)
-        }
-
-        .org-tree li::after {
-            right: auto;
-            left: 50%;
-            border-left: var(--line) solid var(--connector)
-        }
-
-        .org-tree > ul > li::before, .org-tree > ul > li::after, .org-tree li:only-child::before, .org-tree li:only-child::after {
-            display: none
-        }
-
-        .org-tree li:only-child {
-            padding-top: 0
-        }
-
-        .org-tree li:first-child::before, .org-tree li:last-child::after {
-            border: 0 none
-        }
-
-        .org-tree li:last-child::before {
-            border-right: var(--line) solid var(--connector);
-            border-radius: 0 14px 0 0
-        }
-
-        .org-tree li:first-child::after {
-            border-radius: 14px 0 0 0
-        }
-
-        .org-tree li > ul::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 50%;
-            height: var(--gap);
-            border-left: var(--line) solid var(--connector)
-        }
-
-        .org-tree li.collapsed > ul {
-            display: none
-        }
-
-    .person {
-        --rc: #9BAABF;
-        --sz: 52px;
+        align-items: flex-start;
         position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-align: center;
-        width: 134px
-    }
-
-        .person.xl {
-            --sz: 96px
-        }
-
-        .person.lg {
-            --sz: 72px
-        }
-
-        .person.md {
-            --sz: 60px
-        }
-
-    .avatar {
-        position: relative;
-        width: var(--sz);
-        height: var(--sz);
-        padding: calc(var(--sz)*.07);
-        border-radius: 50%;
-        background: linear-gradient(145deg,var(--rc),color-mix(in srgb,var(--rc) 45%,#fff));
-        box-shadow: 0 12px 22px -8px color-mix(in srgb,var(--rc) 60%,transparent),0 2px 4px rgba(16,30,54,.08);
-        transition: transform .22s ease,box-shadow .22s ease
-    }
-
-        .avatar:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 16px 26px -8px color-mix(in srgb,var(--rc) 70%,transparent),0 2px 4px rgba(16,30,54,.1)
-        }
-
-        .avatar > span {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid #fff;
-            background: linear-gradient(160deg,#fff,color-mix(in srgb,var(--rc) 14%,#fff));
-            color: color-mix(in srgb,var(--rc) 85%,#1b2333);
-            font-weight: 800;
-            font-size: calc(var(--sz)*.3);
-            letter-spacing: .3px
-        }
-
-    .person-card {
-        margin-top: 11px;
         width: 100%;
-        padding: 8px 8px 9px;
-        background: #fff;
-        border: 1px solid var(--line-c);
-        border-radius: 12px;
-        box-shadow: 0 1px 2px rgba(16,30,54,.05),0 10px 18px -12px rgba(16,30,54,.22)
+        margin: 0;
+        gap: 20px
     }
 
-    .person-name {
-        font-size: 12.5px;
-        font-weight: 700;
-        color: var(--ink);
-        line-height: 1.25;
-        overflow-wrap: anywhere
-    }
-
-    .person-title {
-        display: inline-block;
-        margin-top: 5px;
-        padding: 1px 9px;
-        border-radius: 20px;
-        background: color-mix(in srgb,var(--rc) 13%,#fff);
-        color: color-mix(in srgb,var(--rc) 65%,#1b2333);
-        font-size: 10px;
-        font-weight: 600;
-        line-height: 1.5
-    }
-
-    .person.me .avatar {
-        box-shadow: 0 0 0 5px color-mix(in srgb,var(--rc) 24%,transparent),0 12px 22px -8px color-mix(in srgb,var(--rc) 60%,transparent)
-    }
-
-    .person.me .person-card {
-        border-color: var(--rc);
-        box-shadow: 0 0 0 3px color-mix(in srgb,var(--rc) 16%,transparent)
-    }
-
-    .toggle {
-        margin-top: 9px;
-        display: inline-flex;
+    .node {
+        --nc: #9BAABF;
+        position: relative;
+        display: grid;
+        grid-template-columns: 48px 1fr;
+        grid-auto-rows: min-content;
         align-items: center;
-        gap: 6px;
-        padding: 3px 11px;
-        border-radius: 20px;
-        border: 1.5px solid var(--rc);
-        background: #fff;
-        color: var(--rc);
-        font-size: 10.5px;
-        font-weight: 700;
-        line-height: 1.5;
+        column-gap: 12px;
+        min-width: 210px;
+        padding: 13px 14px 13px 12px;
+        background: var(--surface);
+        border-top: 2.5px solid var(--nc);
+        border-left: 1.5px solid color-mix(in srgb,var(--nc) 35%,var(--border));
+        border-right: 1.5px solid color-mix(in srgb,var(--nc) 35%,var(--border));
+        border-bottom: 1.5px solid color-mix(in srgb,var(--nc) 35%,var(--border));
+        border-radius: var(--r-md);
+        text-align: left;
         cursor: pointer;
-        transition: background .15s,color .15s
+        box-shadow: var(--shadow-card);
+        transition: transform .2s ease,box-shadow .2s ease,border-color .2s ease;
+        z-index: 5
     }
-
-        .toggle i {
-            font-size: 8px;
-            transition: transform .2s
-        }
-
-        .toggle:hover, li.collapsed > .person .toggle {
-            background: var(--rc);
-            color: #fff
-        }
-
-            li.collapsed > .person .toggle i {
-                transform: rotate(-90deg)
-            }
 
     .employee-info-btn {
         position: absolute;
-        top: -4px;
-        right: -4px;
-        width: 22px;
-        height: 22px;
-        border-radius: 50%;
-        border: 1.5px solid var(--rc);
-        background: #fff;
-        color: var(--rc);
+        top: 8px;
+        right: 8px;
+        width: 15px;
+        height: 15px;
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 0;
-        font-size: 9px;
+        border-radius: 50%;
+        background: var(--nc);
+        color: #fff;
+        border-color: var(--nc);
+        font-size: 7px;
         cursor: pointer;
-        box-shadow: 0 3px 8px rgba(16,30,54,.2);
-        transition: background .15s,color .15s,transform .15s;
-        z-index: 2
+        z-index: 1;
+        transition: all .2s ease
     }
 
         .employee-info-btn:hover {
-            background: var(--rc);
+            background: var(--nc);
             color: #fff;
-            transform: scale(1.12)
+            border-color: var(--nc);
+            transform: scale(1.1)
         }
 
-        .employee-info-btn:focus-visible, .toggle:focus-visible {
-            outline: 2px solid var(--rc);
-            outline-offset: 2px
+        .employee-info-btn i {
+            font-size: 9px
         }
 
-    .org-tree li.is-hidden {
-        display: none
+    .node:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-hover);
+        border-top-color: var(--nc);
+        border-left-color: color-mix(in srgb,var(--nc) 55%,var(--border));
+        border-right-color: color-mix(in srgb,var(--nc) 55%,var(--border));
+        border-bottom-color: color-mix(in srgb,var(--nc) 55%,var(--border))
     }
 
-    .org-tree li.solo::before, .org-tree li.solo::after {
-        display: none
+    .node:active {
+        transform: translateY(-1px)
     }
 
-    .org-tree li.solo {
-        padding-top: 0
+    .node-avatar {
+        grid-row: 1 / -1;
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: color-mix(in srgb,var(--nc) 12%,white);
+        color: var(--nc);
+        font-family: var(--font);
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: .3px;
+        border: 1.5px solid color-mix(in srgb,var(--nc) 22%,white);
+        position: relative;
+        flex-shrink: 0
     }
 
-    .org-reset {
-        margin-left: auto;
-        padding: 5px 14px;
-        border: 1px solid var(--line-c);
+        .node-avatar::after {
+            position: absolute;
+            right: -4px;
+            bottom: -4px;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--nc);
+            color: #fff;
+            font-size: 8px;
+            font-weight: 700;
+            border: 2px solid #fff;
+            box-shadow: 0 1px 4px rgba(16,30,54,.2)
+        }
+
+    .node[data-role="ceo"] .node-avatar::after {
+        content: "★"
+    }
+
+    .node[data-role="manager"] .node-avatar::after {
+        content: "B";
+        font-size: 7px
+    }
+
+    .node[data-role="assimanager"] .node-avatar::after {
+        content: "C";
+        font-size: 7px
+    }
+
+    .node[data-role="team-lead"] .node-avatar::after {
+        content: "M";
+        font-size: 7px
+    }
+
+    .node[data-role="executive"] .node-avatar::after {
+        content: "✓"
+    }
+
+    .node strong {
+        display: block;
+        margin: 0 0 3px;
+        color: var(--text-primary);
+        font-family: var(--font);
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 1.3;
+        white-space: normal;
+        padding-right: 22px
+    }
+
+    .node small {
+        display: block;
+        font-size: 10.5px;
+        line-height: 1.5;
+        color: var(--text-secondary)
+    }
+
+    .empcode {
+        font-size: 11.5px !important;
+        color: #9d9fa1 !important;
+        font-weight: 700 !important
+    }
+
+    .employee-role {
+        color: var(--nc) !important;
+        font-weight: 600 !important;
+        font-size: 10px !important
+    }
+
+        .employee-role i {
+            width: 11px;
+            margin-right: 2px;
+            font-size: 8.5px;
+            color: var(--nc)
+        }
+
+    .team-count {
+        display: inline-flex !important;
+        align-items: center;
+        gap: 4px;
+        margin-top: 6px;
+        padding: 2px 8px;
         border-radius: 20px;
-        background: #fff;
-        color: var(--ink);
-        font-size: 11px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: background .15s,color .15s
+        background: color-mix(in srgb,var(--nc) 10%,white);
+        color: var(--nc) !important;
+        font-size: 9.5px !important;
+        font-weight: 700 !important;
+        letter-spacing: .2px;
+        border: 1px solid color-mix(in srgb,var(--nc) 20%,white)
     }
 
-        .org-reset:hover {
-            background: var(--ink);
-            color: #fff
+        .team-count::before {
+            content: "";
+            display: inline-block;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--nc);
+            opacity: .75
         }
 
-    @@keyframes openIn {
+    .node[data-role="ceo"] {
+        --nc: var(--c-admin);
+        min-width: 255px;
+        border-radius: var(--r-lg);
+        box-shadow: var(--shadow-admin);
+        background: #1a80e133
+    }
+
+        .node[data-role="ceo"] .node-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            font-size: 16px
+        }
+
+        .node[data-role="ceo"] strong {
+            font-size: 16px
+        }
+
+    .node[data-role="manager"] {
+        --nc: var(--c-manager);
+        min-width: 255px;
+        background: rgb(255 153 35 / 22%)
+    }
+
+    .node[data-role="assimanager"] {
+        --nc: var(--c-assimanager);
+        min-width: 255px;
+        background: rgb(97 151 201 / 32%)
+    }
+
+    .node[data-role="team-lead"] {
+        --nc: var(--c-lead);
+        min-width: 255px;
+        background: #704ac136
+    }
+
+    .node[data-role="executive"] {
+        --nc: var(--c-exec);
+        min-width: 255px;
+        background: rgb(5 150 105 / 19%);
+        cursor: default
+    }
+
+        .node[data-role="executive"]:hover {
+            transform: none;
+            box-shadow: var(--shadow-card)
+        }
+
+    .team-count-wrapper {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        margin-top: 6px
+    }
+
+        .team-count-wrapper .team-count {
+            margin-top: 0
+        }
+
+    .team-toggle-btn {
+        margin-left: auto;
+        width: 25px;
+        height: 25px;
+        padding: 3px 3px 6px 3px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        background: var(--nc);
+        color: #fff;
+        border-color: var(--nc);
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 1;
+        cursor: pointer;
+        transition: all .18s ease
+    }
+
+        .team-toggle-btn:hover {
+            border: 1px solid color-mix(in srgb,var(--nc) 22%,white);
+            background: color-mix(in srgb,var(--nc) 8%,white);
+            color: var(--nc)
+        }
+
+        .team-toggle-btn:active {
+            transform: scale(.92)
+        }
+
+    .node.active {
+        border-top-color: var(--nc);
+        border-left-color: color-mix(in srgb,var(--nc) 55%,var(--border));
+        border-right-color: color-mix(in srgb,var(--nc) 55%,var(--border));
+        border-bottom-color: color-mix(in srgb,var(--nc) 55%,var(--border));
+        box-shadow: 0 4px 18px color-mix(in srgb,var(--nc) 16%,transparent),var(--shadow-card)
+    }
+
+    .manager-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+        width: 100%;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin: 32px 0 0;
+        padding-top: 0;
+        padding-bottom: 16px;
+        position: relative
+    }
+
+    .manager-block {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        animation: fadeUp .3s ease both
+    }
+
+    .tl-horizontal-container {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        width: max-content;
+        min-width: 100%;
+        margin-top: 16px;
+        padding-top: 20px;
+        animation: expandTree .24s ease both
+    }
+
+        .tl-horizontal-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: var(--line-w);
+            height: 20px;
+            background: var(--connector);
+            transform: translateX(-50%);
+            border-radius: 2px
+        }
+
+    .tl-horizontal-line {
+        height: var(--line-w);
+        width: 100%;
+        min-width: 160px;
+        margin-bottom: 20px;
+        background: var(--connector);
+        border-radius: 2px
+    }
+
+    .tl-row {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+        width: 100%
+    }
+
+    .tl-column {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        padding-top: 20px
+    }
+
+        .tl-column::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: var(--line-w);
+            height: 20px;
+            background: var(--connector);
+            transform: translateX(-50%);
+            border-radius: 2px
+        }
+
+        .tl-column > .tl-horizontal-container {
+            display: none;
+            flex-direction: column !important;
+            align-items: center;
+            margin-top: 12px;
+            min-width: unset;
+            width: max-content
+        }
+
+            .tl-column > .tl-horizontal-container > .tl-horizontal-line {
+                display: none
+            }
+
+            .tl-column > .tl-horizontal-container > .tl-row {
+                flex-direction: column !important;
+                align-items: center;
+                gap: 10px
+            }
+
+                .tl-column > .tl-horizontal-container > .tl-row > .tl-column {
+                    padding-top: 0
+                }
+
+                    .tl-column > .tl-horizontal-container > .tl-row > .tl-column::before {
+                        display: none
+                    }
+
+    .manager-vertical-connector {
+        display: none
+    }
+
+    .tree::-webkit-scrollbar, .tl-row::-webkit-scrollbar {
+        width: 5px;
+        height: 5px
+    }
+
+    .tree::-webkit-scrollbar-thumb, .tl-row::-webkit-scrollbar-thumb {
+        background: var(--connector);
+        border-radius: 10px
+    }
+
+    .tree::-webkit-scrollbar-track, .tl-row::-webkit-scrollbar-track {
+        background: transparent
+    }
+
+    @@keyframes fadeUp {
         from {
             opacity: 0;
-            transform: translateY(-8px)
+            transform: translateY(10px)
         }
 
         to {
             opacity: 1;
-            transform: none
+            transform: translateY(0)
         }
     }
 
-    @@media (max-width:640px) {
-        .org-wrap {
-            padding: 28px 14px 44px;
+    @@keyframes expandTree {
+        from {
+            opacity: 0;
+            transform: translateY(-6px)
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0)
+        }
+    }
+
+    @@media (max-width:768px) {
+        .tree {
+            padding: 28px 10px 50px;
             border-radius: 14px
         }
 
-        .person {
-            width: 116px
+        .manager-container {
+            justify-content: flex-start;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding: 0 20px 24px;
+            gap: 14px;
+            scroll-snap-type: x mandatory
         }
 
-            .person.xl {
-                --sz: 80px
-            }
-
-            .person.lg {
-                --sz: 64px
-            }
-
-            .person.md {
-                --sz: 54px
-            }
-
-        .org-tree li {
-            padding-left: 6px;
-            padding-right: 6px
+        .manager-block {
+            flex: 0 0 auto;
+            scroll-snap-align: center
         }
-    }
 
-    @@media (prefers-reduced-motion:reduce) {
-        .org-tree * {
-            animation: none !important;
-            transition: none !important
+        .tl-row {
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            overflow-x: auto;
+            padding: 0 16px 16px;
+            scroll-snap-type: x mandatory
+        }
+
+        .tl-column {
+            flex: 0 0 auto;
+            scroll-snap-align: center
+        }
+
+        .node[data-role="ceo"] {
+            min-width: 210px
+        }
+
+        .node[data-role="manager"] {
+            min-width: 198px
+        }
+
+        .node[data-role="assimanager"] {
+            min-width: 198px
+        }
+
+        .node[data-role="team-lead"] {
+            min-width: 188px
+        }
+
+        .node[data-role="executive"] {
+            min-width: 180px
         }
     }
 
@@ -940,37 +1093,63 @@
             .ToList()
             ?? new List<EmployeeNode>();
     }
+    private string RenderNode(EmployeeNode emp, int teamCount)
+    {
+        var role = DataRole(emp.CustRole);
+        var id = Safe(emp.EmpCode);
+        var hasTeam = teamCount > 0;
+        var teamHtml = hasTeam ? $@"<div class='team-count-wrapper'><small class='team-count'>Team: {teamCount}</small><button type='button' class='team-toggle-btn' onclick='event.stopPropagation(); toggleTeamLeads(this.closest("".node""))' aria-label='Toggle team'>+</button></div>" : "";
+        var nodeAttrs = hasTeam ? $"data-manager-id='{id}' onclick='toggleTeamLeads(this)'" : "";
+        return $@"<div class='node' data-role='{role}' data-empcode='{id}' {nodeAttrs}><div class='node-avatar'>{Safe(GetInitials(emp.Name))}</div><div><strong>{Safe(emp.Name)}</strong><small class='empcode'>{id}</small><small class='employee-role'><i class='fas fa-user-tag'></i>{Safe(emp.Role)}</small>{teamHtml}</div><button type='button' class='employee-info-btn' data-empcode='{id}' onclick='event.stopPropagation(); showEmployeeInfo(this);' title='Employee Information'><i class='fas fa-info'></i></button></div>";
+    }
+    private IHtmlContent RenderEmployeeChildren(EmployeeNode employee, string employeeId)
+    {
+        var html = new HtmlContentBuilder();
+        var children = GetTeam(employee);
+        if (!children.Any()) return html;
+        html.AppendHtml($"<div class='tl-horizontal-container' data-manager-id='{Safe(employeeId)}'><div class='tl-horizontal-line'></div><div class='tl-row'>");
+        foreach (var child in children)
+        {
+            var childTeam = GetTeam(child);
+            html.AppendHtml("<div class='tl-column'>");
+            html.AppendHtml(RenderNode(child, childTeam.Count));
+            if (childTeam.Any())
+            {
+                html.AppendHtml($"<div class='manager-vertical-connector' data-manager-id='{Safe(child.EmpCode)}'></div>");
+                html.AppendHtml(RenderEmployeeChildren(child, child.EmpCode));
+            }
+            html.AppendHtml("</div>");
+        }
+        html.AppendHtml("</div></div>");
+        return html;
+    }
+    private IHtmlContent RenderManagers(EmployeeNode root)
+    {
+        var html = new HtmlContentBuilder();
+        var children = GetTeam(root);
+        if (!children.Any()) return html;
+        html.AppendHtml("<div class='level'><div class='manager-container' style='display:flex;'>");
+        foreach (var emp in children)
+        {
+            var team = GetTeam(emp);
+            html.AppendHtml("<div class='manager-block'>");
+            html.AppendHtml(RenderNode(emp, team.Count));
+            if (team.Any())
+            {
+                html.AppendHtml($"<div class='manager-vertical-connector' data-manager-id='{Safe(emp.EmpCode)}'></div>");
+                html.AppendHtml(RenderEmployeeChildren(emp, emp.EmpCode));
+            }
+            html.AppendHtml("</div>");
+        }
+        html.AppendHtml("</div></div>");
+        return html;
+    }
     private string GetInitials(string name)
     {
         if (string.IsNullOrWhiteSpace(name)) return "?";
         var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length == 1) return parts[0].Substring(0, 1).ToUpper();
         return (parts[0].Substring(0, 1) + parts[^1].Substring(0, 1)).ToUpper();
-    }
-    private IHtmlContent RenderTree(EmployeeNode emp, int depth, string me, bool inScope)
-    {
-        var html = new HtmlContentBuilder();
-        var team = GetTeam(emp);
-        var showInfo = inScope || string.Equals(emp.EmpCode?.Trim(), me, StringComparison.OrdinalIgnoreCase);
-        var id = Safe(emp.EmpCode);
-        var size = depth == 0 ? "xl" : depth == 1 ? "lg" : depth == 2 ? "md" : "sm";
-        var cls = depth > 0 && team.Any() ? " class='collapsed'" : "";
-        html.AppendHtml($"<li data-empcode='{id}'{cls}><div class='person {size}' data-role='{DataRole(emp.CustRole)}'><div class='avatar'><span>{Safe(GetInitials(emp.Name))}</span>");
-        if (showInfo)
-            html.AppendHtml($"<button type='button' class='employee-info-btn' data-empcode='{id}' onclick='event.stopPropagation(); showEmployeeInfo(this);' title='Employee information'><i class='fas fa-info'></i></button>");
-        html.AppendHtml($"</div><div class='person-card'><div class='person-name'>{Safe(emp.Name)}</div><div class='person-title'>{Safe(emp.Role)}</div></div>");
-        if (team.Any())
-            html.AppendHtml($"<button type='button' class='toggle' onclick='toggleNode(this)' title='Show or hide team'><i class='fas fa-chevron-down'></i><span>{team.Count}</span></button>");
-        html.AppendHtml("</div>");
-        if (team.Any())
-        {
-            html.AppendHtml("<ul>");
-            foreach (var child in team)
-                html.AppendHtml(RenderTree(child, depth + 1, me, showInfo));
-            html.AppendHtml("</ul>");
-        }
-        html.AppendHtml("</li>");
-        return html;
     }
 }
 @if (root == null)
@@ -999,10 +1178,28 @@ else
     <input type="hidden" id="currentEmpCode" value="@Context.Session.GetString("EmpCode")" />
     <input type="hidden" id="currentRole" value="@Context.Session.GetString("Role")" />
     <div class="tree-page">
-        <div class="org-wrap">
-            <div class="org-tree">
-                <ul>@RenderTree(root, 0, currentCode, false)</ul>
+        <div class="tree">
+            <div class="level">
+                <div class="node" data-role="@rootRole" data-empcode="@root.EmpCode">
+                    <div class="node-avatar">@GetInitials(root.Name)</div>
+                    <div>
+                        <strong>@root.Name</strong>
+                        <small class="empcode">@root.EmpCode</small>
+                        <small class="employee-role"><i class="fas fa-user-tag"></i>@root.CustRole</small>
+                        @if (root.Children?.Any() == true)
+                        {
+                            <small class="team-count">Team @root.Children.Count</small>
+                        }
+                    </div>
+                    @if (Context.Session.GetString("Role")?.ToLower() == "ceo")
+                    {
+                        <button type="button" class="employee-info-btn" data-empcode="@root.EmpCode" onclick="event.stopPropagation(); showEmployeeInfo(this);" title="Employee Information">
+                            <i class="fas fa-info"></i>
+                        </button>
+                    }
+                </div>
             </div>
+            @RenderManagers(root)
         </div>
     </div>
     <div class="modal fade" id="commonInfoModal" tabindex="-1" aria-hidden="true">
@@ -1024,64 +1221,70 @@ else
     </div>
 }
 <script type="text/javascript">
-    function collapseBelow(li) {
-        li.querySelectorAll("li").forEach(function (x) {
-            if (x.querySelector(":scope > ul")) x.classList.add("collapsed");
-        });
-    }
-    function applyFocus() {
-        document.querySelectorAll(".org-tree ul").forEach(function (ul) {
-            const kids = Array.from(ul.children).filter(function (c) { return c.tagName === "LI"; });
-            const open = kids.find(function (k) {
-                return k.querySelector(":scope > ul") && !k.classList.contains("collapsed");
-            });
-            kids.forEach(function (k) {
-                k.classList.toggle("is-hidden", !!open && k !== open);
-                k.classList.toggle("solo", !!open && k === open);
-            });
-        });
-    }
-    function toggleNode(btn) {
-        const li = btn.closest("li");
-        if (li.classList.contains("collapsed")) {
-            li.parentElement.querySelectorAll(":scope > li").forEach(function (sib) {
-                if (sib !== li && sib.querySelector(":scope > ul")) {
-                    sib.classList.add("collapsed");
-                    collapseBelow(sib);
-                }
-            });
-            li.classList.remove("collapsed");
-        } else {
-            li.classList.add("collapsed");
-            collapseBelow(li);
-        }
-        applyFocus();
-    }
-    function resetTree() {
-        const rootLi = document.querySelector(".org-tree > ul > li");
-        document.querySelectorAll(".org-tree li").forEach(function (li) {
-            if (li !== rootLi && li.querySelector(":scope > ul")) li.classList.add("collapsed");
-        });
-        applyFocus();
-    }
     document.addEventListener("DOMContentLoaded", function () {
-        const code = document.getElementById("currentEmpCode")?.value?.trim();
-        const meLi = code ? document.querySelector(`.org-tree li[data-empcode="${CSS.escape(code)}"]`) : null;
-        const me = meLi?.querySelector(":scope > .person");
-        if (me) {
-            me.classList.add("me");
-            let p = meLi;
-            while (p) {
-                if (p.tagName === "LI") p.classList.remove("collapsed");
-                p = p.parentElement;
+        const currentEmpCode = document.getElementById("currentEmpCode")?.value?.trim();
+        const currentRole = document.getElementById("currentRole")?.value?.trim()?.toLowerCase();
+        if (!currentEmpCode || currentRole === "ceo") return;
+        const currentNode = document.querySelector(`.node[data-empcode="${CSS.escape(currentEmpCode)}"]`);
+        function markOpen(id) {
+            const node = document.querySelector(`.node[data-manager-id="${id}"]`);
+            if (!node) return;
+            node.classList.add("active");
+            const connector = node.parentElement?.querySelector(`:scope > .manager-vertical-connector[data-manager-id="${id}"]`);
+            if (connector) connector.style.display = "block";
+            const btn = node.querySelector(".team-toggle-btn");
+            if (btn) btn.textContent = "−";
+        }
+        function expandAncestors(element) {
+            let parent = element.parentElement;
+            while (parent) {
+                if (parent.classList.contains("tl-horizontal-container") && parent.style.display !== "flex") {
+                    parent.style.display = "flex";
+                    const id = parent.getAttribute("data-manager-id");
+                    if (id) markOpen(id);
+                }
+                parent = parent.parentElement;
             }
         }
-        applyFocus();
-        const wrap = document.querySelector(".org-wrap");
-        if (!me || !wrap) return;
-        const r = me.getBoundingClientRect(), w = wrap.getBoundingClientRect();
-        wrap.scrollLeft += r.left - w.left - (w.width - r.width) / 2;
+        function expandOwn(id) {
+            const container = document.querySelector(`.tl-horizontal-container[data-manager-id="${id}"]`);
+            if (!container || container.style.display === "flex") return;
+            container.style.display = "flex";
+            markOpen(id);
+        }
+        if (currentNode) expandAncestors(currentNode);
+        expandOwn(currentEmpCode);
     });
+</script>
+<script type="text/javascript">
+    function toggleTeamLeads(managerNode) {
+        const managerId = managerNode.getAttribute("data-manager-id");
+        const container = managerNode.parentElement;
+        if (!container) return;
+        const tlContainer = container.querySelector(`:scope > .tl-horizontal-container[data-manager-id="${managerId}"]`);
+        const connector = container.querySelector(`:scope > .manager-vertical-connector[data-manager-id="${managerId}"]`);
+        if (!tlContainer) return;
+        const toggleButton = managerNode.querySelector(".team-toggle-btn");
+        const isVisible = tlContainer.style.display === "flex";
+        if (isVisible) {
+            collapseContainer(tlContainer);
+            tlContainer.style.display = "none";
+            managerNode.classList.remove("active");
+            if (connector) connector.style.display = "none";
+            if (toggleButton) toggleButton.textContent = "+";
+        } else {
+            tlContainer.style.display = "flex";
+            managerNode.classList.add("active");
+            if (connector) connector.style.display = "block";
+            if (toggleButton) toggleButton.textContent = "−";
+        }
+    }
+    function collapseContainer(container) {
+        container.querySelectorAll(".tl-horizontal-container").forEach(el => el.style.display = "none");
+        container.querySelectorAll(".manager-vertical-connector").forEach(el => el.style.display = "none");
+        container.querySelectorAll(".node.active").forEach(el => el.classList.remove("active"));
+        container.querySelectorAll(".team-toggle-btn").forEach(el => el.textContent = "+");
+    }
 </script>
 <script type="text/javascript">
     function showEmployeeInfo(button) {

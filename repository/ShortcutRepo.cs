@@ -125,7 +125,7 @@ namespace WLSPL_ERP_CRM.repository
 
             string query;
 
-            if (userRole == "Admin" || userRole == "SubAdmin")
+            if (userRole == "CEO")
             {
                 query = @"
                     SELECT empcode AS EmpCode, name AS EmpName, id AS Id
@@ -157,7 +157,7 @@ namespace WLSPL_ERP_CRM.repository
             using var cmd = new SqlCommand(query, con);
             cmd.Parameters.AddWithValue("@Search", $"%{q}%");
 
-            if (userRole != "Admin" && userRole != "SubAdmin")
+            if (userRole != "CEO")
                 cmd.Parameters.AddWithValue("@UserCode", userCode);
 
             await con.OpenAsync();
@@ -190,7 +190,7 @@ namespace WLSPL_ERP_CRM.repository
 
             string query;
 
-            if (userRole == "Admin")
+            if (userRole == "CEO")
             {
                 query = @"
                     SELECT c.id          AS id,
@@ -243,7 +243,7 @@ namespace WLSPL_ERP_CRM.repository
             using var cmd = new SqlCommand(query, con);
             cmd.Parameters.AddWithValue("@Search", $"%{q}%");
 
-            if (userRole != "Admin")
+            if (userRole != "CEO")
                 cmd.Parameters.AddWithValue("@UserCode", userCode);
 
             await con.OpenAsync();
