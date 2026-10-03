@@ -1559,21 +1559,9 @@ hr.hr-dashed {
         }
 
             .startbar .startbar-menu .navbar-nav .nav-item .nav .nav-item .nav-link {
-                padding: 6px 16px 6px 40px
+                padding: 6px 16px 6px 23px
             }
 
-                .startbar .startbar-menu .navbar-nav .nav-item .nav .nav-item .nav-link:before {
-                    content: "";
-                    position: absolute;
-                    width: 4px;
-                    height: 4px;
-                    border: 1px solid var(--bs-nav-link-disc-color);
-                    border-radius: 50%;
-                    background: rgba(137,151,189,.2);
-                    left: 12px;
-                    top: auto;
-                    bottom: auto
-                }
 
         .startbar .startbar-menu .menu-icon {
             font-size: 18px;
