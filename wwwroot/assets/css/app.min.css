@@ -1459,7 +1459,9 @@ hr.hr-dashed {
         .startbar .startbar-menu .startbar-collapse {
             padding: 0 16px 16px;
             height: calc(100vh - 120px);
-            overflow-y: auto
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #4c6581 transparent;
         }
 
         .startbar .startbar-menu .navbar-nav .menu-label {
