@@ -669,7 +669,7 @@
             // Build per-month data once so cards and modals share it
             var months = yearGroup
             .GroupBy(x => new { x.Month, x.MonthName })
-            .OrderBy(x => x.Key.Month)
+            .OrderByDescending(x => x.Key.Month)
             .Select(g => new
             {
                 Month = g.Key.Month,
