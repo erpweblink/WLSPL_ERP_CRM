@@ -32,7 +32,14 @@
         public string Total { get; set; } = string.Empty;   
         public string NewCompanies { get; set; } = string.Empty;   
         public string NewInvoice { get; set; } = string.Empty;   
-        public string NewProforma { get; set; } = string.Empty;   
+        public string NewProforma { get; set; } = string.Empty;
+
+
+        public decimal InvoiceAmount { get; set; }
+        public int ApprovedInvoices { get; set; }
+        public decimal ApprovedInvoiceAmount { get; set; }
+        public decimal ProformaAmount { get; set; }
+        public bool InScope { get; set; }
 
 
     }

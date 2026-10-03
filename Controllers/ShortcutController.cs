@@ -13,7 +13,8 @@ public class ShortcutController : Controller
     [HttpGet]
     public IActionResult GetShortcuts()
     {
-        var shortcuts = _shortcuts.GetShortcutsAsync().Result;
+        string UserRole = HttpContext.Session.GetString("Role")?.ToString() ?? "NA";
+        var shortcuts = _shortcuts.GetShortcutsAsync(UserRole).Result;
         return Json(shortcuts);
     }
 
