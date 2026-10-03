@@ -223,148 +223,221 @@
                                 <span>Dashboard</span>
                             </a>
                         </li>
+
                         <li class="nav-item">
-                            <a class="nav-link" href="#sidebarDashboards" data-bs-toggle="collapse" role="button"
-                               aria-expanded="false" aria-controls="sidebarDashboards">
-                                <i class="iconoir-home-simple menu-icon"></i>
-                                <span>CRM</span>
+                            <a class="nav-link" href="#sidebarMasters" data-bs-toggle="collapse" role="button"
+                               aria-expanded="false" aria-controls="sidebarMasters">
+                                <i class="iconoir-database menu-icon"></i>
+                                <span>Masters</span>
                             </a>
-                            <div class="collapse " id="sidebarDashboards">
+
+                            <div class="collapse" id="sidebarMasters">
                                 <ul class="nav flex-column">
                                     @if (profileRole == "CEO")
                                     {
                                         <li class="nav-item">
-                                            <a class="nav-link" asp-controller="UserMaster" asp-action="index">
-                                                <div class="d-flex align-items-center"><span class="nav-link-text">User's</span></div>
+                                            <a class="nav-link" asp-controller="UserMaster" asp-action="Index">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="iconoir-group me-2"></i>
+                                                    <span class="nav-link-text">Users</span>
+                                                </div>
                                             </a>
                                         </li>
 
                                         <li class="nav-item">
                                             <a class="nav-link" asp-controller="Services" asp-action="Index">
-                                                <div class="d-flex align-items-center"><span class="nav-link-text">Services</span></div>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="iconoir-tools me-2"></i>
+                                                    <span class="nav-link-text">Services</span>
+                                                </div>
                                             </a>
                                         </li>
+                                    }
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-controller="Companymaster" asp-action="Index">
+                                            <div class="d-flex align-items-center">
+                                                <i class="iconoir-building me-2"></i>
+                                                <span class="nav-link-text">Companies</span>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </li>
 
+                       <li class="nav-item">
+                            <a class="nav-link" href="#sidebarDashboards" data-bs-toggle="collapse" role="button"
+                               aria-expanded="false" aria-controls="sidebarDashboards">
+                                <i class="iconoir-user-love menu-icon"></i>
+                                <span>CRM</span>
+                            </a>
+
+                            <div class="collapse" id="sidebarDashboards">
+                                <ul class="nav flex-column">
+                                    @if (profileRole == "CEO")
+                                    {
                                         <li class="nav-item">
                                             <a class="nav-link" asp-controller="Lead" asp-action="InquiryList">
-                                                <div class="d-flex align-items-center"><span class="nav-link-text">Web Site Inquiry</span></div>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="iconoir-globe me-2"></i>
+                                                    <span class="nav-link-text">Website Inquiry</span>
+                                                </div>
                                             </a>
                                         </li>
 
                                         <li class="nav-item">
                                             <a class="nav-link" asp-controller="Lead" asp-action="WhatsappInquiry">
-                                                <div class="d-flex align-items-center"><span class="nav-link-text">What'sapp Inquiry</span></div>
+                                                <div class="d-flex align-items-center">
+                                                    <i class="iconoir-chat-bubble me-2"></i>
+                                                    <span class="nav-link-text">WhatsApp Inquiry</span>
+                                                </div>
                                             </a>
                                         </li>
                                     }
 
                                     <li class="nav-item">
-                                        <a class="nav-link" asp-controller="Lead" asp-action="index">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text">Lead Generation</span></div>
+                                        <a class="nav-link" asp-controller="Lead" asp-action="Index">
+                                            <div class="d-flex align-items-center">
+                                                <i class="iconoir-user-plus me-2"></i>
+                                                <span class="nav-link-text">Lead Generation</span>
+                                            </div>
                                         </a>
                                     </li>
 
-                                    <li class="nav-item">
-                                        <a class="nav-link" asp-controller="Companymaster" asp-action="index">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text">Company</span></div>
-                                        </a>
-                                    </li>
                                     <li class="nav-item">
                                         <a class="nav-link" asp-controller="CallandMeeting" asp-action="Create">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text">Call and Meeting Update</span></div>
+                                            <div class="d-flex align-items-center">
+                                                <i class="iconoir-phone me-2"></i>
+                                                <span class="nav-link-text">Call and Meeting Update</span>
+                                            </div>
                                         </a>
                                     </li>
+
                                     <li class="nav-item">
                                         <a class="nav-link" asp-controller="Callandmeeting" asp-action="FollowUpReport">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text">Call and Meeting Report</span></div>
+                                            <div class="d-flex align-items-center">
+                                                <i class="iconoir-stats-report me-2"></i>
+                                                <span class="nav-link-text">Call and Meeting Report</span>
+                                            </div>
                                         </a>
                                     </li>
+
                                     <li class="nav-item">
                                         <a class="nav-link" asp-controller="Callandmeeting" asp-action="NotUpdateIndex">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text">Not Updated List</span></div>
+                                            <div class="d-flex align-items-center">
+                                                <i class="iconoir-clock me-2"></i>
+                                                <span class="nav-link-text">Not Updated List</span>
+                                            </div>
                                         </a>
                                     </li>
                                 </ul>
                             </div>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#sidebarApplications" data-bs-toggle="collapse" role="button"
-                               aria-expanded="false" aria-controls="sidebarApplications">
-                                <i class="iconoir-view-grid menu-icon"></i>
-                                <span>ERP</span>
-                            </a>
-                            <div class="collapse " id="sidebarApplications">
-                                <ul class="nav flex-column">
 
-                                    <li class="nav-item">
-                                        <a class="nav-link" asp-controller="Quotation" asp-action="Index">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text">Quotation</span></div>
-                                        </a>
-                                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#sidebarApplications" data-bs-toggle="collapse" role="button"
+                           aria-expanded="false" aria-controls="sidebarApplications">
+                          <i class="iconoir-wallet menu-icon"></i>
+                            <span>Accounts</span>
+                        </a>
 
-                                    <li class="nav-item">
-                                        <a class="nav-link" asp-controller="Proforma" asp-action="Index">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text">Proforma</span></div>
-                                        </a>
-                                    </li>
+                        <div class="collapse" id="sidebarApplications">
+                            <ul class="nav flex-column">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Quotation" asp-action="Index">
+                                        <div class="d-flex align-items-center">
+                                            <i class="iconoir-page-star me-2"></i>
+                                            <span class="nav-link-text">Quotation</span>
+                                        </div>
+                                    </a>
+                                </li>
 
-                                    <li class="nav-item">
-                                        <a class="nav-link" asp-controller="TaxInvoice" asp-action="Index">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text">Tax Invoice</span></div>
-                                        </a>
-                                    </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Proforma" asp-action="Index">
+                                        <div class="d-flex align-items-center">
+                                            <i class="iconoir-submit-document me-2"></i>
+                                            <span class="nav-link-text">Proforma</span>
+                                        </div>
+                                    </a>
+                                </li>
 
-                                    <li class="nav-item d-none">
-                                        <a class="nav-link" asp-controller="WorkOrder" asp-action="Index">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text">Work-Order</span></div>
-                                        </a>
-                                    </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="TaxInvoice" asp-action="Index">
+                                        <div class="d-flex align-items-center">
+                                            <i class="iconoir-percentage-circle me-2"></i>
+                                            <span class="nav-link-text">Tax Invoice</span>
+                                        </div>
+                                    </a>
+                                </li>
 
-                                    <li class="nav-item d-none">
-                                        <a class="nav-link" asp-controller="TaxInvoice" asp-action="BalancePayment">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text">Balance Payment List</span></div>
-                                        </a>
-                                    </li>
+                                <li class="nav-item d-none">
+                                    <a class="nav-link" asp-controller="WorkOrder" asp-action="Index">
+                                        <div class="d-flex align-items-center">
+                                            <i class="iconoir-clipboard-check me-2"></i>
+                                            <span class="nav-link-text">Work Order</span>
+                                        </div>
+                                    </a>
+                                </li>
 
-                                </ul>
-                            </div>
-                        </li>
+                                <li class="nav-item d-none">
+                                    <a class="nav-link" asp-controller="TaxInvoice" asp-action="BalancePayment">
+                                        <div class="d-flex align-items-center">
+                                            <i class="iconoir-wallet me-2"></i>
+                                            <span class="nav-link-text">Balance Payment List</span>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link" href="#sidebarApplicationss" data-bs-toggle="collapse" role="button"
-                               aria-expanded="false" aria-controls="sidebarApplicationss">
-                                <i class="iconoir-stats-report menu-icon"></i>
-                                <span>Reports</span>
-                            </a>
-                            <div class="collapse " id="sidebarApplicationss">
-                                <ul class="nav flex-column">
-                                    <li class="nav-item">
-                                        <a class="nav-link" asp-controller="Report" asp-action="GetTopInvoiceList">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text">Top Sales Person</span></div>
-                                        </a>
-                                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#sidebarApplicationss" data-bs-toggle="collapse" role="button"
+                           aria-expanded="false" aria-controls="sidebarApplicationss">
+                            <i class="iconoir-stats-report menu-icon"></i>
+                            <span>Reports</span>
+                        </a>
 
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="#">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text">Sales Outstanding</span></div>
-                                        </a>
-                                    </li>
+                        <div class="collapse" id="sidebarApplicationss">
+                            <ul class="nav flex-column">
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Report" asp-action="GetTopInvoiceList">
+                                        <div class="d-flex align-items-center">
+                                            <i class="iconoir-medal me-2"></i>
+                                            <span class="nav-link-text">Top Sales Person</span>
+                                        </div>
+                                    </a>
+                                </li>
 
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="#">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text">Party Ledger</span></div>
-                                        </a>
-                                    </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#">
+                                        <div class="d-flex align-items-center">
+                                            <i class="iconoir-hourglass me-2"></i>
+                                            <span class="nav-link-text">Sales Outstanding</span>
+                                        </div>
+                                    </a>
+                                </li>
 
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="#">
-                                            <div class="d-flex align-items-center"><span class="nav-link-text">Sales Report</span></div>
-                                        </a>
-                                    </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#">
+                                        <div class="d-flex align-items-center">
+                                            <i class="iconoir-book me-2"></i>
+                                            <span class="nav-link-text">Party Ledger</span>
+                                        </div>
+                                    </a>
+                                </li>
 
-                                </ul>
-                            </div>
-                        </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#">
+                                        <div class="d-flex align-items-center">
+                                            <i class="iconoir-graph-up me-2"></i>
+                                            <span class="nav-link-text">Sales Report</span>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
 
                         <li class="nav-item d-none">
                             <a class="nav-link" href="#sidebarApplicationss" data-bs-toggle="collapse" role="button"
