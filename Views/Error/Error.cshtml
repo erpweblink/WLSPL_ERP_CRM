@@ -1,0 +1,470 @@
+﻿@model WEBLINK_CRM.Models.ErrorViewModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@Model.Title - @Model.StatusCode</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --a1: #ef4444;
+            --a2: #f97316;
+            --bg: #f6f7fb;
+            --card: rgba(255, 255, 255, .72);
+            --card-border: rgba(255, 255, 255, .9);
+            --text: #0f172a;
+            --muted: #64748b;
+            --chip: #f1f5f9;
+            --chip-hover: #e2e8f0;
+            --line: rgba(100, 116, 139, .25);
+            --ghost: rgba(15, 23, 42, .045);
+            --grid: rgba(15, 23, 42, .045);
+        }
+
+        .theme-warning {
+            --a1: #f59e0b;
+            --a2: #ef4444;
+        }
+
+        .theme-info {
+            --a1: #6366f1;
+            --a2: #06b6d4;
+        }
+
+        @@media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #0b1020;
+                --card: rgba(22, 28, 50, .72);
+                --card-border: rgba(255, 255, 255, .08);
+                --text: #f1f5f9;
+                --muted: #94a3b8;
+                --chip: rgba(255, 255, 255, .07);
+                --chip-hover: rgba(255, 255, 255, .13);
+                --line: rgba(148, 163, 184, .25);
+                --ghost: rgba(255, 255, 255, .05);
+                --grid: rgba(255, 255, 255, .04);
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+            color: var(--text);
+            background: var(--bg);
+            position: relative;
+            overflow: hidden;
+        }
+
+            /* subtle grid texture */
+            body::before {
+                content: "";
+                position: fixed;
+                inset: 0;
+                background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+                background-size: 44px 44px;
+                -webkit-mask-image: radial-gradient(circle at center, #000 30%, transparent 75%);
+                mask-image: radial-gradient(circle at center, #000 30%, transparent 75%);
+                pointer-events: none;
+            }
+
+        /* animated gradient blobs */
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: .45;
+            pointer-events: none;
+            background: linear-gradient(135deg, var(--a1), var(--a2));
+        }
+
+            .blob.b1 {
+                width: 420px;
+                height: 420px;
+                top: -120px;
+                left: -100px;
+                animation: drift 14s ease-in-out infinite;
+            }
+
+            .blob.b2 {
+                width: 360px;
+                height: 360px;
+                bottom: -120px;
+                right: -80px;
+                animation: drift 17s ease-in-out infinite reverse;
+            }
+
+        /* giant ghost status code */
+        .ghost {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: clamp(14rem, 38vw, 34rem);
+            font-weight: 800;
+            letter-spacing: -.06em;
+            line-height: 1;
+            color: var(--ghost);
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .error-card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 580px;
+            text-align: center;
+            padding: 52px 40px 34px;
+            border-radius: 28px;
+            background: var(--card);
+            border: 1px solid var(--card-border);
+            -webkit-backdrop-filter: blur(22px) saturate(160%);
+            backdrop-filter: blur(22px) saturate(160%);
+            box-shadow: 0 30px 80px rgba(15, 23, 42, .15), 0 2px 0 rgba(255, 255, 255, .5) inset;
+            animation: rise .7s cubic-bezier(.2, .8, .2, 1) both;
+        }
+
+        /* icon with pulsing rings */
+        .icon-wrap {
+            position: relative;
+            width: 92px;
+            height: 92px;
+            margin: 0 auto 26px;
+            display: grid;
+            place-items: center;
+            border-radius: 28px;
+            font-size: 2.3rem;
+            color: #fff;
+            background: linear-gradient(135deg, var(--a1), var(--a2));
+            box-shadow: 0 18px 40px color-mix(in srgb, var(--a1) 45%, transparent);
+            animation: float 3.5s ease-in-out infinite;
+        }
+
+            .icon-wrap::before,
+            .icon-wrap::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                border-radius: 28px;
+                border: 2px solid var(--a1);
+                opacity: 0;
+                animation: ripple 2.8s ease-out infinite;
+            }
+
+            .icon-wrap::after {
+                animation-delay: 1.4s;
+            }
+
+        .badge-code {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: .78rem;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            color: var(--a1);
+            background: color-mix(in srgb, var(--a1) 12%, transparent);
+            border: 1px solid color-mix(in srgb, var(--a1) 25%, transparent);
+        }
+
+            .badge-code .dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: var(--a1);
+                animation: blink 1.6s ease-in-out infinite;
+            }
+
+        h1 {
+            margin: 18px 0 12px;
+            font-size: clamp(1.9rem, 5vw, 2.5rem);
+            font-weight: 800;
+            letter-spacing: -.03em;
+            line-height: 1.15;
+            background: linear-gradient(135deg, var(--text) 30%, var(--a1));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        p.msg {
+            margin: 0 auto 32px;
+            max-width: 430px;
+            color: var(--muted);
+            font-size: .98rem;
+            line-height: 1.7;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-x {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 13px 24px;
+            border: 0;
+            border-radius: 14px;
+            font: inherit;
+            font-weight: 700;
+            font-size: .92rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform .2s, box-shadow .2s, background .2s;
+        }
+
+            .btn-x i {
+                transition: transform .2s;
+            }
+
+        .btn-primary-x {
+            color: #fff;
+            background: linear-gradient(135deg, var(--a1), var(--a2));
+            box-shadow: 0 12px 26px color-mix(in srgb, var(--a1) 38%, transparent);
+        }
+
+            .btn-primary-x:hover {
+                color: #fff;
+                transform: translateY(-3px);
+                box-shadow: 0 18px 34px color-mix(in srgb, var(--a1) 48%, transparent);
+            }
+
+                .btn-primary-x:hover i {
+                    transform: scale(1.15);
+                }
+
+        .btn-ghost-x {
+            color: var(--text);
+            background: var(--chip);
+        }
+
+            .btn-ghost-x:hover {
+                background: var(--chip-hover);
+                transform: translateY(-3px);
+            }
+
+                .btn-ghost-x:hover i {
+                    transform: translateX(-3px);
+                }
+
+        .btn-x:focus-visible {
+            outline: 3px solid color-mix(in srgb, var(--a1) 55%, transparent);
+            outline-offset: 2px;
+        }
+
+        .dev-details {
+            margin-top: 22px;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: .8rem;
+            line-height: 1.5;
+            color: #dc2626;
+            background: rgba(239, 68, 68, .09);
+            border: 1px solid rgba(239, 68, 68, .25);
+            border-radius: 12px;
+        }
+
+        .meta {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--line);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+            font-size: .76rem;
+            color: var(--muted);
+        }
+
+            .meta .row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .meta code {
+                padding: 4px 9px;
+                border-radius: 8px;
+                background: var(--chip);
+                color: var(--text);
+                font-size: .74rem;
+                word-break: break-all;
+            }
+
+        .copy-btn {
+            border: 0;
+            padding: 5px 11px;
+            border-radius: 8px;
+            font: inherit;
+            font-size: .72rem;
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--a1);
+            background: color-mix(in srgb, var(--a1) 12%, transparent);
+            transition: background .2s;
+        }
+
+            .copy-btn:hover {
+                background: color-mix(in srgb, var(--a1) 22%, transparent);
+            }
+
+        @@keyframes float {
+            0%, 100% {
+                transform: translateY(0)
+            }
+
+            50% {
+                transform: translateY(-9px)
+            }
+        }
+
+        @@keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(28px) scale(.97)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        @@keyframes ripple {
+            0% {
+                opacity: .55;
+                transform: scale(1)
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(1.7)
+            }
+        }
+
+        @@keyframes blink {
+            0%, 100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: .3
+            }
+        }
+
+        @@keyframes drift {
+            0%, 100% {
+                transform: translate(0, 0)
+            }
+
+            50% {
+                transform: translate(60px, 40px)
+            }
+        }
+
+        @@media (max-width: 520px) {
+            .error-card {
+                padding: 40px 22px 26px;
+                border-radius: 22px;
+            }
+
+            .btn-x {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @@media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="theme-@Model.Theme">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="ghost" aria-hidden="true">@Model.StatusCode</div>
+
+    <main class="error-card">
+        <div class="icon-wrap"><i class="fas @Model.Icon"></i></div>
+
+        <span class="badge-code"><span class="dot"></span> Error @Model.StatusCode</span>
+
+        <h1>@Model.Title</h1>
+        <p class="msg">@Model.Message</p>
+
+        <div class="actions">
+            <a href="javascript:history.back()" class="btn-x btn-ghost-x">
+                <i class="fas fa-arrow-left"></i> Go Back
+            </a>
+            <a href="@Url.Action("Index", "Dashboard")" class="btn-x btn-primary-x">
+                <i class="fas fa-house"></i> Dashboard
+            </a>
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.Details))
+        {
+            <div class="dev-details"><i class="fas fa-bug"></i> @Model.Details</div>
+        }
+
+        <div class="meta">
+            @if (!string.IsNullOrEmpty(Model.Path))
+            {
+                <div class="row">Path <code>@Model.Path</code></div>
+            }
+            <div class="row">
+                Reference ID <code id="refId">@Model.RequestId</code>
+                <button type="button" class="copy-btn" id="copyBtn" onclick="copyRef()">
+                    <i class="far fa-copy"></i> Copy
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function copyRef() {
+            var text = document.getElementById('refId').innerText;
+            var btn = document.getElementById('copyBtn');
+            var done = function () {
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied';
+                setTimeout(function () { btn.innerHTML = '<i class="far fa-copy"></i> Copy'; }, 1800);
+            };
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(done);
+            } else {
+                var t = document.createElement('textarea');
+                t.value = text;
+                document.body.appendChild(t);
+                t.select();
+                document.execCommand('copy');
+                document.body.removeChild(t);
+                done();
+            }
+        }
+    </script>
+</body>
+</html>

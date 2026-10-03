@@ -83,8 +83,14 @@ namespace WLSPL_ERP_CRM.Controllers
 
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> Create(string? ID)
         {
+            if (string.IsNullOrWhiteSpace(ID) && !User.IsInRole("CEO"))
+            {
+                return Forbid();  
+            }
+
             var companies = await _TaxinvoiceRepo.Getcompany();
 
             TaxInvoiceCreateVM model;

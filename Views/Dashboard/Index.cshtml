@@ -992,7 +992,7 @@
         }
 
         .top-table td.tt-amt {
-            color: #ea580c;
+            color: #3475c1;
             font-weight: 800;
         }
 
@@ -1093,12 +1093,6 @@
         }
     }
 
-
-
-
-   
-
-
     .employee-performance-section {
         width: 100%;
         background: #fff;
@@ -1150,29 +1144,25 @@
         }
 
         .performance-date .form-control {
-            width: 150px;
-            height: 38px;
-            padding: 6px 10px;
-            font-size: 12px;
-            font-weight: 600;
-            color: #334155;
-            border: 1px solid #cbd5e1;
+            height: 36px;
+            min-width: 140px;
+            font-size: .85rem;
+            border: 1px solid #e1e4f2;
             border-radius: 10px;
             background: #fff;
-            box-shadow: 0 2px 6px rgba(15, 23, 42, .05);
-            transition: all .2s ease;
+            transition: border-color .2s, box-shadow .2s;
         }
+
+            .performance-date .form-control:focus {
+                border-color: #6366f1;
+                box-shadow: 0 0 0 3px rgba(99, 102, 241, .15);
+            }
 
             .performance-date .form-control:hover {
                 border-color: #94a3b8;
             }
 
-            .performance-date .form-control:focus {
-                border-color: #2563eb;
-                box-shadow: 0 0 0 3px rgba(37, 99, 235, .15);
-                outline: none;
-            }
-
+           
     /* ==============================
                    TABLE WRAPPER (clear outer border)
                    ============================== */
