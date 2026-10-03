@@ -12,15 +12,15 @@ namespace WLSPL_ERP_CRM.repository
             _configuration = configuration;
         }
 
-        public Task<List<ShortcutItem>> GetShortcutsAsync()
+        public Task<List<ShortcutItem>> GetShortcutsAsync(string UserRole)
         {
-            var items = GetAll();
+            var items = GetAll(UserRole);
             return Task.FromResult(items);
         }
 
-        public List<ShortcutItem> GetAll()
+        public List<ShortcutItem> GetAll(string UserRole)
         {
-            return new List<ShortcutItem>
+            var all = new List<ShortcutItem>
             {
                     new ShortcutItem
                     {
@@ -111,6 +111,18 @@ namespace WLSPL_ERP_CRM.repository
                         Description = "View company list"
                     }
             };
+
+            if (string.Equals(UserRole, "CEO", StringComparison.OrdinalIgnoreCase))
+                return all;
+
+            var restrictedUrls = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    "/UserMaster/Index",
+                    "/UserMaster/Create",
+                    "/TaxInvoice/Create"
+                };
+
+            return all.Where(x => !restrictedUrls.Contains(x.Url)).ToList();
         }
 
         public async Task<List<ShortcutItem>> SearchEmployees(string q, string userRole, string userCode)

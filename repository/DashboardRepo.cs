@@ -126,215 +126,177 @@ namespace WEBLINK_CRM.Repositories
             var result = new List<EmployeeNodeInfo>();
 
             const string sql = @"
-                DECLARE @StartDate DATE = @FromDate;
-                DECLARE @EndDate DATE = DATEADD(DAY, 1, @ToDate);
+                    DECLARE @StartDate DATE = @FromDate;
+                    DECLARE @EndDate DATE = DATEADD(DAY, 1, @ToDate);
 
-                ;WITH EmployeeHierarchy AS
-                (
-                    -- CURRENT LOGGED-IN USER
-                    SELECT
-                        e.empcode,
-                        e.name,
-                        e.TL_Manager AS ParentCode,
-                        CAST('/' + e.empcode + '/' AS VARCHAR(MAX)) AS HierarchyPath
-                    FROM employees e
-                    WHERE e.isdeleted = 0
-                      AND e.status = 1
-                      AND e.empcode = @CurrentEmpCode
+                    ;WITH EmployeeHierarchy AS
+                    (
+                        SELECT
+                            e.empcode,
+                            e.name,
+                            e.TL_Manager AS ParentCode,
+                            CAST('/' + e.empcode + '/' AS VARCHAR(MAX)) AS HierarchyPath
+                        FROM employees e
+                        WHERE e.isdeleted = 0
+                          AND e.status = 1
+                          AND e.empcode = @CurrentEmpCode
 
-                    UNION ALL
+                        UNION ALL
 
-                    -- CURRENT USER'S COMPLETE HIERARCHY
-                    SELECT
-                        c.empcode,
-                        c.name,
-                        c.TL_Manager AS ParentCode,
-                        CAST(
-                            p.HierarchyPath + c.empcode + '/'
-                            AS VARCHAR(MAX)
-                        ) AS HierarchyPath
-                    FROM employees c
-                    INNER JOIN EmployeeHierarchy p
-                        ON c.TL_Manager = p.empcode
-                    WHERE c.isdeleted = 0
-                      AND c.status = 1
-                      AND c.empcode <> c.TL_Manager
-                ),
+                        SELECT
+                            c.empcode,
+                            c.name,
+                            c.TL_Manager AS ParentCode,
+                            CAST(p.HierarchyPath + c.empcode + '/' AS VARCHAR(MAX)) AS HierarchyPath
+                        FROM employees c
+                        INNER JOIN EmployeeHierarchy p
+                            ON c.TL_Manager = p.empcode
+                        WHERE c.isdeleted = 0
+                          AND c.status = 1
+                          AND c.empcode <> c.TL_Manager
+                    ),
 
-                SelectedEmployee AS
-                (
-                    SELECT
-                        HierarchyPath
-                    FROM EmployeeHierarchy
-                    WHERE empcode = @SelectedEmpCode
-                ),
+                    SelectedEmployee AS
+                    (
+                        SELECT HierarchyPath
+                        FROM EmployeeHierarchy
+                        WHERE empcode = @SelectedEmpCode
+                    ),
 
-                PerformanceEmployees AS
-                (
-                    /*
-                     * ALWAYS INCLUDE CURRENT USER
-                     */
+                    PerformanceEmployees AS
+                    (
+                        SELECT
+                            x.empcode,
+                            x.name,
+                            x.HierarchyPath,
+                            MAX(x.InScope) AS InScope
+                        FROM
+                        (
+                            SELECT h.empcode, h.name, h.HierarchyPath, 0 AS InScope
+                            FROM EmployeeHierarchy h
+                            WHERE h.empcode = @CurrentEmpCode
+
+                            UNION ALL
+
+                            SELECT h.empcode, h.name, h.HierarchyPath, 1 AS InScope
+                            FROM EmployeeHierarchy h
+                            INNER JOIN SelectedEmployee s
+                                ON h.HierarchyPath LIKE s.HierarchyPath + '%'
+                        ) x
+                        GROUP BY x.empcode, x.name, x.HierarchyPath
+                    ),
+
+                    Meetings AS
+                    (
+                        SELECT
+                            sessionname AS EmpCode,
+                            SUM(CASE WHEN Type = 'Fresh'     THEN 1 ELSE 0 END) AS FreshMeetings,
+                            SUM(CASE WHEN Type = 'Follow-up' THEN 1 ELSE 0 END) AS FollowupMeetings,
+                            SUM(CASE WHEN Type = 'Services'  THEN 1 ELSE 0 END) AS ServicesMeetings,
+                            COUNT(*) AS AllMeetings
+                        FROM stswlspl.VW_FollowUpRpt
+                        WHERE commentdatetime >= @StartDate
+                          AND commentdatetime < @EndDate
+                          AND Updatefor = 'Meeting'
+                        GROUP BY sessionname
+                    ),
+
+                    Companies AS
+                    (
+                        SELECT
+                            sessionname AS EmpCode,
+                            COUNT(*) AS NewCompanies
+                        FROM Company
+                        WHERE status = 1
+                          AND regdate >= @StartDate
+                          AND regdate < @EndDate
+                        GROUP BY sessionname
+                    ),
+
+                    InvoiceData AS
+                    (
+                        SELECT
+                            sessionname AS EmpCode,
+                            CAST(ISNULL(totalamtaftertax, 0) as decimal) AS Amount,
+                            CASE WHEN IsApprove = '1' THEN 1 ELSE 0 END AS IsApp
+                        FROM InvoiceMain
+                        WHERE createddate >= @StartDate
+                          AND createddate < @EndDate
+                    ),
+
+                    Invoices AS
+                    (
+                        SELECT
+                            EmpCode,
+                            COUNT(*) AS TotalInvoices,
+                            SUM(Amount) AS InvoiceAmount,
+                            SUM(CASE WHEN IsApp = 1 THEN 1 ELSE 0 END) AS ApprovedInvoices,
+                            SUM(CASE WHEN IsApp = 1 THEN Amount ELSE 0 END) AS ApprovedAmount
+                        FROM InvoiceData
+                        GROUP BY EmpCode
+                    ),
+
+                    ProformaData AS
+                    (
+                        SELECT
+                            sessionname AS EmpCode,
+                            CAST(ISNULL(totalamtaftertax, 0) as decimal) AS Amount   
+                        FROM tbl_ProformaInvoiceMain
+                        WHERE createddate >= @StartDate
+                          AND createddate < @EndDate
+                    ),
+
+                    Proformas AS
+                    (
+                        SELECT
+                            EmpCode,
+                            COUNT(*) AS TotalProformas,
+                            SUM(Amount) AS ProformaAmount
+                        FROM ProformaData
+                        GROUP BY EmpCode
+                    )
+
                     SELECT
                         h.empcode,
                         h.name,
+                        h.InScope,
+
+                        ISNULL(m.FreshMeetings, 0)    AS FreshMeetings,
+                        ISNULL(m.FollowupMeetings, 0) AS FollowupMeetings,
+                        ISNULL(m.ServicesMeetings, 0) AS ServicesMeetings,
+                        ISNULL(m.AllMeetings, 0)      AS AllMeetings,
+
+                        ISNULL(c.NewCompanies, 0)     AS NewCompanies,
+
+                        ISNULL(i.TotalInvoices, 0)    AS TotalInvoices,
+                        ISNULL(i.InvoiceAmount, 0)    AS InvoiceAmount,
+                        ISNULL(i.ApprovedInvoices, 0) AS ApprovedInvoices,
+                        ISNULL(i.ApprovedAmount, 0)   AS ApprovedAmount,
+
+                        ISNULL(p.TotalProformas, 0)   AS TotalProformas,
+                        ISNULL(p.ProformaAmount, 0)   AS ProformaAmount
+
+                    FROM PerformanceEmployees h
+
+                    LEFT JOIN Meetings m   ON m.EmpCode = h.empcode
+                    LEFT JOIN Companies c  ON c.EmpCode = h.empcode
+                    LEFT JOIN Invoices i   ON i.EmpCode = h.empcode
+                    LEFT JOIN Proformas p  ON p.EmpCode = h.empcode
+
+                    ORDER BY
+                        CASE WHEN h.empcode = @CurrentEmpCode THEN 0 ELSE 1 END,
                         h.HierarchyPath
-                    FROM EmployeeHierarchy h
-                    WHERE h.empcode = @CurrentEmpCode
 
-                    UNION
-
-                    /*
-                     * INCLUDE SELECTED USER + SELECTED USER'S TEAM
-                     */
-                    SELECT
-                        h.empcode,
-                        h.name,
-                        h.HierarchyPath
-                    FROM EmployeeHierarchy h
-                    INNER JOIN SelectedEmployee s
-                        ON h.HierarchyPath LIKE s.HierarchyPath + '%'
-                ),
-
-                Meetings AS
-                (
-                    SELECT
-                        sessionname AS EmpCode,
-
-                        SUM(
-                            CASE
-                                WHEN Type = 'Fresh'
-                                THEN 1
-                                ELSE 0
-                            END
-                        ) AS FreshMeetings,
-
-                        SUM(
-                            CASE
-                                WHEN Type = 'Follow-up'
-                                THEN 1
-                                ELSE 0
-                            END
-                        ) AS FollowupMeetings,
-
-                        SUM(
-                            CASE
-                                WHEN Type = 'Services'
-                                THEN 1
-                                ELSE 0
-                            END
-                        ) AS ServicesMeetings,
-
-                        COUNT(*) AS AllMeetings
-
-                    FROM stswlspl.VW_FollowUpRpt
-
-                    WHERE commentdatetime >= @StartDate
-                      AND commentdatetime < @EndDate
-                      AND Updatefor = 'Meeting'
-
-                    GROUP BY sessionname
-                ),
-
-                Companies AS
-                (
-                    SELECT
-                        sessionname AS EmpCode,
-                        COUNT(*) AS NewCompanies
-
-                    FROM Company
-
-                    WHERE status = 1
-                      AND regdate >= @StartDate
-                      AND regdate < @EndDate
-
-                    GROUP BY sessionname
-                ),
-
-                Invoices AS
-                (
-                    SELECT
-                        sessionname AS EmpCode,
-                        COUNT(*) AS TotalInvoices
-
-                    FROM InvoiceMain
-
-                    WHERE createddate >= @StartDate
-                      AND createddate < @EndDate
-
-                    GROUP BY sessionname
-                ),
-
-                Proformas AS
-                (
-                    SELECT
-                        sessionname AS EmpCode,
-                        COUNT(*) AS TotalProformas
-
-                    FROM tbl_ProformaInvoiceMain
-
-                    WHERE createddate >= @StartDate
-                      AND createddate < @EndDate
-
-                    GROUP BY sessionname
-                )
-
-                SELECT
-                    h.empcode,
-                    h.name,
-
-                    ISNULL(m.FreshMeetings, 0) AS FreshMeetings,
-                    ISNULL(m.FollowupMeetings, 0) AS FollowupMeetings,
-                    ISNULL(m.ServicesMeetings, 0) AS ServicesMeetings,
-                    ISNULL(m.AllMeetings, 0) AS AllMeetings,
-
-                    ISNULL(c.NewCompanies, 0) AS NewCompanies,
-
-                    ISNULL(i.TotalInvoices, 0) AS TotalInvoices,
-
-                    ISNULL(p.TotalProformas, 0) AS TotalProformas
-
-                FROM PerformanceEmployees h
-
-                LEFT JOIN Meetings m
-                    ON m.EmpCode = h.empcode
-
-                LEFT JOIN Companies c
-                    ON c.EmpCode = h.empcode
-
-                LEFT JOIN Invoices i
-                    ON i.EmpCode = h.empcode
-
-                LEFT JOIN Proformas p
-                    ON p.EmpCode = h.empcode
-
-                ORDER BY
-                    CASE
-                        WHEN h.empcode = @CurrentEmpCode THEN 0
-                        ELSE 1
-                    END,
-                    h.HierarchyPath
-
-                OPTION (MAXRECURSION 100);
-            ";
+                    OPTION (MAXRECURSION 100);
+                ";
 
             using var con = new SqlConnection(_connectionString);
             using var cmd = new SqlCommand(sql, con);
 
-            cmd.Parameters.AddWithValue(
-                "@CurrentEmpCode",
-                currentEmpCode);
-
-            cmd.Parameters.AddWithValue(
-                "@SelectedEmpCode",
-                selectedEmpCode);
-
-            cmd.Parameters.AddWithValue(
-                "@FromDate",
-                fromDate.Date);
-
-            cmd.Parameters.AddWithValue(
-                "@ToDate",
-                toDate.Date);
+            cmd.Parameters.AddWithValue("@CurrentEmpCode", currentEmpCode);
+            cmd.Parameters.AddWithValue("@SelectedEmpCode", selectedEmpCode);
+            cmd.Parameters.AddWithValue("@FromDate", fromDate.Date);
+            cmd.Parameters.AddWithValue("@ToDate", toDate.Date);
 
             await con.OpenAsync();
 
@@ -344,25 +306,22 @@ namespace WEBLINK_CRM.Repositories
             {
                 result.Add(new EmployeeNodeInfo
                 {
-                    EmployeeCode =
-                        reader["empcode"]?.ToString() ?? "",
+                    EmployeeCode = reader["empcode"]?.ToString() ?? "",
+                    EmployeeName = reader["name"]?.ToString() ?? "",
 
-                    EmployeeName =
-                        reader["name"]?.ToString() ?? "",
-                    Fresh =
-                        reader["FreshMeetings"]?.ToString() ?? "0",
-                    FollowUp =
-                        reader["FollowupMeetings"]?.ToString() ?? "0",
-                    Service =
-                        reader["ServicesMeetings"]?.ToString() ?? "0",
-                    Total =
-                        reader["AllMeetings"]?.ToString() ?? "0",
-                    NewCompanies =
-                        reader["NewCompanies"]?.ToString() ?? "0",
-                    NewInvoice =
-                        reader["TotalInvoices"]?.ToString() ?? "0",
-                    NewProforma =
-                        reader["TotalProformas"]?.ToString() ?? "0"
+                    Fresh = reader["FreshMeetings"]?.ToString() ?? "0",
+                    FollowUp = reader["FollowupMeetings"]?.ToString() ?? "0",
+                    Service = reader["ServicesMeetings"]?.ToString() ?? "0",
+                    Total = reader["AllMeetings"]?.ToString() ?? "0",
+                    NewCompanies = reader["NewCompanies"]?.ToString() ?? "0",
+                    NewInvoice = reader["TotalInvoices"]?.ToString() ?? "0",
+                    NewProforma = reader["TotalProformas"]?.ToString() ?? "0",
+
+                    InvoiceAmount = Convert.ToDecimal(reader["InvoiceAmount"]),
+                    ApprovedInvoices = Convert.ToInt32(reader["ApprovedInvoices"]),
+                    ApprovedInvoiceAmount = Convert.ToDecimal(reader["ApprovedAmount"]),
+                    ProformaAmount = Convert.ToDecimal(reader["ProformaAmount"]),
+                    InScope = Convert.ToInt32(reader["InScope"]) == 1
                 });
             }
 

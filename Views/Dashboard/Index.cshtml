@@ -587,7 +587,7 @@
 
     @@media (max-width:768px) {
         .renewal-marquee {
-            height: 40px
+            height: 36px
         }
 
         .renewal-marquee-track {
@@ -595,8 +595,8 @@
         }
 
         .renewal-message {
-            font-size: 10px;
-            padding-right: 70px
+            font-size: 11px;
+            padding-right: 60px
         }
     }
 
@@ -780,7 +780,325 @@
         }
 </style>
 
-<style>
+<style type="text/css">
+    /* ================= SUMMARY CARDS + TOP SALES ================= */
+    .summary-section {
+        width: 100%;
+    }
+
+    .summary-cards {
+        --row-h: 150px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 2.4fr);
+        grid-auto-rows: var(--row-h);
+        gap: 12px;
+    }
+
+    /* ---------- Summary cards (compact) ---------- */
+    .summary-card {
+        --ac: #2563eb;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+        padding: 8px 14px;
+        background: #fff;
+        border: 1px solid #dfe5ee;
+        border-left: 6px solid var(--ac);
+        border-radius: 12px;
+        box-shadow: 0 4px 14px rgba(16, 30, 54, .06);
+        transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+        .summary-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(16, 30, 54, .10);
+        }
+
+        .summary-card.meetings {
+            --ac: #2563eb;
+        }
+
+        .summary-card.invoice {
+            --ac: #ea580c;
+        }
+
+        .summary-card.proforma {
+            --ac: #be185d;
+        }
+
+    .summary-icon {
+        flex: 0 0 auto;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        color: var(--ac);
+        background: color-mix(in srgb, var(--ac) 12%, #fff);
+    }
+
+    /* label on its own line, count and amount side by side */
+    .summary-info {
+        min-width: 0;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        column-gap: 8px;
+        row-gap: 0;
+    }
+
+    .summary-label {
+        flex-basis: 100%;
+        color: #64748b;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        line-height: 1.3;
+    }
+
+    .summary-value {
+        color: #0f172a;
+        font-size: 20px;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+
+    .summary-amount {
+        color: var(--ac);
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.2;
+        overflow-wrap: anywhere;
+    }
+
+    /* ---------- Top sales card (fixed height + scroller) ---------- */
+    .top-card {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        min-height: 0;
+        background: #fff;
+        border: 1px solid #dfe5ee;
+        border-left: 6px solid #f5a623;
+        border-radius: 12px;
+        box-shadow: 0 4px 14px rgba(16, 30, 54, .06);
+        overflow: hidden;
+    }
+
+    .top-card-header {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 14px;
+        color: #1b2333;
+        font-size: 12px;
+        font-weight: 800;
+        border-bottom: 1px solid #eef1f5;
+        background: linear-gradient(135deg, #fffbeb, #fff 70%);
+    }
+
+        .top-card-header i {
+            color: #f5a623;
+            font-size: 12px;
+        }
+
+    /* the scroll area */
+    .top-card-body {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-x: auto;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #b6c2d3 transparent;
+    }
+
+        .top-card-body::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .top-card-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .top-card-body::-webkit-scrollbar-thumb {
+            background: #b6c2d3;
+            border-radius: 10px;
+        }
+
+            .top-card-body::-webkit-scrollbar-thumb:hover {
+                background: #8294ac;
+            }
+
+    .top-table {
+        width: 100%;
+        margin: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 12px;
+    }
+
+        /* sticky header stays visible while scrolling */
+        .top-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            padding: 5px 10px;
+            color: #64748b;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            text-align: center;
+            white-space: nowrap;
+            background: #f8fafd;
+            border-bottom: 1px solid #e3e9f1;
+        }
+
+            .top-table thead th:nth-child(2) {
+                text-align: left;
+            }
+
+        .top-table tbody td {
+            padding: 4px 10px;
+            color: #334155;
+            font-weight: 600;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: middle;
+            border-bottom: 1px solid #eef1f5;
+        }
+
+        .top-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .top-table tbody tr:hover td {
+            background: #f4f8ff;
+        }
+
+        .top-table td.tt-name {
+            text-align: left;
+            max-width: 170px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .top-table td.tt-amt {
+            color: #ea580c;
+            font-weight: 800;
+        }
+
+    .rank-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        font-size: 11px;
+        font-weight: 800;
+        border: 1px solid transparent;
+    }
+
+        .rank-badge.r1 {
+            background: #fef3c7;
+            color: #b45309;
+            border-color: #fcd34d;
+        }
+
+        .rank-badge.r2 {
+            background: #e5e7eb;
+            color: #475569;
+            border-color: #cbd5e1;
+        }
+
+        .rank-badge.r3 {
+            background: #ffedd5;
+            color: #c2410c;
+            border-color: #fdba74;
+        }
+
+    /* ================= RESPONSIVE ================= */
+
+    /* Laptops / tablets landscape: 3 cards in a row, top card full width below */
+    @@media (max-width: 1399.98px) {
+        .summary-cards {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-auto-rows: auto;
+        }
+
+        .summary-card {
+            min-height: 66px;
+        }
+
+        .top-card {
+            grid-column: 1 / -1;
+            height: 150px;
+        }
+    }
+
+    /* Tablets */
+    @@media (max-width: 991.98px) {
+        .summary-cards {
+            gap: 10px;
+        }
+
+        .summary-card {
+            padding: 8px 10px;
+            gap: 8px;
+        }
+
+        .summary-icon {
+            width: 34px;
+            height: 34px;
+            font-size: 14px;
+        }
+
+        .summary-value {
+            font-size: 18px;
+        }
+    }
+
+    /* Phones: cards stack, still compact */
+    @@media (max-width: 575.98px) {
+        .summary-cards {
+            grid-template-columns: 1fr;
+        }
+
+        .summary-card {
+            min-height: 60px;
+        }
+
+        .top-card {
+            height: 160px;
+            border-radius: 10px;
+        }
+
+        .top-table {
+            min-width: 420px;
+        }
+    }
+
+    @@media (prefers-reduced-motion: reduce) {
+        .summary-card {
+            transition: none !important;
+        }
+    }
+
+
+
+
+   
+
+
     .employee-performance-section {
         width: 100%;
         background: #fff;
@@ -856,8 +1174,8 @@
             }
 
     /* ==============================
-           TABLE WRAPPER (clear outer border)
-           ============================== */
+                   TABLE WRAPPER (clear outer border)
+                   ============================== */
     .performance-table-wrapper {
         width: 100%;
         max-height: 450px;
@@ -1124,6 +1442,300 @@
     }
 </style>
 
+<style type="text/css">
+    /* ================= RESPONSIVE OVERRIDES ================= */
+
+    html, body {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .tree-page,
+    .employee-performance-section {
+        max-width: 100%;
+    }
+
+    .org-wrap {
+        overflow-x: auto;
+        overflow-y: hidden;
+    }
+
+    .person-card {
+        width: 100%;
+        max-width: 178px;
+    }
+
+    .person-name {
+        word-break: break-word;
+    }
+
+    /* Large tablets / small laptops */
+    @@media (max-width: 1199.98px) {
+        :root {
+            --gap: 26px;
+        }
+
+        .org-tree li {
+            padding-left: 18px;
+            padding-right: 18px;
+        }
+
+        .performance-header {
+            flex-wrap: wrap;
+        }
+    }
+
+    /* Tablets */
+    @@media (max-width: 991.98px) {
+        :root {
+            --gap: 24px;
+        }
+
+        .org-wrap {
+            padding: 32px 16px 48px;
+            border-radius: 16px;
+        }
+
+        .person {
+            width: 124px;
+        }
+
+        .person-card {
+            max-width: 150px;
+        }
+
+        .person.xl {
+            --sz: 84px;
+        }
+
+        .person.lg {
+            --sz: 68px;
+        }
+
+        .person.md {
+            --sz: 56px;
+        }
+
+        .performance-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .performance-date {
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+            .performance-date .form-control {
+                flex: 1 1 140px;
+                width: auto;
+                min-width: 130px;
+            }
+    }
+
+    /* Phones */
+    @@media (max-width: 767.98px) {
+        :root {
+            --gap: 22px;
+        }
+
+        .org-legend {
+            gap: 6px;
+        }
+
+            .org-legend span {
+                font-size: 10px;
+                padding: 4px 9px;
+            }
+
+        .org-reset {
+            margin-left: 0;
+        }
+
+        .org-wrap {
+            padding: 24px 10px 40px;
+            border-radius: 12px;
+        }
+
+        .person {
+            width: 104px;
+        }
+
+        .person-card {
+            max-width: 128px;
+            padding: 6px;
+            margin-top: 9px;
+        }
+
+        .person-name {
+            font-size: 11px;
+        }
+
+        .person-title {
+            font-size: 9px;
+            padding: 1px 7px;
+        }
+
+        .person.xl {
+            --sz: 72px;
+        }
+
+        .person.lg {
+            --sz: 58px;
+        }
+
+        .person.md {
+            --sz: 50px;
+        }
+
+        .org-tree li {
+            padding-left: 5px;
+            padding-right: 5px;
+        }
+
+        .company-counts {
+            gap: 4px 6px;
+        }
+
+        .company-count-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0;
+        }
+        /* Performance section */
+        .employee-performance-section {
+            padding: 12px;
+            border-radius: 12px;
+        }
+
+        .performance-title {
+            font-size: 14px;
+        }
+
+        .performance-date {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 8px;
+        }
+
+            .performance-date label {
+                grid-column: auto;
+                font-size: 11px;
+            }
+
+            .performance-date .form-control {
+                width: 100%;
+                min-width: 0;
+                height: 36px;
+            }
+
+            .performance-date .btn {
+                grid-column: 1 / -1;
+                width: 100%;
+            }
+
+        .performance-table-wrapper {
+            max-height: 380px;
+        }
+
+        .employee-performance-table {
+            min-width: 720px;
+            font-size: 12px;
+        }
+
+            .employee-performance-table tbody td {
+                height: 54px;
+                padding: 8px;
+            }
+        /* Modal */
+        #commonModalDialog {
+            margin: 8px;
+            max-width: calc(100% - 16px);
+        }
+
+        .modal-content {
+            border-radius: 14px;
+        }
+
+        .modal-body {
+            padding: 10px;
+        }
+
+        #commonModalBody .renewal-table-wrapper {
+            max-height: 60vh;
+        }
+
+        #commonModalBody .renewal-table {
+            font-size: 11px;
+        }
+
+            #commonModalBody .renewal-table tbody td,
+            #commonModalBody .renewal-table thead th {
+                padding: 8px;
+            }
+
+        .renewal-filter-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+        }
+    }
+
+    /* Small phones */
+    @@media (max-width: 400px) {
+        .person {
+            width: 92px;
+        }
+
+        .person-card {
+            max-width: 112px;
+        }
+
+        .person-name {
+            font-size: 10.5px;
+        }
+
+        .company-count-item {
+            font-size: 8px;
+        }
+
+            .company-count-item strong {
+                font-size: 9px;
+            }
+
+        .employee-performance-table {
+            min-width: 640px;
+        }
+    }
+
+    /* Landscape phones: keep modal usable */
+    @@media (max-height: 500px) and (orientation: landscape) {
+        #commonModalBody .renewal-table-wrapper {
+            max-height: 55vh;
+        }
+
+        .performance-table-wrapper {
+            max-height: 300px;
+        }
+    }
+
+    /* Touch devices: bigger tap targets */
+    @@media (hover: none) and (pointer: coarse) {
+        .toggle {
+            padding: 6px 14px;
+            min-height: 32px;
+        }
+
+        .renewal-filter-btn {
+            padding: 6px 8px;
+        }
+
+        .renewal-filter-option, .renewal-filter-select-all {
+            padding: 9px 6px;
+        }
+    }
+</style>
 
 @functions {
     private string Safe(object value)
@@ -1206,6 +1818,7 @@
         return html;
     }
 }
+
 @if (root == null)
 {
     <div class="alert alert-warning m-3">No data found for your account.</div>
@@ -1239,7 +1852,6 @@ else
         </div>
 
         <div class="employee-performance-section mt-4">
-
             <div class="performance-header">
                 <div>
                     <h5 class="performance-title">
@@ -1253,28 +1865,85 @@ else
 
                 <div class="performance-date">
                     <label for="performanceFromDate">From Date</label>
-                    <input type="date"
-                           id="performanceFromDate"
-                           class="form-control"
-                           value="@DateTime.Now.ToString("yyyy-MM-dd")"
-                           onchange="loadEmployeePerformance()" />
+                    <input type="date" id="performanceFromDate"
+                           class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" onchange="loadEmployeePerformance()" />
 
                     <label for="performanceToDate">To Date</label>
-                    <input type="date"
-                           id="performanceToDate"
-                           class="form-control"
-                           value="@DateTime.Now.ToString("yyyy-MM-dd")"
-                           onchange="loadEmployeePerformance()" />
+                    <input type="date" id="performanceToDate"
+                           class="form-control" value="@DateTime.Now.ToString("yyyy-MM-dd")" onchange="loadEmployeePerformance()" />
 
-                    <button type="button"
-                            class="btn btn-danger btn-sm"
-                            onclick="resetPerformanceDates()">
+                    <button type="button" class="btn btn-danger btn-sm" onclick="resetPerformanceDates()">
                         <i class="fas fa-undo-alt text-white-50"></i>
                     </button>
                 </div>
             </div>
+            <div class="summary-section">
+                <div class="summary-cards">
 
-            <div class="performance-table-wrapper">
+                    <div class="summary-card meetings">
+                        <div class="summary-icon"><i class="fas fa-handshake"></i></div>
+                        <div class="summary-info">
+                            <div class="summary-label">Total Meetings</div>
+                            <div class="summary-value" id="sumMeetings">0</div>
+                        </div>
+                    </div>
+
+                    <div class="summary-card invoice">
+                        <div class="summary-icon"><i class="fas fa-file-invoice"></i></div>
+                        <div class="summary-info">
+                            <div class="summary-label">Invoices</div>
+                            <div class="summary-value" id="sumInvoiceCount">0</div>
+                            <div class="summary-amount">&#8377; <span id="sumInvoiceAmount">0.00</span></div>
+                        </div>
+                    </div>
+
+                    <div class="summary-card proforma">
+                        <div class="summary-icon"><i class="fas fa-file-alt"></i></div>
+                        <div class="summary-info">
+                            <div class="summary-label">Proforma</div>
+                            <div class="summary-value" id="sumProformaCount">0</div>
+                            <div class="summary-amount">&#8377; <span id="sumProformaAmount">0.00</span></div>
+                        </div>
+                    </div>
+                    <div class="top-card">
+                        <div class="top-card-header">
+                            <i class="fas fa-trophy"></i>
+                            <span>Top 3 Sales Persons</span>
+                        </div>
+                        <div class="top-card-body">
+                            <table class="top-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Sales Person</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="topSalesBody">
+                                    <tr>
+                                        <td><span class="rank-badge r1">1</span></td>
+                                        <td class="tt-name">--</td>
+                                        <td class="tt-amt">0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="rank-badge r2">2</span></td>
+                                        <td class="tt-name">--</td>
+                                        <td class="tt-amt">0.00</td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="rank-badge r3">3</span></td>
+                                        <td class="tt-name">--</td>
+                                        <td class="tt-amt">0.00</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="performance-table-wrapper mt-2">
                 <table class="table employee-performance-table">
                     <thead>
                         <tr>
@@ -1303,6 +1972,7 @@ else
 
         </div>
     </div>
+
     <div class="modal fade" id="commonInfoModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" id="commonModalDialog">
             <div class="modal-content">
@@ -1321,6 +1991,8 @@ else
         </div>
     </div>
 }
+
+
 <script type="text/javascript">
     function collapseBelow(li) {
         li.querySelectorAll("li").forEach(function (x) {
@@ -1401,6 +2073,58 @@ else
 </script>
 
 <script type="text/javascript">
+
+    function formatINR(value) {
+        return Number(value || 0).toLocaleString("en-IN", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function renderSummary(data) {
+        // only the selected employee + their team
+        let scope = (data || []).filter(function (x) { return x.inScope; });
+        if (!scope.length) scope = data || [];
+
+        const sum = function (field) {
+            return scope.reduce(function (t, x) { return t + Number(x[field] || 0); }, 0);
+        };
+
+        $("#sumMeetings").text(sum("total"));
+        $("#sumInvoiceCount").text(sum("newInvoice"));
+        $("#sumInvoiceAmount").text(formatINR(sum("invoiceAmount")));
+        $("#sumProformaCount").text(sum("newProforma"));
+        $("#sumProformaAmount").text(formatINR(sum("proformaAmount")));
+
+        renderTopSales(scope);
+    }
+
+    // Top 3 by APPROVED invoice amount (ties: more approved invoices first)
+    function renderTopSales(scope) {
+        const top = (scope || [])
+            .filter(function (x) { return Number(x.approvedInvoices || 0) > 0; })
+            .sort(function (a, b) {
+                return Number(b.approvedInvoiceAmount || 0) - Number(a.approvedInvoiceAmount || 0)
+                    || Number(b.approvedInvoices || 0) - Number(a.approvedInvoices || 0);
+            })
+            .slice(0, 3);
+
+        const rows = [1, 2, 3].map(function (rank, i) {
+            const p = top[i];
+            const name = p ? (p.employeeName || "") : "--";
+            const tip = p ? `${Number(p.approvedInvoices || 0)} approved invoice(s)` : "";
+            return `
+                <tr>
+                    <td><span class="rank-badge r${rank}">${rank}</span></td>
+                    <td class="tt-name" title="${escapeHtml(name)}">${escapeHtml(name)}</td>
+                    <td class="tt-amt" title="${escapeHtml(tip)}">${p ? formatINR(p.approvedInvoiceAmount) : "0.00"}</td>
+                </tr>`;
+        }).join("");
+
+        $("#topSalesBody").html(rows);
+    }
+
+
     function resetPerformanceDates() {
         const currentDate = new Date().toISOString().split('T')[0];
         document.getElementById("performanceFromDate").value = currentDate;
@@ -1432,16 +2156,15 @@ else
             showToast("Employee code not found.", "error");
             return;
         }
-
         if (!fromDate || !toDate) {
             showToast("Please select From Date and To Date.", "error");
             return;
         }
-
         if (fromDate > toDate) {
             showToast("From Date cannot be greater than To Date.", "error");
             return;
         }
+
         $("#employeePerformanceBody").html(`
             <tr>
                 <td colspan="9" class="text-center py-4">
@@ -1454,40 +2177,27 @@ else
         $.ajax({
             url: '@Url.Action("GetEmployeePerformance", "Dashboard")',
             type: "GET",
-            data: {
-                empCode: empCode,
-                fromDate: fromDate,
-                toDate: toDate
-            },
+            data: { empCode: empCode, fromDate: fromDate, toDate: toDate },
             success: function (response) {
-
                 if (!response.success) {
-
+                    renderSummary([]);
                     $("#employeePerformanceBody").html(`
                         <tr>
-                            <td colspan="9"
-                                class="text-center text-danger py-4">
-                                ${escapeHtml(
-                                    response.message ||
-                                    "Unable to load data."
-                                )}
+                            <td colspan="9" class="text-center text-danger py-4">
+                                ${escapeHtml(response.message || "Unable to load data.")}
                             </td>
                         </tr>
                     `);
-
                     return;
                 }
 
                 const data = response.data || [];
                 if (!data.length) {
-
-                    $("#performanceEmployeeName")
-                        .text("No performance data");
-
+                    renderSummary([]);
+                    $("#performanceEmployeeName").text("No performance data");
                     $("#employeePerformanceBody").html(`
                         <tr>
-                            <td colspan="9"
-                                class="text-center text-muted py-4">
+                            <td colspan="9" class="text-center text-muted py-4">
                                 No performance data found.
                             </td>
                         </tr>
@@ -1497,22 +2207,22 @@ else
 
                 const selectedEmployee =
                     data.find(function (x) {
-                        return String(x.employeeCode).toLowerCase() ===
-                               String(empCode).toLowerCase();
+                        return String(x.employeeCode).toLowerCase() === String(empCode).toLowerCase();
                     }) || data[0];
+
                 $("#performanceEmployeeName").text(
-                    `${selectedEmployee.employeeName}
-                     (${selectedEmployee.employeeCode})`
+                    `${selectedEmployee.employeeName} (${selectedEmployee.employeeCode})`
                 );
-                // KEEP YOUR EXISTING BINDING
+
+                renderSummary(data);                 // NEW: cards + top 3
                 renderEmployeePerformanceTable(data);
             },
             error: function (xhr) {
                 console.error(xhr);
+                renderSummary([]);
                 $("#employeePerformanceBody").html(`
                     <tr>
-                        <td colspan="9"
-                            class="text-center text-danger py-4">
+                        <td colspan="9" class="text-center text-danger py-4">
                             Unable to load employee performance.
                         </td>
                     </tr>
