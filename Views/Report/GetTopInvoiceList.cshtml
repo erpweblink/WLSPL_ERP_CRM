@@ -1,4 +1,31 @@
-﻿@model List<WEBLINK_CRM.Models.VM_Reports>
+@model List<WEBLINK_CRM.Models.VM_Reports>
+
+@functions {
+    static string Initials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length == 1
+            ? parts[0].Substring(0, 1).ToUpper()
+            : (parts[0].Substring(0, 1) + parts[parts.Length - 1].Substring(0, 1)).ToUpper();
+    }
+
+    // Stable colour per person (string.GetHashCode is randomised per process in .NET Core)
+    static int Tone(string name)
+    {
+        if (string.IsNullOrEmpty(name)) return 0;
+        int sum = 0;
+        foreach (var c in name) sum += c;
+        return sum % 6;
+    }
+
+    static string Short(decimal v)
+    {
+        if (v >= 10000000m) return "₹" + (v / 10000000m).ToString("0.##") + " Cr";
+        if (v >= 100000m) return "₹" + (v / 100000m).ToString("0.##") + " L";
+        return "₹" + v.ToString("N0");
+    }
+}
 
 @{
     ViewData["Title"] = "Top Salesperson - Year & Month Wise";
@@ -6,336 +33,506 @@
     var groupedYears = Model
         .GroupBy(x => x.Year)
         .OrderByDescending(x => x.Key);
+
+    var currentYear = DateTime.Now.Year;
+
+    // open current year; if there's no data for it, open the latest year instead
+    var openYear = groupedYears.Any(g => g.Key == currentYear)
+        ? currentYear
+        : groupedYears.Max(g => g.Key);
 }
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
 <style>
-    .tablehead {
-        color: black;
-    }
-
-    :root {
-        --ink: #151b24;
-        --ink-soft: #2b3542;
-        --paper: #ffffff;
-        --line: #e3e1db;
-        --muted: #7a8290;
-        --gold: #b8863b;
-        --gold-bg: #faf1de;
-        --silver: #78818f;
-        --silver-bg: #f0f1f3;
-        --bronze: #a66a3d;
-        --bronze-bg: #f6e9de;
-        --revenue: #3f7a5e;
-        --revenue-bg: #eaf3ee;
-    }
-
     .sp-report {
-        font-family: 'Inter', -apple-system, sans-serif;
+        --ink: #172036;
+        --ink-soft: #3b4660;
+        --muted: #7b8498;
+        --line: #2c3652;
+        --surface: #ffffff;
+        --canvas: #f4f6fb;
+        --accent: #4f46e5;
+        --accent-soft: #eceafd;
+        --revenue: #0f9d73;
+        --revenue-soft: #e3f6ef;
+        --gold: #c58a12;
+        --gold-soft: #fdf3d8;
+        --silver: #6b7488;
+        --silver-soft: #eef0f5;
+        --bronze: #b0602d;
+        --bronze-soft: #e9d3c3;
+        font-family: 'Inter', -apple-system, 'Segoe UI', sans-serif;
         color: var(--ink);
     }
 
         .sp-report .display {
-            font-family: 'Space Grotesk', 'Inter', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
         }
 
         .sp-report .tnum {
             font-variant-numeric: tabular-nums;
         }
 
-
-
-
-
-    /* ================================
-                   YEAR SECTION
-                ================================ */
-
-    .year-section {
-        margin-bottom: 40px;
-    }
-
-    .year-title {
+    /* ---------- Page header ---------- */
+    .sp-hero {
         display: flex;
-        align-items: baseline;
-        gap: 14px;
-        margin-bottom: 18px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid var(--ink);
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 28px;
+        padding: 22px 26px;
+        border-radius: 16px;
+        color: #fff;
+        background: linear-gradient( 265deg, #0b0f14, #1a3e66);
     }
 
-        .year-title .year-num {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 30px;
+        .sp-hero h3 {
+            margin: 0;
+            font-size: 22px;
             font-weight: 700;
-            letter-spacing: -.5px;
+            letter-spacing: -.2px;
+            color: #fff;
         }
 
-        .year-title .year-note {
+        .sp-hero p {
+            margin: 4px 0 0;
+            font-size: 13px;
+            color: rgba(255,255,255,.7);
+        }
+
+        .sp-hero .hero-icon {
+            width: 46px;
+            height: 46px;
+            flex: none;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            background: rgba(255,255,255,.14);
+            font-size: 20px;
+        }
+
+        .sp-hero .hero-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+    /* ---------- Year section ---------- */
+    .year-section {
+        margin-bottom: 44px;
+    }
+
+    .year-head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+
+    .year-num {
+        font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+        font-size: 34px;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -1px;
+    }
+
+    .year-note {
+        color: var(--muted);
+        font-size: 13px;
+        margin-top: 6px;
+    }
+
+    .year-stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .stat-chip {
+        padding: 9px 14px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--surface);
+        min-width: 150px;
+    }
+
+        .stat-chip .label {
+            font-size: 11.5px;
             color: var(--muted);
-            font-size: 14px;
         }
 
+        .stat-chip .value {
+            font-size: 16px;
+            font-weight: 700;
+            margin-top: 1px;
+        }
 
-    /* ================================
-                   MONTH GRID
-                ================================ */
+            .stat-chip .value.green {
+                color: var(--revenue);
+            }
 
+    /* ---------- Month grid ---------- */
     .month-grid {
         display: grid;
-        grid-template-columns: repeat(5, minmax(0, 1fr));
-        gap: 14px;
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+        gap: 16px;
     }
-
-
-    /* ================================
-                   MONTH CARD
-                ================================ */
 
     .month-card {
         position: relative;
-        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+        padding: 18px;
         border: 1px solid var(--line);
-        border-left: 3px solid var(--gold);
-        border-radius: 4px;
-        background: var(--paper);
+        border-radius: 16px;
+        background: var(--surface);
         cursor: pointer;
-        transition: border-color .15s ease, transform .15s ease;
+        text-align: left;
+        width: 100%;
+        transition: box-shadow .2s ease, border-color .2s ease, transform .2s ease;
     }
 
         .month-card:hover {
-            border-color: var(--ink-soft);
-            border-left-width: 3px;
+            border-color: #c9ccf5;
+            box-shadow: 0 10px 28px rgba(79,70,229,.12);
             transform: translateY(-3px);
         }
 
-        .month-card:active {
-            transform: translateY(-1px);
+        .month-card:focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
         }
 
-        .month-card .card-body {
-            padding: 18px 18px 16px;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
+        .month-card.is-best {
+            border-color: #f1d58b;
+            background: linear-gradient(180deg, #fffaf0 0%, #fff 55%);
         }
 
-
-    /* ================================
-                   MONTH NAME / COUNT
-                ================================ */
+    .month-top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
 
     .month-name {
-        font-family: 'Space Grotesk', sans-serif;
-        color: orangered;
-        font-size: 16px;
+        font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+        font-size: 17px;
+        font-weight: 700;
+    }
+
+    .best-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 8px;
+        border-radius: 999px;
+        background: var(--gold-soft);
+        color: var(--gold);
+        font-size: 11px;
         font-weight: 600;
     }
 
-    .sales-count {
+    .month-total {
+        margin-top: 12px;
+        font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+        font-size: 24px;
+        font-weight: 800;
+        letter-spacing: -.5px;
+    }
+
+    .month-sub {
         color: var(--muted);
         font-size: 12px;
-        margin-top: 3px;
+        margin-top: 2px;
     }
 
+    .month-meter {
+        height: 5px;
+        margin-top: 12px;
+        border-radius: 3px;
+        background: #eef0f6;
+        overflow: hidden;
+    }
 
-    /* ================================
-                   TOP PERSON
-                ================================ */
+        .month-meter span {
+            display: block;
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--accent), #8b85f5);
+        }
+
+    .month-card.is-best .month-meter span {
+        background: linear-gradient(90deg, #e0a526, #f3c75b);
+    }
 
     .top-person {
-        margin-top: auto;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 16px;
         padding-top: 14px;
-        border-top: 1px solid var(--line);
-        font-size: 12px;
-        color: black;
+        border-top: 1px dashed var(--line);
     }
 
-        .top-person strong {
-            display: block;
-            margin-top: 4px;
-            font-size: 14px;
+        .top-person .who {
+            min-width: 0;
+            flex: 1;
+        }
+
+            .top-person .who small {
+                display: block;
+                font-size: 11px;
+                color: var(--muted);
+            }
+
+            .top-person .who strong {
+                display: block;
+                font-size: 13.5px;
+                font-weight: 600;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+        .top-person .top-amount {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--revenue);
+            background: var(--revenue-soft);
+            padding: 3px 8px;
+            border-radius: 8px;
+            white-space: nowrap;
+        }
+
+    /* ---------- Avatar ---------- */
+    .avatar {
+        width: 36px;
+        height: 36px;
+        flex: none;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #fff;
+    }
+
+        .avatar.sm {
+            width: 32px;
+            height: 32px;
+            font-size: 11.5px;
+        }
+
+    .tone-0 {
+        background: #4f46e5;
+    }
+
+    .tone-1 {
+        background: #0f9d73;
+    }
+
+    .tone-2 {
+        background: #e0701f;
+    }
+
+    .tone-3 {
+        background: #d6336c;
+    }
+
+    .tone-4 {
+        background: #0b7fb5;
+    }
+
+    .tone-5 {
+        background: #7a4fd0;
+    }
+
+    /* ---------- Modal ---------- */
+    .sp-modal .modal-content {
+        border: none;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 24px 60px rgba(23,32,54,.28);
+    }
+
+    .sp-modal .modal-header {
+        padding: 8px 27px;
+        border: none;
+        color: #fff;
+        background: linear-gradient(120deg, #172036 0%, #0d151d 70%, #0d151d 100%);
+    }
+
+    .sp-modal .modal-title {
+        font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .sp-modal .modal-sub {
+        font-size: 12.5px;
+        color: rgba(255,255,255,.7);
+        margin-top: 2px;
+    }
+
+    .sp-modal .btn-close {
+        filter: brightness(0) invert(1);
+        opacity: .8;
+    }
+
+    .sp-modal .modal-body {
+        padding: 0;
+        background: var(--surface);
+    }
+
+
+    /* Podium summary */
+    .podium {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 3px;
+        padding: 6px 18px 4px;
+    }
+
+    .podium-item {
+        padding: 12px;
+        border-radius: 14px;
+        text-align: center;
+        background: var(--silver-soft);
+    }
+
+        .podium-item.p1 {
+            background: var(--gold-soft);
+        }
+
+        .podium-item.p3 {
+            background: var(--bronze-soft);
+        }
+
+        .podium-item .avatar {
+            margin: 0 auto 8px;
+        }
+
+        .podium-item .pname {
+            font-size: 13px;
             font-weight: 600;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-
-    /* ================================
-                   TOP AMOUNT
-                ================================ */
-
-    .top-amount {
-        margin-top: 6px;
-        color: var(--revenue);
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: 18px;
-        font-weight: 600;
-        letter-spacing: -.2px;
-    }
-
-
-    /* ================================
-                   MODAL
-                ================================ */
-
-    #salespersonSalesModal .modal-content {
-        border: none;
-        border-radius: 6px;
-        overflow: hidden;
-        box-shadow: 0 20px 50px rgba(21,27,36,.25);
-    }
-
-    #salespersonSalesModal .modal-header {
-        background: var(--ink);
-        color: #fff;
-        padding: 20px 24px;
-        border: none;
-    }
-
-    #salespersonSalesModal .modal-title {
-        font-family: 'Space Grotesk', sans-serif;
-        color: #fff !important;
-        font-size: 19px;
-        font-weight: 600;
-    }
-
-    #salespersonSalesModal .modal-header small {
-        color: rgba(255,255,255,.60) !important;
-    }
-
-    #salespersonSalesModal .btn-close {
-        filter: brightness(0) invert(1);
-        opacity: .75;
-    }
-
-    #salespersonSalesModal .modal-body {
-        background: var(--paper);
-    }
-
-    #salespersonSalesModal .modal-footer {
-        background: #fafafa;
-        border-top: 1px solid var(--line);
-        padding: 13px 20px;
-    }
-
-        #salespersonSalesModal .modal-footer .text-muted {
-            color: var(--muted) !important;
+        .podium-item .pamt {
             font-size: 13px;
+            font-weight: 700;
+            color: var(--revenue);
+            margin-top: 2px;
         }
 
-        #salespersonSalesModal .modal-footer .btn-secondary {
-            background: var(--ink);
-            border-color: var(--ink);
-            padding: 7px 20px;
-            border-radius: 4px;
-            font-weight: 600;
+        .podium-item .pmedal {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 7px;
         }
 
-            #salespersonSalesModal .modal-footer .btn-secondary:hover {
-                background: var(--ink-soft);
-                border-color: var(--ink-soft);
-            }
+        .podium-item.p1 .pmedal {
+            color: var(--gold);
+        }
 
-    .modal-backdrop.show {
-        opacity: .55 !important;
+        .podium-item.p2 .pmedal {
+            color: var(--silver);
+        }
+
+        .podium-item.p3 .pmedal {
+            color: var(--bronze);
+        }
+
+    /* Table */
+    .sales-table-wrapper {
+        max-height: 380px;
+        overflow-y: auto;
     }
-
-
-    /* ================================
-                   SALES TABLE
-                ================================ */
 
     .sales-table {
-        margin: 0;
+        margin: 0 !important;
     }
 
         .sales-table thead th {
-            padding: 12px 16px;
-            background: #5b6493;
-            border-bottom: 1px solid var(--line);
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            padding: 12px 18px;
+            background: linear-gradient(265deg, #0b0f14, #1a3e66);
             color: var(--muted);
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: .3px;
-        }
-
-        .sales-table tbody td {
-            padding: 14px 16px;
-            border-color: var(--line);
-            vertical-align: middle;
+            border-bottom: 1px solid var(--line);
+            font-size: 12px;
+            font-weight: 700;
         }
 
         .sales-table tbody tr:hover {
-            background: #fafafa;
+            background: #f8f9fd;
         }
 
-
-    /* ================================
-                   RANK
-                ================================ */
+    .person-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 600;
+        font-size: 14px;
+    }
 
     .rank-number {
-        width: 30px;
-        height: 30px;
+        width: 28px;
+        height: 28px;
         border-radius: 50%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        background: #f1f2f3;
+        background: #f1f2f6;
         color: var(--ink-soft);
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: 13px;
+        font-size: 12.5px;
         font-weight: 700;
     }
 
         .rank-number.rank-1 {
-            background: var(--gold-bg);
+            background: var(--gold-soft);
             color: var(--gold);
-            border: 1px solid rgba(184,134,59,.35);
         }
 
         .rank-number.rank-2 {
-            background: var(--silver-bg);
+            background: var(--silver-soft);
             color: var(--silver);
-            border: 1px solid rgba(120,129,143,.35);
         }
 
         .rank-number.rank-3 {
-            background: var(--bronze-bg);
+            background: var(--bronze-soft);
             color: var(--bronze);
-            border: 1px solid rgba(166,106,61,.35);
         }
 
-
-    /* ================================
-                   SHARE BAR (relative to month leader)
-                ================================ */
-
     .share-cell {
-        min-width: 140px;
+        min-width: 150px;
+    }
+
+    .share-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
 
     .share-track {
-        position: relative;
-        height: 5px;
+        flex: 1;
+        height: 6px;
         border-radius: 3px;
-        background: #edeeef;
+        background: #edeff5;
         overflow: hidden;
-        margin-bottom: 5px;
     }
 
     .share-fill {
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
+        height: 100%;
         border-radius: 3px;
-        background: var(--muted);
+        background: #b3b9cc;
     }
 
         .share-fill.rank-1 {
@@ -350,131 +547,111 @@
             background: var(--bronze);
         }
 
-
-    /* ================================
-                   AMOUNT
-                ================================ */
+    .share-pct {
+        width: 38px;
+        text-align: right;
+        font-size: 11.5px;
+        color: var(--muted);
+    }
 
     .amount {
         color: var(--revenue);
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: 15px;
-        font-weight: 600;
+        font-size: 14.5px;
+        font-weight: 700;
     }
 
+    .modal-backdrop.show {
+        opacity: .5 !important;
+    }
 
-    /* ================================
-                   RESPONSIVE
-                ================================ */
+    .year-toggle {
+        width: 100%;
+        background: none;
+        border: 0;
+        padding: 0;
+        text-align: left;
+        color: inherit;
+        cursor: pointer;
+    }
 
-    @@media (max-width: 1200px) {
-        .month-grid {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+        .year-toggle:focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 4px;
+            border-radius: 8px;
         }
-    }
 
-    @@media (max-width: 992px) {
-        .month-grid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+        .year-toggle .year-chevron {
+            margin-left: 12px;
+            font-size: 18px;
+            color: var(--muted);
+            transition: transform .2s ease;
         }
-    }
 
+        .year-toggle[aria-expanded="false"] .year-chevron {
+            transform: rotate(-90deg);
+        }
+
+    /* ---------- Responsive ---------- */
     @@media (max-width: 768px) {
+        .sp-hero {
+            padding: 18px;
+        }
+
         .month-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
         }
 
         .month-card {
-            min-height: 190px;
+            padding: 14px;
         }
 
-        .report-header {
-            flex-direction: column;
-            align-items: flex-start;
+        .month-total {
+            font-size: 19px;
+        }
+
+        .year-num {
+            font-size: 28px;
+        }
+
+        .podium {
+            grid-template-columns: 1fr;
         }
     }
 
     @@media (max-width: 480px) {
         .month-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 8px;
+            grid-template-columns: 1fr;
         }
 
-        .month-card .card-body {
-            padding: 13px;
-        }
-
-        .month-name {
-            font-size: 14px;
-        }
-
-        .top-person strong {
-            font-size: 12px;
-        }
-
-        .top-amount {
-            font-size: 15px;
-        }
-
-        .share-cell {
-            min-width: 90px;
+        .stat-chip {
+            flex: 1;
+            min-width: 130px;
         }
     }
 
+    @@media (prefers-reduced-motion: reduce) {
+        .month-card {
+            transition: none;
+        }
+
+            .month-card:hover {
+                transform: none;
+            }
+    }
 </style>
 
-<style>
-    /* Modal fixed height */
-    .sales-table-modal .modal-content {
-        height: 600px;
-    }
-
-    /* Scroll only table area */
-    .sales-table-wrapper {
-        height: 450px;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-
-    /* Fixed table header */
-    .sales-table thead th {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        background: #1f2937;
-        color: #fff;
-    }
-
-    /* Keep header aligned */
-    .sales-table {
-        margin-bottom: 0 !important;
-    }
-
-    /* Optional scrollbar */
-    .sales-table-wrapper::-webkit-scrollbar {
-        width: 7px;
-    }
-
-    .sales-table-wrapper::-webkit-scrollbar-thumb {
-        background: #aaa;
-        border-radius: 10px;
-    }
-
-    .sales-table-wrapper::-webkit-scrollbar-track {
-        background: #f1f1f1;
-    }
-</style>
 <div class="container-fluid sp-report">
 
-    <!-- HEADER -->
-
-    <div class="card-header d-flex align-items-center justify-content-between">
-        <h3 class="mb-0 text-uppercase">
-            <i class="fa fa-users"></i>
-            Top Salesperson
-        </h3>
-        <div class="header-mark">Leaderboard</div>
+    @* ===== HEADER ===== *@
+    <div class="sp-hero">
+        <div class="hero-left">
+            <div class="hero-icon"><i class="fa fa-trophy"></i></div>
+            <div>
+                <h3 class="display">Top Salesperson</h3>
+                <p>Monthly leaderboard by total sales. Select a month to see everyone's ranking.</p>
+            </div>
+        </div>
     </div>
 
     @if (!Model.Any())
@@ -487,214 +664,189 @@
     {
         foreach (var yearGroup in groupedYears)
         {
+            // Build per-month data once so cards and modals share it
+            var months = yearGroup
+            .GroupBy(x => new { x.Month, x.MonthName })
+            .OrderBy(x => x.Key.Month)
+            .Select(g => new
+            {
+                Month = g.Key.Month,
+                MonthName = g.Key.MonthName,
+                People = g.OrderByDescending(x => x.TotalAmount).ToList(),
+                Total = g.Sum(x => x.TotalAmount)
+            })
+            .ToList();
+
+            var yearTotal = months.Sum(m => m.Total);
+            var bestMonth = months.OrderByDescending(m => m.Total).First();
+            var maxMonthTotal = bestMonth.Total;
+            var isOpen = yearGroup.Key == openYear;
+
             <div class="year-section">
 
-                <!-- YEAR -->
-                <div class="year-title">
-                    <span class="year-num">@yearGroup.Key</span>
-                    <span class="year-note">Monthly sales</span>
-                </div>
+                @* ===== YEAR HEADER ===== *@
+                <button type="button" class="year-head year-toggle" data-bs-toggle="collapse" data-bs-target="#yearBody_@yearGroup.Key" aria-expanded="@(isOpen ? "true" : "false")" aria-controls="yearBody_@yearGroup.Key">
+                    <div>
+                        <div class="year-num">@yearGroup.Key</div>
+                        <div class="year-note">@months.Count month(s) of sales data</div>
+                    </div>
 
+                    <div class="year-stats">
+                        <div class="stat-chip">
+                            <div class="label">Total sales</div>
+                            <div class="value green tnum">@Short(yearTotal)</div>
+                        </div>
+                        <div class="stat-chip">
+                            <div class="label">Best month</div>
+                            <div class="value">@bestMonth.MonthName</div>
+                        </div>
+                    </div>
+                </button>
 
-                <!-- MONTH CARDS -->
-                <div class="month-grid">
+                @* ===== MONTH CARDS ===== *@
+                <div class="collapse @(isOpen ? "show" : "")" id="yearBody_@yearGroup.Key">
+                    <div class="month-grid">
 
-                    @foreach (var monthGroup in yearGroup
-                                .GroupBy(x => new { x.Month, x.MonthName })
-                                .OrderBy(x => x.Key.Month))
-                    {
-                        var monthData = monthGroup
-                        .OrderByDescending(x => x.TotalAmount)
-                        .ToList();
+                        @foreach (var m in months)
+                        {
+                            var topPerson = m.People.FirstOrDefault();
+                            var modalId = $"salesModal_{yearGroup.Key}_{m.Month}";
+                            var isBest = m.Month == bestMonth.Month && months.Count > 1;
+                            var meterPct = maxMonthTotal > 0 ? (double)(m.Total / maxMonthTotal * 100) : 0;
 
-                        var topPerson = monthData.FirstOrDefault();
+                            <button type="button"
+                                    class="month-card @(isBest ? "is-best" : "")"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#@modalId">
 
-                        // Unique modal ID for every month
-                        var modalId = $"salesModal_{yearGroup.Key}_{monthGroup.Key.Month}";
-
-
-                        <!-- MONTH CARD -->
-                        <div class="card month-card"
-                             role="button"
-                             data-bs-toggle="modal"
-                             data-bs-target="#@modalId">
-
-                            <div class="card-body">
-
-                                <!-- MONTH -->
-                                <div class="month-name">
-                                    @monthGroup.Key.MonthName
+                                <div class="month-top">
+                                    <span class="month-name">@m.MonthName</span>
+                                    @if (isBest)
+                                    {
+                                        <span class="best-badge"><i class="fa fa-star"></i> Best month</span>
+                                    }
                                 </div>
 
-                                <!-- SALESPERSON COUNT -->
-                                <div class="sales-count">
-                                    @monthData.Count salesperson(s)
+                                <div class="month-total tnum">@Short(m.Total)</div>
+                                <div class="month-sub">@m.People.Count salesperson(s)</div>
+
+                                <div class="month-meter" title="Compared with the best month of @yearGroup.Key">
+                                    <span style="width:@(meterPct.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture))%"></span>
                                 </div>
 
-                                <!-- TOP SALESPERSON -->
                                 @if (topPerson != null)
                                 {
                                     <div class="top-person">
-
-                                        Top salesperson
-
-                                        <strong title="@topPerson.Name">
-                                            @topPerson.Name
-                                        </strong>
-
-                                        <div class="top-amount tnum">
-                                            ₹@topPerson.TotalAmount.ToString("N2")
+                                        <div class="avatar tone-@Tone(topPerson.Name)">@Initials(topPerson.Name)</div>
+                                        <div class="who">
+                                            <small>Top salesperson</small>
+                                            <strong title="@topPerson.Name">@topPerson.Name</strong>
                                         </div>
-
+                                        <span class="top-amount tnum">@Short(topPerson.TotalAmount)</span>
                                     </div>
                                 }
+                            </button>
+                        }
 
-                            </div>
+                    </div>
 
-                        </div>
+                    @* ===== MODALS (outside the grid so they don't affect layout) ===== *@
+                    @foreach (var m in months)
+                    {
+                        var topPerson = m.People.FirstOrDefault();
+                        var modalId = $"salesModal_{yearGroup.Key}_{m.Month}";
+                        int rank = 1;
 
-
-                        <!-- ================================= -->
-                        <!-- MONTH SALESPERSON MODAL -->
-                        <!-- ================================= -->
-
-                        <div class="modal fade"
+                        <div class="modal fade sp-modal"
                              id="@modalId"
                              tabindex="-1"
                              aria-labelledby="@(modalId)_Label"
                              aria-hidden="true">
 
-                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                            <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+                                <div class="modal-content">
 
-                                <div class="modal-content sales-table-modal">
-
-                                    <!-- HEADER -->
                                     <div class="modal-header">
-
                                         <div>
-                                            <h5 class="modal-title" id="@(modalId)_Label">
-                                                @monthGroup.Key.MonthName @yearGroup.Key
-                                            </h5>
-
-                                            <small class="modal-title">
-                                                Salesperson performance
-                                            </small>
+                                            <h5 class="modal-title" id="@(modalId)_Label">@m.MonthName @yearGroup.Key</h5>
+                                            <div class="modal-sub">
+                                                @m.People.Count salesperson(s) &middot; Total <span class="tnum">₹@m.Total.ToString("N2")</span>
+                                            </div>
                                         </div>
-
-                                        <button type="button"
-                                                class="btn-close"
-                                                data-bs-dismiss="modal">
-                                        </button>
-
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
 
+                                    <div class="modal-body">
 
-                                    <!-- BODY -->
-                                    <div class="modal-body p-0">
+                                        @* Top 3 *@
+                                        <div class="podium">
+                                            @foreach (var p in m.People.Take(3).Select((value, index) => new { value, index }))
+                                            {
+                                                <div class="podium-item p@(p.index + 1)">
+                                                    <div class="pmedal"><i class="fa fa-medal"></i> #@(p.index + 1)</div>
+                                                    <div class="avatar tone-@Tone(p.value.Name)">@Initials(p.value.Name)</div>
+                                                    <div class="pname" title="@p.value.Name">@p.value.Name</div>
+                                                    <div class="pamt tnum">@Short(p.value.TotalAmount)</div>
+                                                </div>
+                                            }
+                                        </div>
 
-                                        <div class="sales-table-wrapper">
-
+                                        <div class="sales-table-wrapper mt-3">
                                             <table class="table table-hover align-middle mb-0 sales-table">
-
-                                                <thead class="tablehead">
+                                                <thead>
                                                     <tr>
                                                         <th>Rank</th>
                                                         <th>Salesperson</th>
-                                                        <th>Share of top</th>
+                                                        <th>Compared with top</th>
                                                         <th class="text-end">Total sales</th>
                                                     </tr>
                                                 </thead>
-
                                                 <tbody>
-
-                                                    @{
-                                                        int rank = 1;
-                                                    }
-
-                                                    @foreach (var person in monthData)
+                                                    @foreach (var person in m.People)
                                                     {
-                                                        var rankClass = rank <= 3
-                                                        ? $"rank-{rank}"
-                                                        : "";
+                                                        var rankClass = rank <= 3 ? $"rank-{rank}" : "";
 
-                                                        var sharePct =
-                                                        (topPerson != null && topPerson.TotalAmount > 0)
+                                                        var sharePct = (topPerson != null && topPerson.TotalAmount > 0)
                                                         ? (double)(person.TotalAmount / topPerson.TotalAmount * 100)
                                                         : 0;
 
                                                         <tr>
+                                                            <td><span class="rank-number @rankClass">@rank</span></td>
 
-                                                            <!-- RANK -->
                                                             <td>
-                                                                <span class="rank-number @rankClass">
-                                                                    @rank
-                                                                </span>
-                                                            </td>
-
-                                                            <!-- SALESPERSON -->
-                                                            <td>
-                                                                <strong>
-                                                                    @person.Name
-                                                                </strong>
-                                                            </td>
-
-                                                            <!-- SHARE -->
-                                                            <td class="share-cell">
-
-                                                                <div class="share-track">
-                                                                    <div class="share-fill @rankClass"
-                                                                         style="width:@(sharePct.ToString("0.#"))%;">
-                                                                    </div>
+                                                                <div class="person-cell">
+                                                                    <div class="avatar sm tone-@Tone(person.Name)">@Initials(person.Name)</div>
+                                                                    <span>@person.Name</span>
                                                                 </div>
-
                                                             </td>
 
-                                                            <!-- AMOUNT -->
+                                                            <td class="share-cell">
+                                                                <div class="share-row">
+                                                                    <div class="share-track">
+                                                                        <div class="share-fill @rankClass"
+                                                                             style="width:@(sharePct.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture))%;"></div>
+                                                                    </div>
+                                                                    <span class="share-pct tnum">@sharePct.ToString("0")%</span>
+                                                                </div>
+                                                            </td>
+
                                                             <td class="text-end pe-4">
-                                                                <strong class="amount tnum">
-                                                                    ₹@person.TotalAmount.ToString("N2")
-                                                                </strong>
+                                                                <span class="amount tnum">₹@person.TotalAmount.ToString("N2")</span>
                                                             </td>
-
                                                         </tr>
 
                                                         rank++;
                                                     }
-
                                                 </tbody>
-
                                             </table>
-
                                         </div>
-
                                     </div>
-
-
-                                    <!-- FOOTER -->
-                                    <div class="modal-footer">
-
-                                        <div class="me-auto text-muted">
-                                            @monthData.Count salesperson(s)
-                                        </div>
-
-                                        <button type="button"
-                                                class="btn btn-secondary"
-                                                data-bs-dismiss="modal">
-                                            Close
-                                        </button>
-
-                                    </div>
-
                                 </div>
-
                             </div>
-
                         </div>
-
                     }
 
                 </div>
-
             </div>
         }
     }
