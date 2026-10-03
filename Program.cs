@@ -63,10 +63,10 @@ builder.Services.AddSession(options =>
 builder.Services.AddAuthentication(
     CookieAuthenticationDefaults.AuthenticationScheme
 ).AddCookie(options =>
-{
+{  
     options.Cookie.Name = ".WEBLINK_CRM.Auth";
-    options.LoginPath = "/Login/Index";
-    options.AccessDeniedPath = "/Login/AccessDenied";
+    options.LoginPath = "/Account/Login";
+    options.AccessDeniedPath = "/Error/403";
     options.ExpireTimeSpan =TimeSpan.FromMinutes(60);
     options.SlidingExpiration = true;
     options.Cookie.HttpOnly = true;
@@ -96,11 +96,12 @@ var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-
+    app.UseExceptionHandler("/Error/500");
     app.UseHsts();
 }
 
+
+app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
 // ======================================================
 // MIDDLEWARE

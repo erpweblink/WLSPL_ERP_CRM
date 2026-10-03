@@ -8,7 +8,7 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 namespace WEBLINK_CRM.Controllers
 {
     [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
-    [Authorize]
+    [Authorize(Roles ="CEO")]
     public class UserMasterController : Controller
     {
         private readonly IUserRepository _repository;
